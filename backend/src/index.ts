@@ -1,0 +1,75 @@
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+import { initDatabase } from './db';
+import { sendMetaConversionEvent } from './metaConversion';
+import { initWhatsApp, whatsappRouter, aiModeRouter } from './whatsapp';
+import { authRouter } from './authRoutes';
+import { userRouter } from './userRoutes';
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+
+// ─── Rutas de autenticación (públicas) ───
+app.use('/api/auth', authRouter);
+
+// ─── Rutas de usuarios (protegidas) ───
+app.use('/api/users', userRouter);
+
+// ─── Rutas de WhatsApp ───
+app.use('/api/webhook/evolution', whatsappRouter);
+app.use('/api/ai-mode', aiModeRouter);
+
+// ─── Meta Conversion API ───
+app.post('/api/meta/conversion', async (req, res) => {
+  const { eventName, userData, customData, testEventCode, eventTime } = req.body;
+  if (!eventName || !userData) {
+    return res.status(400).json({ error: 'eventName and userData are required' });
+  }
+  const success = await sendMetaConversionEvent(eventName, userData, customData, testEventCode, eventTime);
+  if (success) {
+    res.json({ status: 'ok' });
+  } else {
+    res.status(500).json({ error: 'Failed to send conversion event' });
+  }
+});
+
+// ─── Health check ───
+app.get('/api/status', (req, res) => {
+  res.json({ status: 'OK', message: 'ChatPrex Backend está en línea' });
+});
+
+// ─── WebSockets ───
+io.on('connection', (socket) => {
+  console.log(`[Socket] Cliente conectado: ${socket.id}`);
+  socket.on('disconnect', () => {
+    console.log(`[Socket] Cliente desconectado: ${socket.id}`);
+  });
+});
+
+// ─── Arrancar servidor ───
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, async () => {
+  console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
+
+  // Inicializar base de datos (crear tablas si no existen)
+  await initDatabase();
+
+  // Inicializar WhatsApp
+  initWhatsApp(io);
+});

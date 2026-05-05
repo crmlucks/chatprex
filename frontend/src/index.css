@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-heading: 'Plus Jakarta Sans', var(--font-main);
+  }
+
+  body {
+    @apply bg-surface-dim text-slate-800 antialiased;
+    font-family: var(--font-main);
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* --- DARK MODE OVERRIDES --- */
+.dark .bg-white, .dark [class*="bg-white/"], .dark .glass-panel { background-color: #1e1e1e !important; }
+.dark .bg-slate-50, .dark [class*="bg-slate-50/"], .dark .bg-slate-100, .dark [class*="bg-slate-100/"] { background-color: #1e1e1e !important; }
+.dark .text-slate-800, .dark .text-slate-900, .dark .text-slate-700 { color: #f8fafc !important; }
+.dark .text-slate-600, .dark .text-slate-500, .dark .text-slate-400 { color: #9ca3af !important; }
+.dark .border-slate-200, .dark .border-slate-100, .dark .glass-panel { border-color: #333333 !important; }
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #333333 !important; }
+.dark .bg-surface-dim { background-color: transparent !important; }
+
+/* Tinted Backgrounds for Icons/Badges in Dark Mode */
+.dark .bg-blue-50, .dark [class*="bg-blue-50/"] { background-color: rgba(59, 130, 246, 0.15) !important; }
+.dark .bg-amber-50, .dark [class*="bg-amber-50/"] { background-color: rgba(245, 158, 11, 0.15) !important; }
+.dark .bg-emerald-50, .dark [class*="bg-emerald-50/"] { background-color: rgba(16, 185, 129, 0.15) !important; }
+.dark .bg-purple-50, .dark [class*="bg-purple-50/"] { background-color: rgba(168, 85, 247, 0.15) !important; }
+.dark .bg-rose-50, .dark [class*="bg-rose-50/"] { background-color: rgba(244, 63, 94, 0.15) !important; }
+.dark .bg-primary\/10 { background-color: rgba(22, 73, 255, 0.15) !important; }
+
+/* WhatsApp Simulator Overrides */
+.dark [class*="bg-[#e5ddd5]"] { background-color: #0b141a !important; background-blend-mode: overlay; }
+.dark [class*="bg-[#d9fdd3]"] { background-color: #005c4b !important; }
+.dark [class*="text-[#111b21]"] { color: #e9edef !important; }
+
+/* Form Elements */
+.dark input, .dark textarea, .dark select {
+  background-color: #1e1e1e !important;
+  color: #f8fafc !important;
+  border-color: #333333 !important;
+}
+.dark input::placeholder, .dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Modern Dark Mode Background */
+.dark body {
+  background-color: #181619;
+  background-image: none;
+}
+
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/90 backdrop-blur-md border border-white/20 shadow-sm;
+  }
+  
+  .message-bubble {
+    @apply px-4 py-2 rounded-2xl max-w-[85%] text-sm shadow-sm;
+  }
+  .message-bubble-in {
+    @apply bg-white text-slate-800 rounded-tl-none;
+  }
+  .message-bubble-out {
+    /* Fondo más suave (40% de opacidad) para el chat saliente */
+    @apply bg-primary/40 text-slate-900 rounded-tr-none border border-primary/10;
+  }
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/40 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary/70;
+}
