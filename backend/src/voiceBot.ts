@@ -71,7 +71,7 @@ export async function transcribeAudio(buffer: Buffer, mimeType: string = 'audio/
   }
   try {
     // OpenAI SDK expects a File or ReadStream. We create a File object.
-    const file = new File([buffer], 'voice_message.ogg', { type: mimeType });
+    const file = new File([new Uint8Array(buffer)], 'voice_message.ogg', { type: mimeType });
     const transcription = await openai.audio.transcriptions.create({
       file,
       model: 'whisper-1',
