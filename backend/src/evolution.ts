@@ -458,9 +458,10 @@ evolutionRouter.get('/webhook-log', (_req, res) => {
 });
 
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 //  WEBHOOK DE EVOLUTION API
 // ═══════════════════════════════════════════════════
-evolutionRouter.post('/webhook', async (req, res) => {
+const handleWebhookEvent = async (req: any, res: any) => {
   const body = req.body;
   const event = body?.event || 'desconocido';
   console.log(`[Evolution Webhook] Evento: ${event}`);
@@ -652,6 +653,9 @@ evolutionRouter.post('/webhook', async (req, res) => {
   }
 
   res.sendStatus(200);
-});
+};
 
+// Rutas duales para el Webhook por si falta el /webhook final
+evolutionRouter.post('/', handleWebhookEvent);
+evolutionRouter.post('/webhook', handleWebhookEvent);
 export { evolutionRouter };
