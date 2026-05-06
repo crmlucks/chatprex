@@ -9,7 +9,17 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [waStatus, setWaStatus] = useState<string>('disconnected');
   const [connectionMode, setConnectionMode] = useState<'qr' | 'meta'>('qr');
+  const [qrCountdown, setQrCountdown] = useState(0);
   const socketRef = useRef<Socket | null>(null);
+  const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /** Normaliza el base64: agrega prefijo data:image si falta */
+  const normalizeQR = (qr: string): string => {
+    if (qr.startsWith('data:image')) return qr;
+    // Si es base64 puro, agregar prefijo PNG
+    return `data:image/png;base64,${qr.replace(/^base64,/, '')}`;
+  };
 
   const requestQR = () => {
     setWaStatus('loading');
@@ -17,6 +27,33 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     if (socketRef.current?.connected) {
       socketRef.current.emit('request-evolution-qr');
     }
+  };
+
+  const startQRRefresh = () => {
+    stopQRRefresh();
+    setQrCountdown(30);
+    // Countdown cada segundo
+    countdownTimer.current = setInterval(() => {
+      setQrCountdown(prev => {
+        if (prev <= 1) return 30;
+        return prev - 1;
+      });
+    }, 1000);
+    // Refrescar QR cada 30 segundos
+    refreshTimer.current = setInterval(() => {
+      if (socketRef.current?.connected) {
+        console.log('Auto-refrescando QR...');
+        socketRef.current.emit('request-evolution-qr');
+      }
+    }, 30000);
+  };
+
+  const stopQRRefresh = () => {
+    if (refreshTimer.current) clearInterval(refreshTimer.current);
+    if (countdownTimer.current) clearInterval(countdownTimer.current);
+    refreshTimer.current = null;
+    countdownTimer.current = null;
+    setQrCountdown(0);
   };
 
   useEffect(() => {
@@ -29,8 +66,9 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
     socket.on('whatsapp-qr', (qrBase64: string) => {
       console.log('QR Recibido en frontend');
-      setQrCode(qrBase64);
+      setQrCode(normalizeQR(qrBase64));
       setWaStatus('connecting');
+      startQRRefresh();
     });
 
     socket.on('whatsapp-status', (status: string) => {
@@ -38,15 +76,18 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       if (status === 'connected') {
         setWaStatus('connected');
         setQrCode(null);
+        stopQRRefresh();
       } else {
         setWaStatus(status);
         setQrCode(null);
+        stopQRRefresh();
       }
     });
 
     return () => {
       socket.disconnect();
       socketRef.current = null;
+      stopQRRefresh();
     };
   }, []);
 
@@ -144,14 +185,25 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                       </button>
                     </div>
                   ) : qrCode ? (
-                    <div className="text-center animate-in fade-in duration-500 w-full max-w-[260px]">
+                    <div className="text-center animate-in fade-in duration-500 w-full max-w-[280px]">
                       <p className="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Escanea este código</p>
-                      <div className={`p-4 rounded-3xl border shadow-xl mb-4 transition-colors ${isDarkMode ? 'bg-white border-slate-700' : 'bg-white border-slate-200'}`}>
+                      <div className={`p-4 rounded-3xl border shadow-xl mb-4 transition-colors relative ${isDarkMode ? 'bg-white border-slate-700' : 'bg-white border-slate-200'}`}>
                         <img src={qrCode} alt="WhatsApp QR Code" className="w-full h-auto object-contain rounded-xl" />
+                        {qrCountdown > 0 && (
+                          <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/70 flex items-center justify-center">
+                            <span className="text-[10px] font-bold text-white">{qrCountdown}</span>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                        Abre WhatsApp en tu teléfono, ve a <strong>Dispositivos Vinculados</strong> y enfoca la cámara aquí.
+                      <p className="text-xs text-slate-500 leading-relaxed font-medium mb-3">
+                        Abre WhatsApp → <strong>Dispositivos Vinculados</strong> → Escanea el código
                       </p>
+                      <button
+                        onClick={requestQR}
+                        className={`flex items-center gap-2 mx-auto px-4 py-2 rounded-xl font-bold text-xs transition-all active:scale-95 border ${isDarkMode ? 'border-slate-700 text-slate-400 hover:text-white hover:border-primary' : 'border-slate-200 text-slate-500 hover:text-primary hover:border-primary'}`}
+                      >
+                        <RefreshCw size={14} /> Generar nuevo QR
+                      </button>
                     </div>
                   ) : (
                     <div className="text-center w-full max-w-sm">
