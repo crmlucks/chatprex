@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import express from 'express';
 import { generateAIResponse } from './ai';
+import pool from './db';
 
 const evolutionRouter = express.Router();
 
@@ -39,13 +40,15 @@ export const checkEvolutionStatus = async (socket: any) => {
       if (data?.instance?.state === 'open') {
         socket.emit('whatsapp-status', 'connected');
       } else {
-        fetchEvolutionQR(socket);
+        await fetchEvolutionQR(socket);
       }
-    } else if (res.status === 404) {
-      fetchEvolutionQR(socket);
+    } else {
+      // 404 or other errors -> try fetching/creating
+      await fetchEvolutionQR(socket);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error checking Evolution status:', error);
+    socket.emit('whatsapp-status', `Falla en Evolution: ${error.message}`);
   }
 };
 
@@ -128,18 +131,33 @@ evolutionRouter.post('/webhook', async (req, res) => {
         const from = msg.key.remoteJid;
         const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '[Multimedia]';
         const id = msg.key.id;
+        const pushName = msg.pushName || from.split('@')[0];
 
         ioInstance.emit('whatsapp-message', {
           id,
           from,
-          name: from,
+          name: pushName,
           text,
           fromMe: false,
           timestamp: new Date().toISOString()
         });
 
+        // Register as new lead if it doesn't exist
+        try {
+          const phone = from.split('@')[0];
+          const existRes = await pool.query('SELECT id FROM leads WHERE phone = $1', [phone]);
+          if (existRes.rowCount === 0) {
+            await pool.query(
+              `INSERT INTO leads (name, phone, score, status) VALUES ($1, $2, '50%', 'Nuevo')`,
+              [pushName, phone]
+            );
+            console.log(`Nuevo lead registrado automáticamente: ${phone}`);
+          }
+        } catch (dbErr) {
+          console.error('Error auto-registrando lead:', dbErr);
+        }
+
         // Simple IA integration
-        // Here we could call N8N or local AI just like in Meta API
         const aiReply = await generateAIResponse(from, text);
         if (aiReply) {
            await sendEvolutionMessage(from, aiReply);
