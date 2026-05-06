@@ -208,7 +208,7 @@ const sendWhatsAppMessage = async (
 
 /**
  * Comprueba rápidamente si el número de teléfono configurado está activo.
- * Emitimos `whatsapp-status` a los clientes socket.
+ * Emitimos `meta-whatsapp-status` a los clientes socket.
  */
 const checkWhatsAppStatus = async () => {
   if (!ioInstance) return;
@@ -216,13 +216,15 @@ const checkWhatsAppStatus = async () => {
     const endpoint = `https://graph.facebook.com/v13.0/${META_PHONE_ID}?access_token=${META_TOKEN}`;
     const res = await fetch(endpoint);
     if (res.ok) {
-      ioInstance.emit('whatsapp-status', 'connected');
+      ioInstance.emit('meta-whatsapp-status', 'connected');
     } else {
       const err = await res.text();
-      ioInstance.emit('whatsapp-status', `error ${res.status}: ${err}`);
+      // Only log it, don't emit to 'whatsapp-status' to avoid breaking Evolution API
+      console.error('[Meta API] Error:', err);
+      ioInstance.emit('meta-whatsapp-status', `error ${res.status}: ${err}`);
     }
   } catch (e: any) {
-    ioInstance.emit('whatsapp-status', `network error: ${e.message}`);
+    ioInstance.emit('meta-whatsapp-status', `network error: ${e.message}`);
   }
 };
 
