@@ -1,15 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Bot, MessageCircle, Mic, QrCode, Plus, RefreshCw, CheckCircle2, Phone, Shield } from 'lucide-react';
-import { io } from 'socket.io-client';
+import React, { useEffect, useState, useRef } from 'react';
+import { Bot, MessageCircle, Mic, QrCode, Plus, RefreshCw, CheckCircle2, Phone, Shield, AlertTriangle } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
 
 const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [waStatus, setWaStatus] = useState<string>('disconnected');
-
   const [connectionMode, setConnectionMode] = useState<'qr' | 'meta'>('qr');
+  const socketRef = useRef<Socket | null>(null);
+
+  const requestQR = () => {
+    setWaStatus('loading');
+    setQrCode(null);
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('request-evolution-qr');
+    }
+  };
 
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000');
+    const socket = io(SOCKET_URL);
+    socketRef.current = socket;
 
     socket.on('connect', () => {
       console.log('Conectado al servidor WebSocket');
@@ -27,13 +39,14 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         setWaStatus('connected');
         setQrCode(null);
       } else {
-        setWaStatus(status); // Guarda el error o estado real
+        setWaStatus(status);
         setQrCode(null);
       }
     });
 
     return () => {
       socket.disconnect();
+      socketRef.current = null;
     };
   }, []);
 
@@ -142,17 +155,42 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                     </div>
                   ) : (
                     <div className="text-center w-full max-w-sm">
-                      {waStatus.includes('Error') || waStatus.includes('Falla') ? (
-                        <div className={`p-4 rounded-2xl border text-sm mb-4 break-words font-medium transition-colors ${isDarkMode ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-red-50 border-red-100 text-red-500'}`}>
-                          <strong>Falla en el motor de WhatsApp:</strong><br />
-                          {waStatus}
+                      {waStatus.includes('Error') || waStatus.includes('Falla') || waStatus.includes('error') ? (
+                        <div className="flex flex-col items-center gap-4">
+                          <div className={`w-16 h-16 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-rose-500/10' : 'bg-red-50'}`}>
+                            <AlertTriangle size={32} className="text-rose-400" />
+                          </div>
+                          <div className={`p-4 rounded-2xl border text-sm break-words font-medium transition-colors w-full ${isDarkMode ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-red-50 border-red-100 text-red-500'}`}>
+                            <strong>Error de conexión:</strong><br />
+                            <span className="text-xs">{waStatus}</span>
+                          </div>
+                          <button
+                            onClick={requestQR}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 ${isDarkMode ? 'bg-primary text-white hover:bg-primary/90' : 'bg-primary text-white hover:bg-primary/90'} shadow-lg shadow-primary/20`}
+                          >
+                            <RefreshCw size={16} /> Reintentar Conexión
+                          </button>
+                          <a
+                            href={`${API_URL}/api/webhook/evolution/test`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] font-bold text-blue-400 hover:underline mt-1"
+                          >
+                            🔧 Abrir diagnóstico de Evolution API
+                          </a>
                         </div>
                       ) : (
-                        <>
-                          <RefreshCw size={32} className={`animate-spin mx-auto mb-4 ${isDarkMode ? 'text-primary/40' : 'text-slate-300'}`} />
+                        <div className="flex flex-col items-center gap-3">
+                          <RefreshCw size={32} className={`animate-spin ${isDarkMode ? 'text-primary/40' : 'text-slate-300'}`} />
                           <p className={`text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Generando QR...</p>
-                          <p className="text-[10px] font-black text-slate-500 mt-1 uppercase tracking-widest">Conectando con el servidor</p>
-                        </>
+                          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Conectando con Evolution API</p>
+                          <button
+                            onClick={requestQR}
+                            className={`mt-4 flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all active:scale-95 border ${isDarkMode ? 'border-slate-700 text-slate-400 hover:text-white hover:border-slate-500' : 'border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-400'}`}
+                          >
+                            <RefreshCw size={14} /> Reintentar
+                          </button>
+                        </div>
                       )}
                     </div>
                   )

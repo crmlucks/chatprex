@@ -3,153 +3,320 @@ import express from 'express';
 import { generateAIResponse } from './ai';
 import pool from './db';
 
+// Permitir certificados self-signed dentro de Docker/Coolify
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const evolutionRouter = express.Router();
 
-const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || 'http://localhost:8080';
+// Limpiar URL: quitar trailing slash
+const rawUrl = (process.env.EVOLUTION_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
+const EVOLUTION_API_URL = rawUrl;
 const EVOLUTION_API_TOKEN = process.env.EVOLUTION_API_TOKEN || '';
-const INSTANCE_NAME = 'ChatPrex';
-const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://api.chatprex.com/api/webhook/evolution';
+const INSTANCE_NAME = process.env.EVOLUTION_INSTANCE_NAME || 'ChatPrex';
+const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://api.chatprex.com/api/webhook/evolution/webhook';
 
 let ioInstance: Server | null = null;
 
-const getHeaders = () => ({
+console.log(`[Evolution] Config loaded:`);
+console.log(`  URL: ${EVOLUTION_API_URL}`);
+console.log(`  Token: ${EVOLUTION_API_TOKEN ? EVOLUTION_API_TOKEN.substring(0, 6) + '...' : '(vacío)'}`);
+console.log(`  Instance: ${INSTANCE_NAME}`);
+console.log(`  Webhook: ${WEBHOOK_URL}`);
+
+const getHeaders = (): Record<string, string> => ({
   'Content-Type': 'application/json',
-  'apikey': EVOLUTION_API_TOKEN
+  'apikey': EVOLUTION_API_TOKEN,
 });
 
+/**
+ * Wrapper de fetch con timeout para evitar cuelgues.
+ */
+async function safeFetch(url: string, options: any = {}): Promise<Response> {
+  return fetch(url, {
+    ...options,
+    signal: AbortSignal.timeout(15000), // 15 segundos timeout
+  });
+}
+
+// ─── Inicialización Socket ───
 export const initEvolution = (io: Server) => {
   ioInstance = io;
 
   io.on('connection', (socket) => {
+    console.log(`[Evolution] Socket conectado, verificando estado...`);
     checkEvolutionStatus(socket);
 
     socket.on('request-evolution-qr', () => {
+      console.log(`[Evolution] QR solicitado manualmente`);
       fetchEvolutionQR(socket);
     });
   });
 };
 
+// ─── Verificar estado de conexión ───
 export const checkEvolutionStatus = async (socket: any) => {
+  const url = `${EVOLUTION_API_URL}/instance/connectionState/${INSTANCE_NAME}`;
+  console.log(`[Evolution] GET ${url}`);
+
   try {
-    console.log(`[Evolution] Checking status for ${INSTANCE_NAME}...`);
-    const res = await fetch(`${EVOLUTION_API_URL}/instance/connectionState/${INSTANCE_NAME}`, {
-      headers: getHeaders()
-    });
-    
+    const res = await safeFetch(url, { headers: getHeaders() });
+    const text = await res.text();
+    console.log(`[Evolution] Status response (${res.status}): ${text.substring(0, 200)}`);
+
     if (res.ok) {
-      const data = await res.json();
-      console.log('[Evolution] Connection State:', data);
-      if (data?.instance?.state === 'open') {
-        socket.emit('whatsapp-status', 'connected');
-      } else {
-        await fetchEvolutionQR(socket);
-      }
-    } else {
-      console.log(`[Evolution] State returned ${res.status}, fetching QR...`);
-      await fetchEvolutionQR(socket);
+      try {
+        const data = JSON.parse(text);
+        if (data?.instance?.state === 'open') {
+          socket.emit('whatsapp-status', 'connected');
+          return;
+        }
+      } catch {}
     }
+
+    // Si no está conectado o no existe, pedir QR
+    await fetchEvolutionQR(socket);
   } catch (error: any) {
-    console.error('[Evolution] Error checking status:', error);
-    socket.emit('whatsapp-status', `Falla Evolution (Status): ${error.message}`);
+    console.error(`[Evolution] FALLO de red al verificar status:`, error.message);
+    // Intentar creando la instancia directamente
+    try {
+      await fetchEvolutionQR(socket);
+    } catch (e2: any) {
+      socket.emit('whatsapp-status', `Error Red: ${error.message}`);
+    }
   }
 };
 
+// ─── Obtener QR (conectar o crear instancia) ───
 export const fetchEvolutionQR = async (socket: any) => {
+  // Paso 1: Intentar /instance/connect
   try {
-    console.log(`[Evolution] Attempting to connect ${INSTANCE_NAME}...`);
-    const connectRes = await fetch(`${EVOLUTION_API_URL}/instance/connect/${INSTANCE_NAME}`, {
-      headers: getHeaders()
-    });
-    
-    if (connectRes.ok) {
-      const connectData = await connectRes.json();
-      console.log('[Evolution] Connect Data:', connectData);
-      if (connectData?.base64) {
-        socket.emit('whatsapp-qr', connectData.base64);
-        return;
-      }
-    } else {
-      const errText = await connectRes.text();
-      console.log(`[Evolution] Connect failed (${connectRes.status}):`, errText);
-    }
+    const connectUrl = `${EVOLUTION_API_URL}/instance/connect/${INSTANCE_NAME}`;
+    console.log(`[Evolution] Intentando conectar: GET ${connectUrl}`);
 
-    console.log(`[Evolution] Creating instance ${INSTANCE_NAME}...`);
+    const connectRes = await safeFetch(connectUrl, { headers: getHeaders() });
+    const connectText = await connectRes.text();
+    console.log(`[Evolution] Connect response (${connectRes.status}): ${connectText.substring(0, 300)}`);
+
+    if (connectRes.ok) {
+      try {
+        const connectData = JSON.parse(connectText);
+        // Evolution v2 devuelve el QR en distintos campos según la versión
+        const qrBase64 = connectData?.base64
+          || connectData?.qrcode?.base64
+          || connectData?.data?.base64
+          || connectData?.data?.qrcode?.base64;
+
+        if (qrBase64) {
+          console.log(`[Evolution] ✅ QR obtenido exitosamente (${qrBase64.length} chars)`);
+          socket.emit('whatsapp-qr', qrBase64);
+          return;
+        }
+
+        // Tal vez ya está conectado
+        if (connectData?.instance?.state === 'open') {
+          socket.emit('whatsapp-status', 'connected');
+          return;
+        }
+      } catch {}
+    }
+  } catch (err: any) {
+    console.log(`[Evolution] Connect falló: ${err.message}`);
+  }
+
+  // Paso 2: Si connect falló, crear instancia nueva
+  try {
+    const createUrl = `${EVOLUTION_API_URL}/instance/create`;
     const payload = {
       instanceName: INSTANCE_NAME,
       qrcode: true,
-      integration: "WHATSAPP-BAILEYS",
+      integration: 'WHATSAPP-BAILEYS',
       webhook: WEBHOOK_URL,
       webhook_by_events: false,
-      webhook_base64: false,
-      webhook_events: ["APPLICATION_STARTUP", "QRCODE_UPDATED", "MESSAGES_UPSERT", "MESSAGES_UPDATE", "SEND_MESSAGE", "CONNECTION_UPDATE"]
+      webhook_base64: true,
+      webhook_events: [
+        'APPLICATION_STARTUP',
+        'QRCODE_UPDATED',
+        'MESSAGES_UPSERT',
+        'MESSAGES_UPDATE',
+        'SEND_MESSAGE',
+        'CONNECTION_UPDATE',
+      ],
     };
 
-    const res = await fetch(`${EVOLUTION_API_URL}/instance/create`, {
+    console.log(`[Evolution] Creando instancia: POST ${createUrl}`);
+    console.log(`[Evolution] Payload:`, JSON.stringify(payload));
+
+    const res = await safeFetch(createUrl, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
+    const resText = await res.text();
+    console.log(`[Evolution] Create response (${res.status}): ${resText.substring(0, 500)}`);
+
     if (res.ok) {
-      const data = await res.json();
-      console.log('[Evolution] Create Data:', data);
-      if (data?.qrcode?.base64) {
-        socket.emit('whatsapp-qr', data.qrcode.base64);
-      } else if (data?.instance?.state === 'open') {
-        socket.emit('whatsapp-status', 'connected');
-      } else {
-        // Fallback si no viene el QR pero se creó
-        const fbRes = await fetch(`${EVOLUTION_API_URL}/instance/connect/${INSTANCE_NAME}`, { headers: getHeaders() });
-        const fbData = await fbRes.json();
-        if (fbData?.base64) socket.emit('whatsapp-qr', fbData.base64);
-      }
-    } else {
-      const errorText = await res.text();
-      console.error('[Evolution] Failed to create instance:', errorText);
-      socket.emit('whatsapp-status', `Falla Creación: ${errorText.substring(0, 50)}`);
+      try {
+        const data = JSON.parse(resText);
+        const qrBase64 = data?.qrcode?.base64 || data?.base64 || data?.data?.qrcode?.base64;
+
+        if (qrBase64) {
+          console.log(`[Evolution] ✅ QR obtenido al crear instancia`);
+          socket.emit('whatsapp-qr', qrBase64);
+          return;
+        }
+
+        if (data?.instance?.state === 'open') {
+          socket.emit('whatsapp-status', 'connected');
+          return;
+        }
+
+        // Fallback: esperar 2s y pedir connect de nuevo
+        console.log(`[Evolution] Instancia creada pero sin QR, reintentando connect...`);
+        await new Promise((r) => setTimeout(r, 2000));
+
+        const fbRes = await safeFetch(`${EVOLUTION_API_URL}/instance/connect/${INSTANCE_NAME}`, {
+          headers: getHeaders(),
+        });
+        const fbText = await fbRes.text();
+        console.log(`[Evolution] Retry connect (${fbRes.status}): ${fbText.substring(0, 300)}`);
+
+        if (fbRes.ok) {
+          try {
+            const fbData = JSON.parse(fbText);
+            const qr = fbData?.base64 || fbData?.qrcode?.base64;
+            if (qr) {
+              socket.emit('whatsapp-qr', qr);
+              return;
+            }
+          } catch {}
+        }
+      } catch {}
     }
+
+    // Si la instancia ya existe (409), intentar connect
+    if (res.status === 409) {
+      console.log(`[Evolution] Instancia ya existe, intentando connect...`);
+      const retryRes = await safeFetch(`${EVOLUTION_API_URL}/instance/connect/${INSTANCE_NAME}`, {
+        headers: getHeaders(),
+      });
+      const retryText = await retryRes.text();
+      console.log(`[Evolution] Retry after 409 (${retryRes.status}): ${retryText.substring(0, 300)}`);
+      if (retryRes.ok) {
+        try {
+          const rd = JSON.parse(retryText);
+          const qr = rd?.base64 || rd?.qrcode?.base64;
+          if (qr) {
+            socket.emit('whatsapp-qr', qr);
+            return;
+          }
+        } catch {}
+      }
+    }
+
+    socket.emit('whatsapp-status', `Error Creación (${res.status}): ${resText.substring(0, 80)}`);
   } catch (error: any) {
-    console.error('[Evolution] Error fetching QR:', error);
-    socket.emit('whatsapp-status', `Falla Red: ${error.message}`);
+    console.error(`[Evolution] FALLO completo:`, error.message);
+    socket.emit('whatsapp-status', `Error Red: ${error.message}`);
   }
 };
 
+// ─── Enviar mensaje ───
 export const sendEvolutionMessage = async (to: string, text: string) => {
   const number = to.includes('@s.whatsapp.net') ? to : `${to}@s.whatsapp.net`;
   try {
-    await fetch(`${EVOLUTION_API_URL}/message/sendText/${INSTANCE_NAME}`, {
+    await safeFetch(`${EVOLUTION_API_URL}/message/sendText/${INSTANCE_NAME}`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ number, options: { delay: 1200 }, textMessage: { text } })
+      body: JSON.stringify({ number, options: { delay: 1200 }, textMessage: { text } }),
     });
-  } catch (error) {
-    console.error('Error sending message via Evolution API:', error);
+  } catch (error: any) {
+    console.error('[Evolution] Error enviando mensaje:', error.message);
   }
 };
 
-// Manejo de webhooks de Evolution API
+// ─── Endpoint de diagnóstico (público) ───
+evolutionRouter.get('/test', async (_req, res) => {
+  const results: any = {
+    config: {
+      url: EVOLUTION_API_URL,
+      token: EVOLUTION_API_TOKEN ? `${EVOLUTION_API_TOKEN.substring(0, 6)}...` : '(vacío)',
+      instance: INSTANCE_NAME,
+      webhook: WEBHOOK_URL,
+    },
+    tests: {},
+  };
+
+  // Test 1: Alcanzar Evolution API raíz
+  try {
+    const r = await safeFetch(EVOLUTION_API_URL, { headers: getHeaders() });
+    results.tests.root = { status: r.status, ok: r.ok, body: (await r.text()).substring(0, 200) };
+  } catch (e: any) {
+    results.tests.root = { error: e.message };
+  }
+
+  // Test 2: Verificar estado de instancia
+  try {
+    const r = await safeFetch(`${EVOLUTION_API_URL}/instance/connectionState/${INSTANCE_NAME}`, {
+      headers: getHeaders(),
+    });
+    results.tests.connectionState = { status: r.status, body: (await r.text()).substring(0, 200) };
+  } catch (e: any) {
+    results.tests.connectionState = { error: e.message };
+  }
+
+  // Test 3: Listar instancias
+  try {
+    const r = await safeFetch(`${EVOLUTION_API_URL}/instance/fetchInstances`, {
+      headers: getHeaders(),
+    });
+    results.tests.fetchInstances = { status: r.status, body: (await r.text()).substring(0, 500) };
+  } catch (e: any) {
+    results.tests.fetchInstances = { error: e.message };
+  }
+
+  res.json(results);
+});
+
+// ─── Webhook de Evolution API ───
 evolutionRouter.post('/webhook', async (req, res) => {
   const body = req.body;
+  console.log(`[Evolution Webhook] Evento recibido: ${body?.event || 'desconocido'}`);
+
   if (!ioInstance) return res.sendStatus(200);
 
   try {
-    if (body.event === 'qrcode.updated' && body.data?.qrcode?.base64) {
-      ioInstance.emit('whatsapp-qr', body.data.qrcode.base64);
-    } 
+    // QR actualizado
+    if (body.event === 'qrcode.updated') {
+      const qr = body.data?.qrcode?.base64 || body.data?.base64;
+      if (qr) {
+        console.log(`[Evolution Webhook] QR actualizado, emitiendo a frontend`);
+        ioInstance.emit('whatsapp-qr', qr);
+      }
+    }
+    // Estado de conexión
     else if (body.event === 'connection.update') {
-      if (body.data?.state === 'open') {
+      const state = body.data?.state;
+      console.log(`[Evolution Webhook] Estado de conexión: ${state}`);
+      if (state === 'open') {
         ioInstance.emit('whatsapp-status', 'connected');
-      } else if (body.data?.state === 'close') {
+      } else if (state === 'close') {
         ioInstance.emit('whatsapp-status', 'disconnected');
       }
     }
+    // Mensajes entrantes
     else if (body.event === 'messages.upsert') {
-      const msg = body.data?.message;
-      if (msg && !msg.key.fromMe) {
+      const msg = body.data?.message || body.data;
+      if (msg && msg.key && !msg.key.fromMe) {
         const from = msg.key.remoteJid;
-        const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '[Multimedia]';
+        const text =
+          msg.message?.conversation ||
+          msg.message?.extendedTextMessage?.text ||
+          '[Multimedia]';
         const id = msg.key.id;
-        const pushName = msg.pushName || from.split('@')[0];
+        const pushName = msg.pushName || from?.split('@')[0] || 'Desconocido';
+
+        console.log(`[Evolution Webhook] Mensaje de ${pushName} (${from}): ${text.substring(0, 50)}`);
 
         ioInstance.emit('whatsapp-message', {
           id,
@@ -157,10 +324,10 @@ evolutionRouter.post('/webhook', async (req, res) => {
           name: pushName,
           text,
           fromMe: false,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
-        // Register as new lead if it doesn't exist
+        // Auto-registrar como lead si no existe
         try {
           const phone = from.split('@')[0];
           const existRes = await pool.query('SELECT id FROM leads WHERE phone = $1', [phone]);
@@ -169,29 +336,33 @@ evolutionRouter.post('/webhook', async (req, res) => {
               `INSERT INTO leads (name, phone, score, status) VALUES ($1, $2, '50%', 'Nuevo')`,
               [pushName, phone]
             );
-            console.log(`Nuevo lead registrado automáticamente: ${phone}`);
+            console.log(`[Evolution] ✅ Nuevo lead registrado: ${pushName} (${phone})`);
           }
-        } catch (dbErr) {
-          console.error('Error auto-registrando lead:', dbErr);
+        } catch (dbErr: any) {
+          console.error('[Evolution] Error auto-registrando lead:', dbErr.message);
         }
 
-        // Simple IA integration
-        const aiReply = await generateAIResponse(from, text);
-        if (aiReply) {
-           await sendEvolutionMessage(from, aiReply);
-           ioInstance.emit('whatsapp-message', {
-             id: `ai-${id}`,
-             from: 'bot',
-             name: 'ChatPrex Bot',
-             text: aiReply,
-             fromMe: true,
-             timestamp: new Date().toISOString()
-           });
+        // Respuesta con IA
+        try {
+          const aiReply = await generateAIResponse(from, text);
+          if (aiReply) {
+            await sendEvolutionMessage(from, aiReply);
+            ioInstance.emit('whatsapp-message', {
+              id: `ai-${id}`,
+              from: 'bot',
+              name: 'ChatPrex Bot',
+              text: aiReply,
+              fromMe: true,
+              timestamp: new Date().toISOString(),
+            });
+          }
+        } catch (aiErr: any) {
+          console.error('[Evolution] Error generando respuesta IA:', aiErr.message);
         }
       }
     }
-  } catch (err) {
-    console.error('Error handling Evolution webhook:', err);
+  } catch (err: any) {
+    console.error('[Evolution Webhook] Error procesando evento:', err.message);
   }
 
   res.sendStatus(200);
