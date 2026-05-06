@@ -63,6 +63,7 @@ async function handleEvolutionFlow(socket: any) {
       // Paso 2A: Intentar conectar para obtener QR
       const qr = await tryConnect();
       if (qr === 'connected') {
+        await setWebhook(); // Asegurar webhook configurado
         socket.emit('whatsapp-status', 'connected');
         return;
       }
@@ -80,6 +81,7 @@ async function handleEvolutionFlow(socket: any) {
     // Paso 3: Crear instancia nueva
     const result = await createInstance();
     if (result === 'connected') {
+      await setWebhook(); // Asegurar webhook configurado
       socket.emit('whatsapp-status', 'connected');
     } else if (result) {
       socket.emit('whatsapp-qr', result);
@@ -88,6 +90,7 @@ async function handleEvolutionFlow(socket: any) {
       await new Promise(r => setTimeout(r, 2000));
       const lastQr = await tryConnect();
       if (lastQr === 'connected') {
+        await setWebhook();
         socket.emit('whatsapp-status', 'connected');
       } else if (lastQr) {
         socket.emit('whatsapp-qr', lastQr);
@@ -251,6 +254,62 @@ async function createInstance(): Promise<string | null> {
 }
 
 // ═══════════════════════════════════════════════════
+//  CONFIGURAR WEBHOOK EN LA INSTANCIA
+// ═══════════════════════════════════════════════════
+async function setWebhook(): Promise<void> {
+  try {
+    const webhookPayload = {
+      url: WEBHOOK_URL,
+      webhook_by_events: false,
+      webhook_base64: true,
+      events: [
+        'APPLICATION_STARTUP',
+        'QRCODE_UPDATED',
+        'MESSAGES_UPSERT',
+        'MESSAGES_UPDATE',
+        'SEND_MESSAGE',
+        'CONNECTION_UPDATE',
+      ],
+    };
+
+    console.log(`[Evolution] Configurando webhook: ${WEBHOOK_URL}`);
+
+    // Intentar con POST /webhook/set (Evolution v2)
+    const res = await safeFetch(`${EVOLUTION_API_URL}/webhook/set/${INSTANCE_NAME}`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(webhookPayload),
+    });
+
+    const text = await res.text();
+    console.log(`[Evolution] Webhook set (${res.status}): ${text.substring(0, 200)}`);
+
+    if (!res.ok) {
+      // Fallback: intentar con PUT /webhook/set
+      const res2 = await safeFetch(`${EVOLUTION_API_URL}/webhook/set/${INSTANCE_NAME}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(webhookPayload),
+      });
+      const text2 = await res2.text();
+      console.log(`[Evolution] Webhook set PUT (${res2.status}): ${text2.substring(0, 200)}`);
+    }
+
+    // Verificar webhook configurado
+    try {
+      const checkRes = await safeFetch(`${EVOLUTION_API_URL}/webhook/find/${INSTANCE_NAME}`, {
+        headers: getHeaders(),
+      });
+      const checkText = await checkRes.text();
+      console.log(`[Evolution] Webhook actual: ${checkText.substring(0, 300)}`);
+    } catch {}
+
+  } catch (e: any) {
+    console.error(`[Evolution] Error configurando webhook:`, e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════
 //  ENVIAR MENSAJE
 // ═══════════════════════════════════════════════════
 export const sendEvolutionMessage = async (to: string, text: string) => {
@@ -360,7 +419,42 @@ evolutionRouter.get('/test', async (_req, res) => {
     results.tests.connectionState = { error: e.message };
   }
 
+  // Test 5: Webhook configuration
+  try {
+    const r = await safeFetch(`${EVOLUTION_API_URL}/webhook/find/${INSTANCE_NAME}`, { headers: getHeaders() });
+    results.tests.webhookConfig = { status: r.status, body: (await r.text()).substring(0, 500) };
+  } catch (e: any) {
+    results.tests.webhookConfig = { error: e.message };
+  }
+
+  results.webhookTarget = WEBHOOK_URL;
+
   res.json(results);
+});
+
+// ═══════════════════════════════════════════════════
+//  FORZAR CONFIGURACIÓN DE WEBHOOK (manual)
+// ═══════════════════════════════════════════════════
+evolutionRouter.get('/setup-webhook', async (_req, res) => {
+  await setWebhook();
+  // Verificar resultado
+  try {
+    const r = await safeFetch(`${EVOLUTION_API_URL}/webhook/find/${INSTANCE_NAME}`, { headers: getHeaders() });
+    const data = await r.text();
+    res.json({ message: 'Webhook configurado', target: WEBHOOK_URL, current: JSON.parse(data) });
+  } catch (e: any) {
+    res.json({ message: 'Webhook configurado (no se pudo verificar)', target: WEBHOOK_URL, error: e.message });
+  }
+});
+
+// Últimos webhooks recibidos (para debug)
+const webhookLog: any[] = [];
+
+// ═══════════════════════════════════════════════════
+//  LOG DE WEBHOOKS RECIBIDOS
+// ═══════════════════════════════════════════════════
+evolutionRouter.get('/webhook-log', (_req, res) => {
+  res.json({ total: webhookLog.length, last20: webhookLog.slice(-20) });
 });
 
 // ═══════════════════════════════════════════════════
@@ -370,6 +464,15 @@ evolutionRouter.post('/webhook', async (req, res) => {
   const body = req.body;
   const event = body?.event || 'desconocido';
   console.log(`[Evolution Webhook] Evento: ${event}`);
+
+  // Guardar en log para debug (mantener solo los últimos 50)
+  webhookLog.push({
+    time: new Date().toISOString(),
+    event,
+    data: body.data ? 'Presente' : 'Ausente',
+    remoteJid: body.data?.message?.key?.remoteJid || body.data?.key?.remoteJid
+  });
+  if (webhookLog.length > 50) webhookLog.shift();
 
   if (!ioInstance) return res.sendStatus(200);
 
@@ -388,6 +491,8 @@ evolutionRouter.post('/webhook', async (req, res) => {
       console.log(`[Evolution Webhook] Conexión: ${state}`);
       if (state === 'open') {
         ioInstance.emit('whatsapp-status', 'connected');
+        // Asegurar que el webhook esté configurado
+        await setWebhook();
       } else if (state === 'close') {
         ioInstance.emit('whatsapp-status', 'disconnected');
       }
