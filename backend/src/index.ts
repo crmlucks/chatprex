@@ -63,6 +63,25 @@ app.get('/api/status', (req, res) => {
 // ─── WebSockets ───
 io.on('connection', (socket) => {
   console.log(`[Socket] Cliente conectado: ${socket.id}`);
+
+  // Enviar mensaje de texto desde el CRM al WhatsApp
+  socket.on('send-message', async (data: { to: string; text: string; media?: string; fileName?: string }) => {
+    console.log(`[Socket] Enviando mensaje a ${data.to}: ${data.text?.substring(0, 50)}`);
+    try {
+      const { sendEvolutionMessage, sendEvolutionMedia } = await import('./evolution');
+      
+      if (data.media && data.media.startsWith('data:')) {
+        // Enviar multimedia
+        await sendEvolutionMedia(data.to, data.media, data.text, data.fileName);
+      } else if (data.text) {
+        // Enviar texto
+        await sendEvolutionMessage(data.to, data.text);
+      }
+    } catch (err: any) {
+      console.error('[Socket] Error enviando mensaje:', err.message);
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log(`[Socket] Cliente desconectado: ${socket.id}`);
   });

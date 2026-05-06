@@ -266,6 +266,54 @@ export const sendEvolutionMessage = async (to: string, text: string) => {
   }
 };
 
+/** Enviar multimedia (imagen, video, audio, documento) */
+export const sendEvolutionMedia = async (to: string, mediaBase64: string, caption?: string, fileName?: string) => {
+  const number = to.includes('@s.whatsapp.net') ? to : `${to}@s.whatsapp.net`;
+
+  // Determinar tipo de media del data URI
+  const mimeMatch = mediaBase64.match(/^data:([^;]+);base64,/);
+  const mimeType = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+  const pureBase64 = mediaBase64.replace(/^data:[^;]+;base64,/, '');
+
+  let endpoint = 'sendMedia';
+  let payload: any = {
+    number,
+    options: { delay: 1200 },
+    mediaMessage: {
+      mediatype: 'document',
+      caption: caption || '',
+      media: `data:${mimeType};base64,${pureBase64}`,
+      fileName: fileName || 'archivo',
+    },
+  };
+
+  if (mimeType.startsWith('image/')) {
+    payload.mediaMessage.mediatype = 'image';
+  } else if (mimeType.startsWith('video/')) {
+    payload.mediaMessage.mediatype = 'video';
+  } else if (mimeType.startsWith('audio/')) {
+    endpoint = 'sendWhatsAppAudio';
+    payload = {
+      number,
+      options: { delay: 1200 },
+      audioMessage: {
+        audio: `data:${mimeType};base64,${pureBase64}`,
+      },
+    };
+  }
+
+  try {
+    await safeFetch(`${EVOLUTION_API_URL}/message/${endpoint}/${INSTANCE_NAME}`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    console.log(`[Evolution] ✅ Media enviado a ${number} (${mimeType})`);
+  } catch (error: any) {
+    console.error('[Evolution] Error enviando media:', error.message);
+  }
+};
+
 // ═══════════════════════════════════════════════════
 //  ENDPOINT DE DIAGNÓSTICO
 // ═══════════════════════════════════════════════════
@@ -320,19 +368,22 @@ evolutionRouter.get('/test', async (_req, res) => {
 // ═══════════════════════════════════════════════════
 evolutionRouter.post('/webhook', async (req, res) => {
   const body = req.body;
-  console.log(`[Evolution Webhook] Evento: ${body?.event || 'desconocido'}`);
+  const event = body?.event || 'desconocido';
+  console.log(`[Evolution Webhook] Evento: ${event}`);
 
   if (!ioInstance) return res.sendStatus(200);
 
   try {
-    if (body.event === 'qrcode.updated') {
+    // ─── QR Actualizado ───
+    if (event === 'qrcode.updated') {
       const qr = body.data?.qrcode?.base64 || body.data?.base64;
       if (qr) {
         console.log(`[Evolution Webhook] QR actualizado → frontend`);
         ioInstance.emit('whatsapp-qr', qr);
       }
     }
-    else if (body.event === 'connection.update') {
+    // ─── Estado de Conexión ───
+    else if (event === 'connection.update') {
       const state = body.data?.state;
       console.log(`[Evolution Webhook] Conexión: ${state}`);
       if (state === 'open') {
@@ -341,26 +392,108 @@ evolutionRouter.post('/webhook', async (req, res) => {
         ioInstance.emit('whatsapp-status', 'disconnected');
       }
     }
-    else if (body.event === 'messages.upsert') {
+    // ─── Mensajes Entrantes y Salientes ───
+    else if (event === 'messages.upsert') {
       const msg = body.data?.message || body.data;
-      if (msg?.key && !msg.key.fromMe) {
-        const from = msg.key.remoteJid;
-        const text = msg.message?.conversation
-          || msg.message?.extendedTextMessage?.text
-          || '[Multimedia]';
-        const id = msg.key.id;
-        const pushName = msg.pushName || from?.split('@')[0] || 'Desconocido';
+      if (!msg?.key) {
+        console.log(`[Evolution Webhook] Mensaje sin key, ignorando`);
+        return res.sendStatus(200);
+      }
 
-        console.log(`[Evolution Webhook] Mensaje de ${pushName}: ${text.substring(0, 50)}`);
+      const fromMe = msg.key.fromMe === true;
+      const remoteJid = msg.key.remoteJid;
+      const id = msg.key.id;
+      const pushName = msg.pushName || remoteJid?.split('@')[0] || 'Desconocido';
+      const messageContent = msg.message || {};
 
-        ioInstance.emit('whatsapp-message', {
-          id, from, name: pushName, text,
-          fromMe: false, timestamp: new Date().toISOString(),
-        });
+      // Extraer texto del mensaje
+      let text = messageContent.conversation
+        || messageContent.extendedTextMessage?.text
+        || messageContent.imageMessage?.caption
+        || messageContent.videoMessage?.caption
+        || messageContent.documentMessage?.fileName
+        || '';
 
-        // Auto-registrar lead
+      // Detectar tipo de multimedia
+      let mediaUrl: string | undefined;
+      let mimeType: string | undefined;
+      let mediaType: string = 'text';
+
+      if (messageContent.imageMessage) {
+        mediaType = 'image';
+        mimeType = messageContent.imageMessage.mimetype || 'image/jpeg';
+        if (!text) text = '📷 Imagen';
+      } else if (messageContent.videoMessage) {
+        mediaType = 'video';
+        mimeType = messageContent.videoMessage.mimetype || 'video/mp4';
+        if (!text) text = '🎬 Video';
+      } else if (messageContent.audioMessage) {
+        mediaType = 'audio';
+        mimeType = messageContent.audioMessage.mimetype || 'audio/ogg';
+        text = messageContent.audioMessage.ptt ? '🎤 Mensaje de voz' : '🎵 Audio';
+      } else if (messageContent.documentMessage) {
+        mediaType = 'document';
+        mimeType = messageContent.documentMessage.mimetype || 'application/octet-stream';
+        if (!text) text = `📄 ${messageContent.documentMessage.fileName || 'Documento'}`;
+      } else if (messageContent.stickerMessage) {
+        mediaType = 'sticker';
+        mimeType = 'image/webp';
+        text = '🏷️ Sticker';
+      } else if (messageContent.contactMessage || messageContent.contactsArrayMessage) {
+        text = '👤 Contacto compartido';
+      } else if (messageContent.locationMessage) {
+        text = `📍 Ubicación: ${messageContent.locationMessage.degreesLatitude}, ${messageContent.locationMessage.degreesLongitude}`;
+      }
+
+      if (!text) text = '[Mensaje]';
+
+      // Intentar descargar multimedia desde Evolution API
+      if (['image', 'video', 'audio', 'document', 'sticker'].includes(mediaType) && msg.key.id) {
         try {
-          const phone = from.split('@')[0];
+          const mediaRes = await safeFetch(
+            `${EVOLUTION_API_URL}/chat/getBase64FromMediaMessage/${INSTANCE_NAME}`,
+            {
+              method: 'POST',
+              headers: getHeaders(),
+              body: JSON.stringify({ message: msg }),
+            }
+          );
+          if (mediaRes.ok) {
+            const mediaData = await mediaRes.json();
+            const base64 = mediaData?.base64 || mediaData?.data?.base64;
+            if (base64) {
+              mediaUrl = base64.startsWith('data:') ? base64 : `data:${mimeType};base64,${base64}`;
+            }
+          }
+        } catch (mediaErr: any) {
+          console.error('[Evolution] Error descargando media:', mediaErr.message);
+        }
+      }
+
+      // Determinar chatId (siempre usar remoteJid para agrupar)
+      const chatId = fromMe ? remoteJid : remoteJid;
+      const displayName = fromMe ? 'Tú' : pushName;
+
+      console.log(`[Evolution Webhook] ${fromMe ? '→' : '←'} ${displayName}: ${text.substring(0, 60)} ${mediaType !== 'text' ? `[${mediaType}]` : ''}`);
+
+      // Emitir al frontend
+      ioInstance.emit('whatsapp-message', {
+        id,
+        from: chatId,
+        name: fromMe ? 'Tú' : pushName,
+        text,
+        media: mediaUrl,
+        mimeType,
+        fromMe,
+        timestamp: msg.messageTimestamp
+          ? new Date(Number(msg.messageTimestamp) * 1000).toISOString()
+          : new Date().toISOString(),
+      });
+
+      // Auto-registrar como lead (solo mensajes entrantes)
+      if (!fromMe && remoteJid && !remoteJid.includes('@g.us') && !remoteJid.includes('@broadcast')) {
+        try {
+          const phone = remoteJid.split('@')[0];
           const existRes = await pool.query('SELECT id FROM leads WHERE phone = $1', [phone]);
           if (existRes.rowCount === 0) {
             await pool.query(
@@ -368,24 +501,45 @@ evolutionRouter.post('/webhook', async (req, res) => {
               [pushName, phone]
             );
             console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone})`);
+            // Notificar al frontend que hay un nuevo lead
+            ioInstance.emit('new-lead', { name: pushName, phone });
           }
         } catch (dbErr: any) {
           console.error('[Evolution] Error registrando lead:', dbErr.message);
         }
+      }
 
-        // Respuesta IA
+      // Respuesta IA (solo mensajes entrantes de chats individuales)
+      if (!fromMe && remoteJid && !remoteJid.includes('@g.us') && !remoteJid.includes('@broadcast')) {
         try {
-          const aiReply = await generateAIResponse(from, text);
+          const aiReply = await generateAIResponse(remoteJid, text);
           if (aiReply) {
-            await sendEvolutionMessage(from, aiReply);
-            ioInstance.emit('whatsapp-message', {
-              id: `ai-${id}`, from: 'bot', name: 'ChatPrex Bot',
-              text: aiReply, fromMe: true, timestamp: new Date().toISOString(),
-            });
+            await sendEvolutionMessage(remoteJid, aiReply);
+            // No emitimos aquí porque Evolution enviará el webhook de messages.upsert con fromMe=true
           }
         } catch (aiErr: any) {
           console.error('[Evolution] Error IA:', aiErr.message);
         }
+      }
+    }
+    // ─── Mensaje enviado exitosamente ───
+    else if (event === 'send.message') {
+      const msg = body.data?.message || body.data;
+      if (msg?.key) {
+        const remoteJid = msg.key.remoteJid;
+        const text = msg.message?.conversation
+          || msg.message?.extendedTextMessage?.text
+          || msg.message?.imageMessage?.caption
+          || '[Mensaje enviado]';
+
+        ioInstance.emit('whatsapp-message', {
+          id: msg.key.id,
+          from: remoteJid,
+          name: 'Tú',
+          text,
+          fromMe: true,
+          timestamp: new Date().toISOString(),
+        });
       }
     }
   } catch (err: any) {
