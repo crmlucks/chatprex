@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, MessageSquare, Calendar, Settings, PieChart, Home, DollarSign, Shield, Zap, Bot, Smartphone, Workflow, Moon, Sun, ChevronRight, ChevronLeft, LogOut, UserCog } from 'lucide-react';
+import { LayoutDashboard, Users, MessageSquare, Calendar, Settings, PieChart, Home, DollarSign, Shield, Zap, Bot, Smartphone, Workflow, Moon, Sun, ChevronRight, ChevronLeft, LogOut, UserCog, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole = 'usuario', userName = '', onLogout }: SidebarProps) => {
-  const [isCollapsed, setIsCollapsed] = React.useState(true);
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [openGroup, setOpenGroup] = React.useState<string | null>(null);
 
   const canSee = (...roles: string[]) => roles.includes(userRole);
@@ -25,38 +25,48 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
   return (
     <>
       {/* Sidebar Desktop */}
-      <aside className={`hidden md:flex relative flex-col w-64 h-screen z-50 transition-colors duration-500 ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'} border-r`}>
+      <aside className={`hidden md:flex relative flex-col h-screen z-50 transition-all duration-300 ${isCollapsed ? 'w-[72px]' : 'w-64'} ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'} border-r`}>
         {/* Brand Header */}
-        <div className="hidden md:flex h-20 items-center px-8 border-b border-transparent">
+        <div className={`h-20 flex items-center border-b border-transparent ${isCollapsed ? 'px-4 justify-center' : 'px-8'}`}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
+            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 shrink-0">
               <Bot className="text-white" size={20} />
             </div>
-            <div>
-              <span className={`text-[18px] md:text-[20px] font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`} style={{ fontFamily: 'var(--font-heading)' }}>ChatPrex</span>
-              <div className="flex items-center gap-1.5 -mt-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span className="text-[11px] font-bold text-slate-500">Cloud ERP</span>
+            {!isCollapsed && (
+              <div>
+                <span className={`text-[18px] md:text-[20px] font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`} style={{ fontFamily: 'var(--font-heading)' }}>ChatPrex</span>
+                <div className="flex items-center gap-1.5 -mt-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <span className="text-[11px] font-bold text-slate-500">Cloud ERP</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        <nav className="flex-1 py-6 flex flex-col gap-2 px-3 overflow-x-hidden">
-          <NavItem onClick={() => setActiveTab('Dashboard')} icon={<LayoutDashboard size={20} />} label="Dashboard" active={activeTab === 'Dashboard'} isDarkMode={isDarkMode} />
-          <NavItem onClick={() => setActiveTab('Leads Pipeline')} icon={<Users size={20} />} label="Leads Pipeline" active={activeTab === 'Leads Pipeline'} isDarkMode={isDarkMode} />
-          <NavItem onClick={() => setActiveTab('Conversaciones')} icon={<MessageSquare size={20} />} label="Conversaciones" active={activeTab === 'Conversaciones'} isDarkMode={isDarkMode} />
-          <NavItem onClick={() => setActiveTab('Inventario')} icon={<Home size={20} />} label="Propiedades" active={activeTab === 'Inventario'} isDarkMode={isDarkMode} />
-          <NavItem onClick={() => setActiveTab('Calendario')} icon={<Calendar size={20} />} label="Calendario" active={activeTab === 'Calendario'} isDarkMode={isDarkMode} />
-          <NavItem onClick={() => setActiveTab('Finanzas')} icon={<DollarSign size={20} />} label="Finanzas" active={activeTab === 'Finanzas'} isDarkMode={isDarkMode} />
-          <NavItem onClick={() => setActiveTab('Campañas')} icon={<PieChart size={20} />} label="Campañas" active={activeTab === 'Campañas'} isDarkMode={isDarkMode} />
+        {/* Collapse Toggle */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={`absolute -right-3 top-24 z-50 w-6 h-6 rounded-full border shadow-md flex items-center justify-center transition-all hover:scale-110 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white' : 'bg-white border-slate-200 text-slate-400 hover:text-primary'}`}
+        >
+          {isCollapsed ? <PanelLeftOpen size={12} /> : <PanelLeftClose size={12} />}
+        </button>
+
+        <nav className={`flex-1 py-6 flex flex-col gap-2 overflow-x-hidden overflow-y-auto custom-scrollbar ${isCollapsed ? 'px-2' : 'px-3'}`}>
+          <NavItem onClick={() => setActiveTab('Dashboard')} icon={<LayoutDashboard size={20} />} label="Dashboard" active={activeTab === 'Dashboard'} isDarkMode={isDarkMode} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Leads Pipeline')} icon={<Users size={20} />} label="Leads Pipeline" active={activeTab === 'Leads Pipeline'} isDarkMode={isDarkMode} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Conversaciones')} icon={<MessageSquare size={20} />} label="Conversaciones" active={activeTab === 'Conversaciones'} isDarkMode={isDarkMode} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Inventario')} icon={<Home size={20} />} label="Propiedades" active={activeTab === 'Inventario'} isDarkMode={isDarkMode} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Calendario')} icon={<Calendar size={20} />} label="Calendario" active={activeTab === 'Calendario'} isDarkMode={isDarkMode} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Finanzas')} icon={<DollarSign size={20} />} label="Finanzas" active={activeTab === 'Finanzas'} isDarkMode={isDarkMode} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Campañas')} icon={<PieChart size={20} />} label="Campañas" active={activeTab === 'Campañas'} isDarkMode={isDarkMode} collapsed={isCollapsed} />
           {canSee('propietario', 'administrador') && (
-            <NavItem onClick={() => setActiveTab('Usuarios')} icon={<UserCog size={20} />} label="Usuarios" active={activeTab === 'Usuarios'} isDarkMode={isDarkMode} />
+            <NavItem onClick={() => setActiveTab('Usuarios')} icon={<UserCog size={20} />} label="Usuarios" active={activeTab === 'Usuarios'} isDarkMode={isDarkMode} collapsed={isCollapsed} />
           )}
         </nav>
 
-        <div className={`p-4 border-t shrink-0 overflow-x-hidden flex flex-col gap-2 transition-colors ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
-          {canSee('propietario', 'administrador') && (
+        <div className={`p-4 border-t shrink-0 overflow-x-hidden flex flex-col gap-2 transition-colors ${isDarkMode ? 'border-slate-800' : 'border-slate-100'} ${isCollapsed ? 'px-2' : ''}`}>
+          {canSee('propietario', 'administrador') && !isCollapsed && (
             <NavGroup 
               icon={<Workflow size={20} />} 
               label="Integraciones" 
@@ -70,8 +80,11 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
               <SubNavItem onClick={() => setActiveTab('Automatización')} label="Automatización" active={activeTab === 'Automatización'} isDarkMode={isDarkMode} />
             </NavGroup>
           )}
+          {canSee('propietario', 'administrador') && isCollapsed && (
+            <NavItem onClick={() => setActiveTab('Conexión WP')} icon={<Workflow size={20} />} label="Integraciones" active={['Conexión WP', 'Constructor Bots', 'Automatización'].includes(activeTab)} isDarkMode={isDarkMode} collapsed={isCollapsed} />
+          )}
 
-          {canSee('propietario') && (
+          {canSee('propietario') && !isCollapsed && (
             <NavGroup 
               icon={<Settings size={20} />} 
               label="Ajustes" 
@@ -84,33 +97,46 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
               <SubNavItem onClick={() => setActiveTab('Configuración')} label="Configuración General" active={activeTab === 'Configuración'} isDarkMode={isDarkMode} />
             </NavGroup>
           )}
+          {canSee('propietario') && isCollapsed && (
+            <NavItem onClick={() => setActiveTab('Configuración')} icon={<Settings size={20} />} label="Ajustes" active={['Configuración', 'Administración'].includes(activeTab)} isDarkMode={isDarkMode} collapsed={isCollapsed} />
+          )}
 
           <button 
             onClick={() => setIsDarkMode(!isDarkMode)} 
-            className={`w-full flex items-center justify-between p-3 mt-2 rounded-xl transition-all duration-200 ${isDarkMode ? 'bg-slate-800 text-amber-500 hover:bg-slate-700' : 'bg-slate-100 text-indigo-500 hover:bg-slate-200'}`}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-3 mt-2 rounded-xl transition-all duration-200 ${isDarkMode ? 'bg-slate-800 text-amber-500 hover:bg-slate-700' : 'bg-slate-100 text-indigo-500 hover:bg-slate-200'}`}
           >
             <div className="flex items-center gap-3">
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-              <span className={`text-[13px] font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                {isDarkMode ? 'Modo Día' : 'Modo Noche'}
-              </span>
+              {!isCollapsed && (
+                <span className={`text-[13px] font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                  {isDarkMode ? 'Modo Día' : 'Modo Noche'}
+                </span>
+              )}
             </div>
           </button>
 
           {/* User info + Logout */}
           {userName && (
-            <div className={`flex items-center justify-between p-3 rounded-xl mt-1 ${isDarkMode ? 'bg-slate-800/50' : 'bg-slate-50'}`}>
-              <div className="flex items-center gap-2 min-w-0">
-                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&size=32`} alt="" className="w-7 h-7 rounded-full shrink-0" />
-                <div className="min-w-0">
-                  <p className={`text-[12px] font-bold truncate ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>{userName}</p>
-                  <p className="text-[10px] font-medium text-slate-500 capitalize">{userRole}</p>
-                </div>
-              </div>
-              {onLogout && (
-                <button onClick={onLogout} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-slate-200 text-slate-500'}`} title="Cerrar sesión">
-                  <LogOut size={16} />
+            <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-3 rounded-xl mt-1 ${isDarkMode ? 'bg-slate-800/50' : 'bg-slate-50'}`}>
+              {isCollapsed ? (
+                <button onClick={onLogout} className="p-1" title="Cerrar sesión">
+                  <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&size=32`} alt="" className="w-7 h-7 rounded-full" />
                 </button>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&size=32`} alt="" className="w-7 h-7 rounded-full shrink-0" />
+                    <div className="min-w-0">
+                      <p className={`text-[12px] font-bold truncate ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>{userName}</p>
+                      <p className="text-[10px] font-medium text-slate-500 capitalize">{userRole}</p>
+                    </div>
+                  </div>
+                  {onLogout && (
+                    <button onClick={onLogout} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-slate-200 text-slate-500'}`} title="Cerrar sesión">
+                      <LogOut size={16} />
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -138,21 +164,28 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
   );
 };
 
-const NavItem = ({ icon, label, active, onClick, isDarkMode, badge }: any) => (
+const NavItem = ({ icon, label, active, onClick, isDarkMode, badge, collapsed }: any) => (
   <button 
     onClick={onClick}
-    className={`group relative flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-300 font-semibold text-[13px] active:scale-95 whitespace-nowrap ${
+    title={collapsed ? label : undefined}
+    className={`group relative flex items-center ${collapsed ? 'justify-center' : ''} gap-3 ${collapsed ? 'px-2' : 'px-4'} py-2 rounded-xl transition-all duration-300 font-semibold text-[13px] active:scale-95 whitespace-nowrap ${
       active 
         ? 'bg-primary text-white shadow-lg shadow-primary/20' 
         : (isDarkMode ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-primary')
     }`}
   >
-    <span className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>{icon}</span>
-    <span className="md:block">{label}</span>
-    {badge && (
+    <span className={`transition-transform duration-300 shrink-0 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>{icon}</span>
+    {!collapsed && <span className="md:block">{label}</span>}
+    {badge && !collapsed && (
       <span className={`absolute -top-1 -right-1 md:relative md:top-auto md:right-auto ml-auto px-1.5 py-0.5 rounded-md text-[11px] font-bold ${active ? 'bg-white text-primary' : 'bg-primary text-white'}`}>
         {badge}
       </span>
+    )}
+    {/* Tooltip on collapse */}
+    {collapsed && (
+      <div className="absolute left-full ml-2 px-2 py-1 rounded-md text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 bg-slate-900 text-white shadow-lg">
+        {label}
+      </div>
     )}
   </button>
 );

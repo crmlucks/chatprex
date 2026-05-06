@@ -11,7 +11,9 @@ import { sendMetaConversionEvent } from './metaConversion';
 import { initWhatsApp, whatsappRouter, aiModeRouter } from './whatsapp';
 import { authRouter } from './authRoutes';
 import { userRouter } from './userRoutes';
-
+import { leadRouter } from './leadRoutes';
+import { propertyRouter } from './propertyRoutes';
+import { initEvolution, evolutionRouter } from './evolution';
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -30,8 +32,13 @@ app.use('/api/auth', authRouter);
 // ─── Rutas de usuarios (protegidas) ───
 app.use('/api/users', userRouter);
 
+// ─── Rutas CRM (protegidas) ───
+app.use('/api/leads', leadRouter);
+app.use('/api/properties', propertyRouter);
+
 // ─── Rutas de WhatsApp ───
-app.use('/api/webhook/evolution', whatsappRouter);
+app.use('/api/webhook/meta', whatsappRouter);
+app.use('/api/webhook/evolution', evolutionRouter);
 app.use('/api/ai-mode', aiModeRouter);
 
 // ─── Meta Conversion API ───
@@ -70,6 +77,7 @@ server.listen(PORT, async () => {
   // Inicializar base de datos (crear tablas si no existen)
   await initDatabase();
 
-  // Inicializar WhatsApp
+  // Inicializar WhatsApp y Evolution
   initWhatsApp(io);
+  initEvolution(io);
 });

@@ -1,17 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, Building2, Map, LayoutGrid, LayoutList, Search, Plus, Filter, MapPin, X, Edit2, Trash2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
   const [viewMode, setViewMode] = useState<'grid'|'list'>(() => {
     return typeof window !== 'undefined' && window.innerWidth < 768 ? 'list' : 'grid';
   });
   
-  const [properties, setProperties] = useState([
-    { id: 1, type: "Casa", name: "Villa las Palmas", project: "Residencial Palmas", price: "250,000", currency: "USD", location: "Zona Norte", area: "250", status: "Disponible", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80" },
-    { id: 2, type: "Departamento", name: "Torre Central 4B", project: "Torre Central", price: "120,000", currency: "USD", location: "Centro", area: "85", status: "Vendido", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80" },
-    { id: 3, type: "Terreno", name: "Lote Sur Industrial", project: "Parque Sur", price: "85,000", currency: "USD", location: "Zona Sur", area: "1000", status: "Reservado", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=400&q=80" },
-    { id: 4, type: "Oficina", name: "Corp. Horizonte", project: "Horizonte Business", price: "1,200", currency: "USD", location: "Distrito Financiero", area: "45", status: "Bloqueado", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" }
-  ]);
+  const [properties, setProperties] = useState<any[]>([]);
+  const { token } = useAuth();
+
+  const fetchProperties = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/properties`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProperties(data);
+      }
+    } catch (err) {
+      console.error('Error fetching properties', err);
+    }
+  };
+
+  useEffect(() => {
+    if (token) fetchProperties();
+  }, [token]);
 
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -20,23 +37,38 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
     rooms: '', details: '', status: 'Disponible'
   });
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newProperty = {
-      id: Date.now(),
-      type: formData.type,
-      name: formData.name,
-      project: formData.project,
-      price: formData.price,
-      currency: formData.currency,
-      location: formData.location,
-      area: formData.area,
-      status: formData.status,
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80" // Default generic image
-    };
-    setProperties([newProperty, ...properties]);
-    setShowModal(false);
-    setFormData({ name: '', project: '', developer: '', type: 'Departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', details: '', status: 'Disponible' });
+    try {
+      const res = await fetch(`${API_URL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+      if (res.ok) {
+        fetchProperties();
+        setShowModal(false);
+        setFormData({ name: '', project: '', developer: '', type: 'Departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', details: '', status: 'Disponible' });
+      }
+    } catch (err) {
+      console.error('Error saving property', err);
+    }
+  };
+
+  const deleteProperty = async (id: number) => {
+    if (!window.confirm('¿Eliminar esta propiedad?')) return;
+    try {
+      const res = await fetch(`${API_URL}/api/properties/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) fetchProperties();
+    } catch (err) {
+      console.error('Error deleting property', err);
+    }
   };
 
   return (
@@ -134,7 +166,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                           <button className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:text-primary hover:bg-primary/10' : 'text-slate-500 hover:text-primary hover:bg-primary/10'}`} title="Editar">
                             <Edit2 size={16} />
                           </button>
-                          <button className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:text-rose-500 hover:bg-rose-500/10' : 'text-slate-500 hover:text-rose-500 hover:bg-rose-500/10'}`} title="Eliminar">
+                          <button onClick={() => deleteProperty(p.id)} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:text-rose-500 hover:bg-rose-500/10' : 'text-slate-500 hover:text-rose-500 hover:bg-rose-500/10'}`} title="Eliminar">
                             <Trash2 size={16} />
                           </button>
                         </div>

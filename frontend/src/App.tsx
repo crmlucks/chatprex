@@ -83,7 +83,7 @@ function AuthenticatedApp() {
 
     switch (activeTab) {
       case 'Dashboard': return <Dashboard isDarkMode={isDarkMode} />;
-      case 'Leads Pipeline': return <Leads isDarkMode={isDarkMode} />;
+      case 'Leads Pipeline': return <Leads isDarkMode={isDarkMode} setActiveTab={setActiveTab} />;
       case 'Conversaciones': return <ChatInterface isDarkMode={isDarkMode} />;
       case 'Calendario': return <Calendar isDarkMode={isDarkMode} />;
       case 'Inventario': return <Properties isDarkMode={isDarkMode} />;

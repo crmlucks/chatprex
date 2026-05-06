@@ -60,6 +60,44 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_users_role ON users (role);
     `);
 
+    // Crear tabla leads
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS leads (
+        id            SERIAL PRIMARY KEY,
+        name          VARCHAR(150) NOT NULL,
+        phone         VARCHAR(30) NOT NULL,
+        score         VARCHAR(10) DEFAULT '50%',
+        budget        VARCHAR(50) DEFAULT '',
+        project       VARCHAR(150) DEFAULT '',
+        status        VARCHAR(50) DEFAULT 'Nuevo',
+        tags          JSONB DEFAULT '[]'::jsonb,
+        bot_active    BOOLEAN DEFAULT false,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Crear tabla properties
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS properties (
+        id            SERIAL PRIMARY KEY,
+        type          VARCHAR(50) NOT NULL,
+        name          VARCHAR(150) NOT NULL,
+        project       VARCHAR(150) DEFAULT '',
+        developer     VARCHAR(150) DEFAULT '',
+        price         VARCHAR(50) NOT NULL,
+        currency      VARCHAR(10) DEFAULT 'USD',
+        location      VARCHAR(255) NOT NULL,
+        area          VARCHAR(50) DEFAULT '',
+        rooms         VARCHAR(20) DEFAULT '',
+        details       TEXT DEFAULT '',
+        status        VARCHAR(50) DEFAULT 'Disponible',
+        image         TEXT DEFAULT '',
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
     console.log('✅ Base de datos inicializada correctamente.');
   } catch (err) {
     console.error('❌ Error inicializando la base de datos:', err);
