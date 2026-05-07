@@ -118,15 +118,35 @@ whatsappRouter.post('/', async (req, res) => {
                   }
                   
                   if (aiReply) {
-                    ioInstance.emit('whatsapp-message', {
-                      id: `ai-${msg.id}`,
-                      from: 'bot',
-                      name: 'ChatPrex Bot' + (globalUseN8n ? ' (n8n)' : ''),
-                      text: aiReply,
-                      fromMe: true,
-                      timestamp: new Date().toISOString(),
-                    });
-                    await sendWhatsAppMessage(from, aiReply);
+                    let messagesToSend = [aiReply];
+                    if (aiReply.length > 250) {
+                      let parts = aiReply.split(/\\n+/).filter(p => p.trim().length > 0);
+                      if (parts.length === 1) {
+                        parts = aiReply.match(/[^.?!]+[.?!]+(?:\\s+|$)/g)?.map(s => s.trim()) || [aiReply];
+                      }
+                      if (parts.length > 3) {
+                        messagesToSend = [parts[0], parts.slice(1, parts.length - 1).join(' '), parts[parts.length - 1]];
+                      } else if (parts.length > 1) {
+                        messagesToSend = parts;
+                      }
+                    }
+
+                    for (let i = 0; i < messagesToSend.length; i++) {
+                      if (messagesToSend[i].trim().length > 0) {
+                        ioInstance.emit('whatsapp-message', {
+                          id: `ai-${msg.id}-${i}`,
+                          from: 'bot',
+                          name: 'ChatPrex Bot' + (globalUseN8n ? ' (n8n)' : ''),
+                          text: messagesToSend[i].trim(),
+                          fromMe: true,
+                          timestamp: new Date().toISOString(),
+                        });
+                        await sendWhatsAppMessage(from, messagesToSend[i].trim());
+                        if (i < messagesToSend.length - 1) {
+                          await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
+                        }
+                      }
+                    }
                   }
                   continue; // Skip normal handling for this audio message
                 }
@@ -149,15 +169,35 @@ whatsappRouter.post('/', async (req, res) => {
                   aiReply = await generateAIResponse(from, text);
                 }
                 if (aiReply) {
-                  ioInstance.emit('whatsapp-message', {
-                    id: `ai-${msg.id}`,
-                    from: 'bot',
-                    name: 'ChatPrex Bot' + (globalUseN8n ? ' (n8n)' : ''),
-                    text: aiReply,
-                    fromMe: true,
-                    timestamp: new Date().toISOString(),
-                  });
-                  await sendWhatsAppMessage(from, aiReply);
+                  let messagesToSend = [aiReply];
+                  if (aiReply.length > 250) {
+                    let parts = aiReply.split(/\\n+/).filter(p => p.trim().length > 0);
+                    if (parts.length === 1) {
+                      parts = aiReply.match(/[^.?!]+[.?!]+(?:\\s+|$)/g)?.map(s => s.trim()) || [aiReply];
+                    }
+                    if (parts.length > 3) {
+                      messagesToSend = [parts[0], parts.slice(1, parts.length - 1).join(' '), parts[parts.length - 1]];
+                    } else if (parts.length > 1) {
+                      messagesToSend = parts;
+                    }
+                  }
+
+                  for (let i = 0; i < messagesToSend.length; i++) {
+                    if (messagesToSend[i].trim().length > 0) {
+                      ioInstance.emit('whatsapp-message', {
+                        id: `ai-${msg.id}-${i}`,
+                        from: 'bot',
+                        name: 'ChatPrex Bot' + (globalUseN8n ? ' (n8n)' : ''),
+                        text: messagesToSend[i].trim(),
+                        fromMe: true,
+                        timestamp: new Date().toISOString(),
+                      });
+                      await sendWhatsAppMessage(from, messagesToSend[i].trim());
+                      if (i < messagesToSend.length - 1) {
+                        await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
+                      }
+                    }
+                  }
                 }
               }
             }

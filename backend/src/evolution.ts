@@ -672,7 +672,38 @@ const handleWebhookEvent = async (req: any, res: any) => {
               console.log(`[Evolution] 🤖 Generando respuesta IA para ${remoteJid} (texto combinado)`);
               const aiReply = await generateAIResponse(remoteJid, combinedText);
               if (aiReply) {
-                await sendEvolutionMessage(remoteJid, aiReply);
+                let messagesToSend = [aiReply];
+                if (aiReply.length > 250) {
+                  // Separar por párrafos
+                  let parts = aiReply.split(/\\n+/).filter(p => p.trim().length > 0);
+                  
+                  // Si es un solo párrafo grande, separar por oraciones
+                  if (parts.length === 1) {
+                    parts = aiReply.match(/[^.?!]+[.?!]+(?:\\s+|$)/g)?.map(s => s.trim()) || [aiReply];
+                  }
+                  
+                  // Si hay más de 3 partes, agrupar las del medio para que sean exactamente 3 mensajes. 
+                  // El último mensaje siempre contendrá la pregunta o llamado a la acción.
+                  if (parts.length > 3) {
+                    messagesToSend = [
+                      parts[0],
+                      parts.slice(1, parts.length - 1).join(' '),
+                      parts[parts.length - 1]
+                    ];
+                  } else if (parts.length > 1) {
+                    messagesToSend = parts;
+                  }
+                }
+
+                for (let i = 0; i < messagesToSend.length; i++) {
+                  if (messagesToSend[i].trim().length > 0) {
+                    await sendEvolutionMessage(remoteJid, messagesToSend[i].trim());
+                    // Simular tiempo de escritura entre envíos múltiples
+                    if (i < messagesToSend.length - 1) {
+                      await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
+                    }
+                  }
+                }
               }
             } catch (aiErr: any) {
               console.error('[Evolution] Error IA:', aiErr.message);
