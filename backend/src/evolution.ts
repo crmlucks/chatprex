@@ -500,9 +500,21 @@ const handleWebhookEvent = async (req: any, res: any) => {
     }
     // ─── Mensajes Entrantes y Salientes ───
     else if (event === 'messages.upsert') {
-      const msg = body.data?.message || body.data;
-      if (!msg?.key) {
-        console.log(`[Evolution Webhook] Mensaje sin key, ignorando`);
+      const data = body.data || {};
+      
+      // En Evolution v2, a veces la data es directamente el objeto con key, 
+      // a veces es un array (data.messages), y a veces viene dentro de data.message
+      let msg = data;
+      if (data.key && data.message) {
+        msg = data; // Es el formato esperado: { key: {}, message: {}, pushName: '' }
+      } else if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
+        msg = data.messages[0];
+      } else if (data.message && data.message.key) {
+        msg = data.message;
+      }
+
+      if (!msg || !msg.key) {
+        console.log(`[Evolution Webhook] Mensaje sin key, ignorando. Estructura:`, Object.keys(data));
         return res.sendStatus(200);
       }
 
@@ -630,7 +642,11 @@ const handleWebhookEvent = async (req: any, res: any) => {
     }
     // ─── Mensaje enviado exitosamente ───
     else if (event === 'send.message') {
-      const msg = body.data?.message || body.data;
+      const data = body.data || {};
+      let msg = data;
+      if (data.key && data.message) msg = data;
+      else if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) msg = data.messages[0];
+      else if (data.message && data.message.key) msg = data.message;
       if (msg?.key) {
         const remoteJid = msg.key.remoteJid;
         const text = msg.message?.conversation
