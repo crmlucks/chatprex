@@ -722,7 +722,29 @@ const handleWebhookEvent = async (req: any, res: any) => {
 
                 for (let i = 0; i < messagesToSend.length; i++) {
                   if (messagesToSend[i].trim().length > 0) {
-                    await sendEvolutionMessage(remoteJid, messagesToSend[i].trim());
+                    const aiText = messagesToSend[i].trim();
+                    await sendEvolutionMessage(remoteJid, aiText);
+                    
+                    // Emitir al frontend inmediatamente
+                    ioInstance.emit('whatsapp-message', {
+                      id: `ai-${Date.now()}-${i}`,
+                      from: remoteJid,
+                      name: 'ChatPrex Bot',
+                      text: aiText,
+                      fromMe: true,
+                      timestamp: new Date().toISOString(),
+                    });
+                    
+                    // Guardar en BD por si el webhook no lo reporta
+                    try {
+                      await pool.query(
+                        `INSERT INTO evolution_messages (id, chat_id, text, from_me, timestamp)
+                         VALUES ($1, $2, $3, true, $4)
+                         ON CONFLICT (id) DO NOTHING`,
+                        [`ai-${Date.now()}-${i}`, remoteJid, aiText, new Date().toISOString()]
+                      );
+                    } catch (e) {}
+
                     if (i < messagesToSend.length - 1) {
                       await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
                     }

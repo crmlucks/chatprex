@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MoreVertical, Phone, Video, Paperclip, Send, Smile, Filter, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Search, MoreVertical, Phone, Video, Paperclip, Send, Smile, Filter, CheckCircle2, ArrowLeft, Zap, Plus, Edit2, Trash2, X } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 
 interface ChatMessage {
@@ -9,6 +9,15 @@ interface ChatMessage {
   time: string;
   media?: string;
   mimeType?: string;
+}
+
+interface QuickReply {
+  id: string;
+  title: string;
+  text: string;
+  media?: string;
+  mimeType?: string;
+  fileName?: string;
 }
 
 interface Chat {
@@ -28,7 +37,26 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const [chats, setChats] = useState<{ [id: string]: Chat }>({});
   const [useN8n, setUseN8n] = useState(false);
   
+  // Respuestas Rápidas
+  const [showQuickReplies, setShowQuickReplies] = useState(false);
+  const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
+  const [editingReply, setEditingReply] = useState<QuickReply | null>(null);
+  const [showReplyForm, setShowReplyForm] = useState(false);
+  const [replyForm, setReplyForm] = useState<Partial<QuickReply>>({});
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('chatprex_quick_replies');
+    if (saved) {
+      setQuickReplies(JSON.parse(saved));
+    }
+  }, []);
+
+  const saveQuickReplies = (replies: QuickReply[]) => {
+    setQuickReplies(replies);
+    localStorage.setItem('chatprex_quick_replies', JSON.stringify(replies));
+  };
 
   useEffect(() => {
     // Fetch initial n8n state
@@ -253,6 +281,67 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     }));
   };
 
+  const handleSelectQuickReply = (reply: QuickReply) => {
+    let parsedText = reply.text;
+    if (activeChatData) {
+      parsedText = parsedText.replace(/{{nombre}}/g, activeChatData.name);
+      parsedText = parsedText.replace(/{{proyecto}}/g, 'Proyecto');
+    }
+    
+    setInputText(parsedText);
+    if (reply.media) {
+      setMediaBase64(reply.media);
+      // Construct a fake File object so the UI shows an attachment name
+      if (reply.mimeType) {
+        const fakeFile = new File([new Blob()], reply.fileName || 'archivo_adjunto', { type: reply.mimeType });
+        setSelectedFile(fakeFile);
+      }
+    }
+    setShowQuickReplies(false);
+  };
+
+  const handleSaveReplyForm = () => {
+    if (!replyForm.title || !replyForm.text) return;
+    const newReply: QuickReply = {
+      id: replyForm.id || Date.now().toString(),
+      title: replyForm.title,
+      text: replyForm.text,
+      media: replyForm.media,
+      mimeType: replyForm.mimeType,
+      fileName: replyForm.fileName
+    };
+    
+    let updated;
+    if (replyForm.id) {
+      updated = quickReplies.map(r => r.id === replyForm.id ? newReply : r);
+    } else {
+      updated = [...quickReplies, newReply];
+    }
+    saveQuickReplies(updated);
+    setShowReplyForm(false);
+    setReplyForm({});
+  };
+
+  const handleDeleteReply = (id: string) => {
+    saveQuickReplies(quickReplies.filter(r => r.id !== id));
+  };
+
+  const handleReplyFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setReplyForm({
+          ...replyForm,
+          media: event.target?.result as string,
+          mimeType: file.type,
+          fileName: file.name
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const activeChatData = activeChat ? chats[activeChat] : null;
   const chatList = Object.values(chats).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
@@ -351,14 +440,79 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               <div ref={messagesEndRef} />
             </div>
 
-            {selectedFile && (
+            {(selectedFile || mediaBase64) && (
               <div className={`px-4 py-2 flex items-center justify-between border-t transition-colors ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
-                <span className={`text-xs truncate ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{selectedFile.name}</span>
+                <span className={`text-xs truncate ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{selectedFile?.name || 'Archivo adjunto'}</span>
                 <button onClick={() => { setSelectedFile(null); setMediaBase64(null); }} className="text-rose-500 text-xs font-bold px-2 hover:text-rose-400">X</button>
               </div>
             )}
+            
+            {showQuickReplies && (
+              <div className={`absolute bottom-20 left-4 right-4 md:left-6 md:right-6 rounded-2xl shadow-2xl border p-4 z-50 flex flex-col max-h-[60vh] ${isDarkMode ? 'bg-[#1E1E1E] border-slate-700' : 'bg-white border-slate-200'}`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className={`font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                    <Zap size={18} className="text-amber-500" /> Respuestas Rápidas
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => { setReplyForm({}); setShowReplyForm(true); }} className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
+                      <Plus size={16} /> Nueva
+                    </button>
+                    <button onClick={() => setShowQuickReplies(false)} className={`p-1 rounded-md ${isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}>
+                      <X size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                {showReplyForm ? (
+                  <div className="flex flex-col gap-3 overflow-y-auto custom-scrollbar p-1">
+                    <input type="text" placeholder="Título corto (ej. Bienvenida)" className={`w-full p-2 text-sm rounded-lg border ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} value={replyForm.title || ''} onChange={e => setReplyForm({...replyForm, title: e.target.value})} />
+                    <textarea rows={4} placeholder="Escribe el texto. Usa {{nombre}} y {{proyecto}} como variables." className={`w-full p-2 text-sm rounded-lg border resize-none ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} value={replyForm.text || ''} onChange={e => setReplyForm({...replyForm, text: e.target.value})} />
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <label className="cursor-pointer text-sm text-primary font-medium flex items-center gap-1 hover:underline">
+                          <Paperclip size={16} /> {replyForm.fileName ? 'Cambiar adjunto' : 'Añadir adjunto'}
+                          <input type="file" className="hidden" onChange={handleReplyFileChange} />
+                        </label>
+                        {replyForm.fileName && <span className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{replyForm.fileName}</span>}
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => setShowReplyForm(false)} className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Cancelar</button>
+                        <button onClick={handleSaveReplyForm} className="px-3 py-1.5 text-sm rounded-lg font-medium bg-primary text-white hover:bg-primary-dark transition-colors">Guardar</button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-2">
+                    {quickReplies.length === 0 ? (
+                      <div className={`text-center py-6 text-sm ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>No hay respuestas rápidas creadas.</div>
+                    ) : (
+                      quickReplies.map(reply => (
+                        <div key={reply.id} className={`p-3 rounded-xl border flex flex-col gap-2 transition-colors cursor-pointer group ${isDarkMode ? 'bg-slate-800/50 border-slate-700 hover:bg-slate-800' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
+                          <div className="flex justify-between items-start">
+                            <div onClick={() => handleSelectQuickReply(reply)} className="flex-1">
+                              <h4 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>{reply.title}</h4>
+                              <p className={`text-xs line-clamp-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{reply.text}</p>
+                              {reply.fileName && <div className="text-[10px] mt-1 text-primary flex items-center gap-1"><Paperclip size={10} /> Adjunto: {reply.fileName}</div>}
+                            </div>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={(e) => { e.stopPropagation(); setReplyForm(reply); setShowReplyForm(true); }} className={`p-1.5 rounded-md ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-slate-200 text-slate-600'}`}><Edit2 size={14} /></button>
+                              <button onClick={(e) => { e.stopPropagation(); handleDeleteReply(reply.id); }} className={`p-1.5 rounded-md hover:bg-rose-500/10 text-rose-500`}><Trash2 size={14} /></button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className={`p-3 md:p-4 border-t transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
               <div className={`flex items-center gap-3 p-1 rounded-2xl border transition-all ${isDarkMode ? 'bg-slate-900 border-slate-700 focus-within:border-primary/50' : 'bg-slate-50 border-slate-200 focus-within:border-primary/50'}`}>
+                <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-2 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-amber-500 bg-amber-500/10' : (isDarkMode ? 'text-slate-500 hover:text-amber-500 hover:bg-amber-500/10' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-500/10')}`}>
+                  <Zap size={18} />
+                </button>
                 <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
                 <button onClick={() => fileInputRef.current?.click()} className={`p-2 rounded-xl transition-all active:scale-95 ${isDarkMode ? 'text-slate-500 hover:text-primary hover:bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}>
                   <Paperclip size={18} />
