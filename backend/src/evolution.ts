@@ -639,6 +639,12 @@ const handleWebhookEvent = async (req: any, res: any) => {
         timestamp: msgTimestamp,
       });
 
+      // Configuración de palabras clave para activar/despertar al bot
+      const activationKeywords = ['info', 'informacion', 'información', 'precio', 'quiero', 'asesor', 'catalogo', 'catálogo', 'ubicacion', 'comprar'];
+      const textLower = text.toLowerCase();
+      // Verificamos si alguna de las palabras clave está presente como palabra independiente o parte del texto
+      const containsKeyword = activationKeywords.some(kw => textLower.includes(kw));
+
       // Auto-registrar como lead (solo mensajes entrantes, no grupos ni broadcast)
       let isBotActive = false;
       if (!fromMe && remoteJid && !remoteJid.includes('@g.us') && !remoteJid.includes('@broadcast')) {
@@ -648,16 +654,26 @@ const handleWebhookEvent = async (req: any, res: any) => {
           console.log(`[Evolution] Buscando lead con phone: ${phone}`);
           const existRes = await pool.query('SELECT id, bot_active FROM leads WHERE phone = $1', [phone]);
           if (existRes.rowCount === 0) {
+            // Nuevo lead: Bot inactivo por defecto, a menos que el mensaje contenga una palabra clave
+            isBotActive = containsKeyword;
             await pool.query(
-              `INSERT INTO leads (name, phone, score, status, bot_active) VALUES ($1, $2, '50%', 'Nuevo', true)`,
-              [pushName, phone]
+              `INSERT INTO leads (name, phone, score, status, bot_active) VALUES ($1, $2, '50%', 'Nuevo', $3)`,
+              [pushName, phone, isBotActive]
             );
-            isBotActive = true;
-            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) con bot activado`);
+            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) - Bot Activo: ${isBotActive}`);
             ioInstance.emit('new-lead', { name: pushName, phone });
           } else {
             isBotActive = existRes.rows[0].bot_active;
-            console.log(`[Evolution] Lead existente: ${phone}, bot_active: ${isBotActive}`);
+            
+            // Si el bot estaba apagado pero el usuario mandó una palabra clave, despertarlo
+            if (!isBotActive && containsKeyword) {
+              isBotActive = true;
+              await pool.query('UPDATE leads SET bot_active = true WHERE phone = $1', [phone]);
+              console.log(`[Evolution] 🤖 Bot DESPERTADO por palabra clave para: ${phone}`);
+            } else {
+              console.log(`[Evolution] Lead existente: ${phone}, bot_active: ${isBotActive}`);
+            }
+          }
           }
         } catch (dbErr: any) {
           console.error('[Evolution] Error registrando lead:', dbErr.message);
