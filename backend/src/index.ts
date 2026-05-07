@@ -14,6 +14,8 @@ import { userRouter } from './userRoutes';
 import { leadRouter } from './leadRoutes';
 import { propertyRouter } from './propertyRoutes';
 import { initEvolution, evolutionRouter } from './evolution';
+import { aiConfigRouter } from './aiRoutes';
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -35,6 +37,7 @@ app.use('/api/users', userRouter);
 // ─── Rutas CRM (protegidas) ───
 app.use('/api/leads', leadRouter);
 app.use('/api/properties', propertyRouter);
+app.use('/api/ai-config', aiConfigRouter);
 
 // ─── Rutas de WhatsApp ───
 app.use('/api/webhook/meta', whatsappRouter);

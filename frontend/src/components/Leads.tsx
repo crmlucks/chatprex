@@ -302,11 +302,23 @@ const ListView = ({ leads, onSelect, isDarkMode, onToggleBot, onDelete, onGoChat
 const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onDelete, onGoChat, isDarkMode }: any) => {
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
   const handleDrop = (e: React.DragEvent) => { e.preventDefault(); onDrop(e.dataTransfer.getData('leadId'), status); };
+  
+  const getStatusColor = (st: string) => {
+    switch (st) {
+      case 'Nuevo': return isDarkMode ? 'text-blue-400' : 'text-blue-600';
+      case 'Contactado': return isDarkMode ? 'text-amber-400' : 'text-amber-600';
+      case 'Cita': return isDarkMode ? 'text-purple-400' : 'text-purple-600';
+      case 'Negociación': return isDarkMode ? 'text-emerald-400' : 'text-emerald-600';
+      case 'Cerrado': return isDarkMode ? 'text-slate-400' : 'text-slate-600';
+      default: return 'text-primary';
+    }
+  };
+
   return (
     <div onDragOver={handleDragOver} onDrop={handleDrop} className="flex flex-col w-72 md:w-80 shrink-0">
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="flex items-center gap-2">
-          <h3 className={`text-[13px] font-bold ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>{status}</h3>
+          <h3 className={`text-[13px] font-bold ${getStatusColor(status)}`}>{status}</h3>
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-slate-800 text-slate-500' : 'bg-slate-200 text-slate-500'}`}>{leads.length}</span>
         </div>
       </div>
@@ -328,30 +340,34 @@ const LeadCard = ({ lead, onToggleBot, onSelect, onDelete, onGoChat, isDarkMode 
   const handleDragStart = (e: React.DragEvent) => { e.dataTransfer.setData('leadId', lead.id); };
   const sc = getScoreColor(lead.score || '0');
   return (
-    <div draggable onDragStart={handleDragStart} onClick={() => onSelect(lead)}
+    <div draggable onDragStart={handleDragStart} onDoubleClick={() => onSelect(lead)}
       className={`p-4 rounded-2xl border shadow-sm cursor-grab active:cursor-grabbing transition-all hover:shadow-md hover:border-primary/30 group ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex gap-2 flex-wrap">
-          {(lead.tags || []).map((tag: string, i: number) => (
-            <span key={i} className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${getTagColor(tag)}`}>{tag}</span>
-          ))}
-        </div>
+      <div className="flex justify-between items-start mb-2 gap-2">
+        <h4 className={`text-[14px] font-bold truncate group-hover:text-primary transition-colors ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{lead.name}</h4>
         <button onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }}
-          className={`p-1.5 rounded-lg transition-all ${lead.botActive ? 'bg-primary/10 text-primary shadow-sm' : 'bg-slate-100 text-slate-400'}`}>
+          className={`p-1.5 rounded-lg shrink-0 transition-all ${lead.botActive ? 'bg-primary/10 text-primary shadow-sm' : 'bg-slate-100 text-slate-400'}`}>
           <Bot size={14} />
         </button>
       </div>
-      <h4 className={`text-[14px] font-bold mb-1 group-hover:text-primary transition-colors ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{lead.name}</h4>
+      <div className="flex gap-2 flex-wrap mb-3">
+        {(lead.tags || []).map((tag: string, i: number) => (
+          <span key={i} className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${getTagColor(tag)}`}>{tag}</span>
+        ))}
+      </div>
+      
       <div className="space-y-2 mt-3">
         <div className="flex items-center gap-2 text-slate-500">
           <Phone size={12} /><span className="text-[11px] font-medium">{lead.phone}</span>
         </div>
         <div className={`flex items-center justify-between mt-4 pt-3 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100/50'}`}>
-          <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${sc.bg} ${sc.text}`}>{lead.score || '—'}</div>
-            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Score</p>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold ${sc.bg} ${sc.text}`}>{lead.score || '—'}</div>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate w-full">{lead.project || 'Sin proyecto'}</span>
+              <span className="text-[9px] text-slate-400 capitalize truncate w-full">{lead.source || 'Orgánico'}</span>
+            </div>
           </div>
-          <div className="text-right">
+          <div className="text-right shrink-0 ml-2">
             <p className={`text-[12px] font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{lead.budget || '—'}</p>
             <p className="text-[9px] text-slate-500 font-medium">{lead.time}</p>
           </div>
@@ -361,7 +377,7 @@ const LeadCard = ({ lead, onToggleBot, onSelect, onDelete, onGoChat, isDarkMode 
             <button title="Llamar" className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}><Phone size={13} /></button>
             <button title="Chat" onClick={() => onGoChat?.('Conversaciones')} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}><MessageSquare size={13} /></button>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <button title="Editar" onClick={() => onSelect(lead)} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-400 hover:bg-slate-100'}`}><Edit size={13} /></button>
             <button title="Eliminar" onClick={() => onDelete(lead.id)} className="p-1.5 rounded-lg transition-colors text-rose-400 hover:bg-rose-50"><Trash2 size={13} /></button>
           </div>
@@ -703,50 +719,130 @@ const ModalCitas = ({ leadName, isDarkMode, registerAlarm, unregisterAlarm }: { 
 };
 
 const NewLeadModal = ({ isDarkMode, onClose, onSave }: any) => {
-  const [form, setForm] = useState({ name: '', phone: '', score: '50%', budget: '', project: '', status: 'Nuevo' });
-  const inputCls = `w-full px-3 py-2 border rounded-xl text-sm ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-800'}`;
+  const [form, setForm] = useState({ 
+    name: '', 
+    phone: '', 
+    email: '', 
+    status: 'Nuevo', 
+    budget: '', 
+    source: 'WhatsApp', 
+    project: '', 
+    details: '',
+    score: '50%' // Default score
+  });
+
+  const inputCls = `w-full px-3 py-2 border rounded-xl text-[13px] font-medium outline-none transition-all ${
+    isDarkMode 
+      ? 'bg-slate-900/50 border-slate-700 text-white focus:border-primary focus:bg-slate-900' 
+      : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-primary focus:bg-white'
+  }`;
+
+  const labelCls = `block text-[10px] font-black mb-1.5 uppercase tracking-widest ${
+    isDarkMode ? 'text-slate-400' : 'text-slate-500'
+  }`;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className={`w-full max-w-md rounded-2xl border p-6 shadow-2xl ${isDarkMode ? 'bg-[#1E1E1E] border-slate-700' : 'bg-white border-slate-200'}`}>
-        <div className="flex justify-between items-center mb-5">
-          <h3 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Nuevo Lead</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-700/50"><X size={18} className="text-slate-400" /></button>
-        </div>
-        <form onSubmit={e => { e.preventDefault(); if (form.name && form.phone) onSave(form); }} className="space-y-3">
-          <div>
-            <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Nombre *</label>
-            <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={inputCls} />
-          </div>
-          <div>
-            <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Teléfono *</label>
-            <input required value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className={inputCls} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Presupuesto</label>
-              <input value={form.budget} onChange={e => setForm({...form, budget: e.target.value})} placeholder="$100k" className={inputCls} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <div className={`w-full max-w-lg rounded-3xl border shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 ${isDarkMode ? 'bg-[#1E1E1E] border-slate-700' : 'bg-white border-slate-200'}`}>
+        
+        {/* Encabezado Premium */}
+        <div className={`px-6 py-4 flex justify-between items-center border-b ${isDarkMode ? 'border-slate-800 bg-slate-800/20' : 'border-slate-100 bg-slate-50/50'}`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-inner ${isDarkMode ? 'bg-primary/20 text-primary' : 'bg-primary/10 text-primary'}`}>
+              <Users size={16} />
             </div>
             <div>
-              <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Score</label>
-              <select value={form.score} onChange={e => setForm({...form, score: e.target.value})} className={inputCls}>
-                <option>90%</option><option>80%</option><option>70%</option><option>60%</option><option>50%</option><option>40%</option><option>30%</option><option>20%</option>
+              <h3 className={`text-base font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Registrar Lead</h3>
+              <p className="text-[10px] text-slate-500 font-bold">Añade un nuevo prospecto al CRM</p>
+            </div>
+          </div>
+          <button onClick={onClose} className={`p-1.5 rounded-xl transition-all ${isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-200 text-slate-500'}`}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Formulario Compacto a 2 Columnas */}
+        <form onSubmit={e => { e.preventDefault(); if (form.name && form.phone) onSave(form); }} className="p-6 overflow-y-auto max-h-[75vh] custom-scrollbar">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+            
+            <div className="col-span-2">
+              <label className={labelCls}>Nombre Completo *</label>
+              <input required autoFocus value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Ej. Juan Pérez" className={inputCls} />
+            </div>
+
+            <div className="col-span-1">
+              <label className={labelCls}>Teléfono *</label>
+              <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+52 1..." className={inputCls} />
+            </div>
+
+            <div className="col-span-1">
+              <label className={labelCls}>Email</label>
+              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="correo@ejemplo.com" className={inputCls} />
+            </div>
+
+            <div className="col-span-1">
+              <label className={labelCls}>Etapa del Pipeline</label>
+              <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className={inputCls}>
+                <option>Nuevo</option>
+                <option>Contactado</option>
+                <option>Cita</option>
+                <option>Negociación</option>
+                <option>Cerrado</option>
               </select>
             </div>
+
+            <div className="col-span-1">
+              <label className={labelCls}>Presupuesto</label>
+              <input value={form.budget} onChange={e => setForm({...form, budget: e.target.value})} placeholder="Ej. $150,000 USD" className={inputCls} />
+            </div>
+
+            <div className="col-span-1">
+              <label className={labelCls}>Origen / Fuente</label>
+              <select value={form.source} onChange={e => setForm({...form, source: e.target.value})} className={inputCls}>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Facebook">Facebook</option>
+                <option value="Instagram">Instagram</option>
+                <option value="TikTok">TikTok</option>
+                <option value="LinkedIn">LinkedIn</option>
+                <option value="X">X (Twitter)</option>
+                <option value="Referido">Referido</option>
+                <option value="Orgánico">Orgánico / Web</option>
+              </select>
+            </div>
+
+            <div className="col-span-1">
+              <label className={labelCls}>Proyecto de Interés</label>
+              <select value={form.project} onChange={e => setForm({...form, project: e.target.value})} className={inputCls}>
+                <option value="">Seleccionar proyecto...</option>
+                <option value="Torre Esmeralda">Torre Esmeralda</option>
+                <option value="Residencial Los Pinos">Residencial Los Pinos</option>
+                <option value="Plaza Comercial Sur">Plaza Comercial Sur</option>
+                <option value="Lotes Campestres">Lotes Campestres</option>
+              </select>
+            </div>
+
+            <div className="col-span-2">
+              <label className={labelCls}>Detalle / Notas de Interés</label>
+              <textarea 
+                value={form.details} 
+                onChange={e => setForm({...form, details: e.target.value})} 
+                placeholder="Busca 3 habitaciones, con vista al mar, necesita financiamiento..." 
+                className={`${inputCls} h-20 resize-none`} 
+              />
+            </div>
           </div>
-          <div>
-            <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Proyecto / Interés</label>
-            <input value={form.project} onChange={e => setForm({...form, project: e.target.value})} className={inputCls} />
-          </div>
-          <div>
-            <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Etapa</label>
-            <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className={inputCls}>
-              <option>Nuevo</option><option>Contactado</option><option>Cita</option><option>Negociación</option><option>Cerrado</option>
-            </select>
-          </div>
-          <button type="submit" className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-all active:scale-[0.98] shadow-lg shadow-primary/20 mt-2">
-            Crear Lead
-          </button>
         </form>
+
+        {/* Footer con Botones */}
+        <div className={`px-6 py-4 border-t flex justify-end gap-3 ${isDarkMode ? 'border-slate-800 bg-slate-800/30' : 'border-slate-100 bg-slate-50'}`}>
+          <button type="button" onClick={onClose} className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-200'}`}>
+            Cancelar
+          </button>
+          <button onClick={() => { if (form.name && form.phone) onSave(form); }} className="px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-dark transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center gap-2">
+            Guardar Lead
+          </button>
+        </div>
+
       </div>
     </div>
   );

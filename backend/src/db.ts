@@ -115,6 +115,24 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_evolution_messages_chat_id ON evolution_messages (chat_id);
     `);
 
+    // Crear tabla ai_config para guardar las configuraciones del cerebro de IA
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ai_config (
+        id            SERIAL PRIMARY KEY,
+        provider      VARCHAR(50) DEFAULT 'OpenAI',
+        model         VARCHAR(50) DEFAULT 'gpt-3.5-turbo',
+        api_key       VARCHAR(255) DEFAULT '',
+        prompt        TEXT DEFAULT 'Eres un asesor inmobiliario experto y persuasivo de ChatPrex.\nTu objetivo es perfilar leads (clientes potenciales), responder sus dudas sobre propiedades y agendar citas.\nReglas:\n1. Sé amable, conciso y utiliza emojis moderadamente.\n2. Si preguntan por precios, diles que los departamentos empiezan desde $85,000 USD.\n3. Si muestran interés, invítalos a agendar una visita.\n4. Responde SIEMPRE en español.',
+        updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+    
+    // Insertar un registro por defecto si no existe
+    const aiConfigCount = await client.query('SELECT COUNT(*) FROM ai_config');
+    if (parseInt(aiConfigCount.rows[0].count) === 0) {
+      await client.query('INSERT INTO ai_config (provider, model) VALUES ($1, $2)', ['OpenAI', 'gpt-3.5-turbo']);
+    }
+
     console.log('✅ Base de datos inicializada correctamente.');
   } catch (err) {
     console.error('❌ Error inicializando la base de datos:', err);

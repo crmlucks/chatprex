@@ -10,9 +10,70 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const [waStatus, setWaStatus] = useState<string>('disconnected');
   const [connectionMode, setConnectionMode] = useState<'qr' | 'meta'>('qr');
   const [qrCountdown, setQrCountdown] = useState(0);
+  
+  // Estados para Cerebro IA
+  const [aiProvider, setAiProvider] = useState('OpenAI');
+  const [aiModel, setAiModel] = useState('gpt-3.5-turbo');
+  const [aiApiKey, setAiApiKey] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isSavingAi, setIsSavingAi] = useState(false);
+  const [aiSaveSuccess, setAiSaveSuccess] = useState(false);
+
   const socketRef = useRef<Socket | null>(null);
   const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /** Cargar configuración IA al inicio */
+  useEffect(() => {
+    const fetchAiConfig = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_URL}/api/ai-config`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setAiProvider(data.provider || 'OpenAI');
+          setAiModel(data.model || 'gpt-3.5-turbo');
+          setAiPrompt(data.prompt || '');
+          if (data.hasApiKey) {
+            setAiApiKey('UNCHANGED'); // Valor mágico para no sobrescribir si el usuario no la cambia
+          }
+        }
+      } catch (e) {
+        console.error('Error cargando config IA:', e);
+      }
+    };
+    fetchAiConfig();
+  }, []);
+
+  const saveAiConfig = async () => {
+    setIsSavingAi(true);
+    setAiSaveSuccess(false);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/api/ai-config`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          provider: aiProvider,
+          model: aiModel,
+          api_key: aiApiKey,
+          prompt: aiPrompt
+        })
+      });
+      if (res.ok) {
+        setAiSaveSuccess(true);
+        setTimeout(() => setAiSaveSuccess(false), 3000);
+      }
+    } catch (e) {
+      console.error('Error guardando config IA:', e);
+    }
+    setIsSavingAi(false);
+  };
 
   /** Normaliza el base64: agrega prefijo data:image si falta */
   const normalizeQR = (qr: string): string => {
@@ -114,13 +175,19 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                 onClick={() => setConnectionMode('qr')}
                 className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold text-[12px] md:text-[13px] transition-all border-b-2 active:scale-95 ${connectionMode === 'qr' ? 'border-primary text-primary bg-white/5' : (isDarkMode ? 'border-transparent text-slate-500 hover:text-slate-300' : 'border-transparent text-slate-500 hover:text-slate-700')}`}
               >
-                <QrCode size={18} /> WhatsApp Libre (QR)
+                <QrCode size={18} /> WhatsApp Libre
               </button>
               <button 
                 onClick={() => setConnectionMode('meta')}
                 className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold text-[12px] md:text-[13px] transition-all border-b-2 active:scale-95 ${connectionMode === 'meta' ? 'border-primary text-primary bg-white/5' : (isDarkMode ? 'border-transparent text-slate-500 hover:text-slate-300' : 'border-transparent text-slate-500 hover:text-slate-700')}`}
               >
-                <Shield size={18} /> WhatsApp Oficial (API)
+                <Shield size={18} /> Meta Cloud API
+              </button>
+              <button 
+                onClick={() => setConnectionMode('brain')}
+                className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold text-[12px] md:text-[13px] transition-all border-b-2 active:scale-95 ${connectionMode === 'brain' ? 'border-primary text-primary bg-white/5' : (isDarkMode ? 'border-transparent text-slate-500 hover:text-slate-300' : 'border-transparent text-slate-500 hover:text-slate-700')}`}
+              >
+                <Bot size={18} /> Cerebro IA
               </button>
             </div>
 
@@ -128,45 +195,26 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               {/* Información Izquierda */}
               <div className={`md:w-1/2 p-6 md:p-8 border-b md:border-b-0 md:border-r flex flex-col justify-between transition-colors ${isDarkMode ? 'border-slate-800 bg-[#1E1E1E]' : 'border-slate-100 bg-white'}`}>
                 <div>
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 border transition-all ${connectionMode === 'qr' ? (isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-emerald-50 text-emerald-600 border-emerald-100') : (isDarkMode ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-blue-50 text-blue-600 border-blue-100')}`}>
-                    {connectionMode === 'qr' ? <QrCode size={24} /> : <MessageCircle size={24} />}
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 border transition-all ${connectionMode === 'qr' ? (isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-emerald-50 text-emerald-600 border-emerald-100') : connectionMode === 'meta' ? (isDarkMode ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-blue-50 text-blue-600 border-blue-100') : (isDarkMode ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-purple-50 text-purple-600 border-purple-100')}`}>
+                    {connectionMode === 'qr' ? <QrCode size={24} /> : connectionMode === 'meta' ? <MessageCircle size={24} /> : <Bot size={24} />}
                   </div>
                   <h2 className={`text-[16px] md:text-[18px] font-bold mb-2 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
-                    {connectionMode === 'qr' ? 'WhatsApp Libre (Baileys)' : 'Meta Cloud API (Oficial)'}
+                    {connectionMode === 'qr' ? 'WhatsApp Libre (Baileys)' : connectionMode === 'meta' ? 'Meta Cloud API (Oficial)' : 'Configuración de Inteligencia Artificial'}
                   </h2>
                   <p className={`text-[12px] md:text-[13px] leading-relaxed mb-6 font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>
                     {connectionMode === 'qr' 
                       ? 'Conecta cualquier número escaneando el código QR. Ideal para arrancar operaciones rápido sin pasar por aprobaciones de Meta. 100% gratuito en envío de mensajes.'
-                      : 'Integración oficial de Facebook. Ideal para negocios verificados. Mayor estabilidad, requiere aprobación de plantillas para mensajes masivos y tiene costo por conversación iniciada por la empresa.'}
+                      : connectionMode === 'meta' 
+                        ? 'Integración oficial de Facebook. Ideal para negocios verificados. Mayor estabilidad, requiere aprobación de plantillas para mensajes masivos y tiene costo por conversación iniciada por la empresa.'
+                        : 'Configura la personalidad, reglas y el motor de Inteligencia Artificial que atenderá automáticamente a tus clientes cuando no estés disponible.'}
                   </p>
 
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-sm font-bold">
-                      <Shield size={16} className={connectionMode === 'qr' ? "text-emerald-400" : "text-blue-400"} />
-                      <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600'}>{connectionMode === 'qr' ? 'Cifrado Extremo a Extremo' : 'Verificación de Empresa (Check Verde)'}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm font-bold">
-                      <Bot size={16} className="text-primary" />
-                      <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600'}>Inteligencia Artificial integrada</span>
+                      <Shield size={16} className={connectionMode === 'qr' ? "text-emerald-400" : connectionMode === 'meta' ? "text-blue-400" : "text-purple-400"} />
+                      <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600'}>{connectionMode === 'qr' ? 'Cifrado Extremo a Extremo' : connectionMode === 'meta' ? 'Verificación de Empresa (Check Verde)' : 'Múltiples Modelos (GPT-4o, Gemini, DeepSeek)'}</span>
                     </div>
                   </div>
-                </div>
-
-                <div className={`mt-8 pt-6 border-t flex items-center justify-between transition-colors ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
-                  <span className="text-[10px] font-bold text-slate-500">Estado de Conexión</span>
-                  {waStatus === 'connected' ? (
-                    <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${isDarkMode ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 shadow-lg shadow-emerald-500/10' : 'text-emerald-600 bg-emerald-50 border-emerald-100'}`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Vinculado
-                    </span>
-                  ) : waStatus === 'connecting' && connectionMode === 'qr' ? (
-                    <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${isDarkMode ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-amber-600 bg-amber-50 border-amber-100'}`}>
-                      <RefreshCw size={12} className="animate-spin" /> Esperando QR
-                    </span>
-                  ) : (
-                    <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg transition-all ${isDarkMode ? 'text-slate-500 bg-slate-800' : 'text-slate-500 bg-slate-100'}`}>
-                      Desconectado
-                    </span>
-                  )}
                 </div>
               </div>
 
@@ -246,6 +294,65 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                       )}
                     </div>
                   )
+                ) : connectionMode === 'brain' ? (
+                  /* Formulario de Cerebro IA */
+                  <div className="w-full animate-in fade-in duration-500 flex flex-col">
+                    <h3 className={`text-lg font-black tracking-tight mb-6 text-center ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Motor de Inteligencia Artificial</h3>
+                    <div className="space-y-4 flex-1">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className={`block text-[10px] font-black mb-1 uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-700'}`}>Proveedor</label>
+                          <select 
+                            value={aiProvider}
+                            onChange={(e) => setAiProvider(e.target.value)}
+                            className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-200 focus:border-purple-500' : 'bg-white border-slate-200 text-slate-800 focus:border-purple-500'}`}
+                          >
+                            <option value="OpenAI">OpenAI</option>
+                            <option value="Gemini">Google Gemini</option>
+                            <option value="DeepSeek">DeepSeek</option>
+                            <option value="Groq">Groq</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className={`block text-[10px] font-black mb-1 uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-700'}`}>Modelo</label>
+                          <input 
+                            type="text" 
+                            value={aiModel}
+                            onChange={(e) => setAiModel(e.target.value)}
+                            className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-mono ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-200 focus:border-purple-500' : 'bg-white border-slate-200 text-slate-800 focus:border-purple-500'}`} 
+                            placeholder="Ej: gpt-4o-mini" 
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className={`block text-[10px] font-black mb-1 uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-700'}`}>API Key</label>
+                        <input 
+                          type="password" 
+                          value={aiApiKey}
+                          onChange={(e) => setAiApiKey(e.target.value)}
+                          className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-mono ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-200 focus:border-purple-500' : 'bg-white border-slate-200 text-slate-800 focus:border-purple-500'}`} 
+                          placeholder="sk-..." 
+                        />
+                        <p className="text-[10px] text-slate-500 mt-1">Dejar en blanco si quieres usar el bot simulado.</p>
+                      </div>
+                      <div>
+                        <label className={`block text-[10px] font-black mb-1 uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-700'}`}>System Prompt (Personalidad)</label>
+                        <textarea 
+                          value={aiPrompt}
+                          onChange={(e) => setAiPrompt(e.target.value)}
+                          className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-mono h-32 resize-none custom-scrollbar ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-200 focus:border-purple-500' : 'bg-white border-slate-200 text-slate-800 focus:border-purple-500'}`} 
+                          placeholder="Eres un experto inmobiliario..."></textarea>
+                      </div>
+                      <button 
+                        onClick={saveAiConfig}
+                        disabled={isSavingAi}
+                        className={`w-full text-white font-bold text-xs md:text-sm py-3 rounded-xl transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${aiSaveSuccess ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' : 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/20'} disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        {isSavingAi ? <RefreshCw className="animate-spin" size={16} /> : aiSaveSuccess ? <CheckCircle2 size={16} /> : <Bot size={16} />}
+                        {isSavingAi ? 'Guardando...' : aiSaveSuccess ? '¡Guardado!' : 'Guardar Configuración IA'}
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   /* Formulario de Meta API */
                   <div className="w-full animate-in fade-in duration-500 flex flex-col">
