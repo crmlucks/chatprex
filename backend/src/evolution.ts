@@ -595,6 +595,22 @@ const handleWebhookEvent = async (req: any, res: any) => {
 
       console.log(`[Evolution Webhook] ${fromMe ? '→' : '←'} ${displayName}: ${text.substring(0, 60)} ${mediaType !== 'text' ? `[${mediaType}]` : ''}`);
 
+      const msgTimestamp = msg.messageTimestamp
+        ? new Date(Number(msg.messageTimestamp) * 1000).toISOString()
+        : new Date().toISOString();
+
+      // ═══ GUARDAR EN BASE DE DATOS ═══
+      try {
+        await pool.query(
+          `INSERT INTO evolution_messages (id, chat_id, text, from_me, timestamp, media_url, media_type)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           ON CONFLICT (id) DO NOTHING`,
+          [id, chatId, text, fromMe, msgTimestamp, mediaUrl || null, mimeType || null]
+        );
+      } catch (dbErr: any) {
+        console.error('[Evolution] Error guardando mensaje en BD:', dbErr.message);
+      }
+
       // Emitir al frontend
       ioInstance.emit('whatsapp-message', {
         id,
@@ -604,9 +620,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
         media: mediaUrl,
         mimeType,
         fromMe,
-        timestamp: msg.messageTimestamp
-          ? new Date(Number(msg.messageTimestamp) * 1000).toISOString()
-          : new Date().toISOString(),
+        timestamp: msgTimestamp,
       });
 
       // Auto-registrar como lead (solo mensajes entrantes)
@@ -675,18 +689,33 @@ const handleWebhookEvent = async (req: any, res: any) => {
       else if (data.message && data.message.key) msg = data.message;
       if (msg?.key) {
         const remoteJid = msg.key.remoteJid;
+        const msgId = msg.key.id;
         const text = msg.message?.conversation
           || msg.message?.extendedTextMessage?.text
           || msg.message?.imageMessage?.caption
           || '[Mensaje enviado]';
 
+        const sentTimestamp = new Date().toISOString();
+
+        // Guardar mensaje enviado en BD
+        try {
+          await pool.query(
+            `INSERT INTO evolution_messages (id, chat_id, text, from_me, timestamp)
+             VALUES ($1, $2, $3, true, $4)
+             ON CONFLICT (id) DO NOTHING`,
+            [msgId, remoteJid, text, sentTimestamp]
+          );
+        } catch (dbErr: any) {
+          console.error('[Evolution] Error guardando msg enviado en BD:', dbErr.message);
+        }
+
         ioInstance.emit('whatsapp-message', {
-          id: msg.key.id,
+          id: msgId,
           from: remoteJid,
           name: 'Tú',
           text,
           fromMe: true,
-          timestamp: new Date().toISOString(),
+          timestamp: sentTimestamp,
         });
       }
     }
