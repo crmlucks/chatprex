@@ -120,17 +120,33 @@ export async function initDatabase() {
       CREATE TABLE IF NOT EXISTS ai_config (
         id            SERIAL PRIMARY KEY,
         provider      VARCHAR(50) DEFAULT 'OpenAI',
-        model         VARCHAR(50) DEFAULT 'gpt-3.5-turbo',
+        model         VARCHAR(50) DEFAULT 'gpt-4o-mini',
         api_key       VARCHAR(255) DEFAULT '',
         prompt        TEXT DEFAULT 'Eres un asesor inmobiliario experto y persuasivo de ChatPrex.\nTu objetivo es perfilar leads (clientes potenciales), responder sus dudas sobre propiedades y agendar citas.\nReglas:\n1. Sé amable, conciso y utiliza emojis moderadamente.\n2. Si preguntan por precios, diles que los departamentos empiezan desde $85,000 USD.\n3. Si muestran interés, invítalos a agendar una visita.\n4. Responde SIEMPRE en español.',
+        knowledge     TEXT DEFAULT '',
+        voice_to_text BOOLEAN DEFAULT true,
+        message_grouping BOOLEAN DEFAULT true,
+        humanized_split BOOLEAN DEFAULT true,
+        human_handoff BOOLEAN DEFAULT true,
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+    `);
+
+    // Add new columns if they don't exist (for existing installs)
+    await client.query(`
+      DO $$ BEGIN
+        ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS knowledge TEXT DEFAULT '';
+        ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS voice_to_text BOOLEAN DEFAULT true;
+        ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS message_grouping BOOLEAN DEFAULT true;
+        ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS humanized_split BOOLEAN DEFAULT true;
+        ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS human_handoff BOOLEAN DEFAULT true;
+      END $$;
     `);
     
     // Insertar un registro por defecto si no existe
     const aiConfigCount = await client.query('SELECT COUNT(*) FROM ai_config');
     if (parseInt(aiConfigCount.rows[0].count) === 0) {
-      await client.query('INSERT INTO ai_config (provider, model) VALUES ($1, $2)', ['OpenAI', 'gpt-3.5-turbo']);
+      await client.query('INSERT INTO ai_config (provider, model) VALUES ($1, $2)', ['OpenAI', 'gpt-4o-mini']);
     }
 
     console.log('✅ Base de datos inicializada correctamente.');
