@@ -73,8 +73,15 @@ leadRouter.put('/:id', authMiddleware, async (req, res) => {
 leadRouter.delete('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query('DELETE FROM leads WHERE id=$1 RETURNING id', [id]);
+    const result = await pool.query('DELETE FROM leads WHERE id=$1 RETURNING id, phone', [id]);
     if (result.rowCount === 0) return res.status(404).json({ error: 'Lead not found' });
+    
+    // Eliminar la conversación asociada a este lead
+    const phone = result.rows[0].phone;
+    if (phone) {
+      await pool.query('DELETE FROM evolution_messages WHERE chat_id LIKE $1', [`${phone}%`]);
+    }
+    
     res.json({ success: true, id });
   } catch (error) {
     console.error('Error deleting lead', error);

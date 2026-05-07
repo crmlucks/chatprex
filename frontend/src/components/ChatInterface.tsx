@@ -111,6 +111,36 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     };
   }, []); // <-- Removido activeChat de aquí para evitar reconexiones constantes
 
+  // Cargar la lista inicial de todos los chats al abrir la página
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const res = await fetch(`${API_URL}/api/webhook/evolution/chats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          const chatsList = await res.json();
+          const chatsObj: Record<string, ChatData> = {};
+          chatsList.forEach((c: any) => {
+            chatsObj[c.id] = c;
+          });
+          
+          setChats(prev => ({
+            ...chatsObj,
+            ...prev // Preservar si llegaron mensajes por socket antes de que cargara
+          }));
+        }
+      } catch (err) {
+        console.error('[Chat] Error cargando lista de chats:', err);
+      }
+    };
+    
+    fetchChats();
+  }, []);
+
   // Cargar historial de mensajes al seleccionar un chat
   useEffect(() => {
     if (!activeChat) return;

@@ -731,4 +731,43 @@ evolutionRouter.get('/messages/:chatId', async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════
+//  ENDPOINT DE LISTA DE CHATS
+// ═══════════════════════════════════════════════════
+evolutionRouter.get('/chats', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        m.chat_id as id,
+        COALESCE(l.name, SPLIT_PART(m.chat_id, '@', 1)) as name,
+        m.text as last_message,
+        m.timestamp as time
+      FROM (
+        SELECT chat_id, text, timestamp,
+               ROW_NUMBER() OVER(PARTITION BY chat_id ORDER BY timestamp DESC) as rn
+        FROM evolution_messages
+      ) m
+      LEFT JOIN leads l ON l.phone = SPLIT_PART(m.chat_id, '@', 1)
+      WHERE m.rn = 1
+      ORDER BY m.timestamp DESC
+    `);
+
+    const chats = result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      lastMessage: row.last_message || '[Media]',
+      time: new Date(row.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: row.time,
+      unread: 0,
+      status: 'Leído',
+      messages: []
+    }));
+
+    res.json(chats);
+  } catch (err: any) {
+    console.error('[Evolution] Error obteniendo chats:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export { evolutionRouter };
