@@ -526,6 +526,17 @@ const handleWebhookEvent = async (req: any, res: any) => {
       const pushName = msg.pushName || remoteJid?.split('@')[0] || 'Desconocido';
       const messageContent = msg.message || {};
 
+      // ─── OBTENER CONFIGURACIÓN DE IA ───
+      let aiConfig: any = { activation_keywords: 'info,precio,quiero,asesor,comprar', voice_to_text: true };
+      try {
+        const configRes = await pool.query('SELECT api_key, voice_to_text, activation_keywords, humanized_split, message_grouping FROM ai_config LIMIT 1');
+        if (configRes.rowCount > 0) {
+          aiConfig = { ...aiConfig, ...configRes.rows[0] };
+        }
+      } catch (err) {
+        console.error('[Evolution] Error obteniendo config de IA:', err);
+      }
+
       // Extraer texto del mensaje
       let text = messageContent.conversation
         || messageContent.extendedTextMessage?.text
@@ -585,11 +596,11 @@ const handleWebhookEvent = async (req: any, res: any) => {
               mediaUrl = base64.startsWith('data:') ? base64 : `data:${mimeType};base64,${base64}`;
               
               // Si es un mensaje de voz/audio, intentamos transcribirlo
-              if (mediaType === 'audio') {
+              if (mediaType === 'audio' && aiConfig.voice_to_text !== false && aiConfig.api_key) {
                 try {
                   const pureBase64 = base64.replace(/^data:[^;]+;base64,/, '');
                   const audioBuffer = Buffer.from(pureBase64, 'base64');
-                  const transcription = await transcribeAudio(audioBuffer, mimeType || 'audio/ogg');
+                  const transcription = await transcribeAudio(audioBuffer, mimeType || 'audio/ogg', aiConfig.api_key);
                   if (transcription) {
                     text = transcription; // Reemplazamos "🎤 Mensaje de voz" por el texto transcrito
                     console.log(`[Evolution Webhook] Audio transcrito: ${text}`);
@@ -640,15 +651,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
       });
 
       // Configuración de palabras clave para activar/despertar al bot desde la base de datos
-      let dbKeywords = 'info,precio,quiero,asesor,comprar';
-      try {
-        const configRes = await pool.query('SELECT activation_keywords FROM ai_config LIMIT 1');
-        if (configRes.rowCount > 0 && configRes.rows[0].activation_keywords) {
-          dbKeywords = configRes.rows[0].activation_keywords;
-        }
-      } catch (err) {
-        console.error('[Evolution] Error obteniendo palabras clave:', err);
-      }
+      let dbKeywords = aiConfig.activation_keywords || 'info,precio,quiero,asesor,comprar';
       
       const activationKeywords = dbKeywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
       const textLower = text.toLowerCase();

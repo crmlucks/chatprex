@@ -64,15 +64,18 @@ async function downloadAudio(url: string): Promise<Buffer | null> {
  * Sends an audio buffer to OpenAI Whisper for transcription.
  * Returns the transcribed text, or null on failure.
  */
-export async function transcribeAudio(buffer: Buffer, mimeType: string = 'audio/ogg'): Promise<string | null> {
-  if (!openai) {
-    console.warn('[VoiceBot] OpenAI not configured – cannot transcribe.');
+export async function transcribeAudio(buffer: Buffer, mimeType: string = 'audio/ogg', apiKey?: string): Promise<string | null> {
+  const keyToUse = apiKey || process.env.OPENAI_API_KEY;
+  if (!keyToUse) {
+    console.warn('[VoiceBot] OpenAI API Key not configured – cannot transcribe.');
     return null;
   }
+  
   try {
+    const localOpenai = new OpenAI({ apiKey: keyToUse });
     // OpenAI SDK expects a File or ReadStream. We create a File object.
     const file = new File([new Uint8Array(buffer)], 'voice_message.ogg', { type: mimeType });
-    const transcription = await openai.audio.transcriptions.create({
+    const transcription = await localOpenai.audio.transcriptions.create({
       file,
       model: 'whisper-1',
     });
