@@ -58,10 +58,21 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
   // Conexión WebSockets para recibir mensajes en tiempo real
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000');
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+    console.log(`[Socket] Conectando a ${socketUrl}...`);
+    const newSocket = io(socketUrl);
     setSocket(newSocket);
 
+    newSocket.on('connect', () => {
+      console.log(`[Socket] ✅ Conectado con ID: ${newSocket.id}`);
+    });
+
+    newSocket.on('connect_error', (err) => {
+      console.error(`[Socket] ❌ Error de conexión:`, err.message);
+    });
+
     newSocket.on('whatsapp-message', (data: any) => {
+      console.log(`[Socket] 📥 Mensaje recibido:`, data);
       setChats((prev) => {
         const chatId = data.from;
         const newMsg: ChatMessage = {
@@ -98,7 +109,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     return () => {
       newSocket.disconnect();
     };
-  }, [activeChat]);
+  }, []); // <-- Removido activeChat de aquí para evitar reconexiones constantes
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [mediaBase64, setMediaBase64] = useState<string | null>(null);
