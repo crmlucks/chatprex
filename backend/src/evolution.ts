@@ -673,7 +673,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
             } else {
               console.log(`[Evolution] Lead existente: ${phone}, bot_active: ${isBotActive}`);
             }
-          }
+            }
           }
         } catch (dbErr: any) {
           console.error('[Evolution] Error registrando lead:', dbErr.message);
