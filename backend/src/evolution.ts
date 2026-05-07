@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import express from 'express';
 import { generateAIResponse } from './ai';
+import { transcribeAudio } from './voiceBot';
 import pool from './db';
 
 // Permitir certificados self-signed dentro de Docker/Coolify
@@ -582,6 +583,21 @@ const handleWebhookEvent = async (req: any, res: any) => {
             const base64 = mediaData?.base64 || mediaData?.data?.base64;
             if (base64) {
               mediaUrl = base64.startsWith('data:') ? base64 : `data:${mimeType};base64,${base64}`;
+              
+              // Si es un mensaje de voz/audio, intentamos transcribirlo
+              if (mediaType === 'audio') {
+                try {
+                  const pureBase64 = base64.replace(/^data:[^;]+;base64,/, '');
+                  const audioBuffer = Buffer.from(pureBase64, 'base64');
+                  const transcription = await transcribeAudio(audioBuffer, mimeType || 'audio/ogg');
+                  if (transcription) {
+                    text = transcription; // Reemplazamos "🎤 Mensaje de voz" por el texto transcrito
+                    console.log(`[Evolution Webhook] Audio transcrito: ${text}`);
+                  }
+                } catch (audioErr: any) {
+                  console.error('[Evolution] Error transcribiendo audio:', audioErr.message);
+                }
+              }
             }
           }
         } catch (mediaErr: any) {
@@ -675,15 +691,24 @@ const handleWebhookEvent = async (req: any, res: any) => {
                 let messagesToSend = [aiReply];
                 if (aiReply.length > 250) {
                   // Separar por párrafos
-                  let parts = aiReply.split(/\\n+/).filter(p => p.trim().length > 0);
+                  let parts = aiReply.split(/\\r?\\n+/).filter(p => p.trim().length > 0);
                   
-                  // Si es un solo párrafo grande, separar por oraciones
+                  // Si es un solo párrafo grande, separar por oraciones de forma más flexible
                   if (parts.length === 1) {
-                    parts = aiReply.match(/[^.?!]+[.?!]+(?:\\s+|$)/g)?.map(s => s.trim()) || [aiReply];
+                    const sentenceRegex = /([^.?!]+[.?!]+)/g;
+                    const matches = aiReply.match(sentenceRegex);
+                    if (matches && matches.length > 1) {
+                      parts = matches.map(s => s.trim());
+                    } else {
+                      // Fallback extremo si no hay puntuación: cortar a la mitad
+                      const mid = Math.floor(aiReply.length / 2);
+                      const spaceIdx = aiReply.indexOf(' ', mid);
+                      if (spaceIdx > 0) {
+                        parts = [aiReply.slice(0, spaceIdx).trim(), aiReply.slice(spaceIdx).trim()];
+                      }
+                    }
                   }
                   
-                  // Si hay más de 3 partes, agrupar las del medio para que sean exactamente 3 mensajes. 
-                  // El último mensaje siempre contendrá la pregunta o llamado a la acción.
                   if (parts.length > 3) {
                     messagesToSend = [
                       parts[0],
@@ -698,7 +723,6 @@ const handleWebhookEvent = async (req: any, res: any) => {
                 for (let i = 0; i < messagesToSend.length; i++) {
                   if (messagesToSend[i].trim().length > 0) {
                     await sendEvolutionMessage(remoteJid, messagesToSend[i].trim());
-                    // Simular tiempo de escritura entre envíos múltiples
                     if (i < messagesToSend.length - 1) {
                       await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
                     }

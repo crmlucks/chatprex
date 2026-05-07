@@ -120,9 +120,19 @@ whatsappRouter.post('/', async (req, res) => {
                   if (aiReply) {
                     let messagesToSend = [aiReply];
                     if (aiReply.length > 250) {
-                      let parts = aiReply.split(/\\n+/).filter(p => p.trim().length > 0);
+                      let parts = aiReply.split(/\\r?\\n+/).filter(p => p.trim().length > 0);
                       if (parts.length === 1) {
-                        parts = aiReply.match(/[^.?!]+[.?!]+(?:\\s+|$)/g)?.map(s => s.trim()) || [aiReply];
+                        const sentenceRegex = /([^.?!]+[.?!]+)/g;
+                        const matches = aiReply.match(sentenceRegex);
+                        if (matches && matches.length > 1) {
+                          parts = matches.map(s => s.trim());
+                        } else {
+                          const mid = Math.floor(aiReply.length / 2);
+                          const spaceIdx = aiReply.indexOf(' ', mid);
+                          if (spaceIdx > 0) {
+                            parts = [aiReply.slice(0, spaceIdx).trim(), aiReply.slice(spaceIdx).trim()];
+                          }
+                        }
                       }
                       if (parts.length > 3) {
                         messagesToSend = [parts[0], parts.slice(1, parts.length - 1).join(' '), parts[parts.length - 1]];
@@ -171,9 +181,19 @@ whatsappRouter.post('/', async (req, res) => {
                 if (aiReply) {
                   let messagesToSend = [aiReply];
                   if (aiReply.length > 250) {
-                    let parts = aiReply.split(/\\n+/).filter(p => p.trim().length > 0);
+                    let parts = aiReply.split(/\\r?\\n+/).filter(p => p.trim().length > 0);
                     if (parts.length === 1) {
-                      parts = aiReply.match(/[^.?!]+[.?!]+(?:\\s+|$)/g)?.map(s => s.trim()) || [aiReply];
+                      const sentenceRegex = /([^.?!]+[.?!]+)/g;
+                      const matches = aiReply.match(sentenceRegex);
+                      if (matches && matches.length > 1) {
+                        parts = matches.map(s => s.trim());
+                      } else {
+                        const mid = Math.floor(aiReply.length / 2);
+                        const spaceIdx = aiReply.indexOf(' ', mid);
+                        if (spaceIdx > 0) {
+                          parts = [aiReply.slice(0, spaceIdx).trim(), aiReply.slice(spaceIdx).trim()];
+                        }
+                      }
                     }
                     if (parts.length > 3) {
                       messagesToSend = [parts[0], parts.slice(1, parts.length - 1).join(' '), parts[parts.length - 1]];
