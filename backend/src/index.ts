@@ -70,6 +70,16 @@ io.on('connection', (socket) => {
     try {
       const { sendEvolutionMessage, sendEvolutionMedia } = await import('./evolution');
       
+      // Apagar el bot automáticamente cuando el humano interviene
+      try {
+        const { default: pool } = await import('./db');
+        const phone = data.to.split('@')[0];
+        await pool.query('UPDATE leads SET bot_active = false WHERE phone = $1', [phone]);
+        console.log(`[Bot] ⏸️ Bot desactivado automáticamente para ${phone} por intervención humana`);
+      } catch (dbErr: any) {
+        console.error('[Bot] Error desactivando bot:', dbErr.message);
+      }
+
       if (data.media && data.media.startsWith('data:')) {
         // Enviar multimedia
         await sendEvolutionMedia(data.to, data.media, data.text, data.fileName);

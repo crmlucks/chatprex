@@ -15,6 +15,7 @@ const INSTANCE_NAME = process.env.EVOLUTION_INSTANCE_NAME || 'ChatPrex';
 const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://api.chatprex.com/api/webhook/evolution/webhook';
 
 let ioInstance: Server | null = null;
+const messageQueue: Record<string, { texts: string[], timer: NodeJS.Timeout | null }> = {};
 
 console.log(`[Evolution] ═══════════════════════════════`);
 console.log(`[Evolution] URL:      ${EVOLUTION_API_URL}`);
@@ -609,34 +610,59 @@ const handleWebhookEvent = async (req: any, res: any) => {
       });
 
       // Auto-registrar como lead (solo mensajes entrantes)
+      let isBotActive = false;
       if (!fromMe && remoteJid && !remoteJid.includes('@g.us') && !remoteJid.includes('@broadcast')) {
         try {
           const phone = remoteJid.split('@')[0];
-          const existRes = await pool.query('SELECT id FROM leads WHERE phone = $1', [phone]);
+          const existRes = await pool.query('SELECT id, bot_active FROM leads WHERE phone = $1', [phone]);
           if (existRes.rowCount === 0) {
             await pool.query(
-              `INSERT INTO leads (name, phone, score, status) VALUES ($1, $2, '50%', 'Nuevo')`,
+              `INSERT INTO leads (name, phone, score, status, bot_active) VALUES ($1, $2, '50%', 'Nuevo', true)`,
               [pushName, phone]
             );
-            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone})`);
-            // Notificar al frontend que hay un nuevo lead
+            isBotActive = true;
+            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) con bot activado`);
             ioInstance.emit('new-lead', { name: pushName, phone });
+          } else {
+            isBotActive = existRes.rows[0].bot_active;
           }
         } catch (dbErr: any) {
           console.error('[Evolution] Error registrando lead:', dbErr.message);
         }
       }
 
-      // Respuesta IA (solo mensajes entrantes de chats individuales)
+      // Respuesta IA con Debounce de 12 segundos (solo si bot_active es true)
       if (!fromMe && remoteJid && !remoteJid.includes('@g.us') && !remoteJid.includes('@broadcast')) {
-        try {
-          const aiReply = await generateAIResponse(remoteJid, text);
-          if (aiReply) {
-            await sendEvolutionMessage(remoteJid, aiReply);
-            // No emitimos aquí porque Evolution enviará el webhook de messages.upsert con fromMe=true
+        if (isBotActive) {
+          if (!messageQueue[remoteJid]) {
+            messageQueue[remoteJid] = { texts: [], timer: null as any };
           }
-        } catch (aiErr: any) {
-          console.error('[Evolution] Error IA:', aiErr.message);
+
+          // Agregamos el texto al bloque de mensajes
+          messageQueue[remoteJid].texts.push(text);
+
+          // Limpiamos el temporizador anterior si el usuario mandó otro mensaje rápido
+          if (messageQueue[remoteJid].timer) {
+            clearTimeout(messageQueue[remoteJid].timer);
+          }
+
+          // Configuramos un nuevo temporizador de 12 segundos (12000 ms)
+          messageQueue[remoteJid].timer = setTimeout(async () => {
+            const combinedText = messageQueue[remoteJid].texts.join('\n');
+            delete messageQueue[remoteJid]; // Limpiar cola
+
+            try {
+              console.log(`[Evolution] 🤖 Generando respuesta IA para ${remoteJid} (texto combinado)`);
+              const aiReply = await generateAIResponse(remoteJid, combinedText);
+              if (aiReply) {
+                await sendEvolutionMessage(remoteJid, aiReply);
+              }
+            } catch (aiErr: any) {
+              console.error('[Evolution] Error IA:', aiErr.message);
+            }
+          }, 12000);
+        } else {
+          console.log(`[Evolution] ⏸️ Bot apagado para ${remoteJid}, se ignora el mensaje.`);
         }
       }
     }
