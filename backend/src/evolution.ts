@@ -623,11 +623,13 @@ const handleWebhookEvent = async (req: any, res: any) => {
         timestamp: msgTimestamp,
       });
 
-      // Auto-registrar como lead (solo mensajes entrantes)
+      // Auto-registrar como lead (solo mensajes entrantes, no grupos ni broadcast)
       let isBotActive = false;
       if (!fromMe && remoteJid && !remoteJid.includes('@g.us') && !remoteJid.includes('@broadcast')) {
         try {
-          const phone = remoteJid.split('@')[0];
+          // Extraer identificador del contacto (funciona con @s.whatsapp.net y @lid)
+          const phone = remoteJid.split('@')[0].split(':')[0];
+          console.log(`[Evolution] Buscando lead con phone: ${phone}`);
           const existRes = await pool.query('SELECT id, bot_active FROM leads WHERE phone = $1', [phone]);
           if (existRes.rowCount === 0) {
             await pool.query(
@@ -639,6 +641,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
             ioInstance.emit('new-lead', { name: pushName, phone });
           } else {
             isBotActive = existRes.rows[0].bot_active;
+            console.log(`[Evolution] Lead existente: ${phone}, bot_active: ${isBotActive}`);
           }
         } catch (dbErr: any) {
           console.error('[Evolution] Error registrando lead:', dbErr.message);
