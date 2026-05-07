@@ -111,6 +111,50 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     };
   }, []); // <-- Removido activeChat de aquí para evitar reconexiones constantes
 
+  // Cargar historial de mensajes al seleccionar un chat
+  useEffect(() => {
+    if (!activeChat) return;
+    
+    // Solo cargar si no hay mensajes (para evitar sobrescribir mensajes nuevos si ya están en memoria)
+    if (chats[activeChat]?.messages?.length > 0) return;
+
+    const fetchHistory = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const res = await fetch(`${API_URL}/api/webhook/evolution/messages/${activeChat}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          const messages = await res.json();
+          setChats(prev => {
+            const existingChat = prev[activeChat] || {
+              id: activeChat,
+              name: activeChat.split('@')[0],
+              unread: 0,
+              status: 'Leído',
+              messages: []
+            };
+
+            return {
+              ...prev,
+              [activeChat]: {
+                ...existingChat,
+                messages: messages,
+                lastMessage: messages.length > 0 ? messages[messages.length - 1].text : existingChat.lastMessage
+              }
+            };
+          });
+        }
+      } catch (err) {
+        console.error('[Chat] Error cargando historial:', err);
+      }
+    };
+
+    fetchHistory();
+  }, [activeChat]);
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [mediaBase64, setMediaBase64] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);

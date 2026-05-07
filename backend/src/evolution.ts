@@ -318,7 +318,7 @@ export const sendEvolutionMessage = async (to: string, text: string) => {
     await safeFetch(`${EVOLUTION_API_URL}/message/sendText/${INSTANCE_NAME}`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ number, options: { delay: 1200 }, textMessage: { text } }),
+      body: JSON.stringify({ number, options: { delay: 1200 }, text }), // Evolution v2 usa 'text' directamente
     });
   } catch (error: any) {
     console.error('[Evolution] Error enviando mensaje:', error.message);
@@ -674,4 +674,35 @@ const handleWebhookEvent = async (req: any, res: any) => {
 // Rutas duales para el Webhook por si falta el /webhook final
 evolutionRouter.post('/', handleWebhookEvent);
 evolutionRouter.post('/webhook', handleWebhookEvent);
+// ═══════════════════════════════════════════════════
+//  ENDPOINT DE HISTORIAL DE MENSAJES
+// ═══════════════════════════════════════════════════
+evolutionRouter.get('/messages/:chatId', async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const result = await pool.query(
+      `SELECT id, text, from_me, timestamp, media_url, media_type 
+       FROM evolution_messages 
+       WHERE chat_id = $1 
+       ORDER BY timestamp ASC`,
+      [chatId]
+    );
+
+    const messages = result.rows.map(row => ({
+      id: row.id,
+      fromMe: row.from_me,
+      text: row.text,
+      media: row.media_url,
+      mimeType: row.media_type,
+      time: new Date(row.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: row.timestamp
+    }));
+
+    res.json(messages);
+  } catch (err: any) {
+    console.error('[Evolution] Error obteniendo historial:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export { evolutionRouter };

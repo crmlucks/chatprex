@@ -97,6 +97,23 @@ export async function initDatabase() {
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+    // Crear tabla evolution_messages
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS evolution_messages (
+        id            VARCHAR(100) PRIMARY KEY,
+        chat_id       VARCHAR(50) NOT NULL,
+        text          TEXT,
+        from_me       BOOLEAN DEFAULT false,
+        timestamp     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        media_url     TEXT,
+        media_type    VARCHAR(50)
+      );
+    `);
+    
+    // Índice para buscar mensajes por chat más rápido
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_evolution_messages_chat_id ON evolution_messages (chat_id);
+    `);
 
     console.log('✅ Base de datos inicializada correctamente.');
   } catch (err) {
