@@ -47,9 +47,35 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
     }
   }
 
+  // Cargar propiedades disponibles desde la base de datos para inyectarlas como contexto
+  let propertiesText = "";
+  try {
+    const props = await pool.query("SELECT name, project, type, price, currency, location, rooms, area FROM properties WHERE status = 'Disponible' LIMIT 20");
+    if (props.rowCount > 0) {
+      propertiesText = props.rows.map(p => 
+        `- ${p.name} (${p.type}${p.project ? ` en ${p.project}` : ''}): Precio ${p.price} ${p.currency}, Ubicación: ${p.location}, Cuartos: ${p.rooms}, Área: ${p.area}`
+      ).join('\n');
+    }
+  } catch (e) {
+    console.error("[AI] Error al cargar propiedades:", e);
+  }
+
+  // Agregar regla estricta anti-alucinación
+  systemPrompt += `\n\n--- REGLA ESTRICTA DE VERACIDAD ---
+ESTÁ ESTRICTAMENTE PROHIBIDO INVENTAR propiedades, precios, amenidades o características. 
+DEBES basar tus respuestas ÚNICAMENTE en la "Base de Conocimiento" y en el "Inventario Disponible". 
+Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indicar que no tienes esa información a la mano y que un asesor humano lo confirmará a la brevedad. NO ASUMAS NADA.`;
+
   // Agregar base de conocimiento al system prompt
   if (knowledge) {
-    systemPrompt += `\n\n--- BASE DE CONOCIMIENTO ---\nUsa esta información para responder preguntas con precisión:\n${knowledge}\n---`;
+    systemPrompt += `\n\n--- BASE DE CONOCIMIENTO MANUAL ---\n${knowledge}\n---`;
+  }
+
+  // Agregar inventario en tiempo real
+  if (propertiesText) {
+    systemPrompt += `\n\n--- INVENTARIO DISPONIBLE EN TIEMPO REAL ---\n${propertiesText}\n---`;
+  } else {
+    systemPrompt += `\n\n--- INVENTARIO DISPONIBLE ---\nActualmente no hay propiedades disponibles en el inventario.\n---`;
   }
 
   if (!conversationHistory[fromJid]) {
