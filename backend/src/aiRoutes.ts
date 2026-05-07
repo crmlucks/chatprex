@@ -7,9 +7,9 @@ const aiConfigRouter = express.Router();
 // Obtener configuración de IA
 aiConfigRouter.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff FROM ai_config LIMIT 1');
+    const result = await pool.query('SELECT provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords FROM ai_config LIMIT 1');
     if (result.rowCount === 0) {
-      return res.json({ provider: 'OpenAI', model: 'gpt-4o-mini', hasApiKey: false, safeApiKey: '', prompt: '', knowledge: '' });
+      return res.json({ provider: 'OpenAI', model: 'gpt-4o-mini', hasApiKey: false, safeApiKey: '', prompt: '', knowledge: '', activationKeywords: 'info,precio,quiero,asesor,comprar' });
     }
     
     const config = result.rows[0];
@@ -31,6 +31,7 @@ aiConfigRouter.get('/', async (req, res) => {
       messageGrouping: config.message_grouping !== false,
       humanizedSplit: config.humanized_split !== false,
       humanHandoff: config.human_handoff !== false,
+      activationKeywords: config.activation_keywords || '',
     });
   } catch (error) {
     console.error('Error fetching AI config:', error);
@@ -40,7 +41,7 @@ aiConfigRouter.get('/', async (req, res) => {
 
 // Actualizar configuración de IA
 aiConfigRouter.post('/', async (req, res) => {
-  const { provider, model, api_key, prompt, knowledge, voiceToText, messageGrouping, humanizedSplit, humanHandoff } = req.body;
+  const { provider, model, api_key, prompt, knowledge, voiceToText, messageGrouping, humanizedSplit, humanHandoff, activationKeywords } = req.body;
   try {
     const check = await pool.query('SELECT id, api_key FROM ai_config LIMIT 1');
     
@@ -51,16 +52,16 @@ aiConfigRouter.post('/', async (req, res) => {
 
     if (check.rowCount === 0) {
       await pool.query(
-        `INSERT INTO ai_config (provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [provider, model, apiKeyToSave, prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false]
+        `INSERT INTO ai_config (provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [provider, model, apiKeyToSave, prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || 'info,precio,quiero,asesor,comprar']
       );
     } else {
       await pool.query(
         `UPDATE ai_config SET provider=$1, model=$2, api_key=$3, prompt=$4, knowledge=$5,
-         voice_to_text=$6, message_grouping=$7, humanized_split=$8, human_handoff=$9, updated_at=NOW()
-         WHERE id=$10`,
-        [provider, model, apiKeyToSave, prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, check.rows[0].id]
+         voice_to_text=$6, message_grouping=$7, humanized_split=$8, human_handoff=$9, activation_keywords=$10, updated_at=NOW()
+         WHERE id=$11`,
+        [provider, model, apiKeyToSave, prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || 'info,precio,quiero,asesor,comprar', check.rows[0].id]
       );
     }
     res.json({ success: true });

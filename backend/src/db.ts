@@ -140,6 +140,7 @@ export async function initDatabase() {
         ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS message_grouping BOOLEAN DEFAULT true;
         ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS humanized_split BOOLEAN DEFAULT true;
         ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS human_handoff BOOLEAN DEFAULT true;
+        ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS activation_keywords TEXT DEFAULT 'info,precio,quiero,asesor,comprar';
       END $$;
     `);
     

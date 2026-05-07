@@ -639,11 +639,21 @@ const handleWebhookEvent = async (req: any, res: any) => {
         timestamp: msgTimestamp,
       });
 
-      // Configuración de palabras clave para activar/despertar al bot
-      const activationKeywords = ['info', 'informacion', 'información', 'precio', 'quiero', 'asesor', 'catalogo', 'catálogo', 'ubicacion', 'comprar'];
+      // Configuración de palabras clave para activar/despertar al bot desde la base de datos
+      let dbKeywords = 'info,precio,quiero,asesor,comprar';
+      try {
+        const configRes = await pool.query('SELECT activation_keywords FROM ai_config LIMIT 1');
+        if (configRes.rowCount > 0 && configRes.rows[0].activation_keywords) {
+          dbKeywords = configRes.rows[0].activation_keywords;
+        }
+      } catch (err) {
+        console.error('[Evolution] Error obteniendo palabras clave:', err);
+      }
+      
+      const activationKeywords = dbKeywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
       const textLower = text.toLowerCase();
       // Verificamos si alguna de las palabras clave está presente como palabra independiente o parte del texto
-      const containsKeyword = activationKeywords.some(kw => textLower.includes(kw));
+      const containsKeyword = activationKeywords.length > 0 ? activationKeywords.some(kw => textLower.includes(kw)) : true;
 
       // Auto-registrar como lead (solo mensajes entrantes, no grupos ni broadcast)
       let isBotActive = false;

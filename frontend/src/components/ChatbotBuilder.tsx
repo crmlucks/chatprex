@@ -40,6 +40,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const [messageGrouping, setMessageGrouping] = useState(true);
   const [humanizedSplit, setHumanizedSplit] = useState(true);
   const [humanHandoff, setHumanHandoff] = useState(true);
+  const [activationKeywords, setActivationKeywords] = useState('info,precio,quiero,asesor,comprar');
 
   // Simulator
   const [simMessages, setSimMessages] = useState<{role: string; text: string; time: string}[]>([]);
@@ -73,6 +74,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         if (data.messageGrouping !== undefined) setMessageGrouping(data.messageGrouping);
         if (data.humanizedSplit !== undefined) setHumanizedSplit(data.humanizedSplit);
         if (data.humanHandoff !== undefined) setHumanHandoff(data.humanHandoff);
+        if (data.activationKeywords) setActivationKeywords(data.activationKeywords);
       }
     } catch (err) {
       console.error('Error loading AI config:', err);
@@ -95,6 +97,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         messageGrouping,
         humanizedSplit,
         humanHandoff,
+        activationKeywords,
       };
       const res = await fetch(`${API_URL}/api/ai-config`, {
         method: 'POST',
@@ -313,6 +316,19 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                   </label>
                 </div>
               ))}
+              <div className={cardCls + " flex-col items-start gap-2"}>
+                <div className="w-full">
+                  <h4 className={`font-bold text-[13px] ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>Palabras Clave de Activación</h4>
+                  <p className="text-[11px] text-slate-500 mt-1 font-medium mb-3">Si el bot está apagado, solo se despertará si el cliente envía alguna de estas palabras. Sepáralas por comas.</p>
+                  <input 
+                    type="text" 
+                    value={activationKeywords} 
+                    onChange={e => setActivationKeywords(e.target.value)} 
+                    placeholder="ej. alquimia, precio, info"
+                    className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-800'}`}
+                  />
+                </div>
+              </div>
             </div>
           )}
         </div>
