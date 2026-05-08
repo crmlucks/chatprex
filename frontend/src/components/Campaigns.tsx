@@ -101,9 +101,26 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
             <h1 className={`text-[18px] md:text-[20px] font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Campañas de WhatsApp</h1>
             <p className={`text-[12px] md:text-[13px] mt-1 font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Crea y gestiona tus envíos masivos e inteligentes</p>
           </div>
-          <button className="w-full sm:w-auto bg-primary text-white px-4 py-2 md:px-6 md:py-2.5 rounded-xl text-xs md:text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all active:scale-95 flex items-center justify-center gap-2">
-            <Plus size={18} /> Nueva Campaña
-          </button>
+          <div className={`flex p-1 rounded-xl ${isDarkMode ? 'bg-slate-800' : 'bg-white border border-slate-200'}`}>
+            <button 
+              onClick={() => { setCampaignType('masivo'); setDbFilter('todos'); }}
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${campaignType === 'masivo' ? 'bg-primary text-white shadow-md' : (isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-800')}`}
+            >
+              Envío Masivo
+            </button>
+            <button 
+              onClick={() => { setCampaignType('seguimiento'); setDbFilter('frios'); }}
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${campaignType === 'seguimiento' ? 'bg-primary text-white shadow-md' : (isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-800')}`}
+            >
+              Seguimiento
+            </button>
+            <button 
+              onClick={() => { setCampaignType('postventa'); setDbFilter('cumpleanos'); }}
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${campaignType === 'postventa' ? 'bg-primary text-white shadow-md' : (isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-800')}`}
+            >
+              Post Venta
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -252,23 +269,31 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                     <p className="text-sm text-slate-600 mb-2">Selecciona a quién deseas enviar esta campaña desde tu CRM.</p>
                     
                     {campaignType === 'postventa' ? (
-                      <div className="grid grid-cols-2 gap-3">
-                        <label className="text-sm font-medium text-slate-700 col-span-2 mb-1">Motivo de Postventa (Clientes Activos)</label>
-                        {[
-                          { id: 'cumpleanos', label: 'Cumpleaños del mes' },
-                          { id: 'madre', label: 'Día de la Madre' },
-                          { id: 'padre', label: 'Día del Padre' },
-                          { id: 'navidad', label: 'Saludo de Navidad' },
-                          { id: 'personalizado', label: 'Filtro Personalizado...' }
-                        ].map(f => (
-                          <button
-                            key={f.id}
-                            onClick={() => setDbFilter(f.id)}
-                            className={`p-3 text-left border rounded-lg text-sm transition-colors ${dbFilter === f.id ? 'border-primary bg-primary/5 text-primary font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-600'}`}
-                          >
-                            {f.label}
-                          </button>
-                        ))}
+                      <div className="space-y-4">
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-3">
+                          <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-bold text-amber-800">Estrategia Largo Plazo (Exclusivo Clientes)</p>
+                            <p className="text-xs text-amber-700 mt-1 font-medium">Recomendación: Enviar 1 mensaje mensual o quincenal máximo para evitar saturar al cliente y mantener una relación saludable.</p>
+                          </div>
+                        </div>
+                        <label className={`text-sm font-medium mb-1 block ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Motivo de Postventa</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { id: 'cumpleanos', label: 'Cumpleaños' },
+                            { id: 'aniversario', label: 'Aniversario de Compra' },
+                            { id: 'referidos', label: 'Campaña de Referidos' },
+                            { id: 'nuevas_etapas', label: 'Nuevas Etapas/Proyectos' }
+                          ].map(f => (
+                            <button
+                              key={f.id}
+                              onClick={() => setDbFilter(f.id)}
+                              className={`p-3 text-left border rounded-lg text-sm transition-colors ${dbFilter === f.id ? 'border-primary bg-primary/5 text-primary font-medium' : (isDarkMode ? 'border-slate-700 hover:border-slate-600 text-slate-300' : 'border-slate-200 hover:border-slate-300 text-slate-600')}`}
+                            >
+                              {f.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     ) : campaignType === 'seguimiento' ? (
                       <div className="grid grid-cols-2 gap-3">
@@ -325,6 +350,22 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                 )}
               </div>
             </div>
+
+            {/* BUTTON START CAMPAIGN */}
+            <div className="flex justify-end">
+              <button 
+                onClick={startCampaign}
+                disabled={status === 'running' || !messageTemplate}
+                className="w-full sm:w-auto bg-emerald-600 text-white px-8 py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {status === 'running' ? (
+                  <><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Enviando...</>
+                ) : (
+                  <><Send size={18} /> Iniciar Campaña</>
+                )}
+              </button>
+            </div>
+
           </div>
 
           <div className="col-span-1 space-y-6">

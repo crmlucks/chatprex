@@ -123,5 +123,87 @@ router.get('/finances/transactions', async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
+// --- ADMIN: PROJECTS ---
+router.get('/projects', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM projects ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+router.post('/projects', async (req, res) => {
+  const { name, code, status } = req.body;
+  try {
+    const result = await pool.query('INSERT INTO projects (name, code, status) VALUES ($1, $2, $3) RETURNING *', [name, code, status || 'Activo']);
+    res.json(result.rows[0]);
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+router.put('/projects/:id', async (req, res) => {
+  const { name, code, status } = req.body;
+  try {
+    const result = await pool.query('UPDATE projects SET name=$1, code=$2, status=$3 WHERE id=$4 RETURNING *', [name, code, status, req.params.id]);
+    res.json(result.rows[0]);
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+router.delete('/projects/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM projects WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
 
+// --- ADMIN: PIPELINE STAGES ---
+router.get('/pipeline', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM pipeline_stages ORDER BY "order" ASC, id ASC');
+    res.json(result.rows);
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+router.post('/pipeline', async (req, res) => {
+  const { name, color, visible } = req.body;
+  try {
+    const result = await pool.query('INSERT INTO pipeline_stages (name, color, visible) VALUES ($1, $2, $3) RETURNING *', [name, color, visible]);
+    res.json(result.rows[0]);
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+router.put('/pipeline/:id', async (req, res) => {
+  const { name, color, visible } = req.body;
+  try {
+    const result = await pool.query('UPDATE pipeline_stages SET name=$1, color=$2, visible=$3 WHERE id=$4 RETURNING *', [name, color, visible, req.params.id]);
+    res.json(result.rows[0]);
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+router.delete('/pipeline/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM pipeline_stages WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+
+// --- ADMIN: SOURCES ---
+router.get('/sources', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM lead_sources ORDER BY id ASC');
+    res.json(result.rows);
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+router.post('/sources', async (req, res) => {
+  const { name, icon, visible } = req.body;
+  try {
+    const result = await pool.query('INSERT INTO lead_sources (name, icon, visible) VALUES ($1, $2, $3) RETURNING *', [name, icon, visible]);
+    res.json(result.rows[0]);
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+router.put('/sources/:id', async (req, res) => {
+  const { name, icon, visible } = req.body;
+  try {
+    const result = await pool.query('UPDATE lead_sources SET name=$1, icon=$2, visible=$3 WHERE id=$4 RETURNING *', [name, icon, visible, req.params.id]);
+    res.json(result.rows[0]);
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+router.delete('/sources/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM lead_sources WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
 export default router;

@@ -26,6 +26,7 @@ const statusStyles: Record<EventStatus, string> = {
 export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const [view, setView] = useState<'month'|'week'|'day'>('month');
+  const [filterType, setFilterType] = useState<EventType | 'Todos'>('Todos');
   const [events, setEvents] = useState<CalEvent[]>([]);
 
   useEffect(() => {
@@ -62,6 +63,8 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
     setEvents(events.map(ev => ev.id===dragId ? {...ev, date, ...(time ? {time} : {})} : ev));
     setDragId(null);
   };
+
+  const filteredEvents = events.filter(e => filterType === 'Todos' || e.type === filterType);
 
   const EventPill = ({ev, compact}: {ev:CalEvent; compact?:boolean}) => {
     const tc = typeConfig[ev.type]; const Icon = tc.icon;
@@ -123,11 +126,23 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
         </div>
       </div>
 
-      {/* TYPE LEGEND */}
-      <div className={`px-4 md:px-8 py-2 border-b transition-colors flex items-center gap-3 overflow-x-auto text-[10px] ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
-        {(Object.keys(typeConfig) as EventType[]).map(t => { const c = typeConfig[t]; const I = c.icon; return (
-          <span key={t} className={`flex items-center gap-1 px-2 py-1 rounded-md border font-black uppercase tracking-wider transition-all ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : c.bg} ${c.color}`}><I size={10}/>{t}</span>
-        );})}
+      {/* FILTER BAR */}
+      <div className={`px-4 md:px-8 py-3 border-b transition-colors flex items-center justify-between ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
+        <div className="flex gap-2 items-center">
+          <select 
+            value={filterType} 
+            onChange={e => setFilterType(e.target.value as EventType | 'Todos')}
+            className={`px-3 py-2 rounded-xl text-sm font-semibold outline-none transition-all ${isDarkMode ? 'bg-slate-800 text-white border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 focus:border-primary'}`}
+          >
+            <option value="Todos">Todos los Eventos</option>
+            {(Object.keys(typeConfig) as EventType[]).map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <button className={`p-2 rounded-xl transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400 border border-slate-700 hover:text-primary' : 'bg-white text-slate-500 border border-slate-200 hover:text-primary'}`}>
+            <Filter size={18} />
+          </button>
+        </div>
       </div>
 
       {/* BODY */}
@@ -142,7 +157,7 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
             <div className="flex-1 grid grid-cols-7 grid-rows-5 min-h-[500px]">
               {cells.map((day,i) => {
                 const ds = day ? fmt(day) : '';
-                const de = events.filter(e => e.date===ds);
+                const de = filteredEvents.filter(e => e.date===ds);
                 const today = day===5;
                 return (
                   <div key={i}
@@ -167,30 +182,30 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
           {/* WEEK VIEW */}
           {view === 'week' && (
             <div className="flex-1 overflow-auto">
-              <div className="grid grid-cols-8 border-b border-slate-200 bg-slate-50 sticky top-0 z-10">
-                <div className="p-2 border-r border-slate-200"></div>
+              <div className={`grid grid-cols-8 border-b sticky top-0 z-10 ${isDarkMode ? 'border-slate-800 bg-slate-800/50' : 'border-slate-200 bg-slate-50'}`}>
+                <div className={`p-2 border-r ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}></div>
                 {weekDays.map((d,i) => (
-                  <div key={d} className={`p-2 text-center border-r border-slate-200 ${d===15?'bg-primary/5':''}`}>
+                  <div key={d} className={`p-2 text-center border-r ${isDarkMode ? 'border-slate-800' : 'border-slate-200'} ${d===15 ? (isDarkMode ? 'bg-primary/20' : 'bg-primary/5') : ''}`}>
                     <div className="text-[10px] font-semibold text-slate-500 uppercase">{dayName[i]}</div>
-                    <div className={`text-sm font-bold mt-0.5 w-7 h-7 mx-auto flex items-center justify-center rounded-full ${d===15?'bg-primary text-white':'text-slate-700'}`}>{d}</div>
+                    <div className={`text-sm font-bold mt-0.5 w-7 h-7 mx-auto flex items-center justify-center rounded-full ${d===15 ? 'bg-primary text-white shadow-sm' : (isDarkMode ? 'text-slate-400' : 'text-slate-700')}`}>{d}</div>
                   </div>
                 ))}
               </div>
               <div className="min-w-[700px]">
                 {hours.map(h => (
-                  <div key={h} className="grid grid-cols-8 border-b border-slate-50 min-h-[70px]">
-                    <div className="p-2 text-right text-[10px] text-slate-400 font-medium border-r border-slate-100 bg-slate-50/50">
+                  <div key={h} className={`grid grid-cols-8 border-b min-h-[70px] ${isDarkMode ? 'border-slate-800/50' : 'border-slate-50'}`}>
+                    <div className={`p-2 text-right text-[10px] font-medium border-r ${isDarkMode ? 'text-slate-500 border-slate-800 bg-slate-900/30' : 'text-slate-400 border-slate-100 bg-slate-50/50'}`}>
                       {h.toString().padStart(2,'0')}:00
                     </div>
                     {weekDays.map(d => {
                       const ds = fmt(d); const ts = h.toString().padStart(2,'0');
-                      const he = events.filter(e => e.date===ds && e.time.startsWith(ts));
+                      const he = filteredEvents.filter(e => e.date===ds && e.time.startsWith(ts));
                       return (
                         <div key={d}
                           onDragOver={e => e.preventDefault()}
                           onDrop={() => handleDrop(ds, `${ts}:00`)}
                           onClick={() => openNew(ds, `${ts}:00`)}
-                          className={`border-r border-slate-100 p-1 cursor-pointer hover:bg-slate-50 transition-colors ${d===15?'bg-primary/[0.02]':''}`}>
+                          className={`border-r p-1 cursor-pointer transition-colors ${isDarkMode ? 'border-slate-800 hover:bg-white/5' : 'border-slate-100 hover:bg-slate-50/50'} ${d===15 ? (isDarkMode ? 'bg-primary/5' : 'bg-primary/[0.02]') : ''}`}>
                           {he.map(ev => <EventPill key={ev.id} ev={ev}/>)}
                         </div>
                       );
@@ -204,20 +219,20 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
           {/* DAY VIEW */}
           {view === 'day' && (
             <div className="flex-1 overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b border-slate-200 p-3 z-10 flex items-center justify-center">
-                <h2 className="text-sm font-bold text-slate-700">Lunes, 5 de Mayo 2026</h2>
+              <div className={`sticky top-0 border-b p-3 z-10 flex items-center justify-center ${isDarkMode ? 'bg-slate-800/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                <h2 className={`text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Lunes, 5 de Mayo 2026</h2>
               </div>
               {hours.map(h => {
                 const ts = h.toString().padStart(2,'0')+':00';
-                const he = events.filter(e => e.date==='2026-05-05' && e.time.startsWith(h.toString().padStart(2,'0')));
+                const he = filteredEvents.filter(e => e.date==='2026-05-05' && e.time.startsWith(h.toString().padStart(2,'0')));
                 // Show events from day 15 for demo
-                const he2 = events.filter(e => e.date==='2026-05-15' && e.time.startsWith(h.toString().padStart(2,'0')));
+                const he2 = filteredEvents.filter(e => e.date==='2026-05-15' && e.time.startsWith(h.toString().padStart(2,'0')));
                 const all = [...he, ...he2];
                 return (
-                  <div key={h} className="flex min-h-[80px] group border-b border-slate-50"
+                  <div key={h} className={`flex min-h-[80px] group border-b ${isDarkMode ? 'border-slate-800/50' : 'border-slate-50'}`}
                     onDragOver={e => e.preventDefault()} onDrop={() => handleDrop('2026-05-15', ts)}>
-                    <div className="w-20 pr-4 text-right pt-2 border-r border-slate-100 text-xs text-slate-400 font-medium bg-slate-50/50">{ts}</div>
-                    <div className="flex-1 p-2 flex flex-col gap-2 cursor-pointer hover:bg-slate-50/50" onClick={() => openNew('2026-05-15', ts)}>
+                    <div className={`w-20 pr-4 text-right pt-2 border-r text-xs font-medium ${isDarkMode ? 'border-slate-800 text-slate-500 bg-slate-900/30' : 'border-slate-100 text-slate-400 bg-slate-50/50'}`}>{ts}</div>
+                    <div className={`flex-1 p-2 flex flex-col gap-2 cursor-pointer transition-colors ${isDarkMode ? 'hover:bg-white/5' : 'hover:bg-slate-50/50'}`} onClick={() => openNew('2026-05-15', ts)}>
                       {all.map(ev => <EventBlock key={ev.id} ev={ev}/>)}
                     </div>
                   </div>

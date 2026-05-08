@@ -47,6 +47,7 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
   });
   const [leads, setLeads] = useState<any[]>([]);
   const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [leadToEdit, setLeadToEdit] = useState<any>(null);
   const [showNewLead, setShowNewLead] = useState(false);
   const { showToast, showConfirm } = useToast();
   const [alarmItems, setAlarmItems] = useState<AlarmItem[]>([]);
@@ -66,8 +67,20 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
     }
   };
 
+  const [pipelineStages, setPipelineStages] = useState<string[]>(['Nuevo', 'Contactado', 'Cita', 'Negociación', 'Cerrado']);
+
   useEffect(() => {
-    if (token) fetchLeads();
+    if (token) {
+      fetchLeads();
+      fetch(`${API_URL}/api/data/pipeline`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => {
+          if(Array.isArray(data) && data.length > 0) {
+            setPipelineStages(data.map((d: any) => d.name));
+          }
+        })
+        .catch(console.error);
+    }
   }, [token]);
 
   const registerAlarmItem = useCallback((item: AlarmItem) => {
@@ -99,6 +112,27 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
     } catch (err) {
       console.error('Error creating lead', err);
       showToast('Error al crear lead', 'error');
+    }
+  };
+
+  const updateLead = async (data: any) => {
+    try {
+      const res = await fetch(`${API_URL}/api/leads/${data.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        fetchLeads();
+        setLeadToEdit(null);
+        showToast(`Lead "${data.name}" actualizado`, 'success');
+      }
+    } catch (err) {
+      console.error('Error updating lead', err);
+      showToast('Error al actualizar lead', 'error');
     }
   };
 
@@ -189,7 +223,7 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
       <div className="flex-1 overflow-x-auto p-4 md:p-6 h-full">
         {viewMode === 'kanban' ? (
           <div className="flex gap-6 h-full min-w-max">
-            {['Nuevo', 'Contactado', 'Cita', 'Negociación', 'Cerrado'].map(status => (
+            {pipelineStages.map(status => (
               <PipelineColumn 
                 key={status} 
                 status={status} 
@@ -197,6 +231,7 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
                 onDrop={handleDropLead} 
                 onToggleBot={toggleBot} 
                 onSelect={setSelectedLead}
+                onEdit={setLeadToEdit}
                 onDelete={deleteLead}
                 onGoChat={setActiveTab}
                 isDarkMode={isDarkMode}
@@ -204,17 +239,18 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
             ))}
           </div>
         ) : (
-          <ListView leads={leads} onSelect={setSelectedLead} isDarkMode={isDarkMode} onToggleBot={toggleBot} onDelete={deleteLead} onGoChat={setActiveTab} />
+          <ListView leads={leads} onSelect={setSelectedLead} onEdit={setLeadToEdit} isDarkMode={isDarkMode} onToggleBot={toggleBot} onDelete={deleteLead} onGoChat={setActiveTab} />
         )}
       </div>
 
       {selectedLead && <LeadModal lead={selectedLead} isDarkMode={isDarkMode} onClose={() => setSelectedLead(null)} registerAlarm={registerAlarmItem} unregisterAlarm={unregisterAlarmItem} />}
-      {showNewLead && <NewLeadModal isDarkMode={isDarkMode} onClose={() => setShowNewLead(false)} onSave={addLead} />}
+      {showNewLead && <NewLeadModal isDarkMode={isDarkMode} onClose={() => setShowNewLead(false)} onSave={addLead} pipelineStages={pipelineStages} />}
+      {leadToEdit && <NewLeadModal editLead={leadToEdit} isDarkMode={isDarkMode} onClose={() => setLeadToEdit(null)} onSave={updateLead} pipelineStages={pipelineStages} />}
     </div>
   );
 };
 
-const ListView = ({ leads, onSelect, isDarkMode, onToggleBot, onDelete, onGoChat }: any) => {
+const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, onGoChat }: any) => {
   if (!leads || leads.length === 0) return (
     <div className={`rounded-2xl border p-12 text-center ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-400'}`}>
       <Search size={40} className="mx-auto mb-3 opacity-30" />
@@ -259,7 +295,7 @@ const ListView = ({ leads, onSelect, isDarkMode, onToggleBot, onDelete, onGoChat
                   <div className={`w-12 h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
                     <div className={`${sc.bar} h-full rounded-full`} style={{ width: lead.score }}></div>
                   </div>
-                  <span className={`text-[11px] font-bold ${sc.text}`}>{lead.score}</span>
+                  <span className={`text-[11px] font-bold flex items-center gap-1 ${sc.text}`}>{lead.score} <BrainCircuit size={10} className="opacity-50" title="Scoring generado por IA" /></span>
                 </div>
               </td>
               <td className="px-4 py-2 text-[12px] text-slate-500 font-medium">{lead.project || '—'}</td>
@@ -274,16 +310,16 @@ const ListView = ({ leads, onSelect, isDarkMode, onToggleBot, onDelete, onGoChat
               </td>
               <td className="px-4 py-2 text-right pr-6">
                 <div className="inline-flex items-center gap-0.5">
-                  <button title="Llamar" className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}>
+                  <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-1.5 rounded-lg transition-colors inline-block ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}>
                     <Phone size={14} />
-                  </button>
-                  <button title="Conversación" onClick={() => onGoChat?.('Conversaciones')} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}>
+                  </a>
+                  <button title="Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}>
                     <MessageSquare size={14} />
                   </button>
                   <button title="Activar Bot" onClick={() => onToggleBot(lead.id)} className={`p-1.5 rounded-lg transition-colors ${lead.botActive ? 'text-purple-400' : (isDarkMode ? 'text-slate-500 hover:bg-slate-800' : 'text-slate-400 hover:bg-slate-100')}`}>
                     <Bot size={14} />
                   </button>
-                  <button title="Editar" onClick={() => onSelect(lead)} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}>
+                  <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}>
                     <Edit size={14} />
                   </button>
                   <button title="Eliminar" onClick={() => onDelete(lead.id)} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-400 hover:bg-rose-50'}`}>
@@ -299,7 +335,7 @@ const ListView = ({ leads, onSelect, isDarkMode, onToggleBot, onDelete, onGoChat
   );
 };
 
-const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onDelete, onGoChat, isDarkMode }: any) => {
+const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode }: any) => {
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
   const handleDrop = (e: React.DragEvent) => { e.preventDefault(); onDrop(e.dataTransfer.getData('leadId'), status); };
   
@@ -329,21 +365,26 @@ const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onDelete
           </div>
         )}
         {leads.map((lead: any) => (
-          <LeadCard key={lead.id} lead={lead} onToggleBot={onToggleBot} onSelect={onSelect} onDelete={onDelete} onGoChat={onGoChat} isDarkMode={isDarkMode} />
+          <LeadCard key={lead.id} lead={lead} onToggleBot={onToggleBot} onSelect={onSelect} onEdit={onEdit} onDelete={onDelete} onGoChat={onGoChat} isDarkMode={isDarkMode} />
         ))}
       </div>
     </div>
   );
 };
 
-const LeadCard = ({ lead, onToggleBot, onSelect, onDelete, onGoChat, isDarkMode }: any) => {
+const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode }: any) => {
   const handleDragStart = (e: React.DragEvent) => { e.dataTransfer.setData('leadId', lead.id); };
   const sc = getScoreColor(lead.score || '0');
   return (
     <div draggable onDragStart={handleDragStart} onDoubleClick={() => onSelect(lead)}
       className={`p-4 rounded-2xl border shadow-sm cursor-grab active:cursor-grabbing transition-all hover:shadow-md hover:border-primary/30 group ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
       <div className="flex justify-between items-start mb-2 gap-2">
-        <h4 className={`text-[14px] font-bold truncate group-hover:text-primary transition-colors ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{lead.name}</h4>
+        <div className="flex flex-col min-w-0">
+          <h4 className={`text-[14px] font-bold truncate group-hover:text-primary transition-colors ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{lead.name}</h4>
+          <div className="flex items-center gap-1.5 text-slate-500 mt-0.5">
+            <Phone size={10} className="text-emerald-500 shrink-0" /><span className="text-[11px] font-medium truncate">{lead.phone}</span>
+          </div>
+        </div>
         <button onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }}
           className={`p-1.5 rounded-lg shrink-0 transition-all ${lead.botActive ? 'bg-primary/10 text-primary shadow-sm' : 'bg-slate-100 text-slate-400'}`}>
           <Bot size={14} />
@@ -356,12 +397,12 @@ const LeadCard = ({ lead, onToggleBot, onSelect, onDelete, onGoChat, isDarkMode 
       </div>
       
       <div className="space-y-2 mt-3">
-        <div className="flex items-center gap-2 text-slate-500">
-          <Phone size={12} /><span className="text-[11px] font-medium">{lead.phone}</span>
-        </div>
         <div className={`flex items-center justify-between mt-4 pt-3 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100/50'}`}>
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold ${sc.bg} ${sc.text}`}>{lead.score || '—'}</div>
+            <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold relative ${sc.bg} ${sc.text}`} title="Scoring generado por IA">
+              {lead.score || '—'}
+              <BrainCircuit size={10} className="absolute -top-1 -right-1 text-purple-500 bg-white dark:bg-slate-900 rounded-full" />
+            </div>
             <div className="flex flex-col min-w-0 flex-1">
               <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate w-full">{lead.project || 'Sin proyecto'}</span>
               <span className="text-[9px] text-slate-400 capitalize truncate w-full">{lead.source || 'Orgánico'}</span>
@@ -374,11 +415,11 @@ const LeadCard = ({ lead, onToggleBot, onSelect, onDelete, onGoChat, isDarkMode 
         </div>
         <div className={`flex items-center justify-between pt-2 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100/50'}`} onClick={e => e.stopPropagation()}>
           <div className="flex gap-1">
-            <button title="Llamar" className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}><Phone size={13} /></button>
-            <button title="Chat" onClick={() => onGoChat?.('Conversaciones')} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}><MessageSquare size={13} /></button>
+            <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-1.5 rounded-lg inline-flex items-center transition-colors ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}><Phone size={13} /></a>
+            <button title="Chat" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}><MessageSquare size={13} /></button>
           </div>
           <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-            <button title="Editar" onClick={() => onSelect(lead)} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-400 hover:bg-slate-100'}`}><Edit size={13} /></button>
+            <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-400 hover:bg-slate-100'}`}><Edit size={13} /></button>
             <button title="Eliminar" onClick={() => onDelete(lead.id)} className="p-1.5 rounded-lg transition-colors text-rose-400 hover:bg-rose-50"><Trash2 size={13} /></button>
           </div>
         </div>
@@ -531,7 +572,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
                       <div>
                         <p className={`text-[13px] font-semibold ${task.status === 'completada' ? 'text-slate-500 line-through' : (isDarkMode ? 'text-slate-200' : 'text-slate-800')}`}>{task.text}</p>
                         <div className="flex items-center gap-3 mt-1">
-                          <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1"><Clock size={12}/> {task.date}</span>
+                          <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1"><Clock size={12} className="text-blue-500" /> <span className="text-emerald-500 font-semibold">{task.date}</span></span>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${task.priority === 'Alta' ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-500'}`}>{task.priority}</span>
                         </div>
                       </div>
@@ -773,13 +814,14 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
   );
 };
 
-const NewLeadModal = ({ isDarkMode, onClose, onSave }: any) => {
-  const [form, setForm] = useState({ 
+const NewLeadModal = ({ onClose, onSave, isDarkMode, editLead, pipelineStages }: any) => {
+  const [form, setForm] = useState(editLead || {
     name: '', 
     phone: '', 
     email: '', 
     status: 'Nuevo', 
     budget: '', 
+    currency: 'USD',
     source: 'WhatsApp', 
     project: '', 
     details: '',
@@ -807,8 +849,8 @@ const NewLeadModal = ({ isDarkMode, onClose, onSave }: any) => {
               <Users size={16} />
             </div>
             <div>
-              <h3 className={`text-base font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Registrar Lead</h3>
-              <p className="text-[10px] text-slate-500 font-bold">Añade un nuevo prospecto al CRM</p>
+              <h3 className={`text-base font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{editLead ? 'Editar Lead' : 'Registrar Lead'}</h3>
+              <p className="text-[10px] text-slate-500 font-bold">{editLead ? 'Modifica los datos del prospecto' : 'Añade un nuevo prospecto al CRM'}</p>
             </div>
           </div>
           <button onClick={onClose} className={`p-1.5 rounded-xl transition-all ${isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-200 text-slate-500'}`}>
@@ -838,17 +880,33 @@ const NewLeadModal = ({ isDarkMode, onClose, onSave }: any) => {
             <div className="col-span-1">
               <label className={labelCls}>Etapa del Pipeline</label>
               <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className={inputCls}>
-                <option>Nuevo</option>
-                <option>Contactado</option>
-                <option>Cita</option>
-                <option>Negociación</option>
-                <option>Cerrado</option>
+                {pipelineStages?.length ? pipelineStages.map((s: string) => <option key={s} value={s}>{s}</option>) : (
+                  <>
+                    <option>Nuevo</option>
+                    <option>Contactado</option>
+                    <option>Cita</option>
+                    <option>Negociación</option>
+                    <option>Cerrado</option>
+                  </>
+                )}
               </select>
             </div>
 
             <div className="col-span-1">
               <label className={labelCls}>Presupuesto</label>
-              <input value={form.budget} onChange={e => setForm({...form, budget: e.target.value})} placeholder="Ej. $150,000 USD" className={inputCls} />
+              <div className="flex gap-2">
+                <select value={form.currency} onChange={e => setForm({...form, currency: e.target.value})} className={`${inputCls} !w-[90px] shrink-0`}>
+                  <option value="USD">USD $</option>
+                  <option value="MXN">MXN $</option>
+                  <option value="COP">COP $</option>
+                  <option value="EUR">EUR €</option>
+                  <option value="PEN">PEN S/</option>
+                  <option value="ARS">ARS $</option>
+                  <option value="CLP">CLP $</option>
+                  <option value="BRL">BRL R$</option>
+                </select>
+                <input value={form.budget} onChange={e => setForm({...form, budget: e.target.value})} placeholder="150,000" className={inputCls} />
+              </div>
             </div>
 
             <div className="col-span-1">

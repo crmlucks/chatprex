@@ -93,6 +93,8 @@ export async function initDatabase() {
         details       TEXT DEFAULT '',
         status        VARCHAR(50) DEFAULT 'Disponible',
         image         TEXT DEFAULT '',
+        avatar        TEXT DEFAULT '',
+        images        JSONB DEFAULT '[]'::jsonb,
         created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
@@ -161,9 +163,9 @@ export async function initDatabase() {
       CREATE TABLE IF NOT EXISTS finances_clients (
         id            SERIAL PRIMARY KEY,
         name          VARCHAR(150) NOT NULL,
-        email         VARCHAR(150) DEFAULT '',
-        phone         VARCHAR(50) DEFAULT '',
-        project       VARCHAR(150) DEFAULT '',
+        email         VARCHAR(150),
+        phone         VARCHAR(50),
+        status        VARCHAR(50) DEFAULT 'activo',
         created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
@@ -172,16 +174,75 @@ export async function initDatabase() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS transactions (
         id            SERIAL PRIMARY KEY,
-        type          VARCHAR(20) NOT NULL,
-        amount        DECIMAL(12,2) NOT NULL,
-        currency      VARCHAR(10) DEFAULT 'USD',
-        description   VARCHAR(255) NOT NULL,
-        date          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         client_id     INTEGER REFERENCES finances_clients(id),
+        type          VARCHAR(50) NOT NULL,
+        amount        DECIMAL(15,2) NOT NULL,
         status        VARCHAR(50) DEFAULT 'completado',
+        date          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Crear tabla projects
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS projects (
+        id            SERIAL PRIMARY KEY,
+        name          VARCHAR(150) NOT NULL,
+        code          VARCHAR(50),
+        status        VARCHAR(50) DEFAULT 'Activo',
         created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    // Crear tabla pipeline_stages
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pipeline_stages (
+        id            SERIAL PRIMARY KEY,
+        name          VARCHAR(100) NOT NULL,
+        color         VARCHAR(20) DEFAULT '#3b82f6',
+        visible       BOOLEAN DEFAULT true,
+        "order"       INTEGER DEFAULT 0,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Crear tabla lead_sources
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS lead_sources (
+        id            SERIAL PRIMARY KEY,
+        name          VARCHAR(100) NOT NULL,
+        icon          VARCHAR(50) DEFAULT 'Globe',
+        visible       BOOLEAN DEFAULT true,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Inicializar datos por defecto si están vacías
+    const pipelineCount = await client.query('SELECT COUNT(*) FROM pipeline_stages');
+    if (parseInt(pipelineCount.rows[0].count) === 0) {
+      await client.query(`
+        INSERT INTO pipeline_stages (name, color, "order") VALUES 
+        ('Nuevo', '#3b82f6', 1),
+        ('Contactado', '#0ea5e9', 2),
+        ('Cita Programada', '#f59e0b', 3),
+        ('Negociación', '#a855f7', 4),
+        ('Ganado / Cierre', '#10b981', 5),
+        ('Perdido', '#ef4444', 6)
+      `);
+    }
+
+    const sourcesCount = await client.query('SELECT COUNT(*) FROM lead_sources');
+    if (parseInt(sourcesCount.rows[0].count) === 0) {
+      await client.query(`
+        INSERT INTO lead_sources (name, icon) VALUES 
+        ('Facebook Ads', 'Facebook'),
+        ('Instagram', 'Instagram'),
+        ('TikTok Ads', 'Smartphone'),
+        ('Sitio Web', 'Globe'),
+        ('Referido', 'Users')
+      `);
+    }
+
+    console.log('[DB] Base de datos sincronizada correctamente (incluye proyectos, pipeline y fuentes)');
 
     // Add new columns if they don't exist (for existing installs)
     await client.query(`
@@ -195,6 +256,9 @@ export async function initDatabase() {
         ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS name VARCHAR(150) DEFAULT 'Bot Principal';
         
         ALTER TABLE leads ADD COLUMN IF NOT EXISTS bot_id INTEGER DEFAULT 1;
+
+        ALTER TABLE properties ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '';
+        ALTER TABLE properties ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
       END $$;
     `);
     

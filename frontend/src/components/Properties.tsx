@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Home, Building2, Map, LayoutGrid, LayoutList, Search, Plus, Filter, MapPin, X, Edit2, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Home, Building2, Map, LayoutGrid, LayoutList, Search, Plus, Filter, MapPin, X, Edit2, Trash2, Upload, XCircle, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
-  const [viewMode, setViewMode] = useState<'grid'|'list'>(() => {
-    return typeof window !== 'undefined' && window.innerWidth < 768 ? 'list' : 'grid';
-  });
-  
+  const [viewMode, setViewMode] = useState<'grid'|'list'>('list');
+  const [filterType, setFilterType] = useState('Todos');
   const [properties, setProperties] = useState<any[]>([]);
+  const [projectsList, setProjectsList] = useState<any[]>([]);
   const { token } = useAuth();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const multipleFileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchProperties = async () => {
     try {
@@ -27,36 +29,84 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
   };
 
   useEffect(() => {
-    if (token) fetchProperties();
+    if (token) {
+      fetchProperties();
+      fetchProjects();
+    }
   }, [token]);
+
+  const fetchProjects = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/data/projects`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) setProjectsList(await res.json());
+    } catch (err) {}
+  };
 
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
-    name: '', project: '', developer: '', type: 'Departamento', 
+    id: null as number | null, name: '', project: '', developer: '', type: 'Departamento', 
     price: '', currency: 'USD', location: '', area: '', 
-    rooms: '', details: '', status: 'Disponible'
+    rooms: '', details: '', status: 'Disponible', avatar: '', images: [] as string[]
   });
+
+  const uniqueDevelopers = Array.from(new Set(properties.map(p => p.developer).filter(Boolean)));
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_URL}/api/properties`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+      const isEdit = formData.id != null;
+      const url = isEdit ? `${API_URL}/api/properties/${formData.id}` : `${API_URL}/api/properties`;
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(formData)
       });
       if (res.ok) {
         fetchProperties();
         setShowModal(false);
-        setFormData({ name: '', project: '', developer: '', type: 'Departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', details: '', status: 'Disponible' });
+        setFormData({ id: null, name: '', project: '', developer: '', type: 'Departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', details: '', status: 'Disponible', avatar: '', images: [] });
       }
     } catch (err) {
       console.error('Error saving property', err);
     }
   };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isAvatar: boolean = false) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (isAvatar) {
+      const file = files[0];
+      if (file.size > 2 * 1024 * 1024) return alert('El logo no debe superar los 2MB');
+      const reader = new FileReader();
+      reader.onloadend = () => setFormData(prev => ({ ...prev, avatar: reader.result as string }));
+      reader.readAsDataURL(file);
+    } else {
+      const currentCount = formData.images.length;
+      if (currentCount + files.length > 3) return alert('Máximo 3 fotos de la propiedad permitidas.');
+      
+      Array.from(files).forEach(file => {
+        if (file.size > 2 * 1024 * 1024) return;
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, reader.result as string].slice(0, 3)
+          }));
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const filteredProperties = properties.filter(p => filterType === 'Todos' || p.type === filterType);
 
   const deleteProperty = async (id: number) => {
     if (!window.confirm('¿Eliminar esta propiedad?')) return;
@@ -85,12 +135,21 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
         </div>
 
         <div className="flex justify-between items-center mb-6">
-          <div className="flex gap-2">
-            {["Todos", "Casas", "Departamentos", "Terrenos", "Oficinas"].map(t => (
-              <button key={t} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white text-slate-600 border border-slate-200 hover:border-primary'}`}>
-                {t}
-              </button>
-            ))}
+          <div className="flex gap-2 items-center">
+            <select 
+              value={filterType} 
+              onChange={e => setFilterType(e.target.value)}
+              className={`px-3 py-2 rounded-xl text-sm font-semibold outline-none transition-all ${isDarkMode ? 'bg-[#1E1E1E] text-white border border-slate-800' : 'bg-white text-slate-700 border border-slate-200 focus:border-primary'}`}
+            >
+              <option value="Todos">Todos los Inmuebles</option>
+              <option value="Casas">Casas</option>
+              <option value="Departamentos">Departamentos</option>
+              <option value="Terrenos">Terrenos</option>
+              <option value="Oficinas">Oficinas</option>
+            </select>
+            <button className={`p-2 rounded-xl transition-all ${isDarkMode ? 'bg-[#1E1E1E] text-slate-400 border border-slate-800 hover:text-primary' : 'bg-white text-slate-500 border border-slate-200 hover:text-primary'}`}>
+              <Filter size={18} />
+            </button>
           </div>
           <div className={`flex p-1 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-white border border-slate-200'}`}>
             <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? (isDarkMode ? 'bg-slate-700 text-primary' : 'bg-slate-100 text-primary') : 'text-slate-400'}`}><LayoutGrid size={18} /></button>
@@ -100,10 +159,10 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {properties.map(p => (
+            {filteredProperties.map(p => (
               <div key={p.id} className={`rounded-2xl border shadow-sm overflow-hidden group transition-all hover:shadow-xl ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
                 <div className="h-40 md:h-48 overflow-hidden relative">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <img src={p.images?.[0] || p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=60'} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute top-3 left-3">
                     <span className={`text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-md border ${p.status === 'Disponible' ? 'bg-emerald-500/20 text-emerald-100 border-emerald-500/30' : 'bg-rose-500/20 text-rose-100 border-rose-500/30'}`}>
                       {p.status}
@@ -121,7 +180,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <button className={`py-2 rounded-lg text-[12px] font-semibold transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Detalles</button>
+                    <button onClick={() => { setFormData(p); setShowModal(true); }} className={`py-2 rounded-lg text-[12px] font-semibold transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Editar</button>
                     <button className="py-2 bg-primary text-white rounded-lg text-[12px] font-semibold transition-all active:scale-95 hover:bg-primary-dark shadow-lg shadow-primary/20">Cotizar</button>
                   </div>
                 </div>
@@ -141,7 +200,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                 </tr>
               </thead>
               <tbody className={`divide-y ${isDarkMode ? 'divide-slate-800' : 'divide-slate-100'}`}>
-                {properties.map(p => {
+                {filteredProperties.map(p => {
                   let statusColors = '';
                   switch (p.status) {
                     case 'Disponible': statusColors = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'; break;
@@ -153,7 +212,10 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
                   return (
                     <tr key={p.id} className={`h-[42px] transition-colors ${isDarkMode ? 'hover:bg-white/5 text-slate-300' : 'hover:bg-slate-50 text-slate-700'}`}>
-                      <td className="px-4 py-2 pl-6 font-semibold text-[13px]">{p.name}</td>
+                      <td className="px-4 py-2 pl-6 font-semibold text-[13px] flex items-center gap-2">
+                        {p.avatar && <img src={p.avatar} alt="Logo" className="w-5 h-5 rounded object-cover" />}
+                        {p.name}
+                      </td>
                       <td className="px-4 py-2 text-[13px] font-semibold">{p.price} {p.currency}</td>
                       <td className="px-4 py-2 text-[12px]">{p.area} m²</td>
                       <td className="px-4 py-2">
@@ -163,7 +225,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                       </td>
                       <td className="px-4 py-2">
                         <div className="flex justify-end gap-2">
-                          <button className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:text-primary hover:bg-primary/10' : 'text-slate-500 hover:text-primary hover:bg-primary/10'}`} title="Editar">
+                          <button onClick={() => { setFormData(p); setShowModal(true); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:text-primary hover:bg-primary/10' : 'text-slate-500 hover:text-primary hover:bg-primary/10'}`} title="Editar">
                             <Edit2 size={16} />
                           </button>
                           <button onClick={() => deleteProperty(p.id)} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:text-rose-500 hover:bg-rose-500/10' : 'text-slate-500 hover:text-rose-500 hover:bg-rose-500/10'}`} title="Eliminar">
@@ -181,24 +243,76 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className={`rounded-2xl shadow-2xl border w-full max-w-2xl max-h-[95vh] flex flex-col overflow-hidden ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-            <div className={`px-5 py-4 border-b flex justify-between items-center ${isDarkMode ? 'bg-slate-800/50 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
-              <h2 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Registro de Nueva Propiedad</h2>
-              <button onClick={() => setShowModal(false)} className={`p-1 rounded-lg ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}><X size={18} /></button>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#0B1120]/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#0F172A] border border-slate-800/60 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-800/60 flex justify-between items-center bg-[#0F172A]">
+              <h2 className="font-bold text-sm text-white">Registro de Nueva Propiedad</h2>
+              <button onClick={() => setShowModal(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-800 transition-colors"><X size={18} /></button>
             </div>
-            <div className="flex-1 overflow-y-auto p-5">
+            <div className="flex-1 overflow-y-auto p-5 custom-scrollbar bg-[#0F172A]">
               <form id="property-form" onSubmit={handleSave} className="space-y-4">
                 
+                {/* Image Upload Section */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2">
+                  {/* Avatar Upload */}
+                  <div className="col-span-1 flex flex-col gap-2">
+                    <label className="text-[10px] text-slate-400 font-medium">Logo / Avatar</label>
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full aspect-square bg-[#1E293B] border border-slate-700/50 rounded-xl flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors overflow-hidden group relative"
+                    >
+                      {formData.avatar ? (
+                        <img src={formData.avatar} alt="Logo" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex flex-col items-center text-slate-500 group-hover:text-primary transition-colors">
+                          <Upload size={20} className="mb-1" />
+                          <span className="text-[10px] font-semibold">Subir</span>
+                        </div>
+                      )}
+                    </div>
+                    <input type="file" accept="image/*" ref={fileInputRef} onChange={(e) => handleImageUpload(e, true)} className="hidden" />
+                  </div>
+
+                  {/* Property Photos Upload */}
+                  <div className="col-span-1 md:col-span-3 flex flex-col gap-2">
+                    <label className="text-[10px] text-slate-400 font-medium flex justify-between">
+                      <span>Fotos (Máx 3)</span>
+                      <span>{formData.images?.length || 0}/3</span>
+                    </label>
+                    <div className="flex gap-2">
+                      {formData.images?.map((img, i) => (
+                        <div key={i} className="w-20 sm:w-24 aspect-square rounded-xl bg-[#1E293B] border border-slate-700/50 overflow-hidden relative group">
+                          <img src={img} alt={`Foto ${i}`} className="w-full h-full object-cover" />
+                          <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 p-1 bg-rose-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                      {(formData.images?.length || 0) < 3 && (
+                        <div 
+                          onClick={() => multipleFileInputRef.current?.click()}
+                          className="w-20 sm:w-24 aspect-square bg-[#1E293B] border border-slate-700/50 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors group"
+                        >
+                          <div className="flex flex-col items-center text-slate-500 group-hover:text-primary transition-colors">
+                            <ImageIcon size={20} className="mb-1" />
+                            <span className="text-[10px] font-semibold text-center leading-tight">Añadir<br/>Foto</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <input type="file" accept="image/*" multiple ref={multipleFileInputRef} onChange={(e) => handleImageUpload(e, false)} className="hidden" />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                   <div className="col-span-1 md:col-span-2">
-                    <label className="text-[10px] md:text-xs text-slate-500 font-medium">Detalle de la Propiedad (Nombre/Título)</label>
-                    <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ej. Lujoso Dpto en Miraflores" className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20" />
+                    <label className="text-[10px] text-slate-400 font-medium">Detalle de la Propiedad (Nombre/Título)</label>
+                    <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ej. Lujoso Dpto en Miraflores" className="w-full mt-1.5 p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" />
                   </div>
 
                   <div>
-                    <label className="text-[10px] md:text-xs text-slate-500 font-medium">Tipo de Inmueble</label>
-                    <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20">
+                    <label className="text-[10px] text-slate-400 font-medium">Tipo de Inmueble</label>
+                    <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full mt-1.5 p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all">
                       <option value="Casa">Casa</option>
                       <option value="Departamento">Departamento</option>
                       <option value="Oficina">Oficina</option>
@@ -209,18 +323,46 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                   </div>
 
                   <div>
-                    <label className="text-[10px] md:text-xs text-slate-500 font-medium">Nombre del Proyecto (Opcional)</label>
-                    <input type="text" value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} placeholder="Ej. Torre Esmeralda" className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20" />
+                    <label className="text-[10px] text-slate-400 font-medium">Nombre del Proyecto (Opcional)</label>
+                    <div className="relative mt-1.5">
+                      <input 
+                        type="text" 
+                        list="projects-list"
+                        value={formData.project} 
+                        onChange={e => setFormData({...formData, project: e.target.value})} 
+                        placeholder="Ej. Torre Esmeralda" 
+                        className="w-full p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" 
+                      />
+                      <datalist id="projects-list">
+                        {projectsList.map((prj: any) => (
+                          <option key={prj.id} value={prj.name} />
+                        ))}
+                      </datalist>
+                    </div>
                   </div>
 
                   <div className="col-span-1 md:col-span-2">
-                    <label className="text-[10px] md:text-xs text-slate-500 font-medium">Desarrollador / Inmobiliaria</label>
-                    <input type="text" value={formData.developer} onChange={e => setFormData({...formData, developer: e.target.value})} placeholder="Ej. Inmobiliaria XYZ" className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20" />
+                    <label className="text-[10px] text-slate-400 font-medium">Desarrollador / Inmobiliaria</label>
+                    <div className="relative mt-1.5">
+                      <input 
+                        type="text" 
+                        list="developers-list"
+                        value={formData.developer} 
+                        onChange={e => setFormData({...formData, developer: e.target.value})} 
+                        placeholder="Ej. Inmobiliaria XYZ" 
+                        className="w-full p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" 
+                      />
+                      <datalist id="developers-list">
+                        {uniqueDevelopers.map(dev => (
+                          <option key={dev} value={dev} />
+                        ))}
+                      </datalist>
+                    </div>
                   </div>
 
                   <div>
-                    <label className="text-[10px] md:text-xs text-slate-500 font-medium">Estado</label>
-                    <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20">
+                    <label className="text-[10px] text-slate-400 font-medium">Estado</label>
+                    <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full mt-1.5 p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all">
                       <option value="Disponible">🟢 Disponible</option>
                       <option value="Reservado">🟠 Reservado</option>
                       <option value="Vendido">⚫ Vendido</option>
@@ -229,44 +371,44 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                   </div>
 
                   <div>
-                    <label className="text-[10px] md:text-xs text-slate-500 font-medium">Precio de Venta</label>
-                    <div className="flex gap-2 mt-1">
-                      <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})} className="w-24 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20">
+                    <label className="text-[10px] text-slate-400 font-medium">Precio de Venta</label>
+                    <div className="flex gap-2 mt-1.5">
+                      <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})} className="w-24 p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all">
                         <option value="USD">USD</option>
                         <option value="PEN">PEN</option>
                       </select>
-                      <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="0.00" className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20" />
+                      <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="0.00" className="flex-1 p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-[10px] md:text-xs text-slate-500 font-medium">Ubicación</label>
-                    <input required type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} placeholder="Ej. Av. Principal 123" className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20" />
+                    <label className="text-[10px] text-slate-400 font-medium">Ubicación</label>
+                    <input required type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} placeholder="Ej. Av. Principal 123" className="w-full mt-1.5 p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" />
                   </div>
 
                   <div>
-                    <label className="text-[10px] md:text-xs text-slate-500 font-medium">Área (m²)</label>
-                    <input type="number" value={formData.area} onChange={e => setFormData({...formData, area: e.target.value})} placeholder="Ej. 120" className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20" />
+                    <label className="text-[10px] text-slate-400 font-medium">Área (m²)</label>
+                    <input type="number" value={formData.area} onChange={e => setFormData({...formData, area: e.target.value})} placeholder="Ej. 120" className="w-full mt-1.5 p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" />
                   </div>
 
                   {formData.type !== 'Terreno' && formData.type !== 'Deposito' && (
                     <div>
-                      <label className="text-[10px] md:text-xs text-slate-500 font-medium">Habitaciones / Privados</label>
-                      <input type="number" value={formData.rooms} onChange={e => setFormData({...formData, rooms: e.target.value})} placeholder="Ej. 3" className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20" />
+                      <label className="text-[10px] text-slate-400 font-medium">Habitaciones / Privados</label>
+                      <input type="number" value={formData.rooms} onChange={e => setFormData({...formData, rooms: e.target.value})} placeholder="Ej. 3" className="w-full mt-1.5 p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" />
                     </div>
                   )}
 
                   <div className="col-span-1 md:col-span-2">
-                    <label className="text-[10px] md:text-xs text-slate-500 font-medium">Otras características y detalles</label>
-                    <textarea rows={3} value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})} placeholder="Describe amenities, cochera, vista, año de construcción..." className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20 resize-none"></textarea>
+                    <label className="text-[10px] text-slate-400 font-medium">Otras características y detalles</label>
+                    <textarea rows={3} value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})} placeholder="Describe amenities, cochera, vista, año de construcción..." className="w-full mt-1.5 p-2.5 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs md:text-sm text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none"></textarea>
                   </div>
 
                 </div>
               </form>
             </div>
             
-            <div className={`p-4 border-t shrink-0 transition-colors ${isDarkMode ? 'bg-slate-800/30 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
-              <button form="property-form" type="submit" className="w-full bg-primary text-white p-2.5 rounded-xl text-sm font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 active:scale-95">
+            <div className="p-4 border-t border-slate-800/60 bg-[#0B1120] shrink-0">
+              <button form="property-form" type="submit" disabled={formData.images?.length > 3} className="w-full bg-primary text-white p-3 rounded-xl text-sm font-bold hover:bg-primary-dark transition-all shadow-[0_0_15px_rgba(37,99,235,0.2)] active:scale-[0.98] disabled:opacity-50">
                 Guardar Propiedad
               </button>
             </div>
