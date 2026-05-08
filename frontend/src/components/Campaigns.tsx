@@ -132,7 +132,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                 <p className="text-[11px] md:text-[12px] text-slate-500 mt-1 font-medium">Personaliza tu estrategia de comunicación</p>
               </div>
               <div className="p-6 space-y-4">
-                <label className={`block text-[11px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Selecciona tu Estrategia</label>
+                <label className={`block text-[10px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>selecciona tu estrategia</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <StrategyCard 
                     icon={<Zap size={18} />} 
@@ -158,7 +158,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
               <div className={`px-6 py-4 border-b flex items-center justify-between flex-wrap gap-3 transition-colors ${isDarkMode ? 'border-slate-800/50' : 'border-slate-100'}`}>
                 <h2 className={`font-bold flex items-center gap-2 ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>
                   <MessageSquare size={18} className="text-primary" />
-                  Mensaje Base
+                  mensaje base
                 </h2>
                 <div className="flex items-center gap-3">
                   <select 
@@ -233,20 +233,20 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
               <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                 <h2 className="font-semibold text-slate-800 flex items-center gap-2">
                   <Users size={18} className="text-primary" />
-                  Destinatarios
+                  destinatarios
                 </h2>
                 <div className="flex bg-slate-100 rounded-lg p-1">
                   <button 
                     onClick={() => setRecipientSource('database')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${recipientSource === 'database' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                   >
-                    <Database size={14} /> Base de Datos
+                    <Database size={14} /> base de datos
                   </button>
                   <button 
                     onClick={() => setRecipientSource('manual')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${recipientSource === 'manual' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                   >
-                    <FileText size={14} /> Manual
+                    <FileText size={14} /> manual
                   </button>
                 </div>
               </div>
@@ -277,7 +277,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                             <p className="text-xs text-amber-700 mt-1 font-medium">Recomendación: Enviar 1 mensaje mensual o quincenal máximo para evitar saturar al cliente y mantener una relación saludable.</p>
                           </div>
                         </div>
-                        <label className={`text-sm font-medium mb-1 block ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Motivo de Postventa</label>
+                        <label className={`text-xs font-bold mb-1 block tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>motivo de postventa</label>
                         <div className="grid grid-cols-2 gap-3">
                           {[
                             { id: 'cumpleanos', label: 'Cumpleaños' },
@@ -297,7 +297,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                       </div>
                     ) : campaignType === 'seguimiento' ? (
                       <div className="grid grid-cols-2 gap-3">
-                        <label className="text-sm font-medium text-slate-700 col-span-2 mb-1">Estrategia de Seguimiento (Calentar Leads)</label>
+                        <label className="text-xs font-bold text-slate-500 col-span-2 mb-1 tracking-wider">estrategia de seguimiento (calentar leads)</label>
                         {[
                           { id: 'frios', label: 'Leads Fríos (>30 días)' },
                           { id: 'sin_respuesta', label: 'Sin respuesta a cotización' },
@@ -315,7 +315,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                       </div>
                     ) : (
                       <div>
-                        <label className="text-sm font-medium text-slate-700 block mb-2">Filtrar por Etapa del Pipeline (Masivo)</label>
+                        <label className="text-xs font-bold text-slate-500 block mb-2 tracking-wider">filtrar por etapa del pipeline (masivo)</label>
                         <select 
                           value={dbFilter} 
                           onChange={(e) => setDbFilter(e.target.value)}

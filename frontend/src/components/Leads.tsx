@@ -758,22 +758,22 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
       {showForm && (
         <div className={`p-4 rounded-xl border shadow-lg space-y-3 animate-in slide-in-from-top duration-300 ${isDarkMode ? 'bg-slate-800 border-indigo-500/30' : 'bg-slate-50 border-emerald-500/20'}`}>
           <div className="space-y-1">
-            <label className={`text-[9px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Asunto</label>
+            <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>asunto</label>
             <input type="text" value={nTitle} onChange={e=>setNTitle(e.target.value)} placeholder="Ej: Visita al Penthouse 502..." className={`w-full p-2 rounded-lg text-xs outline-none transition-all border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-white border-slate-200 text-slate-800 focus:border-primary'}`}/>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <div className="space-y-1">
-              <label className={`text-[9px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Tipo</label>
+              <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>tipo</label>
               <select value={nType} onChange={e=>setNType(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}>
                 <option>Visita</option><option>Llamada</option><option>Reunión</option><option>Seguimiento</option><option>Firma</option>
               </select>
             </div>
             <div className="space-y-1">
-              <label className={`text-[9px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Fecha</label>
+              <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>fecha</label>
               <input type="date" value={nDate} onChange={e=>setNDate(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}/>
             </div>
             <div className="space-y-1">
-              <label className={`text-[9px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Hora</label>
+              <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>hora</label>
               <input type="time" value={nTime} onChange={e=>setNTime(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}/>
             </div>
             <div className="flex items-end">
@@ -834,7 +834,7 @@ const NewLeadModal = ({ onClose, onSave, isDarkMode, editLead, pipelineStages }:
       : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-primary focus:bg-white'
   }`;
 
-  const labelCls = `block text-[10px] font-black mb-1.5 uppercase tracking-widest ${
+  const labelCls = `block text-[9px] font-bold mb-1 tracking-wider ${
     isDarkMode ? 'text-slate-400' : 'text-slate-500'
   }`;
 
@@ -863,22 +863,22 @@ const NewLeadModal = ({ onClose, onSave, isDarkMode, editLead, pipelineStages }:
           <div className="grid grid-cols-2 gap-x-4 gap-y-4">
             
             <div className="col-span-2">
-              <label className={labelCls}>Nombre Completo *</label>
+              <label className={labelCls}>nombre completo *</label>
               <input required autoFocus value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Ej. Juan Pérez" className={inputCls} />
             </div>
 
             <div className="col-span-1">
-              <label className={labelCls}>Teléfono *</label>
+              <label className={labelCls}>teléfono *</label>
               <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+52 1..." className={inputCls} />
             </div>
 
             <div className="col-span-1">
-              <label className={labelCls}>Email</label>
+              <label className={labelCls}>email</label>
               <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="correo@ejemplo.com" className={inputCls} />
             </div>
 
             <div className="col-span-1">
-              <label className={labelCls}>Etapa del Pipeline</label>
+              <label className={labelCls}>etapa del pipeline</label>
               <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className={inputCls}>
                 {pipelineStages?.length ? pipelineStages.map((s: string) => <option key={s} value={s}>{s}</option>) : (
                   <>
@@ -893,7 +893,7 @@ const NewLeadModal = ({ onClose, onSave, isDarkMode, editLead, pipelineStages }:
             </div>
 
             <div className="col-span-1">
-              <label className={labelCls}>Presupuesto</label>
+              <label className={labelCls}>presupuesto</label>
               <div className="flex gap-2">
                 <select value={form.currency} onChange={e => setForm({...form, currency: e.target.value})} className={`${inputCls} !w-[90px] shrink-0`}>
                   <option value="USD">USD $</option>
@@ -910,7 +910,7 @@ const NewLeadModal = ({ onClose, onSave, isDarkMode, editLead, pipelineStages }:
             </div>
 
             <div className="col-span-1">
-              <label className={labelCls}>Origen / Fuente</label>
+              <label className={labelCls}>origen / fuente</label>
               <select value={form.source} onChange={e => setForm({...form, source: e.target.value})} className={inputCls}>
                 <option value="WhatsApp">WhatsApp</option>
                 <option value="Facebook">Facebook</option>
@@ -924,12 +924,12 @@ const NewLeadModal = ({ onClose, onSave, isDarkMode, editLead, pipelineStages }:
             </div>
 
             <div className="col-span-1">
-              <label className={labelCls}>Proyecto de Interés</label>
+              <label className={labelCls}>proyecto de interés</label>
               <ProjectSelect value={form.project} onChange={(v: string) => setForm({...form, project: v})} className={inputCls} />
             </div>
 
             <div className="col-span-2">
-              <label className={labelCls}>Detalle / Notas de Interés</label>
+              <label className={labelCls}>detalle / notas de interés</label>
               <textarea 
                 value={form.details} 
                 onChange={e => setForm({...form, details: e.target.value})} 

@@ -150,27 +150,27 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
       {/* Modal Genérico */}
       {modalType && (
-        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="font-bold text-lg text-slate-800 capitalize">Añadir {modalType}</h3>
-              <button onClick={closeModal} className="text-slate-400 hover:bg-slate-100 p-2 rounded-full transition-colors"><X size={20} /></button>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className={`rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+            <div className={`px-6 py-3 border-b flex justify-between items-center ${isDarkMode ? 'bg-slate-800/50 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
+              <h3 className={`font-bold text-sm lowercase ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>añadir {modalType}</h3>
+              <button onClick={closeModal} className="text-slate-400 hover:bg-slate-100 p-1 rounded-lg transition-colors"><X size={18} /></button>
             </div>
-            <form onSubmit={handleSave} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
+            <form onSubmit={handleSave} className={`p-5 space-y-3 max-h-[80vh] overflow-y-auto custom-scrollbar ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'}`}>
               {modalType === 'proyecto' && (
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Nombre del Proyecto</label>
-                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary" placeholder="Ej. Torre Esmeralda" />
+                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre del proyecto</label>
+                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="Ej. Torre Esmeralda" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Código (Opcional)</label>
-                      <input type="text" value={formData.code || ''} onChange={e => setFormData({...formData, code: e.target.value})} className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary" placeholder="PRJ-001" />
+                      <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>código (opcional)</label>
+                      <input type="text" value={formData.code || ''} onChange={e => setFormData({...formData, code: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="PRJ-001" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Estado</label>
-                      <select value={formData.status || 'Activo'} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary bg-white">
+                      <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>estado</label>
+                      <select value={formData.status || 'Activo'} onChange={e => setFormData({...formData, status: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
                         <option value="Activo">Activo</option>
                         <option value="Inactivo">Inactivo</option>
                       </select>
@@ -182,11 +182,11 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               {modalType === 'etapa' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Etapa</label>
-                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary" placeholder="Ej. Contactado" />
+                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre de la etapa</label>
+                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="Ej. Contactado" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Color HEX</label>
+                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>color hex</label>
                     <div className="flex gap-2">
                       <input type="color" value={formData.color || '#3b82f6'} onChange={e => setFormData({...formData, color: e.target.value})} className="h-10 w-10 border border-slate-200 rounded p-0 cursor-pointer" />
                       <input type="text" value={formData.color || '#3b82f6'} onChange={e => setFormData({...formData, color: e.target.value})} className="flex-1 border border-slate-200 rounded-lg px-4 py-2 text-sm font-mono focus:outline-none focus:border-primary" />
@@ -196,7 +196,7 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={formData.visible !== false} onChange={e => setFormData({...formData, visible: e.target.checked})} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                      <span className="ml-3 text-sm font-medium text-slate-700">Visible en el Pipeline Kanban</span>
+                      <span className={`ml-3 text-xs font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Visible en el Pipeline Kanban</span>
                     </label>
                   </div>
                 </>
@@ -205,12 +205,12 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               {modalType === 'fuente' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Fuente</label>
-                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary" placeholder="Ej. Facebook Ads" />
+                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre de la fuente</label>
+                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="Ej. Facebook Ads" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Icono (Opcional)</label>
-                    <select value={formData.icon || 'Globe'} onChange={e => setFormData({...formData, icon: e.target.value})} className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary bg-white">
+                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>icono (opcional)</label>
+                    <select value={formData.icon || 'Globe'} onChange={e => setFormData({...formData, icon: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
                       <option value="Facebook">Facebook</option>
                       <option value="Instagram">Instagram</option>
                       <option value="Smartphone">Smartphone (TikTok/App)</option>
@@ -224,16 +224,16 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={formData.visible !== false} onChange={e => setFormData({...formData, visible: e.target.checked})} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                      <span className="ml-3 text-sm font-medium text-slate-700">Fuente Activa</span>
+                      <span className={`ml-3 text-xs font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Fuente Activa</span>
                     </label>
                   </div>
                 </>
               )}
 
-              <div className="pt-4 flex gap-3">
-                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium text-sm transition-colors">Cancelar</button>
-                <button type="submit" disabled={saving} className="flex-1 px-4 py-2 text-white bg-primary hover:bg-primary-dark rounded-xl font-medium text-sm transition-colors shadow-sm disabled:opacity-50">
-                  {saving ? 'Guardando...' : 'Guardar'}
+              <div className="pt-2 flex gap-3">
+                <button type="button" onClick={closeModal} className={`flex-1 px-4 py-2 rounded-xl font-bold text-xs transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>cancelar</button>
+                <button type="submit" disabled={saving} className="flex-1 px-4 py-2 text-white bg-primary hover:bg-primary-dark rounded-xl font-bold text-xs transition-colors shadow-sm disabled:opacity-50">
+                  {saving ? 'guardando...' : 'guardar'}
                 </button>
               </div>
             </form>

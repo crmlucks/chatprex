@@ -254,7 +254,7 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
             <form onSubmit={save} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
               {/* Type selector */}
               <div>
-                <label className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Tipo de Evento</label>
+                <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>tipo de evento</label>
                 <div className="grid grid-cols-3 gap-2 mt-2">
                   {(Object.keys(typeConfig) as EventType[]).map(t => { const c = typeConfig[t]; const I = c.icon; return (
                     <button key={t} type="button" onClick={() => setForm({...form, type:t})}
@@ -265,48 +265,48 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
                 </div>
               </div>
               <div>
-                <label className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Título</label>
+                <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>título</label>
                 <input required type="text" value={form.title} onChange={e => setForm({...form, title:e.target.value})} placeholder="Ej. Visita Penthouse Lux..." className={`w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'}`}/>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Fecha</label>
+                  <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>fecha</label>
                   <input required type="date" value={form.date} onChange={e => setForm({...form, date:e.target.value})} className={`w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`}/>
                 </div>
                 <div>
-                  <label className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Hora</label>
+                  <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>hora</label>
                   <input required type="time" value={form.time} onChange={e => setForm({...form, time:e.target.value})} className={`w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`}/>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Lead / Cliente</label>
+                  <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>lead / cliente</label>
                   <div className="relative">
                     <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 mt-0.5"/>
                     <input type="text" value={form.client} onChange={e => setForm({...form, client:e.target.value})} placeholder="Buscar lead..." className={`w-full mt-1 pl-8 pr-3 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'}`}/>
                   </div>
                 </div>
                 <div>
-                  <label className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Prioridad</label>
+                  <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>prioridad</label>
                   <select value={form.priority} onChange={e => setForm({...form, priority:e.target.value as Priority})} className={`w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
                     <option>Alta</option><option>Media</option><option>Baja</option>
                   </select>
                 </div>
               </div>
               <div>
-                <label className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Estado</label>
+                <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>estado</label>
                 <select value={form.status} onChange={e => setForm({...form, status:e.target.value as EventStatus})} className={`w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
                   <option value="pendiente">⏳ Pendiente</option><option value="completada">✅ Completada</option><option value="cancelada">❌ Cancelada</option>
                 </select>
               </div>
               <div>
-                <label className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Notas (Opcional)</label>
+                <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>notas (opcional)</label>
                 <textarea value={form.notes} onChange={e => setForm({...form, notes:e.target.value})} rows={2} placeholder="Detalles adicionales..." className={`w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 outline-none resize-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'}`}/>
               </div>
               <div className="flex gap-3 pt-2">
                 {editing && <button type="button" onClick={del} className={`px-4 py-2.5 border rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${isDarkMode ? 'border-rose-900/50 text-rose-500 hover:bg-rose-500/10' : 'border-rose-200 text-rose-600 hover:bg-rose-50'}`}><Trash2 size={14}/>Eliminar</button>}
                 <button type="submit" className="flex-1 bg-primary text-white p-2.5 rounded-xl text-sm font-bold hover:bg-primary-dark shadow-lg shadow-primary/20 active:scale-95 transition-all">
-                  {editing ? 'Actualizar Evento' : 'Guardar en Calendario'}
+                  {editing ? 'actualizar evento' : 'guardar en calendario'}
                 </button>
               </div>
             </form>

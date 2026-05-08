@@ -131,7 +131,7 @@ const Dashboard = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               return (
                 <div key={status} className={`flex-1 min-w-[100px] p-3 rounded-xl border ${dc ? 'border-slate-800 bg-slate-800/30' : 'border-slate-100 bg-slate-50'}`}>
                   <div className="flex justify-between items-center mb-2">
-                    <span className={`text-[10px] font-black uppercase tracking-wider ${dc ? 'text-slate-400' : 'text-slate-500'}`}>{status}</span>
+                    <span className={`text-[9px] font-bold tracking-wider lowercase ${dc ? 'text-slate-400' : 'text-slate-500'}`}>{status}</span>
                     <span className={`text-xs font-bold ${dc ? 'text-white' : 'text-slate-800'}`}>{count}</span>
                   </div>
                   <div className={`h-1.5 rounded-full ${dc ? 'bg-slate-700' : 'bg-slate-200'}`}>
@@ -228,7 +228,7 @@ const Dashboard = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                       <div className="flex items-center gap-2 mt-0.5">
                         {dueDate && <span className={`text-[10px] font-bold flex items-center gap-1 ${isOverdue ? 'text-rose-500' : 'text-slate-500'}`}><Clock size={10} className="text-blue-500" /> {dueDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} {dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
                         <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${pri === 'Alta' ? 'bg-rose-500/10 text-rose-500' : pri === 'Baja' ? 'bg-slate-100 text-slate-400' : 'bg-blue-500/10 text-blue-500'}`}>{pri}</span>
-                        {isOverdue && <span className="text-[9px] font-black text-rose-500 uppercase tracking-wider">Vencida</span>}
+                        {isOverdue && <span className="text-[9px] font-bold text-rose-500 lowercase tracking-wider">vencida</span>}
                       </div>
                     </div>
                   </div>
@@ -290,7 +290,7 @@ const StatCard = ({ label, value, trend, icon, color, isDarkMode }: any) => (
       <div className={`p-2.5 rounded-xl ${color} shadow-sm`}>{icon}</div>
       {trend && <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-500"><ArrowUpRight size={12} /> {trend}</div>}
     </div>
-    <p className="text-[11px] md:text-[12px] font-bold text-slate-500 uppercase tracking-widest mb-1">{label}</p>
+    <p className="text-[10px] font-bold text-slate-500 lowercase tracking-wider mb-1">{label}</p>
     <h3 className={`text-[18px] md:text-[20px] font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{value}</h3>
   </div>
 );

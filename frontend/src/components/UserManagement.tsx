@@ -193,11 +193,11 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
             <table className="w-full min-w-[700px]">
               <thead>
                 <tr className={isDarkMode ? 'bg-slate-800/50' : 'bg-slate-50'}>
-                  <th className={`p-3 text-left text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Usuario</th>
-                  <th className={`p-3 text-left text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Rol</th>
-                  <th className={`p-3 text-left text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Estado</th>
-                  <th className={`p-3 text-left text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Teléfono</th>
-                  <th className={`p-3 text-right text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Acciones</th>
+                  <th className={`p-3 text-left text-[10px] font-bold tracking-wider ${textSecondary}`}>usuario</th>
+                  <th className={`p-3 text-left text-[10px] font-bold tracking-wider ${textSecondary}`}>rol</th>
+                  <th className={`p-3 text-left text-[10px] font-bold tracking-wider ${textSecondary}`}>estado</th>
+                  <th className={`p-3 text-left text-[10px] font-bold tracking-wider ${textSecondary}`}>teléfono</th>
+                  <th className={`p-3 text-right text-[10px] font-bold tracking-wider ${textSecondary}`}>acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -272,32 +272,32 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
             {error && <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>}
             <form onSubmit={editingUser ? handleUpdate : handleCreate} className="space-y-4">
               <div>
-                <label className={`block text-xs font-bold mb-1 ${textSecondary}`}>Nombre</label>
+                <label className={`block text-[9px] font-bold mb-1 tracking-wider ${textSecondary}`}>nombre</label>
                 <input type="text" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className={`w-full px-3 py-2 border rounded-xl text-sm ${inputBg}`} />
               </div>
               <div>
-                <label className={`block text-xs font-bold mb-1 ${textSecondary}`}>Email</label>
+                <label className={`block text-[9px] font-bold mb-1 tracking-wider ${textSecondary}`}>email</label>
                 <input type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className={`w-full px-3 py-2 border rounded-xl text-sm ${inputBg}`} />
               </div>
               {!editingUser && (
                 <div>
-                  <label className={`block text-xs font-bold mb-1 ${textSecondary}`}>Contraseña</label>
+                  <label className={`block text-[9px] font-bold mb-1 tracking-wider ${textSecondary}`}>contraseña</label>
                   <input type="password" required minLength={6} value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className={`w-full px-3 py-2 border rounded-xl text-sm ${inputBg}`} />
                 </div>
               )}
               <div>
-                <label className={`block text-xs font-bold mb-1 ${textSecondary}`}>Teléfono</label>
+                <label className={`block text-[9px] font-bold mb-1 tracking-wider ${textSecondary}`}>teléfono</label>
                 <input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className={`w-full px-3 py-2 border rounded-xl text-sm ${inputBg}`} />
               </div>
               <div>
-                <label className={`block text-xs font-bold mb-1 ${textSecondary}`}>Rol</label>
+                <label className={`block text-[9px] font-bold mb-1 tracking-wider ${textSecondary}`}>rol</label>
                 <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className={`w-full px-3 py-2 border rounded-xl text-sm ${inputBg}`}>
                   <option value="usuario">Usuario</option>
                   <option value="administrador">Administrador</option>
                 </select>
               </div>
               <button type="submit" className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-all active:scale-[0.98] shadow-lg shadow-primary/20">
-                {editingUser ? 'Guardar Cambios' : 'Crear Usuario'}
+                {editingUser ? 'guardar cambios' : 'crear usuario'}
               </button>
             </form>
           </div>
@@ -308,7 +308,7 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       {showPasswordModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className={`w-full max-w-sm rounded-2xl border p-6 shadow-2xl ${isDarkMode ? 'bg-[#1E1E1E] border-slate-700' : 'bg-white border-slate-200'}`}>
-            <h3 className={`text-lg font-bold mb-4 ${textPrimary}`}>Restablecer Contraseña</h3>
+            <h3 className={`text-lg font-bold mb-4 ${textPrimary}`}>restablecer contraseña</h3>
             {error && <div className="mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>}
             <input type="password" minLength={6} placeholder="Nueva contraseña (mín. 6 caracteres)" value={newPassword} onChange={e => setNewPassword(e.target.value)}
               className={`w-full px-3 py-2 border rounded-xl text-sm mb-4 ${inputBg}`} />
