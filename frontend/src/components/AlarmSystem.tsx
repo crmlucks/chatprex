@@ -96,56 +96,55 @@ const AlarmBanner = ({ alarm, onDismiss }: { alarm: ActiveAlarm; onDismiss: () =
 
   const typeIcon = () => {
     const sub = alarm.item.subtype?.toLowerCase() || '';
-    if (sub.includes('visita')) return <CalendarDays size={24} />;
-    if (sub.includes('llamada')) return <Phone size={24} />;
-    if (sub.includes('reunión')) return <ListTodo size={24} />;
-    return <Clock size={24} />;
+    if (sub.includes('visita')) return <CalendarDays size={22} />;
+    if (sub.includes('llamada')) return <Phone size={22} />;
+    if (sub.includes('reunión')) return <ListTodo size={22} />;
+    return <Clock size={22} />;
   };
 
   const isCita = alarm.item.type === 'cita';
 
   return (
     <div
-      className={`fixed top-10 left-1/2 -translate-x-1/2 z-[10000] w-full max-w-xl mx-auto px-6 transition-all duration-500 ${pulse ? 'scale-100' : 'scale-[1.02]'}`}
-      style={{ animation: 'alarmSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}
+      className={`fixed top-6 left-1/2 -translate-x-1/2 z-[10000] w-full max-w-lg mx-auto px-4 transition-all duration-300 ${pulse ? 'scale-100' : 'scale-[1.01]'}`}
+      style={{ animation: 'alarmSlideDown 0.4s ease-out' }}
     >
-      <div className={`relative overflow-hidden rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border ${isCita ? 'border-amber-500/30 bg-slate-900/90' : 'border-rose-500/30 bg-slate-900/90'} backdrop-blur-3xl p-8`}>
-        <div className={`absolute top-0 left-0 right-0 h-1.5 ${isCita ? 'bg-amber-500' : 'bg-rose-500'} animate-pulse`} />
+      <div className={`relative overflow-hidden rounded-xl border bg-surface p-5 shadow-lg ${isCita ? 'border-amber-500/30' : 'border-red-500/30'}`}>
+        <div className={`absolute top-0 left-0 right-0 h-1 ${isCita ? 'bg-amber-500' : 'bg-red-500'} animate-pulse`} />
         
-        <div className="flex items-start gap-6">
-          <div className={`w-16 h-16 rounded-3xl flex items-center justify-center shrink-0 ${isCita ? 'bg-amber-500/20 text-amber-500 shadow-2xl shadow-amber-500/20' : 'bg-rose-500/20 text-rose-500 shadow-2xl shadow-rose-500/20'}`} style={{ animation: 'alarmIconPulse 1s ease-in-out infinite' }}>
+        <div className="flex items-start gap-4">
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${isCita ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
             {typeIcon()}
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
-               <div className={`w-2 h-2 rounded-full ${isCita ? 'bg-amber-500' : 'bg-rose-500'} animate-ping`} />
-               <span className={`text-[10px] font-black uppercase tracking-[2px] ${isCita ? 'text-amber-500' : 'text-rose-500'}`}>
-                 recordatorio activo
+            <div className="flex items-center gap-2 mb-1">
+               <div className={`w-1.5 h-1.5 rounded-full ${isCita ? 'bg-amber-500' : 'bg-red-500'} animate-ping`} />
+               <span className={`text-xs font-medium ${isCita ? 'text-amber-500' : 'text-red-500'}`}>
+                 Recordatorio activo
                </span>
             </div>
-            <h3 className="text-white text-xl font-black lowercase truncate mb-2 tracking-tight">{alarm.item.title}</h3>
+            <h3 className="text-content text-base font-semibold truncate mb-1">{alarm.item.title}</h3>
             
-            <div className="flex items-center gap-4 flex-wrap opacity-60">
-              {alarm.item.leadName && <span className="text-[11px] font-bold text-white flex items-center gap-2">👤 {alarm.item.leadName}</span>}
-              <span className="text-[11px] font-bold text-white flex items-center gap-2">🕐 {alarm.item.dueTime}</span>
-              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 bg-white/5 rounded-lg text-white">{alarm.item.subtype || alarm.item.type}</span>
+            <div className="flex items-center gap-3 flex-wrap text-xs text-content-secondary">
+              {alarm.item.leadName && <span className="flex items-center gap-1">👤 {alarm.item.leadName}</span>}
+              <span className="flex items-center gap-1">🕐 {alarm.item.dueTime}</span>
+              <span className="px-1.5 py-0.5 bg-surface-inset rounded text-content-muted">{alarm.item.subtype || alarm.item.type}</span>
             </div>
           </div>
 
           <button
             onClick={onDismiss}
-            className={`shrink-0 flex items-center gap-2 px-6 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[2px] transition-all active:scale-95 shadow-2xl ${isCita ? 'bg-amber-500 text-amber-950 hover:bg-amber-400' : 'bg-rose-500 text-rose-950 hover:bg-rose-400'}`}
+            className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${isCita ? 'bg-amber-500 text-amber-950 hover:bg-amber-400' : 'bg-red-500 text-white hover:bg-red-400'}`}
           >
-            <BellOff size={16} /> silenciar
+            <BellOff size={14} /> Silenciar
           </button>
         </div>
         
-        <div className="mt-6 pt-6 border-t border-white/5 flex justify-between items-center">
-           <div className="flex items-center gap-2 text-[10px] font-bold text-white/30 uppercase tracking-widest">
-              <AlertTriangle size={12} /> sonando hace {formatElapsed(elapsed)}
+        <div className="mt-3 pt-3 border-t border-edge flex justify-between items-center">
+           <div className="flex items-center gap-1.5 text-xs text-content-muted">
+              <AlertTriangle size={12} /> Sonando hace {formatElapsed(elapsed)}
            </div>
-           <p className="text-[9px] font-black text-white/20 uppercase tracking-[3px]">chatprex pro system</p>
         </div>
       </div>
     </div>
@@ -191,14 +190,14 @@ export const AlarmSystem = ({ items, enabled = true }: { items: AlarmItem[], ena
       <AlarmBanner alarm={activeAlarms[activeAlarms.length - 1]} onDismiss={() => dismissAlarm(activeAlarms[activeAlarms.length - 1].item.id)} />
       {activeAlarms.length > 1 && (
         <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[10001] animate-bounce">
-          <div className="bg-slate-900/90 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/5 shadow-2xl backdrop-blur-xl">
+          <div className="bg-surface text-content px-4 py-2 rounded-lg text-xs font-medium border border-edge shadow-sm">
             {activeAlarms.length} notificaciones pendientes
           </div>
         </div>
       )}
       <style>{`
-        @keyframes alarmSlideDown { from { opacity: 0; transform: translateX(-50%) translateY(-60px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-        @keyframes alarmIconPulse { 0%, 100% { transform: scale(1); rotate: 0deg; } 50% { transform: scale(1.1); rotate: 5deg; } }
+        @keyframes alarmSlideDown { from { opacity: 0; transform: translateX(-50%) translateY(-40px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes alarmIconPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
       `}</style>
     </>
   );

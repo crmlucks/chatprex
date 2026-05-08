@@ -3,124 +3,225 @@
 @tailwind utilities;
 
 @layer base {
+  /* ═══════════════════════════════════════════════
+     DESIGN TOKENS — Light Mode (default)
+     ═══════════════════════════════════════════════ */
   :root {
-    --font-main: 'Inter', sans-serif;
-    --primary: 22 73 255;
-    --primary-foreground: 255 255 255;
-    --surface: 255 255 255;
-    --surface-dim: 248 250 252;
-    --border: 226 232 240;
-    --text-main: 30 41 59;
-    --text-muted: 100 116 139;
+    --surface-base: #f8fafc;
+    --surface: #ffffff;
+    --surface-raised: #ffffff;
+    --surface-inset: #f1f5f9;
+    --edge: #e2e8f0;
+    --edge-light: #f1f5f9;
+    --content: #0f172a;
+    --content-secondary: #475569;
+    --content-muted: #94a3b8;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-subtle: #eff6ff;
   }
 
+  /* ═══════════════════════════════════════════════
+     DESIGN TOKENS — Dark Mode
+     ═══════════════════════════════════════════════ */
   .dark {
-    --surface: 24 22 25;
-    --surface-dim: 18 16 19;
-    --border: 51 51 51;
-    --text-main: 248 250 252;
-    --text-muted: 156 163 175;
+    --surface-base: #0a0a0b;
+    --surface: #141416;
+    --surface-raised: #1e1e21;
+    --surface-inset: #111113;
+    --edge: #27272a;
+    --edge-light: #1e1e21;
+    --content: #f4f4f5;
+    --content-secondary: #a1a1aa;
+    --content-muted: #71717a;
+    --accent: #3b82f6;
+    --accent-hover: #60a5fa;
+    --accent-subtle: #172554;
+  }
+
+  /* ═══════════════════════════════════════════════
+     GLOBAL BASE
+     ═══════════════════════════════════════════════ */
+  * {
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
   }
 
   body {
-    font-family: var(--font-main);
-    @apply bg-surface-dim text-slate-800 antialiased;
-    letter-spacing: -0.01em;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--surface-base);
+    color: var(--content);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 1rem;
+    font-weight: 400;
     line-height: 1.5;
-    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* SISTEMA TIPOGRÁFICO GLOBAL */
-  
+  /* ═══════════════════════════════════════════════
+     TYPOGRAPHY HIERARCHY
+     5 sizes: H1, H2, H3, Body, Label
+     ═══════════════════════════════════════════════ */
+
+  /* H1 — Page Titles */
   h1, .h1 {
-    @apply font-black tracking-tighter text-slate-900 dark:text-white;
-    font-size: 28px;
-    line-height: 36px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 2rem;
+    color: var(--content);
+    letter-spacing: -0.025em;
   }
-  @screen lg {
+  @media (min-width: 1024px) {
     h1, .h1 {
-      font-size: 32px;
-      line-height: 40px;
+      font-size: 2rem;
+      line-height: 2.5rem;
     }
   }
 
+  /* H2 — Section Headings */
   h2, .h2 {
-    @apply font-black tracking-tight text-slate-800 dark:text-slate-100;
-    font-size: 22px;
-    line-height: 30px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.75rem;
+    color: var(--content);
+    letter-spacing: -0.02em;
   }
-  @screen lg {
+  @media (min-width: 1024px) {
     h2, .h2 {
-      font-size: 24px;
-      line-height: 32px;
+      font-size: 1.5rem;
+      line-height: 2rem;
     }
   }
 
+  /* H3 — Card / Widget Titles */
   h3, .h3 {
-    @apply font-bold tracking-tight text-slate-800 dark:text-slate-100;
-    font-size: 18px;
-    line-height: 24px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.5rem;
+    color: var(--content);
+    letter-spacing: -0.01em;
   }
-  @screen lg {
+  @media (min-width: 1024px) {
     h3, .h3 {
-      font-size: 20px;
-      line-height: 28px;
+      font-size: 1.25rem;
+      line-height: 1.75rem;
     }
   }
 
+  /* Body Text */
   p, .body-text {
-    @apply font-medium text-slate-500 dark:text-slate-400;
-    font-size: 14px;
-    line-height: 22px;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.375rem;
+    color: var(--content-secondary);
   }
-  @screen lg {
+  @media (min-width: 1024px) {
     p, .body-text {
-      font-size: 15px;
-      line-height: 24px;
+      font-size: 1rem;
+      line-height: 1.625rem;
     }
   }
 
+  /* Labels / Small Text */
   .label-text, .small-text {
-    @apply font-black text-slate-500 uppercase tracking-widest opacity-60;
-    font-size: 10px;
-    line-height: 16px;
-  }
-
-  /* Resetting case rule globally for specific content classes if needed */
-  .sentence-case {
-    text-transform: none !important;
-  }
-  .sentence-case::first-letter {
-    text-transform: uppercase !important;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.125rem;
+    color: var(--content-muted);
   }
 }
 
 @layer components {
-  .glass-panel {
-    @apply bg-white/90 dark:bg-[#1E1E1E]/90 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 shadow-2xl rounded-3xl;
-  }
-  
-  .card-premium {
-    @apply bg-white dark:bg-[#1E1E1E] border border-slate-200/50 dark:border-white/5 rounded-[32px] shadow-sm transition-all duration-300;
-  }
-  .card-premium:hover {
-    @apply shadow-2xl shadow-slate-200/50 dark:shadow-black/50 border-primary/20;
+
+  /* ═══════════════════════════════════════════════
+     CARD
+     ═══════════════════════════════════════════════ */
+  .card {
+    background-color: var(--surface);
+    border: 1px solid var(--edge);
+    border-radius: 0.75rem;
   }
 
-  .input-premium {
-    @apply w-full p-4 rounded-2xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-[#0F0F0F] focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-medium;
+  /* ═══════════════════════════════════════════════
+     INPUT
+     ═══════════════════════════════════════════════ */
+  .input-field {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--edge);
+    background-color: var(--surface);
+    color: var(--content);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    outline: none;
+  }
+  .input-field:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-subtle);
+  }
+  .input-field::placeholder {
+    color: var(--content-muted);
   }
 
+  /* ═══════════════════════════════════════════════
+     BUTTONS
+     ═══════════════════════════════════════════════ */
   .btn-primary {
-    @apply bg-primary text-white px-8 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 shadow-2xl shadow-primary/30 hover:brightness-110 hover:shadow-primary/40;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background-color: var(--accent);
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary:hover {
+    background-color: var(--accent-hover);
+  }
+  .btn-primary:active {
+    transform: scale(0.97);
   }
 
   .btn-secondary {
-    @apply bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-8 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 hover:bg-slate-200 dark:hover:bg-slate-700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background-color: var(--surface-inset);
+    color: var(--content-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    border: 1px solid var(--edge);
+    cursor: pointer;
+  }
+  .btn-secondary:hover {
+    background-color: var(--surface-raised);
+    color: var(--content);
+  }
+
+  /* Legacy compat alias */
+  .card-premium {
+    background-color: var(--surface);
+    border: 1px solid var(--edge);
+    border-radius: 0.75rem;
   }
 }
 
-/* Custom Scrollbar */
+/* ═══════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -129,13 +230,16 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-200 dark:bg-slate-800 rounded-full transition-colors;
+  background-color: var(--edge);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-300 dark:bg-slate-700;
+  background-color: var(--content-muted);
 }
 
-/* Animations */
+/* ═══════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════ */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }

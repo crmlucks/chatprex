@@ -7,236 +7,215 @@ type EventStatus = 'pendiente' | 'completada' | 'cancelada';
 type Priority = 'alta' | 'media' | 'baja';
 
 interface CalEvent {
-  id: number; title: string; type: EventType; date: string; time: string;
-  client: string; status: EventStatus; priority: Priority; lead?: string; notes?: string;
+ id: number; title: string; type: EventType; date: string; time: string;
+ client: string; status: EventStatus; priority: Priority; lead?: string; notes?: string;
 }
 
 const typeConfig: Record<EventType, { icon: any; color: string; bg: string; border: string }> = {
-  visita: { icon: MapPin, color: 'text-blue-600', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-  llamada: { icon: PhoneIcon, color: 'text-emerald-600', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  reunión: { icon: Users, color: 'text-purple-600', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-  seguimiento: { icon: RotateCcw, color: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  firma: { icon: FileSignature, color: 'text-rose-600', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-  separación: { icon: Bookmark, color: 'text-indigo-600', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
+ visita: { icon: MapPin, color: 'text-blue-600', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+ llamada: { icon: PhoneIcon, color: 'text-emerald-600', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+ reunión: { icon: Users, color: 'text-purple-600', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+ seguimiento: { icon: RotateCcw, color: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+ firma: { icon: FileSignature, color: 'text-red-600', bg: 'bg-red-500/10', border: 'border-red-500/20' },
+ separación: { icon: Bookmark, color: 'text-indigo-600', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
 };
 
 export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
-  const { token } = useAuth();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-  const [view, setView] = useState<'month'|'week'|'day'>('month');
-  const [filterType, setFilterType] = useState<EventType | 'todos'>('todos');
-  const [events, setEvents] = useState<CalEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+ const { token } = useAuth();
+ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+ const [view, setView] = useState<'month'|'week'|'day'>('month');
+ const [filterType, setFilterType] = useState<EventType | 'todos'>('todos');
+ const [events, setEvents] = useState<CalEvent[]>([]);
+ const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!token) return;
-    setLoading(true);
-    fetch(`${API_URL}/api/data/tasks`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(data => {
-        setEvents(data.map((t: any) => ({
-          id: t.id, title: t.title, type: (t.description?.toLowerCase() || t.type?.toLowerCase() || 'visita') as EventType,
-          date: t.due_date ? t.due_date.split('T')[0] : new Date().toISOString().split('T')[0],
-          time: t.due_date ? new Date(t.due_date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false}) : '12:00',
-          client: t.lead_name || '', status: (t.status || 'pendiente') as EventStatus, priority: (t.priority || 'media') as Priority
-        })));
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [token, API_URL]);
+ useEffect(() => {
+  if (!token) return;
+  setLoading(true);
+  fetch(`${API_URL}/api/data/tasks`, { headers: { Authorization: `Bearer ${token}` } })
+   .then(r => r.json())
+   .then(data => {
+    setEvents(data.map((t: any) => ({
+     id: t.id, title: t.title, type: (t.description?.toLowerCase() || t.type?.toLowerCase() || 'visita') as EventType,
+     date: t.due_date ? t.due_date.split('T')[0] : new Date().toISOString().split('T')[0],
+     time: t.due_date ? new Date(t.due_date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false}) : '12:00',
+     client: t.lead_name || '', status: (t.status || 'pendiente') as EventStatus, priority: (t.priority || 'media') as Priority
+    })));
+    setLoading(false);
+   })
+   .catch(() => setLoading(false));
+ }, [token, API_URL]);
 
-  const [modal, setModal] = useState(false);
-  const [editing, setEditing] = useState<CalEvent|null>(null);
-  const todayStr = new Date().toISOString().split('T')[0];
-  const [form, setForm] = useState({ title:'', type:'visita' as EventType, date: todayStr, time:'12:00', client:'', status:'pendiente' as EventStatus, priority:'media' as Priority, notes:'' });
+ const [modal, setModal] = useState(false);
+ const [editing, setEditing] = useState<CalEvent|null>(null);
+ const todayStr = new Date().toISOString().split('T')[0];
+ const [form, setForm] = useState({ title:'', type:'visita' as EventType, date: todayStr, time:'12:00', client:'', status:'pendiente' as EventStatus, priority:'media' as Priority, notes:'' });
 
-  const openNew = (date?: string, time?: string) => { setForm({ title:'', type:'visita', date: date||todayStr, time: time||'12:00', client:'', status:'pendiente', priority:'media', notes:'' }); setEditing(null); setModal(true); };
-  const openEdit = (ev: CalEvent, e: React.MouseEvent) => { e.stopPropagation(); setForm({ ...ev, notes: ev.notes||'' }); setEditing(ev); setModal(true); };
-  
-  const save = (e: React.FormEvent) => {
-    e.preventDefault();
-    if(!form.title) return;
-    if(editing) {
-      setEvents(events.map(ev => ev.id===editing.id ? {...form, id:ev.id} : ev));
-    } else {
-      setEvents([{...form, id:Date.now()}, ...events]);
-    }
-    setModal(false);
-  };
+ const openNew = (date?: string) => { setForm({ title:'', type:'visita', date: date||todayStr, time:'12:00', client:'', status:'pendiente', priority:'media', notes:'' }); setEditing(null); setModal(true); };
+ const openEdit = (ev: CalEvent, e: React.MouseEvent) => { e.stopPropagation(); setForm({ ...ev, notes: ev.notes||'' }); setEditing(ev); setModal(true); };
+ 
+ const save = (e: React.FormEvent) => {
+  e.preventDefault();
+  if(!form.title) return;
+  if(editing) { setEvents(events.map(ev => ev.id===editing.id ? {...form, id:ev.id} : ev)); }
+  else { setEvents([{...form, id:Date.now()}, ...events]); }
+  setModal(false);
+ };
 
-  const del = () => { if(editing) { setEvents(events.filter(ev => ev.id !== editing.id)); setModal(false); } };
+ const del = () => { if(editing) { setEvents(events.filter(ev => ev.id !== editing.id)); setModal(false); } };
 
-  const daysInMonth = 31; 
-  const startDay = new Date(2026, 4, 1).getDay(); // Mayo 2026 empieza Viernes (5)
-  const cells = Array.from({length:35}, (_,i) => { const d = i-startDay+1; return d>0&&d<=daysInMonth ? d : null; });
-  const filteredEvents = events.filter(e => filterType === 'todos' || e.type === filterType);
+ const daysInMonth = 31; 
+ const startDay = new Date(2026, 4, 1).getDay();
+ const cells = Array.from({length:35}, (_,i) => { const d = i-startDay+1; return d>0&&d<=daysInMonth ? d : null; });
+ const filteredEvents = events.filter(e => filterType === 'todos' || e.type === filterType);
 
-  const dc = isDarkMode;
-  const inputCls = `w-full p-3 rounded-2xl border text-sm font-medium outline-none transition-all focus:ring-4 focus:ring-primary/10 ${dc ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-slate-50 border-slate-100 text-slate-800 focus:border-primary shadow-inner'}`;
+ return (
+  <div className="flex-1 flex flex-col overflow-hidden bg-surface-base">
+   
+   {/* Header */}
+   <div className="p-4 md:p-6 border-b border-edge flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface">
+     <div className="flex items-center gap-3">
+      <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent">
+        <CalIcon size={22} />
+      </div>
+      <div>
+        <h1 className="h1">Agenda y tareas</h1>
+        <p className="body-text text-sm">Seguimiento de mayo 2026</p>
+      </div>
+     </div>
+     <div className="flex items-center gap-3 w-full md:w-auto">
+      <div className="flex p-0.5 rounded-lg border border-edge bg-surface w-full md:w-auto">
+        {(['month','week','day'] as const).map(v => (
+         <button key={v} onClick={() => setView(v)} className={`flex-1 md:px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${view===v ? 'bg-accent text-content' : 'text-content-muted hover:text-content'}`}>
+          {v==='month'?'Mes':v==='week'?'Semana':'Día'}
+         </button>
+        ))}
+      </div>
+      <button onClick={() => openNew()} className="btn-primary px-3 py-2">
+        <Plus size={18} />
+      </button>
+     </div>
+   </div>
 
-  return (
-    <div className={`flex-1 flex flex-col overflow-hidden transition-colors ${dc ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
-      
-      {/* Dynamic Header */}
-      <div className={`p-6 md:p-8 border-b flex flex-col md:flex-row justify-between items-start md:items-center gap-6 transition-colors ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
-         <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform hover:scale-105 ${dc ? 'bg-primary/20 text-primary shadow-inner' : 'bg-white text-primary border border-slate-100'}`}>
-               <CalIcon size={28} />
-            </div>
-            <div>
-               <h1 className="h1">Agenda y tareas</h1>
-               <p className="body-text text-xs uppercase tracking-[2px] font-bold opacity-60">Seguimiento de mayo 2026</p>
-            </div>
-         </div>
-         
-         <div className="flex items-center gap-4 w-full md:w-auto">
-            <div className={`flex p-1.5 rounded-2xl w-full md:w-auto ${dc ? 'bg-slate-800' : 'bg-white border border-slate-100 shadow-md'}`}>
-               {(['month','week','day'] as const).map(v => (
-                 <button key={v} onClick={() => setView(v)} className={`flex-1 md:px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${view===v ? 'bg-primary text-white shadow-lg' : 'text-slate-500 hover:text-slate-700'}`}>
-                   {v==='month'?'Mes':v==='week'?'Semana':'Día'}
-                 </button>
+   {/* Filter & Nav */}
+   <div className="px-4 md:px-6 py-3 border-b border-edge flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface">
+     <div className="flex items-center gap-3 w-full sm:w-auto">
+      <div className="relative flex-1 sm:w-60">
+        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
+        <select value={filterType} onChange={e => setFilterType(e.target.value as any)} className="input-field pl-9 text-xs py-2">
+         <option value="todos">Todos los eventos</option>
+         {(Object.keys(typeConfig) as EventType[]).map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+     </div>
+     <div className="flex items-center gap-4">
+      <button className="p-2 rounded-lg border border-edge text-content-muted hover:text-content transition-colors"><ChevronLeft size={16}/></button>
+      <span className="text-xs font-semibold text-content">Mayo 2026</span>
+      <button className="p-2 rounded-lg border border-edge text-content-muted hover:text-content transition-colors"><ChevronRight size={16}/></button>
+     </div>
+   </div>
+
+   {/* Calendar Grid */}
+   <div className="flex-1 overflow-y-auto p-4 md:p-6">
+     <div className="h-full min-h-[600px] rounded-xl border border-edge bg-surface overflow-hidden flex flex-col">
+      <div className="grid grid-cols-7 border-b border-edge bg-surface-inset">
+        {['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(d => (
+         <div key={d} className="py-3 text-center text-xs font-medium text-content-muted">{d}</div>
+        ))}
+      </div>
+      <div className="flex-1 grid grid-cols-7">
+        {view === 'month' && cells.map((day, i) => {
+         const ds = day ? `2026-05-${day.toString().padStart(2,'0')}` : '';
+         const dayEvents = filteredEvents.filter(e => e.date === ds);
+         const isToday = day === 5;
+         return (
+          <div key={i} onClick={() => day && openNew(ds)}
+           className={`border-b border-r border-edge p-2 flex flex-col gap-1 cursor-pointer transition-colors min-h-[100px] overflow-hidden ${!day ? 'bg-surface-inset/50' : 'hover:bg-surface-inset'} ${isToday ? 'bg-accent/5' : ''}`}>
+           {day && (
+            <>
+              <div className="flex justify-between items-center mb-0.5">
+               <span className={`text-xs font-medium ${isToday ? 'text-accent' : 'text-content-muted'}`}>{day}</span>
+               {dayEvents.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-accent" />}
+              </div>
+              <div className="space-y-1 overflow-hidden">
+               {dayEvents.slice(0, 3).map(ev => (
+                <div key={ev.id} onClick={(e) => openEdit(ev, e)} className={`px-1.5 py-0.5 rounded text-xs font-medium truncate border transition-colors hover:opacity-80 ${typeConfig[ev.type].bg} ${typeConfig[ev.type].color} ${typeConfig[ev.type].border}`}>
+                  {ev.time} {ev.title}
+                </div>
                ))}
-            </div>
-            <button onClick={() => openNew()} className="btn-primary p-3.5 rounded-2xl shadow-2xl shadow-primary/30 active:scale-95 transition-all">
-               <Plus size={24} />
-            </button>
-         </div>
-      </div>
-
-      {/* Filter & Nav Bar */}
-      <div className={`px-6 md:px-8 py-4 border-b flex flex-col sm:flex-row justify-between items-center gap-6 transition-colors ${dc ? 'bg-[#1E1E1E]/50 border-slate-800' : 'bg-white border-slate-50'}`}>
-         <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-72">
-               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-               <select value={filterType} onChange={e => setFilterType(e.target.value as any)} 
-                 className={`w-full pl-11 pr-5 py-3 rounded-[18px] border text-[11px] font-black uppercase tracking-widest outline-none appearance-none transition-all ${dc ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-100 text-slate-800 shadow-sm'}`}>
-                  <option value="todos">Todos los eventos</option>
-                  {(Object.keys(typeConfig) as EventType[]).map(t => <option key={t} value={t}>{t}</option>)}
-               </select>
-            </div>
-         </div>
-         <div className="flex items-center gap-6">
-            <button className={`p-2.5 rounded-xl transition-all ${dc ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-white border border-slate-100 text-slate-500 hover:text-slate-800 shadow-sm'}`}><ChevronLeft size={20}/></button>
-            <span className={`text-[11px] font-black uppercase tracking-[3px] ${dc ? 'text-slate-300' : 'text-slate-700'}`}>Mayo 2026</span>
-            <button className={`p-2.5 rounded-xl transition-all ${dc ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-white border border-slate-100 text-slate-500 hover:text-slate-800 shadow-sm'}`}><ChevronRight size={20}/></button>
-         </div>
-      </div>
-
-      {/* Calendar Area */}
-      <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar">
-         <div className={`h-full min-h-[700px] rounded-[40px] border shadow-2xl overflow-hidden flex flex-col transition-all ${dc ? 'bg-[#1E1E1E] border-slate-800 shadow-none' : 'bg-white border-slate-100'}`}>
-            
-            {/* Week Headers */}
-            <div className={`grid grid-cols-7 border-b transition-colors ${dc ? 'bg-slate-900 border-slate-800' : 'bg-slate-50/50 border-slate-50'}`}>
-               {['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(d => (
-                 <div key={d} className="py-5 text-center text-[10px] font-black uppercase tracking-[2px] text-slate-400">{d}</div>
-               ))}
-            </div>
-
-            {/* View Render */}
-            <div className="flex-1 grid grid-cols-7">
-               {view === 'month' && cells.map((day, i) => {
-                 const ds = day ? `2026-05-${day.toString().padStart(2,'0')}` : '';
-                 const dayEvents = filteredEvents.filter(e => e.date === ds);
-                 const isToday = day === 5;
-
-                 return (
-                   <div key={i} onClick={() => day && openNew(ds)}
-                     className={`border-b border-r p-3 flex flex-col gap-2 cursor-pointer transition-all min-h-[120px] overflow-hidden ${!day ? (dc ? 'bg-slate-900/50' : 'bg-slate-50/30') : (dc ? 'hover:bg-white/5' : 'hover:bg-slate-50/50')} ${isToday ? (dc ? 'bg-primary/5' : 'bg-primary/5 shadow-inner') : ''} ${dc ? 'border-slate-800' : 'border-slate-50'}`}>
-                      {day && (
-                        <>
-                           <div className="flex justify-between items-center mb-1">
-                              <span className={`text-xs font-black ${isToday ? 'text-primary' : (dc ? 'text-slate-600' : 'text-slate-400')}`}>{day}</span>
-                              {dayEvents.length > 0 && <div className="w-2 h-2 rounded-full bg-primary shadow-lg shadow-primary/50 animate-pulse" />}
-                           </div>
-                           <div className="space-y-1.5 overflow-hidden">
-                              {dayEvents.slice(0, 3).map(ev => (
-                                <div key={ev.id} onClick={(e) => openEdit(ev, e)} className={`px-2.5 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-tighter truncate border transition-all hover:scale-105 hover:shadow-lg ${typeConfig[ev.type].bg} ${typeConfig[ev.type].color} ${typeConfig[ev.type].border}`}>
-                                   {ev.time} {ev.title}
-                                </div>
-                              ))}
-                              {dayEvents.length > 3 && <div className="text-[8px] font-black text-slate-400 pl-1 uppercase tracking-widest">+{dayEvents.length - 3} más</div>}
-                           </div>
-                        </>
-                      )}
-                   </div>
-                 );
-               })}
-            </div>
-         </div>
-      </div>
-
-      {/* MODAL */}
-      {modal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className={`rounded-[40px] shadow-2xl border w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
-            <div className={`px-10 py-8 border-b flex justify-between items-center transition-colors ${dc ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50/50 border-slate-50'}`}>
-               <div>
-                  <h2 className="h2">{editing ? 'Editar evento' : 'Nueva cita'}</h2>
-                  <p className="body-text text-[10px] uppercase tracking-widest font-bold opacity-60 mt-1">Detalles de la agenda comercial</p>
-               </div>
-               <button onClick={() => setModal(false)} className={`p-3 rounded-2xl transition-all ${dc ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-white border shadow-md text-slate-400 hover:text-slate-800'}`}><X size={20}/></button>
-            </div>
-            
-            <form onSubmit={save} className="p-10 space-y-8 overflow-y-auto custom-scrollbar max-h-[70vh]">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                     <label className="label-text">Tipo de actividad</label>
-                     <select value={form.type} onChange={e => setForm({...form, type: e.target.value as any})} className={inputCls}>
-                        {(Object.keys(typeConfig) as EventType[]).map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-                     </select>
-                  </div>
-                  <div className="space-y-3">
-                     <label className="label-text">Prioridad</label>
-                     <select value={form.priority} onChange={e => setForm({...form, priority: e.target.value as any})} className={inputCls}>
-                        <option value="alta">Alta</option>
-                        <option value="media">Media</option>
-                        <option value="baja">Baja</option>
-                     </select>
-                  </div>
-               </div>
-
-               <div className="space-y-3">
-                  <label className="label-text">Título descriptivo</label>
-                  <input required type="text" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Ej: Visita al proyecto Mirador..." className={inputCls} />
-               </div>
-
-               <div className="grid grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                     <label className="label-text">Fecha</label>
-                     <input required type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} className={inputCls} />
-                  </div>
-                  <div className="space-y-3">
-                     <label className="label-text">Hora</label>
-                     <input required type="time" value={form.time} onChange={e => setForm({...form, time: e.target.value})} className={inputCls} />
-                  </div>
-               </div>
-
-               <div className="space-y-3">
-                  <label className="label-text">Cliente / Lead vinculado</label>
-                  <div className="relative">
-                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                     <input type="text" value={form.client} onChange={e => setForm({...form, client: e.target.value})} placeholder="Nombre del cliente..." className={inputCls + " pl-12"} />
-                  </div>
-               </div>
-
-               <div className="space-y-3">
-                  <label className="label-text">Notas adicionales</label>
-                  <textarea rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Instrucciones para el asesor..." className={inputCls + " resize-none h-32"} />
-               </div>
-            </form>
-
-            <div className={`p-10 border-t flex flex-col sm:flex-row gap-6 transition-colors ${dc ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50/50'}`}>
-               {editing && <button type="button" onClick={del} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-rose-500 border border-rose-500/20 rounded-[20px] hover:bg-rose-500/5 transition-all">Eliminar</button>}
-               <button onClick={save} className="flex-[2] btn-primary py-4 rounded-[20px] shadow-2xl shadow-primary/30 hover:bg-primary-dark transition-all active:scale-95">
-                  <span className="text-[11px] font-black uppercase tracking-[2px]">{editing ? 'Actualizar evento' : 'Programar en agenda'}</span>
-               </button>
-            </div>
+               {dayEvents.length > 3 && <div className="text-xs text-content-muted pl-1">+{dayEvents.length - 3} más</div>}
+              </div>
+            </>
+           )}
           </div>
+         );
+        })}
+      </div>
+     </div>
+   </div>
+
+   {/* Modal */}
+   {modal && (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50">
+     <div className="rounded-xl border border-edge bg-surface shadow-lg w-full max-w-lg overflow-hidden flex flex-col">
+      <div className="px-6 py-4 border-b border-edge flex justify-between items-center bg-surface-inset">
+        <div>
+         <h2 className="h2">{editing ? 'Editar evento' : 'Nueva cita'}</h2>
+         <p className="label-text mt-0.5">Detalles de la agenda comercial</p>
         </div>
-      )}
+        <button onClick={() => setModal(false)} className="p-2 rounded-lg border border-edge text-content-muted hover:text-content transition-colors"><X size={18}/></button>
+      </div>
+      
+      <form onSubmit={save} className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+         <div className="space-y-1.5">
+           <label className="label-text">Tipo de actividad</label>
+           <select value={form.type} onChange={e => setForm({...form, type: e.target.value as any})} className="input-field">
+            {(Object.keys(typeConfig) as EventType[]).map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+           </select>
+         </div>
+         <div className="space-y-1.5">
+           <label className="label-text">Prioridad</label>
+           <select value={form.priority} onChange={e => setForm({...form, priority: e.target.value as any})} className="input-field">
+            <option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option>
+           </select>
+         </div>
+        </div>
+        <div className="space-y-1.5">
+         <label className="label-text">Título descriptivo</label>
+         <input required type="text" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Ej: Visita al proyecto Mirador..." className="input-field" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+         <div className="space-y-1.5">
+           <label className="label-text">Fecha</label>
+           <input required type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} className="input-field" />
+         </div>
+         <div className="space-y-1.5">
+           <label className="label-text">Hora</label>
+           <input required type="time" value={form.time} onChange={e => setForm({...form, time: e.target.value})} className="input-field" />
+         </div>
+        </div>
+        <div className="space-y-1.5">
+         <label className="label-text">Cliente / Lead vinculado</label>
+         <div className="relative">
+           <User className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={16} />
+           <input type="text" value={form.client} onChange={e => setForm({...form, client: e.target.value})} placeholder="Nombre del cliente..." className="input-field pl-9" />
+         </div>
+        </div>
+        <div className="space-y-1.5">
+         <label className="label-text">Notas adicionales</label>
+         <textarea rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Instrucciones para el asesor..." className="input-field resize-none h-24" />
+        </div>
+      </form>
+
+      <div className="p-6 border-t border-edge flex flex-col sm:flex-row gap-3 bg-surface-inset">
+        {editing && <button type="button" onClick={del} className="flex-1 py-2 text-sm font-medium text-red-500 border border-red-500/20 rounded-lg hover:bg-red-500/5 transition-colors">Eliminar</button>}
+        <button onClick={save} className="flex-[2] btn-primary py-2">
+         {editing ? 'Actualizar evento' : 'Programar en agenda'}
+        </button>
+      </div>
+     </div>
     </div>
-  );
+   )}
+  </div>
+ );
 }

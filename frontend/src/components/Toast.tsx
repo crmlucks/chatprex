@@ -44,33 +44,33 @@ const ToastItem = ({ toast, onDismiss }: { toast: Toast; onDismiss: (id: number)
 
   const icon = () => {
     switch (toast.type) {
-      case 'success': return <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />;
-      case 'error': return <Trash2 size={18} className="text-rose-500 shrink-0" />;
-      case 'warning': return <AlertTriangle size={18} className="text-amber-500 shrink-0" />;
-      case 'info': return <ArrowRightLeft size={18} className="text-blue-500 shrink-0" />;
-      default: return <Info size={18} className="text-slate-400 shrink-0" />;
+      case 'success': return <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />;
+      case 'error': return <Trash2 size={16} className="text-red-500 shrink-0" />;
+      case 'warning': return <AlertTriangle size={16} className="text-amber-500 shrink-0" />;
+      case 'info': return <ArrowRightLeft size={16} className="text-blue-500 shrink-0" />;
+      default: return <Info size={16} className="text-content-muted shrink-0" />;
     }
   };
 
   const bgColor = () => {
     switch (toast.type) {
-      case 'success': return 'bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/10';
-      case 'error': return 'bg-rose-500/10 border-rose-500/20 shadow-rose-500/10';
-      case 'warning': return 'bg-amber-500/10 border-amber-500/20 shadow-amber-500/10';
-      case 'info': return 'bg-blue-500/10 border-blue-500/20 shadow-blue-500/10';
-      default: return 'bg-slate-500/10 border-slate-500/20';
+      case 'success': return 'bg-emerald-500/10 border-emerald-500/20';
+      case 'error': return 'bg-red-500/10 border-red-500/20';
+      case 'warning': return 'bg-amber-500/10 border-amber-500/20';
+      case 'info': return 'bg-blue-500/10 border-blue-500/20';
+      default: return 'bg-surface border-edge';
     }
   };
 
   return (
     <div
-      className={`flex items-center gap-4 px-6 py-4 rounded-[24px] border backdrop-blur-2xl shadow-2xl transition-all duration-300 pointer-events-auto ${bgColor()} ${exiting ? 'opacity-0 translate-x-12 scale-90' : 'opacity-100 translate-x-0 scale-100'}`}
-      style={{ animation: 'toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl border pointer-events-auto transition-all duration-300 bg-surface ${bgColor()} ${exiting ? 'opacity-0 translate-x-8' : 'opacity-100 translate-x-0'}`}
+      style={{ animation: 'toastSlideIn 0.3s ease-out' }}
     >
-      <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/10">{icon()}</div>
-      <p className="text-[13px] font-black lowercase text-white tracking-tight flex-1">{toast.message}</p>
-      <button onClick={() => { setExiting(true); setTimeout(() => onDismiss(toast.id), 300); }} className="text-white/40 hover:text-white transition-colors p-1.5 rounded-xl hover:bg-white/5">
-        <X size={16} />
+      {icon()}
+      <p className="text-sm font-medium text-content flex-1">{toast.message}</p>
+      <button onClick={() => { setExiting(true); setTimeout(() => onDismiss(toast.id), 300); }} className="text-content-muted hover:text-content transition-colors p-1 rounded-md hover:bg-surface-inset">
+        <X size={14} />
       </button>
     </div>
   );
@@ -92,33 +92,33 @@ const ConfirmItem = ({ confirm, onDone }: { confirm: ConfirmToast; onDone: (id: 
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300" onClick={handleCancel}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50" onClick={handleCancel}>
       <div
         onClick={e => e.stopPropagation()}
-        className={`bg-[#1E1E1E] border border-slate-800 rounded-[40px] shadow-2xl p-10 max-w-md w-full mx-4 transition-all duration-300 ${exiting ? 'opacity-0 scale-90 translate-y-10' : 'opacity-100 scale-100 translate-y-0'}`}
-        style={{ animation: 'confirmPop 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}
+        className={`bg-surface border border-edge rounded-xl p-6 max-w-md w-full mx-4 transition-all duration-300 ${exiting ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+        style={{ animation: 'confirmPop 0.3s ease-out' }}
       >
-        <div className="flex flex-col items-center text-center gap-6 mb-10">
-          <div className="w-20 h-20 rounded-[28px] bg-amber-500/10 flex items-center justify-center shadow-2xl shadow-amber-500/10 border border-amber-500/20">
-            <AlertTriangle size={36} className="text-amber-500" />
+        <div className="flex flex-col items-center text-center gap-4 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+            <AlertTriangle size={24} className="text-amber-500" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-white lowercase mb-2">confirmar acción</h3>
-            <p className="text-[13px] font-bold text-slate-500 leading-relaxed">{confirm.message}</p>
+            <h3 className="text-base font-semibold text-content mb-1">Confirmar acción</h3>
+            <p className="text-sm text-content-secondary">{confirm.message}</p>
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <button
             onClick={handleCancel}
-            className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-white bg-slate-900 hover:bg-slate-800 rounded-2xl transition-all"
+            className="flex-1 py-2.5 text-sm font-medium text-content-secondary bg-surface-inset hover:bg-surface-raised rounded-lg border border-edge transition-colors"
           >
-            {confirm.cancelText || 'cancelar'}
+            {confirm.cancelText || 'Cancelar'}
           </button>
           <button
             onClick={handleConfirm}
-            className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-white bg-primary hover:bg-primary-dark rounded-2xl transition-all shadow-2xl shadow-primary/30 active:scale-95"
+            className="flex-1 py-2.5 text-sm font-medium text-white bg-accent hover:bg-accent-hover rounded-lg transition-colors"
           >
-            {confirm.confirmText || 'confirmar'}
+            {confirm.confirmText || 'Confirmar'}
           </button>
         </div>
       </div>
@@ -152,7 +152,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     <ToastContext.Provider value={{ showToast, showConfirm }}>
       {children}
 
-      <div className="fixed top-8 right-8 z-[9998] flex flex-col gap-4 max-w-sm w-full pointer-events-none">
+      <div className="fixed top-4 right-4 z-[9998] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
         {toasts.map(t => (
           <ToastItem key={t.id} toast={t} onDismiss={dismissToast} />
         ))}
@@ -164,12 +164,12 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
       <style>{`
         @keyframes toastSlideIn {
-          from { opacity: 0; transform: translateX(60px) scale(0.9); }
-          to { opacity: 1; transform: translateX(0) scale(1); }
+          from { opacity: 0; transform: translateX(40px); }
+          to { opacity: 1; transform: translateX(0); }
         }
         @keyframes confirmPop {
-          from { opacity: 0; transform: scale(0.9) translateY(40px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </ToastContext.Provider>
