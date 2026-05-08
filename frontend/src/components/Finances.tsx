@@ -43,8 +43,41 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
   return { income: inc, expense: exp };
  }, [filteredTransactions, exchangeRate]);
 
- const handleAddTx = (e: React.FormEvent) => { e.preventDefault(); if (!txForm.amount || !txForm.concept) return; setTransactions([{ ...txForm, id: Date.now(), amount: parseFloat(txForm.amount) }, ...transactions]); setShowTxForm(false); setTxForm({ ...txForm, concept: '', amount: '' }); };
- const handleAddClient = (e: React.FormEvent) => { e.preventDefault(); if (!clientForm.name) return; setClients([{ id: Date.now(), ...clientForm }, ...clients]); setShowClientForm(false); };
+  const handleAddTx = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    if (!txForm.amount || !txForm.concept) return; 
+    try {
+      const res = await fetch(`${API_URL}/api/data/finances/transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ...txForm, amount: parseFloat(txForm.amount) })
+      });
+      if (res.ok) {
+        const newTx = await res.json();
+        setTransactions([newTx, ...transactions]);
+        setShowTxForm(false);
+        setTxForm({ ...txForm, concept: '', amount: '' });
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const handleAddClient = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    if (!clientForm.name) return; 
+    try {
+      const res = await fetch(`${API_URL}/api/data/finances/clients`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(clientForm)
+      });
+      if (res.ok) {
+        const newClient = await res.json();
+        setClients([newClient, ...clients]);
+        setShowClientForm(false);
+        setClientForm({ doc: '', name: '', phone: '', email: '', civilStatus: 'Soltero', spouseDoc: '', spouseName: '', spousePhone: '', address: '', district: '', province: '', department: '', notes: '', property: '', agent: '' });
+      }
+    } catch (err) { console.error(err); }
+  };
  const formatMoney = (amount: number) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 

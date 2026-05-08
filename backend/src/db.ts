@@ -259,6 +259,29 @@ export async function initDatabase() {
 
         ALTER TABLE properties ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '';
         ALTER TABLE properties ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
+
+        -- Nuevos campos para Proyectos
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS developer VARCHAR(150) DEFAULT '';
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS contact VARCHAR(150) DEFAULT '';
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS phone VARCHAR(50) DEFAULT '';
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS email VARCHAR(150) DEFAULT '';
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS address VARCHAR(255) DEFAULT '';
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'PEN';
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT '';
+
+        -- Nuevos campos para Finanzas / Clientes
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS doc VARCHAR(50) DEFAULT '';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS civil_status VARCHAR(50) DEFAULT 'Soltero';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS spouse_doc VARCHAR(50) DEFAULT '';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS spouse_name VARCHAR(150) DEFAULT '';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS spouse_phone VARCHAR(50) DEFAULT '';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS address VARCHAR(255) DEFAULT '';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS district VARCHAR(100) DEFAULT '';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS province VARCHAR(100) DEFAULT '';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS department VARCHAR(100) DEFAULT '';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT '';
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS property_id INTEGER;
+        ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS agent_id INTEGER;
       END $$;
     `);
     

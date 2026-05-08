@@ -109,6 +109,64 @@ router.get('/finances/clients', async (req, res) => {
   }
 });
 
+router.post('/finances/clients', async (req, res) => {
+  const { 
+    name, email, phone, doc, civilStatus, spouseDoc, spouseName, spousePhone, 
+    address, district, province, department, notes, property, agent 
+  } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO finances_clients (
+        name, email, phone, doc, civil_status, spouse_doc, spouse_name, spouse_phone, 
+        address, district, province, department, notes, property_id, agent_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
+      [
+        name, email, phone, doc, civilStatus, spouseDoc, spouseName, spousePhone, 
+        address, district, province, department, notes, 
+        property ? parseInt(property) : null, 
+        agent ? parseInt(agent) : null
+      ]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.put('/finances/clients/:id', async (req, res) => {
+  const { 
+    name, email, phone, doc, civilStatus, spouseDoc, spouseName, spousePhone, 
+    address, district, province, department, notes, property, agent 
+  } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE finances_clients SET 
+        name=$1, email=$2, phone=$3, doc=$4, civil_status=$5, spouse_doc=$6, spouse_name=$7, spouse_phone=$8, 
+        address=$9, district=$10, province=$11, department=$12, notes=$13, property_id=$14, agent_id=$15
+      WHERE id=$16 RETURNING *`,
+      [
+        name, email, phone, doc, civilStatus, spouseDoc, spouseName, spousePhone, 
+        address, district, province, department, notes, 
+        property ? parseInt(property) : null, 
+        agent ? parseInt(agent) : null,
+        req.params.id
+      ]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.delete('/finances/clients/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM finances_clients WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
+
 // --- FINANCES: TRANSACTIONS ---
 router.get('/finances/transactions', async (req, res) => {
   try {
@@ -131,18 +189,30 @@ router.get('/projects', async (req, res) => {
   } catch (error) { res.status(500).json({ error: 'Database error' }); }
 });
 router.post('/projects', async (req, res) => {
-  const { name, code, status } = req.body;
+  const { name, developer, contact, phone, email, address, currency, status, notes } = req.body;
   try {
-    const result = await pool.query('INSERT INTO projects (name, code, status) VALUES ($1, $2, $3) RETURNING *', [name, code, status || 'Activo']);
+    const result = await pool.query(
+      'INSERT INTO projects (name, developer, contact, phone, email, address, currency, status, notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *', 
+      [name, developer, contact, phone, email, address, currency || 'PEN', status || 'Activo', notes]
+    );
     res.json(result.rows[0]);
-  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+  } catch (error) { 
+    console.error(error);
+    res.status(500).json({ error: 'Database error' }); 
+  }
 });
 router.put('/projects/:id', async (req, res) => {
-  const { name, code, status } = req.body;
+  const { name, developer, contact, phone, email, address, currency, status, notes } = req.body;
   try {
-    const result = await pool.query('UPDATE projects SET name=$1, code=$2, status=$3 WHERE id=$4 RETURNING *', [name, code, status, req.params.id]);
+    const result = await pool.query(
+      'UPDATE projects SET name=$1, developer=$2, contact=$3, phone=$4, email=$5, address=$6, currency=$7, status=$8, notes=$9 WHERE id=$10 RETURNING *', 
+      [name, developer, contact, phone, email, address, currency, status, notes, req.params.id]
+    );
     res.json(result.rows[0]);
-  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+  } catch (error) { 
+    console.error(error);
+    res.status(500).json({ error: 'Database error' }); 
+  }
 });
 router.delete('/projects/:id', async (req, res) => {
   try {
