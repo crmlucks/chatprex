@@ -22,6 +22,10 @@ Reglas:
 const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const { token } = useAuth();
   const [activeTab, setActiveTab] = useState('prompt');
+  const [bots, setBots] = useState<any[]>([]);
+  const [selectedBotId, setSelectedBotId] = useState<number>(1);
+  const [botName, setBotName] = useState('Bot Principal');
+  
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saveMsg, setSaveMsg] = useState('');
@@ -48,7 +52,6 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const [simLoading, setSimLoading] = useState(false);
   const simEndRef = useRef<HTMLDivElement>(null);
 
-  // Load config on mount
   useEffect(() => {
     loadConfig();
   }, []);
@@ -57,6 +60,26 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     simEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [simMessages]);
 
+  useEffect(() => {
+    if (bots.length > 0) {
+      const selected = bots.find(b => b.id === selectedBotId) || bots[0];
+      setSelectedBotId(selected.id);
+      setBotName(selected.name || 'Nuevo Bot');
+      setPrompt(selected.prompt || DEFAULT_PROMPT);
+      setProvider(selected.provider || 'OpenAI');
+      setModel(selected.model || 'gpt-4o-mini');
+      setHasApiKey(selected.hasApiKey || false);
+      setSafeApiKey(selected.safeApiKey || '');
+      setKnowledge(selected.knowledge || '');
+      setVoiceToText(selected.voiceToText !== false);
+      setMessageGrouping(selected.messageGrouping !== false);
+      setHumanizedSplit(selected.humanizedSplit !== false);
+      setHumanHandoff(selected.humanHandoff !== false);
+      setActivationKeywords(selected.activationKeywords || 'info,precio,quiero,asesor,comprar');
+      setApiKey('');
+    }
+  }, [selectedBotId, bots]);
+
   const loadConfig = async () => {
     try {
       const res = await fetch(`${API_URL}/api/ai-config`, {
@@ -64,17 +87,10 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.prompt) setPrompt(data.prompt);
-        if (data.provider) setProvider(data.provider);
-        if (data.model) setModel(data.model);
-        setHasApiKey(data.hasApiKey || false);
-        setSafeApiKey(data.safeApiKey || '');
-        if (data.knowledge) setKnowledge(data.knowledge);
-        if (data.voiceToText !== undefined) setVoiceToText(data.voiceToText);
-        if (data.messageGrouping !== undefined) setMessageGrouping(data.messageGrouping);
-        if (data.humanizedSplit !== undefined) setHumanizedSplit(data.humanizedSplit);
-        if (data.humanHandoff !== undefined) setHumanHandoff(data.humanHandoff);
-        if (data.activationKeywords) setActivationKeywords(data.activationKeywords);
+        if (Array.isArray(data)) {
+          setBots(data);
+          if (data.length > 0 && !bots.length) setSelectedBotId(data[0].id);
+        }
       }
     } catch (err) {
       console.error('Error loading AI config:', err);
@@ -88,6 +104,8 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     setSaveMsg('');
     try {
       const body: any = {
+        id: selectedBotId === -1 ? null : selectedBotId,
+        name: botName,
         provider,
         model,
         prompt,
@@ -106,11 +124,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       });
       if (res.ok) {
         setSaveMsg('✅ Configuración guardada correctamente');
-        setHasApiKey(apiKey ? true : hasApiKey);
-        if (apiKey) {
-          setSafeApiKey(apiKey.substring(0, 4) + '...' + apiKey.substring(apiKey.length - 4));
-          setApiKey('');
-        }
+        loadConfig(); // Recargar para actualizar ID si era nuevo
       } else {
         setSaveMsg('❌ Error al guardar');
       }
@@ -176,14 +190,44 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
   return (
     <div className={`flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8 flex flex-col md:flex-row gap-6 transition-colors ${isDarkMode ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
+      
+      {/* Columna de Bots */}
+      <div className={`w-full md:w-64 shrink-0 rounded-2xl border shadow-sm flex flex-col overflow-hidden transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+        <div className={`p-4 border-b flex justify-between items-center transition-colors ${isDarkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-100 bg-slate-50'}`}>
+          <h2 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Tus Campañas IA</h2>
+        </div>
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          {bots.map(b => (
+            <button key={b.id} onClick={() => setSelectedBotId(b.id)}
+              className={`w-full text-left px-3 py-3 rounded-xl flex items-center gap-3 transition-all ${selectedBotId === b.id ? 'bg-primary/10 text-primary' : (isDarkMode ? 'hover:bg-slate-800 text-slate-300' : 'hover:bg-slate-50 text-slate-700')}`}>
+              <Bot size={18} className={selectedBotId === b.id ? 'text-primary' : (isDarkMode ? 'text-slate-500' : 'text-slate-400')} />
+              <div className="flex-1 overflow-hidden">
+                <p className="text-sm font-bold truncate">{b.name}</p>
+                <p className="text-[10px] truncate opacity-70">Keywords: {b.activationKeywords}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className={`p-3 border-t transition-colors ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+          <button onClick={() => {
+            setSelectedBotId(-1);
+            setBots([...bots, { id: -1, name: 'Nueva Campaña', provider: 'OpenAI', model: 'gpt-4o-mini', prompt: DEFAULT_PROMPT, activationKeywords: '' }]);
+          }} className="w-full py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-dark transition-all">
+            + Nuevo Bot
+          </button>
+        </div>
+      </div>
+
       {/* Left Column: Configuration */}
       <div className={`flex-1 rounded-2xl border shadow-sm overflow-hidden flex flex-col transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
         <div className={`border-b p-4 md:p-6 flex justify-between items-center transition-colors ${isDarkMode ? 'border-slate-800/50 bg-[#252525]' : 'border-slate-100 bg-slate-50'}`}>
-          <div>
-            <h1 className={`text-[18px] md:text-[20px] font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-              <Bot className="text-primary" size={24} /> Asistente de Ventas IA
-            </h1>
-            <p className={`text-[12px] md:text-[13px] mt-1 font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Configura el comportamiento y la base de conocimiento</p>
+          <div className="flex-1 mr-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Bot className="text-primary shrink-0" size={24} />
+              <input type="text" value={botName} onChange={e => setBotName(e.target.value)}
+                className={`text-[18px] md:text-[20px] font-bold bg-transparent border-b border-transparent focus:border-primary focus:outline-none w-full ${isDarkMode ? 'text-white' : 'text-slate-800'}`} />
+            </div>
+            <p className={`text-[12px] md:text-[13px] font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Configura el comportamiento y la base de conocimiento</p>
           </div>
           <span className="flex items-center gap-1.5 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>

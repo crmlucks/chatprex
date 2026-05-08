@@ -4,70 +4,86 @@ import OpenAI from 'openai';
 
 const aiConfigRouter = express.Router();
 
-// Obtener configuración de IA
+// Obtener todos los bots
 aiConfigRouter.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords FROM ai_config LIMIT 1');
+    const result = await pool.query('SELECT id, name, provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords FROM ai_config ORDER BY id ASC');
     if (result.rowCount === 0) {
-      return res.json({ provider: 'OpenAI', model: 'gpt-4o-mini', hasApiKey: false, safeApiKey: '', prompt: '', knowledge: '', activationKeywords: 'info,precio,quiero,asesor,comprar' });
+      // Si no hay ninguno, devolver uno por defecto en el array
+      return res.json([{ id: 1, name: 'Bot Principal', provider: 'OpenAI', model: 'gpt-4o-mini', hasApiKey: false, safeApiKey: '', prompt: '', knowledge: '', activationKeywords: 'info,precio,quiero,asesor,comprar' }]);
     }
     
-    const config = result.rows[0];
-    
-    // Ocultar parcialmente la API KEY por seguridad
-    let safeApiKey = config.api_key;
-    if (safeApiKey && safeApiKey.length > 10) {
-      safeApiKey = safeApiKey.substring(0, 4) + '...' + safeApiKey.substring(safeApiKey.length - 4);
-    }
-
-    res.json({
-      provider: config.provider,
-      model: config.model,
-      prompt: config.prompt,
-      knowledge: config.knowledge || '',
-      hasApiKey: !!config.api_key,
-      safeApiKey,
-      voiceToText: config.voice_to_text !== false,
-      messageGrouping: config.message_grouping !== false,
-      humanizedSplit: config.humanized_split !== false,
-      humanHandoff: config.human_handoff !== false,
-      activationKeywords: config.activation_keywords || '',
+    const bots = result.rows.map(config => {
+      let safeApiKey = config.api_key;
+      if (safeApiKey && safeApiKey.length > 10) {
+        safeApiKey = safeApiKey.substring(0, 4) + '...' + safeApiKey.substring(safeApiKey.length - 4);
+      }
+      return {
+        id: config.id,
+        name: config.name || 'Bot',
+        provider: config.provider,
+        model: config.model,
+        prompt: config.prompt,
+        knowledge: config.knowledge || '',
+        hasApiKey: !!config.api_key,
+        safeApiKey,
+        voiceToText: config.voice_to_text !== false,
+        messageGrouping: config.message_grouping !== false,
+        humanizedSplit: config.humanized_split !== false,
+        humanHandoff: config.human_handoff !== false,
+        activationKeywords: config.activation_keywords || '',
+      };
     });
+
+    res.json(bots);
   } catch (error) {
     console.error('Error fetching AI config:', error);
     res.status(500).json({ error: 'Failed to fetch AI config' });
   }
 });
 
-// Actualizar configuración de IA
+// Crear o Actualizar bot
 aiConfigRouter.post('/', async (req, res) => {
-  const { provider, model, api_key, prompt, knowledge, voiceToText, messageGrouping, humanizedSplit, humanHandoff, activationKeywords } = req.body;
+  const { id, name, provider, model, api_key, prompt, knowledge, voiceToText, messageGrouping, humanizedSplit, humanHandoff, activationKeywords } = req.body;
   try {
-    const check = await pool.query('SELECT id, api_key FROM ai_config LIMIT 1');
-    
     let apiKeyToSave = api_key;
-    if (check.rowCount > 0 && api_key === 'UNCHANGED') {
-      apiKeyToSave = check.rows[0].api_key;
+    if (id && api_key === 'UNCHANGED') {
+      const check = await pool.query('SELECT api_key FROM ai_config WHERE id = $1', [id]);
+      if (check.rowCount > 0) apiKeyToSave = check.rows[0].api_key;
     }
 
-    if (check.rowCount === 0) {
-      await pool.query(
-        `INSERT INTO ai_config (provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-        [provider, model, apiKeyToSave, prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || 'info,precio,quiero,asesor,comprar']
+    if (!id) {
+      // Create new
+      const result = await pool.query(
+        `INSERT INTO ai_config (name, provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+        [name || 'Nuevo Bot', provider, model, apiKeyToSave || '', prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || '']
       );
+      return res.json({ success: true, id: result.rows[0].id });
     } else {
+      // Update existing
       await pool.query(
-        `UPDATE ai_config SET provider=$1, model=$2, api_key=$3, prompt=$4, knowledge=$5,
-         voice_to_text=$6, message_grouping=$7, humanized_split=$8, human_handoff=$9, activation_keywords=$10, updated_at=NOW()
-         WHERE id=$11`,
-        [provider, model, apiKeyToSave, prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || 'info,precio,quiero,asesor,comprar', check.rows[0].id]
+        `UPDATE ai_config SET name=$1, provider=$2, model=$3, api_key=$4, prompt=$5, knowledge=$6,
+         voice_to_text=$7, message_grouping=$8, humanized_split=$9, human_handoff=$10, activation_keywords=$11, updated_at=NOW()
+         WHERE id=$12`,
+        [name || 'Bot', provider, model, apiKeyToSave || '', prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || '', id]
       );
+      return res.json({ success: true, id });
     }
-    res.json({ success: true });
   } catch (error) {
     console.error('Error updating AI config:', error);
     res.status(500).json({ error: 'Failed to update AI config' });
+  }
+});
+
+// Eliminar bot
+aiConfigRouter.delete('/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM ai_config WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting bot:', error);
+    res.status(500).json({ error: 'Failed to delete bot' });
   }
 });
 

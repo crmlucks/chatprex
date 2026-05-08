@@ -141,6 +141,9 @@ export async function initDatabase() {
         ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS humanized_split BOOLEAN DEFAULT true;
         ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS human_handoff BOOLEAN DEFAULT true;
         ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS activation_keywords TEXT DEFAULT 'info,precio,quiero,asesor,comprar';
+        ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS name VARCHAR(150) DEFAULT 'Bot Principal';
+        
+        ALTER TABLE leads ADD COLUMN IF NOT EXISTS bot_id INTEGER DEFAULT 1;
       END $$;
     `);
     

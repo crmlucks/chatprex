@@ -526,12 +526,14 @@ const handleWebhookEvent = async (req: any, res: any) => {
       const pushName = msg.pushName || remoteJid?.split('@')[0] || 'Desconocido';
       const messageContent = msg.message || {};
 
-      // ─── OBTENER CONFIGURACIÓN DE IA ───
-      let aiConfig: any = { activation_keywords: 'info,precio,quiero,asesor,comprar', voice_to_text: true };
+      // ─── OBTENER CONFIGURACIÓN DE IA (MULTI-BOT) ───
+      let aiConfig: any = { activation_keywords: 'info,precio,quiero,asesor,comprar', voice_to_text: true, id: 1 };
+      let allBots: any[] = [];
       try {
-        const configRes = await pool.query('SELECT api_key, voice_to_text, activation_keywords, humanized_split, message_grouping FROM ai_config LIMIT 1');
+        const configRes = await pool.query('SELECT id, api_key, voice_to_text, activation_keywords, humanized_split, message_grouping FROM ai_config ORDER BY id ASC');
         if (configRes.rowCount > 0) {
-          aiConfig = { ...aiConfig, ...configRes.rows[0] };
+          allBots = configRes.rows;
+          aiConfig = { ...aiConfig, ...configRes.rows[0] }; // Por defecto el primer bot
         }
       } catch (err) {
         console.error('[Evolution] Error obteniendo config de IA:', err);
@@ -650,13 +652,23 @@ const handleWebhookEvent = async (req: any, res: any) => {
         timestamp: msgTimestamp,
       });
 
-      // Configuración de palabras clave para activar/despertar al bot desde la base de datos
-      let dbKeywords = aiConfig.activation_keywords || 'info,precio,quiero,asesor,comprar';
-      
-      const activationKeywords = dbKeywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
+      // Configuración de palabras clave Multi-Bot
       const textLower = text.toLowerCase();
-      // Verificamos si alguna de las palabras clave está presente como palabra independiente o parte del texto
-      const containsKeyword = activationKeywords.length > 0 ? activationKeywords.some(kw => textLower.includes(kw)) : true;
+      let matchedBotId = 1;
+      let containsKeyword = false;
+
+      // Iterar por todos los bots para encontrar cuál coincide con las palabras clave del mensaje
+      for (const bot of allBots) {
+        const keywordsStr = bot.activation_keywords || 'info,precio,quiero,asesor,comprar';
+        const keywords = keywordsStr.split(',').map((k: string) => k.trim().toLowerCase()).filter((k: string) => k.length > 0);
+        if (keywords.length === 0 || keywords.some((kw: string) => textLower.includes(kw))) {
+          matchedBotId = bot.id;
+          containsKeyword = true;
+          // Actualizamos aiConfig para que use la configuración de este bot específico para este mensaje
+          aiConfig = { ...aiConfig, ...bot };
+          break;
+        }
+      }
 
       // Auto-registrar como lead (solo mensajes entrantes, no grupos ni broadcast)
       let isBotActive = false;
@@ -665,25 +677,33 @@ const handleWebhookEvent = async (req: any, res: any) => {
           // Extraer identificador del contacto (funciona con @s.whatsapp.net y @lid)
           const phone = remoteJid.split('@')[0].split(':')[0];
           console.log(`[Evolution] Buscando lead con phone: ${phone}`);
-          const existRes = await pool.query('SELECT id, bot_active FROM leads WHERE phone = $1', [phone]);
+          const existRes = await pool.query('SELECT id, bot_active, bot_id FROM leads WHERE phone = $1', [phone]);
           if (existRes.rowCount === 0) {
             // Nuevo lead: Bot inactivo por defecto, a menos que el mensaje contenga una palabra clave
             isBotActive = containsKeyword;
             await pool.query(
-              `INSERT INTO leads (name, phone, score, status, bot_active) VALUES ($1, $2, '50%', 'Nuevo', $3)`,
-              [pushName, phone, isBotActive]
+              `INSERT INTO leads (name, phone, score, status, bot_active, bot_id) VALUES ($1, $2, '50%', 'Nuevo', $3, $4)`,
+              [pushName, phone, isBotActive, matchedBotId]
             );
-            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) - Bot Activo: ${isBotActive}`);
+            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) - Bot Activo: ${isBotActive} (Bot ID: ${matchedBotId})`);
             ioInstance.emit('new-lead', { name: pushName, phone });
           } else {
             isBotActive = existRes.rows[0].bot_active;
+            const currentBotId = existRes.rows[0].bot_id || 1;
             
-            // Si el bot estaba apagado pero el usuario mandó una palabra clave, despertarlo
+            // Si el bot estaba apagado pero el usuario mandó una palabra clave, despertarlo y reasignar al bot que hizo match
             if (!isBotActive && containsKeyword) {
               isBotActive = true;
-              await pool.query('UPDATE leads SET bot_active = true WHERE phone = $1', [phone]);
-              console.log(`[Evolution] 🤖 Bot DESPERTADO por palabra clave para: ${phone}`);
+              await pool.query('UPDATE leads SET bot_active = true, bot_id = $1 WHERE phone = $2', [matchedBotId, phone]);
+              console.log(`[Evolution] 🤖 Bot DESPERTADO por palabra clave para: ${phone} (Bot ID: ${matchedBotId})`);
             } else {
+              // Si ya está activo, usamos la configuración del bot que tiene asignado este lead
+              if (currentBotId !== matchedBotId) {
+                const assignedBot = allBots.find(b => b.id === currentBotId);
+                if (assignedBot) {
+                  aiConfig = { ...aiConfig, ...assignedBot };
+                }
+              }
               console.log(`[Evolution] Lead existente: ${phone}, bot_active: ${isBotActive}`);
             }
           }

@@ -5,13 +5,16 @@ import pool from './db';
 const conversationHistory: Record<string, { role: 'system' | 'user' | 'assistant', content: string }[]> = {};
 
 /**
- * Obtiene la configuración actual de la IA desde la BD
+ * Obtiene la configuración de IA asignada al lead (Multi-Bot)
  */
-async function getAIConfig() {
+async function getAIConfig(phone: string) {
   try {
-    const res = await pool.query('SELECT provider, model, api_key, prompt, knowledge, human_handoff FROM ai_config LIMIT 1');
+    const leadRes = await pool.query('SELECT bot_id FROM leads WHERE phone = $1', [phone]);
+    const botId = leadRes.rowCount > 0 && leadRes.rows[0].bot_id ? leadRes.rows[0].bot_id : 1;
+    
+    const res = await pool.query('SELECT name, provider, model, api_key, prompt, knowledge, human_handoff FROM ai_config WHERE id = $1', [botId]);
     if (res.rowCount > 0) {
-      return res.rows[0];
+      return { ...res.rows[0], botId };
     }
   } catch (e) {
     console.error('Error leyendo config IA:', e);
@@ -23,7 +26,8 @@ async function getAIConfig() {
  * Genera respuesta usando el proveedor configurado
  */
 export const generateAIResponse = async (fromJid: string, textMessage: string): Promise<string> => {
-  const config = await getAIConfig();
+  const phone = fromJid.split('@')[0].split(':')[0];
+  const config = await getAIConfig(phone);
   
   let systemPrompt = config?.prompt || 'Eres un asistente.';
   const provider = config?.provider || 'OpenAI';
@@ -50,7 +54,19 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
   // Cargar propiedades disponibles desde la base de datos para inyectarlas como contexto
   let propertiesText = "";
   try {
-    const props = await pool.query("SELECT name, project, type, price, currency, location, rooms, area FROM properties WHERE status = 'Disponible' LIMIT 20");
+    const botName = config?.name || 'Bot Principal';
+    
+    let query = "SELECT name, project, type, price, currency, location, rooms, area FROM properties WHERE status = 'Disponible'";
+    let params: any[] = [];
+    
+    // Si el bot tiene un nombre específico de proyecto, filtramos el inventario
+    if (botName !== 'Bot Principal' && botName !== 'Nuevo Bot') {
+      query += " AND (project ILIKE $1 OR name ILIKE $1)";
+      params.push(`%${botName}%`);
+    }
+    query += " LIMIT 20";
+
+    const props = await pool.query(query, params);
     if (props.rowCount > 0) {
       propertiesText = props.rows.map(p => 
         `- ${p.name} (${p.type}${p.project ? ` en ${p.project}` : ''}): Precio ${p.price} ${p.currency}, Ubicación: ${p.location}, Cuartos: ${p.rooms}, Área: ${p.area}`
