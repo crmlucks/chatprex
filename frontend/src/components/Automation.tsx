@@ -257,17 +257,170 @@ const Automation = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                 >
                   Cancelar
                 </button>
-                <button 
-                  onClick={handleHubspotSave}
-                  className="px-5 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 active:scale-95"
-                >
-                  Guardar Integración
-                </button>
-              </div>
+            <div className="flex items-center gap-3 mb-1">
+               <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center"><Zap size={20} /></div>
+               <h1 className={`text-2xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Automatizaciones</h1>
             </div>
+            <p className={`text-sm font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Crea embudos de venta y flujos de marketing inteligentes.</p>
+          </div>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+             <button onClick={() => {
+               const newId = -Math.random();
+               setSelectedId(newId);
+               setAutomations([{ id: newId, name: 'Nuevo Flujo', type: 'Envío Masivo', status: 'Draft', delay: 30, content: 'Escribe tu mensaje aquí...', target: 'Todos los contactos' }, ...automations]);
+             }} className="flex-1 md:flex-none px-6 py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary-dark transition-all active:scale-95 shadow-xl shadow-primary/20">
+                + Crear Nuevo Flujo
+             </button>
           </div>
         </div>
-      )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+           
+           {/* Sidebar: Lista de Automatizaciones (4 cols) */}
+           <div className="lg:col-span-4 space-y-4">
+              <div className={`p-4 rounded-3xl border flex items-center gap-4 ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                 <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+                    <input type="text" placeholder="Buscar flujo..." className="w-full bg-transparent border-none text-xs font-bold pl-9 focus:ring-0 placeholder-slate-500" />
+                 </div>
+                 <button className={`p-2 rounded-xl border ${isDarkMode ? 'border-slate-800 hover:bg-slate-800' : 'border-slate-100 hover:bg-slate-50'}`}><Plus size={16} /></button>
+              </div>
+
+              <div className="space-y-3">
+                 {automations.map(a => (
+                    <button key={a.id} onClick={() => setSelectedId(a.id)}
+                      className={`w-full p-5 rounded-[28px] border text-left transition-all active:scale-[0.98] group relative overflow-hidden ${selectedId === a.id ? 'bg-primary border-primary shadow-2xl shadow-primary/20' : (isDarkMode ? 'bg-[#1E1E1E] border-slate-800 hover:border-slate-600' : 'bg-white border-slate-200 hover:shadow-md')}`}>
+                       <div className="flex justify-between items-start mb-3">
+                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${selectedId === a.id ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'}`}>
+                             {a.type === 'Envío Masivo' ? <MessageCircle size={20} /> : <Zap size={20} />}
+                          </div>
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${a.status === 'Active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-500'}`}>{a.status}</span>
+                       </div>
+                       <h3 className={`text-sm font-black truncate mb-1 lowercase tracking-tight ${selectedId === a.id ? 'text-white' : (isDarkMode ? 'text-slate-100' : 'text-slate-800')}`}>{a.name}</h3>
+                       <p className={`text-[10px] font-bold uppercase tracking-widest ${selectedId === a.id ? 'text-white/70' : 'text-slate-500'}`}>{a.type} • {a.delay}s delay</p>
+                       
+                       {selectedId === a.id && (
+                          <div className="absolute top-0 right-0 p-4">
+                             <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                          </div>
+                       )}
+                    </button>
+                 ))}
+              </div>
+           </div>
+
+           {/* Main: Editor de Flujo (8 cols) */}
+           <div className={`lg:col-span-8 rounded-[40px] border shadow-2xl overflow-hidden flex flex-col transition-all min-h-[600px] ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+              
+              {/* Toolbar Editor */}
+              <div className={`p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-colors ${isDarkMode ? 'border-slate-800 bg-slate-900/50' : 'border-slate-50 bg-slate-50'}`}>
+                 <div className="flex-1">
+                    <input type="text" value={activeAuto?.name} onChange={e => {
+                       const val = e.target.value;
+                       setAutomations(prev => prev.map(a => a.id === selectedId ? {...a, name: val} : a));
+                    }} className={`text-xl font-black bg-transparent border-none focus:ring-0 w-full tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`} />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">ID: {selectedId?.toString().slice(0,8)}</p>
+                 </div>
+                 <div className="flex gap-2 w-full sm:w-auto">
+                    <button className={`flex-1 sm:flex-none p-3 rounded-2xl border flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'border-slate-800 bg-slate-800 text-slate-300' : 'border-slate-100 bg-white text-slate-600'}`}><Trash2 size={14} /> Eliminar</button>
+                    <button className="flex-1 sm:flex-none p-3 px-6 rounded-2xl bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all">Guardar Flujo</button>
+                 </div>
+              </div>
+
+              {/* Área de Trabajo */}
+              <div className="flex-1 p-8 md:p-12 space-y-10 overflow-y-auto custom-scrollbar">
+                 
+                 {/* Paso 1: Configuración */}
+                 <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                       <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] font-black">1</div>
+                       <h4 className={`text-[11px] font-black uppercase tracking-[3px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Configuración de Disparo</h4>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">tipo de automatización</label>
+                          <select className={`w-full p-4 rounded-2xl border text-xs font-bold focus:ring-4 focus:ring-primary/10 outline-none transition-all ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-slate-50 border-slate-100 text-slate-800 focus:border-primary'}`}>
+                             <option>Envío Masivo (Broadcast)</option>
+                             <option>Respuesta por Palabra Clave</option>
+                             <option>Seguimiento Post-Venta</option>
+                          </select>
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">tiempo de espera (segundos)</label>
+                          <div className="flex items-center gap-4">
+                             <input type="range" min="5" max="300" className="flex-1 accent-primary" />
+                             <span className={`px-4 py-2 rounded-xl text-xs font-black ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-800'}`}>60s</span>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* Paso 2: Contenido */}
+                 <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                       <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] font-black">2</div>
+                       <h4 className={`text-[11px] font-black uppercase tracking-[3px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Contenido del Mensaje</h4>
+                    </div>
+
+                    <div className="relative group">
+                       <textarea 
+                          value={activeAuto?.content}
+                          onChange={e => {
+                             const val = e.target.value;
+                             setAutomations(prev => prev.map(a => a.id === selectedId ? {...a, content: val} : a));
+                          }}
+                          rows={6}
+                          className={`w-full p-8 rounded-[40px] border text-sm font-medium focus:ring-4 focus:ring-primary/10 outline-none transition-all resize-none ${isDarkMode ? 'bg-slate-900/50 border-slate-700 text-slate-300 focus:border-primary' : 'bg-slate-50 border-slate-100 text-slate-800 focus:border-primary'}`}
+                          placeholder="Hola {{nombre}}, tenemos una oferta especial para ti..."
+                       />
+                       <div className="absolute bottom-6 right-6 flex gap-2">
+                          <button className={`p-2 rounded-xl border ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white' : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'}`}><Plus size={16} /></button>
+                          <button className={`p-2 rounded-xl border ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white' : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'}`}><Zap size={16} /></button>
+                       </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                       {['{{nombre}}', '{{primer_apellido}}', '{{email}}', '{{telefono}}'].map(tag => (
+                          <button key={tag} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${isDarkMode ? 'border-slate-800 text-slate-500 hover:bg-slate-800 hover:text-primary' : 'border-slate-100 text-slate-500 hover:bg-slate-50 hover:text-primary'}`}>{tag}</button>
+                       ))}
+                    </div>
+                 </div>
+
+                 {/* Paso 3: Segmentación */}
+                 <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                       <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] font-black">3</div>
+                       <h4 className={`text-[11px] font-black uppercase tracking-[3px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Segmentación de Audiencia</h4>
+                    </div>
+                    
+                    <div className={`p-8 rounded-3xl border-2 border-dashed transition-colors flex flex-col items-center text-center gap-4 ${isDarkMode ? 'bg-primary/5 border-primary/20 text-primary' : 'bg-primary/5 border-primary/20 text-primary'}`}>
+                       <Users size={32} className="opacity-50" />
+                       <div>
+                          <p className="text-xs font-black uppercase tracking-widest mb-1">Público Seleccionado: {activeAuto?.target}</p>
+                          <p className="text-[10px] font-bold opacity-70">Haz clic para cambiar el segmento o subir una lista de contactos.</p>
+                       </div>
+                       <button className="px-6 py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl">Cambiar Audiencia</button>
+                    </div>
+                 </div>
+
+              </div>
+
+              {/* Footer Acciones de Estado */}
+              <div className={`p-6 border-t flex justify-between items-center transition-colors ${isDarkMode ? 'border-slate-800 bg-[#252525]' : 'border-slate-50 bg-slate-50'}`}>
+                 <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${activeAuto?.status === 'Active' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></div>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>{activeAuto?.status === 'Active' ? 'Campaña en Ejecución' : 'Campaña Detenida'}</span>
+                 </div>
+                 <button className={`px-8 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 ${activeAuto?.status === 'Active' ? 'bg-rose-500 text-white shadow-xl shadow-rose-500/20' : 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20'}`}>
+                    {activeAuto?.status === 'Active' ? 'Detener Flujo' : 'Activar Ahora'}
+                 </button>
+              </div>
+
+           </div>
+        </div>
+
+      </div>
     </div>
   );
 };

@@ -201,21 +201,24 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
   };
 
   return (
-    <div className={`flex-1 flex flex-col h-[calc(100vh-4rem)] md:h-full pb-20 md:pb-0 ${isDarkMode ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
+    <div className={`flex-1 flex flex-col h-[calc(100vh-4rem)] md:h-full pb-24 md:pb-0 ${isDarkMode ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
       <AlarmSystem items={alarmItems} onDismiss={unregisterAlarmItem} />
       
-      <div className={`h-16 border-b px-4 md:px-8 flex items-center justify-between shrink-0 transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
-        <div className="flex items-center gap-4">
-          <h1 className={`text-[18px] md:text-[20px] font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Leads e Interesados</h1>
-          <div className={`flex p-1 rounded-lg transition-colors ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
-            <button onClick={() => setViewMode('kanban')} className={`p-1.5 rounded-md transition-all ${viewMode === 'kanban' ? (isDarkMode ? 'bg-slate-700 shadow-sm text-primary' : 'bg-white shadow-sm text-primary') : 'text-slate-500 hover:text-slate-400'}`}><KanbanSquare size={18} /></button>
-            <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-slate-700 shadow-sm text-primary' : 'bg-white shadow-sm text-primary') : 'text-slate-500 hover:text-slate-400'}`}><LayoutList size={18} /></button>
+      <div className={`h-20 border-b px-6 md:px-10 flex items-center justify-between shrink-0 transition-all ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col">
+            <h1 className={`text-xl font-black tracking-tight lowercase ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Leads e Interesados</h1>
+            <p className="text-[10px] font-black uppercase tracking-[2px] text-slate-500">gestión de prospectos</p>
+          </div>
+          <div className={`flex p-1 rounded-xl transition-colors ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50 border border-slate-100'}`}>
+            <button onClick={() => setViewMode('kanban')} className={`p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (isDarkMode ? 'bg-primary text-white shadow-lg' : 'bg-primary text-white shadow-md') : 'text-slate-400 hover:text-slate-600'}`}><KanbanSquare size={16} /></button>
+            <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-primary text-white shadow-lg' : 'bg-primary text-white shadow-md') : 'text-slate-400 hover:text-slate-600'}`}><LayoutList size={16} /></button>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button className={`p-2 rounded-xl border transition-colors ${isDarkMode ? 'border-slate-700 text-slate-400 bg-slate-800 hover:bg-slate-700' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}><Filter size={18} /></button>
-          <button onClick={() => setShowNewLead(true)} className="bg-primary text-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-[12px] md:text-[13px] font-semibold shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all active:scale-95 flex items-center gap-2">
-            <Plus size={18} /> <span className="hidden sm:inline">Nuevo Lead</span>
+          <button className={`p-2.5 rounded-xl border transition-all active:scale-95 ${isDarkMode ? 'border-slate-700 text-slate-400 bg-slate-800 hover:bg-slate-700' : 'border-slate-200 text-slate-500 bg-white hover:bg-slate-50 shadow-sm'}`}><Filter size={16} /></button>
+          <button onClick={() => setShowNewLead(true)} className="bg-primary text-white px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all active:scale-95 flex items-center gap-2">
+            <Plus size={16} /> <span className="hidden sm:inline">Nuevo Lead</span>
           </button>
         </div>
       </div>
@@ -259,16 +262,16 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
     </div>
   );
   return (
-    <div className={`rounded-2xl border shadow-sm overflow-hidden overflow-x-auto h-full ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+    <div className={`rounded-[32px] border shadow-xl overflow-hidden overflow-x-auto h-full ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
       <table className="w-full text-left border-collapse min-w-[900px]">
         <thead>
-          <tr className={`border-b text-[11px] font-bold transition-colors ${isDarkMode ? 'bg-slate-800/50 border-slate-800 text-slate-500' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
-            <th className="px-4 py-3 pl-6 font-semibold">Lead</th>
-            <th className="px-4 py-3 font-semibold">Estado</th>
-            <th className="px-4 py-3 font-semibold">Puntaje</th>
-            <th className="px-4 py-3 font-semibold">Proyecto</th>
-            <th className="px-4 py-3 font-semibold">Bot IA</th>
-            <th className="px-4 py-3 pr-6 text-right font-semibold">Acciones</th>
+          <tr className={`border-b text-[10px] font-black uppercase tracking-widest transition-all ${isDarkMode ? 'bg-slate-900/50 border-slate-800 text-slate-500' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
+            <th className="px-8 py-5 font-black">lead / contacto</th>
+            <th className="px-8 py-5 font-black">estado</th>
+            <th className="px-8 py-5 font-black">scoring</th>
+            <th className="px-8 py-5 font-black">proyecto</th>
+            <th className="px-8 py-5 font-black">asistente ia</th>
+            <th className="px-8 py-5 pr-10 text-right font-black">acciones</th>
           </tr>
         </thead>
         <tbody className={`divide-y transition-colors ${isDarkMode ? 'divide-slate-800' : 'divide-slate-100'}`}>
@@ -341,27 +344,29 @@ const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onEdit, 
   
   const getStatusColor = (st: string) => {
     switch (st) {
-      case 'Nuevo': return isDarkMode ? 'text-blue-400' : 'text-blue-600';
-      case 'Contactado': return isDarkMode ? 'text-amber-400' : 'text-amber-600';
-      case 'Cita': return isDarkMode ? 'text-purple-400' : 'text-purple-600';
-      case 'Negociación': return isDarkMode ? 'text-emerald-400' : 'text-emerald-600';
-      case 'Cerrado': return isDarkMode ? 'text-slate-400' : 'text-slate-600';
+      case 'Nuevo': return isDarkMode ? 'text-blue-400' : 'text-blue-500';
+      case 'Contactado': return isDarkMode ? 'text-amber-400' : 'text-amber-500';
+      case 'Cita': return isDarkMode ? 'text-purple-400' : 'text-purple-500';
+      case 'Negociación': return isDarkMode ? 'text-emerald-400' : 'text-emerald-500';
+      case 'Cerrado': return isDarkMode ? 'text-slate-400' : 'text-slate-500';
       default: return 'text-primary';
     }
   };
 
   return (
-    <div onDragOver={handleDragOver} onDrop={handleDrop} className="flex flex-col w-72 md:w-80 shrink-0">
-      <div className="flex items-center justify-between mb-4 px-2">
-        <div className="flex items-center gap-2">
-          <h3 className={`text-[13px] font-bold ${getStatusColor(status)}`}>{status}</h3>
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-slate-800 text-slate-500' : 'bg-slate-200 text-slate-500'}`}>{leads.length}</span>
+    <div onDragOver={handleDragOver} onDrop={handleDrop} className="flex flex-col w-72 md:w-85 shrink-0">
+      <div className="flex items-center justify-between mb-6 px-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-2 h-2 rounded-full ${getStatusColor(status).replace('text', 'bg')}`} />
+          <h3 className={`text-[11px] font-black uppercase tracking-widest ${getStatusColor(status)}`}>{status}</h3>
+          <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg ${isDarkMode ? 'bg-slate-900 text-slate-600' : 'bg-slate-100 text-slate-400'}`}>{leads.length}</span>
         </div>
       </div>
-      <div className="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-1">
+      <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-2 pb-10">
         {leads.length === 0 && (
-          <div className={`p-6 rounded-2xl border-2 border-dashed text-center ${isDarkMode ? 'border-slate-800 text-slate-600' : 'border-slate-200 text-slate-400'}`}>
-            <p className="text-xs font-medium">Arrastra leads aquí</p>
+          <div className={`p-10 rounded-[24px] border-2 border-dashed text-center flex flex-col items-center justify-center gap-2 ${isDarkMode ? 'border-slate-800/50 text-slate-700' : 'border-slate-100 text-slate-300'}`}>
+            <Plus size={24} className="opacity-20" />
+            <p className="text-[10px] font-black uppercase tracking-widest">vacío</p>
           </div>
         )}
         {leads.map((lead: any) => (
@@ -377,50 +382,49 @@ const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isD
   const sc = getScoreColor(lead.score || '0');
   return (
     <div draggable onDragStart={handleDragStart} onDoubleClick={() => onSelect(lead)}
-      className={`p-4 rounded-2xl border shadow-sm cursor-grab active:cursor-grabbing transition-all hover:shadow-md hover:border-primary/30 group ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
-      <div className="flex justify-between items-start mb-2 gap-2">
+      className={`p-5 rounded-[28px] border shadow-sm cursor-grab active:cursor-grabbing transition-all hover:shadow-xl hover:border-primary/40 group ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100 shadow-slate-200/50'}`}>
+      <div className="flex justify-between items-start mb-4 gap-3">
         <div className="flex flex-col min-w-0">
-          <h4 className={`text-[14px] font-bold truncate group-hover:text-primary transition-colors ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{lead.name}</h4>
-          <div className="flex items-center gap-1.5 text-slate-500 mt-0.5">
-            <Phone size={10} className="text-emerald-500 shrink-0" /><span className="text-[11px] font-medium truncate">{lead.phone}</span>
+          <h4 className={`text-[13px] font-black lowercase truncate group-hover:text-primary transition-colors ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{lead.name}</h4>
+          <div className="flex items-center gap-1.5 text-slate-500 mt-1">
+            <Phone size={10} className="text-emerald-500 shrink-0" /><span className="text-[10px] font-bold tracking-tight truncate">{lead.phone}</span>
           </div>
         </div>
         <button onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }}
-          className={`p-1.5 rounded-lg shrink-0 transition-all ${lead.botActive ? 'bg-primary/10 text-primary shadow-sm' : 'bg-slate-100 text-slate-400'}`}>
-          <Bot size={14} />
+          className={`p-2 rounded-xl shrink-0 transition-all active:scale-90 ${lead.botActive ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
+          <Bot size={14} className={lead.botActive ? 'animate-pulse' : ''} />
         </button>
       </div>
-      <div className="flex gap-2 flex-wrap mb-3">
+      
+      <div className="flex gap-2 flex-wrap mb-4">
         {(lead.tags || []).map((tag: string, i: number) => (
-          <span key={i} className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${getTagColor(tag)}`}>{tag}</span>
+          <span key={i} className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border ${getTagColor(tag)}`}>{tag}</span>
         ))}
       </div>
       
-      <div className="space-y-2 mt-3">
-        <div className={`flex items-center justify-between mt-4 pt-3 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100/50'}`}>
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold relative ${sc.bg} ${sc.text}`} title="Scoring generado por IA">
-              {lead.score || '—'}
-              <BrainCircuit size={10} className="absolute -top-1 -right-1 text-purple-500 bg-white dark:bg-slate-900 rounded-full" />
+      <div className="space-y-3">
+        <div className={`flex items-center justify-between pt-4 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-50'}`}>
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <div className={`w-9 h-9 rounded-2xl shrink-0 flex items-center justify-center text-[10px] font-black relative ${sc.bg} ${sc.text}`} title="Scoring generado por IA">
+              {lead.score || '0%'}
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center shadow-sm">
+                 <BrainCircuit size={8} className="text-primary" />
+              </div>
             </div>
             <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate w-full">{lead.project || 'Sin proyecto'}</span>
-              <span className="text-[9px] text-slate-400 capitalize truncate w-full">{lead.source || 'Orgánico'}</span>
+              <span className={`text-[10px] font-black lowercase truncate w-full ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{lead.project || 'sin proyecto'}</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate w-full">{lead.source || 'orgánico'}</span>
             </div>
           </div>
-          <div className="text-right shrink-0 ml-2">
-            <p className={`text-[12px] font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{lead.budget || '—'}</p>
-            <p className="text-[9px] text-slate-500 font-medium">{lead.time}</p>
-          </div>
         </div>
-        <div className={`flex items-center justify-between pt-2 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100/50'}`} onClick={e => e.stopPropagation()}>
-          <div className="flex gap-1">
-            <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-1.5 rounded-lg inline-flex items-center transition-colors ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}><Phone size={13} /></a>
-            <button title="Chat" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}><MessageSquare size={13} /></button>
+        <div className={`flex items-center justify-between pt-3 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-50'}`} onClick={e => e.stopPropagation()}>
+          <div className="flex gap-1.5">
+            <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-xl inline-flex items-center transition-all active:scale-90 ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}><Phone size={14} /></a>
+            <button title="Chat" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-xl transition-all active:scale-90 ${isDarkMode ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}><MessageSquare size={14} /></button>
           </div>
-          <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-            <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-400 hover:bg-slate-100'}`}><Edit size={13} /></button>
-            <button title="Eliminar" onClick={() => onDelete(lead.id)} className="p-1.5 rounded-lg transition-colors text-rose-400 hover:bg-rose-50"><Trash2 size={13} /></button>
+          <div className="flex gap-1.5">
+            <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-xl transition-all active:scale-90 ${isDarkMode ? 'text-slate-500 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}><Edit size={14} /></button>
+            <button title="Eliminar" onClick={() => onDelete(lead.id)} className="p-2 rounded-xl transition-all active:scale-90 text-rose-400 hover:bg-rose-50"><Trash2 size={14} /></button>
           </div>
         </div>
       </div>

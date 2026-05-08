@@ -347,32 +347,39 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
   return (
     <div className={`flex flex-1 h-[calc(100vh-4rem)] md:h-full overflow-hidden transition-colors ${isDarkMode ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
-      {/* Panel Izquierdo: Lista de Chats */}
-      <div className={`${activeChat ? 'hidden md:flex' : 'flex'} w-full md:w-80 lg:w-96 border-r flex-col shadow-sm z-10 h-full transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+      
+      {/* 1. Panel Izquierdo: Lista de Chats (WhatsApp Style) */}
+      <div className={`${activeChat ? 'hidden lg:flex' : 'flex'} w-full md:w-80 lg:w-96 border-r flex-col shadow-sm z-20 h-full transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
         <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 border-b transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
-          <h2 className={`font-bold text-[18px] md:text-[20px] ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Conversaciones</h2>
-          <div className={`flex gap-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-            <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><Filter size={18} /></button>
-            <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><MoreVertical size={18} /></button>
+          <div className="flex items-center gap-2">
+            <h2 className={`font-bold text-[18px] md:text-[20px] ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Mensajes</h2>
+            <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">Live</span>
+          </div>
+          <div className={`flex gap-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            <button className={`p-2 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><Filter size={18} /></button>
+            <button className={`p-2 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><Plus size={18} /></button>
           </div>
         </div>
 
-        <div className="p-3 flex-shrink-0">
-          <div className="relative">
-            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`} size={16} />
+        <div className="p-4 flex-shrink-0">
+          <div className="relative group">
+            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${isDarkMode ? 'text-slate-500 group-focus-within:text-primary' : 'text-slate-400 group-focus-within:text-primary'}`} size={16} />
             <input 
               type="text" 
-              placeholder="Buscar lead o mensaje..." 
-              className={`w-full pl-9 pr-4 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'}`}
+              placeholder="Buscar conversación..." 
+              className={`w-full pl-10 pr-4 py-2.5 border rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'}`}
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-transparent">
           {chatList.length === 0 ? (
-            <div className={`p-6 text-center text-sm mt-10 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-              <p>No hay mensajes recientes.</p>
-              <p className="text-xs mt-2">Envía un mensaje a este número de WhatsApp para iniciar un chat.</p>
+            <div className={`p-8 text-center mt-10 animate-pulse ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
+              <div className="w-16 h-16 bg-slate-200 dark:bg-slate-800 rounded-full mx-auto mb-4 flex items-center justify-center opacity-20">
+                 <MessageSquare size={32} />
+              </div>
+              <p className="text-sm font-bold">Esperando mensajes...</p>
+              <p className="text-[10px] mt-2 uppercase tracking-widest opacity-60">Escanea el QR en Conexiones para activar</p>
             </div>
           ) : (
             chatList.map(chat => (
@@ -392,152 +399,221 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         </div>
       </div>
 
-      {/* Panel Derecho: Conversación Activa */}
-      <div className={`${activeChat ? 'flex' : 'hidden md:flex'} flex-1 flex-col relative h-full transition-colors ${isDarkMode ? 'bg-[#181619]' : 'bg-chat-pattern'}`}>
+      {/* 2. Panel Central: Conversación (Modern Layout) */}
+      <div className={`${activeChat ? 'flex' : 'hidden md:flex'} flex-1 flex-col relative h-full transition-colors ${isDarkMode ? 'bg-[#151316]' : 'bg-[#f0f2f5]'}`}>
         {activeChatData ? (
           <>
-            <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 md:px-6 backdrop-blur-sm border-b shadow-sm z-10 transition-colors ${isDarkMode ? 'bg-[#1E1E1E]/95 border-slate-800' : 'bg-white/95 border-slate-200'}`}>
-              <div className="flex items-center gap-3">
-                <button onClick={() => setActiveChat(null)} className={`md:hidden p-2 -ml-2 rounded-full transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-100'}`}>
+            {/* Header Conversación */}
+            <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 md:px-6 backdrop-blur-md border-b z-30 transition-colors ${isDarkMode ? 'bg-[#1E1E1E]/90 border-slate-800' : 'bg-white/90 border-slate-200'}`}>
+              <div className="flex items-center gap-3 overflow-hidden">
+                <button onClick={() => setActiveChat(null)} className={`lg:hidden p-2 -ml-2 rounded-full transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-100'}`}>
                   <ArrowLeft size={20} />
                 </button>
-                <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-10 h-10 rounded-full object-cover shadow-sm border ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`} />
-                <div>
-                  <h3 className={`font-bold text-[14px] md:text-[16px] flex items-center gap-2 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                <div className="relative">
+                  <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-10 h-10 rounded-full object-cover shadow-sm border ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`} />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-[#1E1E1E] rounded-full"></div>
+                </div>
+                <div className="truncate">
+                  <h3 className={`font-bold text-[14px] md:text-[15px] truncate ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
                     {activeChatData.name}
-                    <select
-                      className={`text-xs px-2 py-0.5 rounded ml-2 font-normal ${isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'}`}
-                      value={useN8n ? 'n8n' : 'local'}
-                      onChange={(e) => toggleN8nMode(e.target.value === 'n8n')}
-                    >
-                      <option value="local">Modo IA: Local</option>
-                      <option value="n8n">Modo IA: n8n</option>
-                    </select>
                   </h3>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>
-                      {activeChatData.id.includes('@lid') 
-                        ? 'Usuario Privado (LID)' 
-                        : activeChatData.id.includes('@g.us') 
-                          ? 'Grupo' 
-                          : `+${activeChatData.id.split('@')[0].split(':')[0]}`}
-                    </span>
-                  </div>
+                  <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">En línea</p>
                 </div>
               </div>
-              <div className={`flex items-center gap-1 md:gap-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                <button className={`p-2 md:p-2.5 rounded-full text-primary transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><Phone size={18} /></button>
-                <button className={`hidden sm:block p-2.5 rounded-full text-primary transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><Video size={18} /></button>
-                <div className={`w-px h-6 mx-1 transition-colors ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
-                <button className={`p-2 md:p-2.5 rounded-full transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><MoreVertical size={18} /></button>
+              
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className={`hidden sm:flex items-center p-1 rounded-xl transition-colors ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                   <button onClick={() => toggleN8nMode(false)} className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${!useN8n ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>Bot Local</button>
+                   <button onClick={() => toggleN8nMode(true)} className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${useN8n ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>Bot n8n</button>
+                </div>
+                <div className="w-px h-6 mx-2 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
+                <button className={`p-2.5 rounded-xl text-primary transition-all active:scale-90 hover:bg-primary/10`}><Phone size={18} /></button>
+                <button 
+                  onClick={() => setShowQuickReplies(!showQuickReplies)}
+                  className={`p-2.5 rounded-xl transition-all active:scale-90 lg:hidden ${showQuickReplies ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'text-amber-500 bg-amber-500/10'}`}
+                >
+                  <Zap size={18} />
+                </button>
+                <button className={`p-2.5 rounded-xl transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}><MoreVertical size={18} /></button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 custom-scrollbar">
+            {/* Messages Area */}
+            <div className={`flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scrollbar transition-all ${isDarkMode ? 'bg-[#0b0a0b]' : 'bg-[#e5ddd5]'}`}
+                 style={!isDarkMode ? { backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")', backgroundAlpha: 0.1, backgroundSize: '400px' } : {}}>
+              <div className="flex justify-center mb-4">
+                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${isDarkMode ? 'bg-slate-800/80 text-slate-400' : 'bg-white/80 text-slate-500'}`}>Hoy</span>
+              </div>
               {activeChatData.messages.map(msg => (
                 <Message key={msg.id} type={msg.fromMe ? 'out' : 'in'} text={msg.text} time={msg.time} media={msg.media} mimeType={msg.mimeType} isDarkMode={isDarkMode} />
               ))}
               <div ref={messagesEndRef} />
             </div>
 
+            {/* File Preview */}
             {(selectedFile || mediaBase64) && (
-              <div className={`px-4 py-2 flex items-center justify-between border-t transition-colors ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
-                <span className={`text-xs truncate ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{selectedFile?.name || 'Archivo adjunto'}</span>
-                <button onClick={() => { setSelectedFile(null); setMediaBase64(null); }} className="text-rose-500 text-xs font-bold px-2 hover:text-rose-400">X</button>
-              </div>
-            )}
-            
-            {showQuickReplies && (
-              <div className={`absolute bottom-20 left-4 right-4 md:left-6 md:right-6 rounded-2xl shadow-2xl border p-4 z-50 flex flex-col max-h-[60vh] ${isDarkMode ? 'bg-[#1E1E1E] border-slate-700' : 'bg-white border-slate-200'}`}>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className={`font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-                    <Zap size={18} className="text-amber-500" /> Respuestas Rápidas
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => { setReplyForm({}); setShowReplyForm(true); }} className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
-                      <Plus size={16} /> Nueva
-                    </button>
-                    <button onClick={() => setShowQuickReplies(false)} className={`p-1 rounded-md ${isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}>
-                      <X size={18} />
-                    </button>
-                  </div>
+              <div className={`px-4 py-3 flex items-center justify-between border-t border-primary/20 animate-in slide-in-from-bottom duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-slate-50'}`}>
+                <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Paperclip size={18} /></div>
+                   <div className="max-w-[200px]">
+                      <p className={`text-xs font-bold truncate ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{selectedFile?.name || 'Archivo adjunto'}</p>
+                      <p className="text-[10px] text-slate-500">Listo para enviar</p>
+                   </div>
                 </div>
-
-                {showReplyForm ? (
-                  <div className="flex flex-col gap-3 overflow-y-auto custom-scrollbar p-1">
-                    <input type="text" placeholder="Título corto (ej. Bienvenida)" className={`w-full p-2 text-sm rounded-lg border ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} value={replyForm.title || ''} onChange={e => setReplyForm({...replyForm, title: e.target.value})} />
-                    <textarea rows={4} placeholder="Escribe el texto. Usa {{nombre}} y {{proyecto}} como variables." className={`w-full p-2 text-sm rounded-lg border resize-none ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} value={replyForm.text || ''} onChange={e => setReplyForm({...replyForm, text: e.target.value})} />
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <label className="cursor-pointer text-sm text-primary font-medium flex items-center gap-1 hover:underline">
-                          <Paperclip size={16} /> {replyForm.fileName ? 'Cambiar adjunto' : 'Añadir adjunto'}
-                          <input type="file" className="hidden" onChange={handleReplyFileChange} />
-                        </label>
-                        {replyForm.fileName && <span className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{replyForm.fileName}</span>}
-                      </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => setShowReplyForm(false)} className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Cancelar</button>
-                        <button onClick={handleSaveReplyForm} className="px-3 py-1.5 text-sm rounded-lg font-medium bg-primary text-white hover:bg-primary-dark transition-colors">Guardar</button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-2">
-                    {quickReplies.length === 0 ? (
-                      <div className={`text-center py-6 text-sm ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>No hay respuestas rápidas creadas.</div>
-                    ) : (
-                      quickReplies.map(reply => (
-                        <div key={reply.id} className={`p-3 rounded-xl border flex flex-col gap-2 transition-colors cursor-pointer group ${isDarkMode ? 'bg-slate-800/50 border-slate-700 hover:bg-slate-800' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
-                          <div className="flex justify-between items-start">
-                            <div onClick={() => handleSelectQuickReply(reply)} className="flex-1">
-                              <h4 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>{reply.title}</h4>
-                              <p className={`text-xs line-clamp-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{reply.text}</p>
-                              {reply.fileName && <div className="text-[10px] mt-1 text-primary flex items-center gap-1"><Paperclip size={10} /> Adjunto: {reply.fileName}</div>}
-                            </div>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={(e) => { e.stopPropagation(); setReplyForm(reply); setShowReplyForm(true); }} className={`p-1.5 rounded-md ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-slate-200 text-slate-600'}`}><Edit2 size={14} /></button>
-                              <button onClick={(e) => { e.stopPropagation(); handleDeleteReply(reply.id); }} className={`p-1.5 rounded-md hover:bg-rose-500/10 text-rose-500`}><Trash2 size={14} /></button>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
+                <button onClick={() => { setSelectedFile(null); setMediaBase64(null); }} className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all">
+                  <X size={16} />
+                </button>
               </div>
             )}
 
-            <div className={`p-3 md:p-4 border-t transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
-              <div className={`flex items-center gap-3 p-1 rounded-2xl border transition-all ${isDarkMode ? 'bg-slate-900 border-slate-700 focus-within:border-primary/50' : 'bg-slate-50 border-slate-200 focus-within:border-primary/50'}`}>
-                <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-2 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-amber-500 bg-amber-500/10' : (isDarkMode ? 'text-slate-500 hover:text-amber-500 hover:bg-amber-500/10' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-500/10')}`}>
-                  <Zap size={18} />
-                </button>
-                <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-                <button onClick={() => fileInputRef.current?.click()} className={`p-2 rounded-xl transition-all active:scale-95 ${isDarkMode ? 'text-slate-500 hover:text-primary hover:bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}>
-                  <Paperclip size={18} />
-                </button>
-                <input 
-                  type="text" 
+            {/* Input Area */}
+            <div className={`p-4 border-t z-30 transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+              <div className={`flex items-center gap-2 p-1.5 rounded-2xl border transition-all ${isDarkMode ? 'bg-slate-900 border-slate-700 focus-within:border-primary/50' : 'bg-slate-50 border-slate-200 focus-within:border-primary/50'}`}>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-2.5 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-white bg-amber-500 shadow-md' : (isDarkMode ? 'text-slate-500 hover:text-amber-500 hover:bg-amber-500/10' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-500/10')}`}>
+                    <Zap size={20} />
+                  </button>
+                  <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
+                  <button onClick={() => fileInputRef.current?.click()} className={`p-2.5 rounded-xl transition-all active:scale-95 ${isDarkMode ? 'text-slate-500 hover:text-primary hover:bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}>
+                    <Paperclip size={20} />
+                  </button>
+                </div>
+                <textarea 
+                  rows={1}
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
                   placeholder="Escribe un mensaje..."
-                  className={`flex-1 bg-transparent py-2 text-xs md:text-sm focus:outline-none ${isDarkMode ? 'text-white placeholder-slate-600' : 'text-slate-800 placeholder-slate-400'}`}
+                  className={`flex-1 bg-transparent py-2 px-1 text-sm focus:outline-none resize-none max-h-32 custom-scrollbar ${isDarkMode ? 'text-white placeholder-slate-600' : 'text-slate-800 placeholder-slate-400'}`}
                 />
-                <button onClick={handleSendMessage} className="bg-primary text-white p-2 md:p-2.5 rounded-xl transition-all active:scale-95 hover:bg-primary-dark shadow-lg shadow-primary/20">
-                  <Send size={18} />
-                </button>
+                <div className="flex items-center gap-1 px-1">
+                   <button className={`p-2.5 rounded-xl transition-all active:scale-95 ${isDarkMode ? 'text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10' : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-500/10'}`}><Smile size={20} /></button>
+                   <button onClick={handleSendMessage} className="bg-primary text-white p-3 rounded-xl transition-all active:scale-95 hover:bg-primary-dark shadow-lg shadow-primary/20 flex items-center justify-center">
+                     <Send size={18} />
+                   </button>
+                </div>
               </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-sm mb-4 transition-colors ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
-              <CheckCircle2 size={40} className="text-emerald-400" />
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-1000">
+            <div className={`w-32 h-32 rounded-3xl flex items-center justify-center shadow-2xl mb-8 transition-all rotate-3 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-100'}`}>
+              <MessageSquare size={64} className="text-primary opacity-20" />
             </div>
-            <p className={`font-bold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>WhatsApp Vinculado Exitosamente</p>
-            <p className="text-xs mt-1">Selecciona o espera un mensaje para iniciar el chat</p>
+            <h2 className={`text-2xl font-black mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>ChatPrex Conversaciones</h2>
+            <p className={`max-w-xs text-sm font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>
+              Gestiona todos tus leads de WhatsApp en un solo lugar. Selecciona un chat para comenzar.
+            </p>
+            <div className="mt-10 flex gap-4">
+               <div className="flex flex-col items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center"><Zap size={20} /></div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">IA Activa</p>
+               </div>
+               <div className="flex flex-col items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center"><CheckCircle2 size={20} /></div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Multicanal</p>
+               </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 3. Panel Derecho: Respuestas Rápidas & Contexto (Desktop Sidebar) */}
+      <div className={`${showQuickReplies ? 'flex' : 'hidden'} lg:flex w-full md:w-80 lg:w-96 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+        <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
+          <div className="flex items-center gap-2 text-amber-500">
+             <Zap size={20} />
+             <h2 className={`font-bold text-[16px] ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Respuestas</h2>
+          </div>
+          <button 
+            onClick={() => { setReplyForm({}); setShowReplyForm(true); }}
+            className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
+          >
+            <Plus size={18} />
+          </button>
+        </div>
+
+        {showReplyForm ? (
+          <div className="flex-1 flex flex-col p-6 overflow-y-auto custom-scrollbar space-y-5 animate-in fade-in duration-300">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Título de la respuesta</label>
+              <input 
+                type="text" 
+                placeholder="Ej: Bienvenida General" 
+                className={`w-full p-3 text-sm rounded-xl border focus:ring-2 focus:ring-primary/20 outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} 
+                value={replyForm.title || ''} 
+                onChange={e => setReplyForm({...replyForm, title: e.target.value})} 
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Contenido del mensaje</label>
+              <textarea 
+                rows={8} 
+                placeholder="Escribe el mensaje..." 
+                className={`w-full p-3 text-sm rounded-xl border focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} 
+                value={replyForm.text || ''} 
+                onChange={e => setReplyForm({...replyForm, text: e.target.value})} 
+              />
+              <p className="text-[10px] text-slate-500 font-medium italic">Puedes usar {"{{nombre}}"} para personalizar.</p>
+            </div>
+            
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Archivo Adjunto</label>
+              <label className={`flex items-center gap-3 p-3 rounded-xl border border-dashed cursor-pointer transition-all hover:bg-primary/5 ${isDarkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-white'}`}>
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><Paperclip size={18} /></div>
+                <div className="flex-1 overflow-hidden">
+                   <p className="text-xs font-bold truncate">{replyForm.fileName || 'Seleccionar archivo'}</p>
+                   <p className="text-[10px] text-slate-500">Imagen, PDF o Video</p>
+                </div>
+                <input type="file" className="hidden" onChange={handleReplyFileChange} />
+              </label>
+            </div>
+
+            <div className="pt-4 flex gap-3 mt-auto">
+              <button onClick={() => setShowReplyForm(false)} className={`flex-1 py-3 text-xs rounded-xl font-bold transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Cancelar</button>
+              <button onClick={handleSaveReplyForm} className="flex-1 py-3 text-xs rounded-xl font-bold bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">Guardar</button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="p-4 border-b transition-colors bg-slate-50/50 dark:bg-slate-900/30">
+               <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                  <input type="text" placeholder="Buscar respuesta..." className={`w-full pl-9 pr-4 py-2 text-xs border rounded-xl outline-none ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`} />
+               </div>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+              {quickReplies.length === 0 ? (
+                <div className="text-center py-10 opacity-30">
+                   <Zap size={48} className="mx-auto mb-4" />
+                   <p className="text-xs font-bold uppercase tracking-widest">Sin respuestas rápidas</p>
+                </div>
+              ) : (
+                quickReplies.map(reply => (
+                  <div key={reply.id} className={`p-4 rounded-2xl border transition-all cursor-pointer group animate-in slide-in-from-right duration-300 ${isDarkMode ? 'bg-[#252525] border-slate-800 hover:border-primary/50' : 'bg-white border-slate-100 hover:border-primary/30 shadow-sm'}`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div onClick={() => handleSelectQuickReply(reply)} className="flex-1">
+                        <h4 className={`font-bold text-[13px] mb-1 group-hover:text-primary transition-colors ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{reply.title}</h4>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={(e) => { e.stopPropagation(); setReplyForm(reply); setShowReplyForm(true); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-500' : 'hover:bg-slate-100 text-slate-400'}`}><Edit2 size={12} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteReply(reply.id); }} className={`p-1.5 rounded-lg hover:bg-rose-500/10 text-rose-500`}><Trash2 size={12} /></button>
+                      </div>
+                    </div>
+                    <p onClick={() => handleSelectQuickReply(reply)} className={`text-[11px] line-clamp-3 font-medium leading-relaxed ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>{reply.text}</p>
+                    {reply.fileName && (
+                      <div className="mt-3 flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10 text-[10px] font-bold text-primary">
+                        <Paperclip size={10} /> {reply.fileName}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+            <div className={`p-6 border-t text-center ${isDarkMode ? 'bg-slate-900/50' : 'bg-slate-50'}`}>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Truco Pro</p>
+                <p className="text-[11px] text-slate-500 font-medium italic">Presiona la tecla <span className="font-bold text-primary">/</span> en el chat para buscar rápido.</p>
+            </div>
           </div>
         )}
       </div>

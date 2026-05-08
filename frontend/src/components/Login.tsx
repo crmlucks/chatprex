@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, LogIn, UserPlus, Building2 } from 'lucide-react';
+import { Eye, EyeOff, LogIn, UserPlus, Bot, ShieldCheck } from 'lucide-react';
 
 const Login = () => {
   const { login, setup, needsSetup } = useAuth();
@@ -34,84 +34,91 @@ const Login = () => {
   };
 
   const showSetupForm = needsSetup || isSetup;
+  const input = "w-full px-5 py-3.5 rounded-2xl bg-slate-900/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-[13px] font-bold";
+  const label = "text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
+    <div className="min-h-screen flex items-center justify-center bg-[#121212] relative overflow-hidden">
+      {/* Premium Background Decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px] animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full bg-blue-600/10 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(22,73,255,0.05)_0%,transparent_70%)]" />
       </div>
 
       <div className="relative z-10 w-full max-w-md px-6">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-4 shadow-xl shadow-primary/10">
-            <Building2 size={32} className="text-primary" />
+        {/* Logo Section */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-[28px] bg-primary border border-primary/20 mb-6 shadow-2xl shadow-primary/40 transform rotate-3 transition-transform hover:rotate-0 duration-500">
+            <Bot size={40} className="text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">ChatPrex</h1>
-          <p className="text-slate-400 text-sm mt-1">CRM Inmobiliario Inteligente</p>
+          <h1 className="text-4xl font-black text-white tracking-tighter lowercase">ChatPrex</h1>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[3px]">premium crm erp</p>
+          </div>
         </div>
 
-        {/* Card */}
-        <div className="bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-xl font-bold text-white mb-1">
-            {showSetupForm ? 'Configuración Inicial' : 'Iniciar Sesión'}
-          </h2>
-          <p className="text-slate-400 text-sm mb-6">
-            {showSetupForm
-              ? 'Crea la cuenta del Propietario del sistema'
-              : 'Ingresa tus credenciales para acceder'}
-          </p>
+        {/* Auth Card */}
+        <div className="bg-[#1E1E1E]/80 backdrop-blur-3xl border border-slate-800/50 rounded-[40px] p-10 shadow-2xl">
+          <div className="mb-8">
+            <h2 className="text-xl font-black text-white lowercase">
+              {showSetupForm ? 'configuración inicial' : 'bienvenido de nuevo'}
+            </h2>
+            <p className="text-slate-500 text-[11px] font-bold mt-1">
+              {showSetupForm
+                ? 'crea la cuenta raíz para administrar el sistema'
+                : 'ingresa tus credenciales para acceder al panel'}
+            </p>
+          </div>
 
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
+            <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[12px] font-bold animate-in shake duration-300">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {showSetupForm && (
-              <>
+              <div className="grid grid-cols-1 gap-6 animate-in slide-in-from-top-4 duration-500">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Nombre completo</label>
+                  <label className={label}>nombre completo</label>
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-900/50 border border-slate-600/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all text-sm"
-                    placeholder="Tu nombre"
+                    className={input}
+                    placeholder="ej. juan pérez"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Teléfono</label>
+                  <label className={label}>teléfono corporativo</label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-900/50 border border-slate-600/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all text-sm"
-                    placeholder="+52 1234567890"
+                    className={input}
+                    placeholder="+51 900 000 000"
                   />
                 </div>
-              </>
+              </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo electrónico</label>
+              <label className={label}>correo electrónico</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/50 border border-slate-600/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all text-sm"
-                placeholder="tu@email.com"
+                className={input}
+                placeholder="hola@chatprex.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Contraseña</label>
+              <label className={label}>contraseña de acceso</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -119,38 +126,47 @@ const Login = () => {
                   minLength={6}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 pr-12 rounded-xl bg-slate-900/50 border border-slate-600/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all text-sm"
+                  className={input + " pr-14"}
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-primary transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-all active:scale-[0.98] shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : showSetupForm ? (
-                <><UserPlus size={18} /> Crear cuenta Propietario</>
-              ) : (
-                <><LogIn size={18} /> Iniciar Sesión</>
-              )}
-            </button>
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 rounded-2xl bg-primary text-white font-black text-[12px] uppercase tracking-[3px] shadow-2xl shadow-primary/30 hover:bg-primary-dark transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : showSetupForm ? (
+                  <><UserPlus size={18} /> inicializar sistema</>
+                ) : (
+                  <><LogIn size={18} /> entrar al sistema</>
+                )}
+              </button>
+            </div>
           </form>
         </div>
 
-        <p className="text-center text-slate-500 text-xs mt-6">
-          © {new Date().getFullYear()} ChatPrex · CRM Inmobiliario
-        </p>
+        {/* Footer Info */}
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <div className="flex items-center gap-3 py-2 px-4 rounded-full bg-white/5 border border-white/5">
+             <ShieldCheck size={14} className="text-emerald-500" />
+             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">conexión segura ssl 256-bit</span>
+          </div>
+          <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">
+            © {new Date().getFullYear()} ChatPrex Cloud · v2.0 Production
+          </p>
+        </div>
       </div>
     </div>
   );

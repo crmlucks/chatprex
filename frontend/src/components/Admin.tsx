@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X, Link } from 'lucide-react';
+import { Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X, Link, Settings, Database, Filter, Target } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -11,7 +11,6 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const [projects, setProjects] = useState<any[]>([]);
   const [pipeline, setPipeline] = useState<any[]>([]);
   const [sources, setSources] = useState<any[]>([]);
-  
   const [formData, setFormData] = useState<any>({});
   const [saving, setSaving] = useState(false);
 
@@ -32,9 +31,7 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         const res = await fetch(`${API_URL}/api/data/sources`, { headers });
         if(res.ok) setSources(await res.json());
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) {}
   };
 
   const openModal = (type: string, item: any = null) => {
@@ -42,11 +39,12 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       setFormData(item);
     } else {
       if (type === 'proyecto') setFormData({ name: '', code: '', status: 'Activo' });
-      else if (type === 'etapa') setFormData({ name: '', color: '#3b82f6', visible: true });
+      else if (type === 'etapa') setFormData({ name: '', color: '#1649FF', visible: true });
       else if (type === 'fuente') setFormData({ name: '', icon: 'Globe', visible: true });
     }
     setModalType(type);
   };
+  
   const closeModal = () => setModalType(null);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -69,12 +67,8 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       if (res.ok) {
         closeModal();
         loadData();
-      } else {
-        alert('Error al guardar');
       }
-    } catch (err) {
-      alert('Error de conexión');
-    } finally {
+    } catch (err) {} finally {
       setSaving(false);
     }
   };
@@ -92,148 +86,159 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) loadData();
-    } catch (err) {
-      alert('Error de conexión');
-    }
+    } catch (err) {}
   };
 
+  const dc = isDarkMode;
+  const card = `rounded-[32px] border transition-all ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100 shadow-xl shadow-slate-200/40'}`;
+  const input = `w-full px-5 py-3 rounded-2xl text-[13px] font-bold outline-none border transition-all ${dc ? 'bg-slate-900 border-slate-800 text-white focus:border-primary' : 'bg-slate-50 border-slate-100 text-slate-800 focus:border-primary focus:bg-white shadow-inner'}`;
+  const label = "text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block";
+
   return (
-    <div className={`flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8 flex flex-col md:flex-row gap-6 relative transition-colors ${isDarkMode ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
-      {/* Menu Lateral Admin */}
-      <div className="w-full md:w-64 shrink-0">
-        <h1 className={`text-[18px] md:text-[20px] font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Administración</h1>
-        <div className="flex md:flex-col gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar">
-          <MenuBtn active={tab === 'proyectos'} onClick={() => setTab('proyectos')} icon={<Layers size={18} />} label="Proyectos/Desarrollos" isDarkMode={isDarkMode} />
-          <MenuBtn active={tab === 'pipeline'} onClick={() => setTab('pipeline')} icon={<Layout size={18} />} label="Etapas del Pipeline" isDarkMode={isDarkMode} />
-          <MenuBtn active={tab === 'fuentes'} onClick={() => setTab('fuentes')} icon={<Globe size={18} />} label="Fuentes de Origen" isDarkMode={isDarkMode} />
+    <div className={`flex-1 overflow-y-auto p-4 md:p-10 pb-24 md:pb-10 transition-colors ${dc ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10">
+        
+        {/* Menu Lateral Admin */}
+        <div className="w-full lg:w-72 shrink-0 space-y-8">
+          <div className="flex items-center gap-4">
+             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${dc ? 'bg-primary/20 text-primary' : 'bg-primary/10 text-primary'}`}>
+                <Settings size={24} />
+             </div>
+             <div>
+                <h1 className={`text-xl font-black tracking-tight lowercase ${dc ? 'text-white' : 'text-slate-800'}`}>Administración</h1>
+                <p className="text-[9px] font-black uppercase tracking-[2px] text-slate-500">configuración central</p>
+             </div>
+          </div>
+          
+          <div className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 scrollbar-hide">
+            <MenuBtn active={tab === 'proyectos'} onClick={() => setTab('proyectos')} icon={<Layers size={18} />} label="proyectos y desarrollos" dc={dc} />
+            <MenuBtn active={tab === 'pipeline'} onClick={() => setTab('pipeline')} icon={<Target size={18} />} label="etapas del pipeline" dc={dc} />
+            <MenuBtn active={tab === 'fuentes'} onClick={() => setTab('fuentes')} icon={<Globe size={18} />} label="fuentes de origen" dc={dc} />
+          </div>
+        </div>
+
+        {/* Contenido Configuración */}
+        <div className={`flex-1 min-h-[600px] animate-in fade-in slide-in-from-right-4 duration-500`}>
+
+          {tab === 'proyectos' && (
+            <div className="space-y-8">
+              <Header tabTitle="proyectos y desarrollos" desc="Gestiona los proyectos inmobiliarios disponibles para venta." onAdd={() => openModal('proyecto')} dc={dc} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {projects.length === 0 ? (
+                  <div className={`col-span-2 text-center py-20 ${dc ? 'text-slate-600' : 'text-slate-400'} font-bold lowercase`}>no hay proyectos registrados</div>
+                ) : projects.map((p: any) => (
+                  <ProjectCard key={p.id} project={p} onEdit={() => openModal('proyecto', p)} onDelete={() => handleDelete('proyecto', p.id)} dc={dc} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {tab === 'pipeline' && (
+            <div className="space-y-8">
+              <Header tabTitle="etapas del pipeline" desc="Define los estados por los que pasan tus prospectos." onAdd={() => openModal('etapa')} dc={dc} />
+              <div className={card + ' p-8'}>
+                <div className={`divide-y ${dc ? 'divide-slate-800' : 'divide-slate-50'}`}>
+                  {pipeline.map((p: any) => (
+                    <PipelineRow key={p.id} pipeline={p} onEdit={() => openModal('etapa', p)} onDelete={() => handleDelete('etapa', p.id)} dc={dc} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'fuentes' && (
+            <div className="space-y-8">
+              <Header tabTitle="fuentes de origen" desc="Canales desde donde llegan tus clientes potenciales." onAdd={() => openModal('fuente')} dc={dc} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {sources.map((s: any) => (
+                  <SourceCard key={s.id} source={s} onEdit={() => openModal('fuente', s)} onDelete={() => handleDelete('fuente', s.id)} dc={dc} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Contenido Configuración */}
-      <div className={`flex-1 rounded-2xl border shadow-sm p-6 overflow-x-auto transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
-
-        {tab === 'proyectos' && (
-          <div>
-            <Header tabTitle="Proyectos / Desarrollos" onAdd={() => openModal('proyecto')} isDarkMode={isDarkMode} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {projects.length === 0 ? (
-                <div className={`col-span-2 text-center py-8 text-sm ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>Sin proyectos registrados. Agrega uno nuevo.</div>
-              ) : projects.map((p: any) => (
-                <ProjectCard key={p.id} project={p} onEdit={() => openModal('proyecto', p)} onDelete={() => handleDelete('proyecto', p.id)} isDarkMode={isDarkMode} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {tab === 'pipeline' && (
-          <div>
-            <Header tabTitle="Etapas del Pipeline" onAdd={() => openModal('etapa')} isDarkMode={isDarkMode} />
-            <div className={`divide-y border rounded-xl px-4 transition-colors ${isDarkMode ? 'divide-slate-800 border-slate-800' : 'divide-slate-100 border-slate-100'}`}>
-              {pipeline.map((p: any) => (
-                <PipelineRow key={p.id} pipeline={p} onEdit={() => openModal('etapa', p)} onDelete={() => handleDelete('etapa', p.id)} isDarkMode={isDarkMode} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {tab === 'fuentes' && (
-          <div>
-            <Header tabTitle="Fuentes de Origen (Leads)" onAdd={() => openModal('fuente')} isDarkMode={isDarkMode} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {sources.map((s: any) => (
-                <SourceCard key={s.id} source={s} onEdit={() => openModal('fuente', s)} onDelete={() => handleDelete('fuente', s.id)} isDarkMode={isDarkMode} />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Modal Genérico */}
+      {/* Modal Genérico Standardized */}
       {modalType && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className={`rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
-            <div className={`px-6 py-3 border-b flex justify-between items-center ${isDarkMode ? 'bg-slate-800/50 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
-              <h3 className={`font-bold text-sm lowercase ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>añadir {modalType}</h3>
-              <button onClick={closeModal} className="text-slate-400 hover:bg-slate-100 p-1 rounded-lg transition-colors"><X size={18} /></button>
-            </div>
-            <form onSubmit={handleSave} className={`p-5 space-y-3 max-h-[80vh] overflow-y-auto custom-scrollbar ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'}`}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
+          <div className={card + ' w-full max-w-xl p-10 relative'}>
+            <button onClick={closeModal} className="absolute top-8 right-8 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"><X size={20} className="text-slate-400" /></button>
+            
+            <h3 className={`text-xl font-black lowercase mb-10 ${dc ? 'text-white' : 'text-slate-800'}`}>añadir {modalType}</h3>
+            
+            <form onSubmit={handleSave} className="space-y-8">
               {modalType === 'proyecto' && (
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                  <div>
-                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre del proyecto</label>
-                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="Ej. Torre Esmeralda" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="md:col-span-2">
+                    <label className={label}>nombre del proyecto</label>
+                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={input} placeholder="Torre Esmeralda..." />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>código (opcional)</label>
-                      <input type="text" value={formData.code || ''} onChange={e => setFormData({...formData, code: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="PRJ-001" />
-                    </div>
-                    <div>
-                      <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>estado</label>
-                      <select value={formData.status || 'Activo'} onChange={e => setFormData({...formData, status: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
-                        <option value="Activo">Activo</option>
-                        <option value="Inactivo">Inactivo</option>
-                      </select>
-                    </div>
+                  <div>
+                    <label className={label}>código interno</label>
+                    <input type="text" value={formData.code || ''} onChange={e => setFormData({...formData, code: e.target.value})} className={input} placeholder="PRJ-001" />
+                  </div>
+                  <div>
+                    <label className={label}>estado inicial</label>
+                    <select value={formData.status || 'Activo'} onChange={e => setFormData({...formData, status: e.target.value})} className={input}>
+                      <option value="Activo">Activo</option>
+                      <option value="Inactivo">Inactivo</option>
+                    </select>
                   </div>
                 </div>
               )}
 
               {modalType === 'etapa' && (
-                <>
+                <div className="space-y-8">
                   <div>
-                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre de la etapa</label>
-                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="Ej. Contactado" />
+                    <label className={label}>nombre de la etapa</label>
+                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={input} placeholder="Ej. Contactado" />
                   </div>
-                  <div>
-                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>color hex</label>
-                    <div className="flex gap-2">
-                      <input type="color" value={formData.color || '#3b82f6'} onChange={e => setFormData({...formData, color: e.target.value})} className="h-10 w-10 border border-slate-200 rounded p-0 cursor-pointer" />
-                      <input type="text" value={formData.color || '#3b82f6'} onChange={e => setFormData({...formData, color: e.target.value})} className="flex-1 border border-slate-200 rounded-lg px-4 py-2 text-sm font-mono focus:outline-none focus:border-primary" />
+                  <div className="grid grid-cols-2 gap-8 items-end">
+                    <div>
+                      <label className={label}>color distintivo</label>
+                      <div className="flex gap-4">
+                        <input type="color" value={formData.color || '#1649FF'} onChange={e => setFormData({...formData, color: e.target.value})} className="h-14 w-14 rounded-2xl p-0 cursor-pointer border-none" />
+                        <input type="text" value={formData.color || '#1649FF'} onChange={e => setFormData({...formData, color: e.target.value})} className={input + ' font-mono'} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 h-14 bg-slate-50 dark:bg-slate-900 px-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+                      <input type="checkbox" className="w-5 h-5 rounded-lg border-2 border-primary text-primary focus:ring-0" checked={formData.visible !== false} onChange={e => setFormData({...formData, visible: e.target.checked})} />
+                      <span className={`text-[11px] font-black lowercase ${dc ? 'text-slate-300' : 'text-slate-700'}`}>visible en kanban</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 pt-2">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={formData.visible !== false} onChange={e => setFormData({...formData, visible: e.target.checked})} />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                      <span className={`ml-3 text-xs font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Visible en el Pipeline Kanban</span>
-                    </label>
-                  </div>
-                </>
+                </div>
               )}
 
               {modalType === 'fuente' && (
-                <>
-                  <div>
-                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre de la fuente</label>
-                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="Ej. Facebook Ads" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="md:col-span-2">
+                    <label className={label}>nombre de la fuente</label>
+                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={input} placeholder="Facebook Ads..." />
                   </div>
                   <div>
-                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>icono (opcional)</label>
-                    <select value={formData.icon || 'Globe'} onChange={e => setFormData({...formData, icon: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
+                    <label className={label}>icono representativo</label>
+                    <select value={formData.icon || 'Globe'} onChange={e => setFormData({...formData, icon: e.target.value})} className={input}>
                       <option value="Facebook">Facebook</option>
                       <option value="Instagram">Instagram</option>
-                      <option value="Smartphone">Smartphone (TikTok/App)</option>
-                      <option value="Globe">Globo (Sitio Web)</option>
-                      <option value="Users">Usuarios (Referido)</option>
+                      <option value="Smartphone">Smartphone</option>
+                      <option value="Globe">Web / Globo</option>
+                      <option value="Users">Referido</option>
                       <option value="Hash">Hashtag</option>
-                      <option value="Link">Enlace</option>
+                      <option value="Link">Enlace Directo</option>
                     </select>
                   </div>
-                  <div className="flex items-center gap-3 pt-2">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={formData.visible !== false} onChange={e => setFormData({...formData, visible: e.target.checked})} />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                      <span className={`ml-3 text-xs font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Fuente Activa</span>
-                    </label>
+                  <div className="flex items-center gap-4 h-14 bg-slate-50 dark:bg-slate-900 px-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <input type="checkbox" className="w-5 h-5 rounded-lg border-2 border-primary text-primary focus:ring-0" checked={formData.visible !== false} onChange={e => setFormData({...formData, visible: e.target.checked})} />
+                    <span className={`text-[11px] font-black lowercase ${dc ? 'text-slate-300' : 'text-slate-700'}`}>fuente activa</span>
                   </div>
-                </>
+                </div>
               )}
 
-              <div className="pt-2 flex gap-3">
-                <button type="button" onClick={closeModal} className={`flex-1 px-4 py-2 rounded-xl font-bold text-xs transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>cancelar</button>
-                <button type="submit" disabled={saving} className="flex-1 px-4 py-2 text-white bg-primary hover:bg-primary-dark rounded-xl font-bold text-xs transition-colors shadow-sm disabled:opacity-50">
-                  {saving ? 'guardando...' : 'guardar'}
+              <div className="pt-6 flex gap-4">
+                <button type="button" onClick={closeModal} className={`flex-1 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all ${dc ? 'border-slate-800 text-slate-500 hover:bg-slate-800' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}>cancelar</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-primary text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-2xl shadow-primary/30 hover:bg-primary-dark transition-all disabled:opacity-50">
+                  {saving ? 'guardando...' : 'guardar cambios'}
                 </button>
               </div>
             </form>
@@ -244,82 +249,94 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   );
 };
 
-const Header = ({ tabTitle, onAdd, isDarkMode }: any) => (
-  <div className="flex justify-between items-center mb-6">
-    <h2 className={`text-[16px] md:text-[18px] font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{tabTitle}</h2>
-    <button onClick={onAdd} className="bg-primary text-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-[12px] md:text-[13px] font-semibold shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all active:scale-95 flex items-center gap-2">
-      <Plus size={16} /> Añadir
+const Header = ({ tabTitle, desc, onAdd, dc }: any) => (
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div>
+      <h2 className={`text-xl font-black tracking-tight lowercase ${dc ? 'text-slate-100' : 'text-slate-800'}`}>{tabTitle}</h2>
+      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">{desc}</p>
+    </div>
+    <button onClick={onAdd} className="bg-primary text-white px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[2px] shadow-2xl shadow-primary/30 hover:bg-primary-dark transition-all active:scale-95 flex items-center gap-3">
+      <Plus size={18} /> añadir nuevo
     </button>
   </div>
 );
 
-const MenuBtn = ({ active, onClick, icon, label, isDarkMode }: any) => (
-  <button onClick={onClick} className={`flex items-center gap-3 px-3 py-2 md:px-4 md:py-2.5 rounded-xl transition-all text-[12px] md:text-[13px] font-semibold whitespace-nowrap md:w-full active:scale-95 ${active ? 'bg-primary text-white shadow-lg shadow-primary/20' : (isDarkMode ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-white border border-transparent hover:border-slate-200')}`}>
-    {icon} {label}
+const MenuBtn = ({ active, onClick, icon, label, dc }: any) => (
+  <button onClick={onClick} className={`flex items-center gap-4 px-6 py-4 rounded-[20px] transition-all text-[12px] font-black lowercase whitespace-nowrap active:scale-95 ${active ? 'bg-primary text-white shadow-2xl shadow-primary/30' : (dc ? 'text-slate-500 hover:bg-slate-800 hover:text-white' : 'text-slate-400 hover:bg-white border border-transparent hover:border-slate-200 shadow-sm')}`}>
+    <span className={active ? 'scale-110' : ''}>{icon}</span> {label}
   </button>
 );
 
-const ActionButtons = ({ onEdit, onDelete, isDarkMode }: any) => (
-  <div className="flex items-center gap-1.5">
-    <button onClick={onEdit} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-500 hover:text-primary hover:bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}><Edit2 size={14} /></button>
-    <button onClick={onDelete} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'}`}><Trash2 size={14} /></button>
-  </div>
-);
-
-const ProjectCard = ({ project, onEdit, onDelete, isDarkMode }: any) => (
-  <div className={`border p-4 rounded-xl transition-all hover:shadow-lg ${isDarkMode ? 'bg-slate-800/50 border-slate-700 hover:border-primary/50' : 'bg-slate-50/50 border-slate-200 hover:border-primary/50'}`}>
-    <div className="flex justify-between items-start mb-2">
-      <div>
-        <h4 className={`font-bold text-sm md:text-base ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>{project.name}</h4>
-        <span className="text-[10px] text-slate-500 font-bold">{project.code}</span>
+const ProjectCard = ({ project, onEdit, onDelete, dc }: any) => (
+  <div className={`p-8 rounded-[32px] border transition-all hover:shadow-2xl hover:-translate-y-1 ${dc ? 'bg-[#1E1E1E] border-slate-800 hover:border-primary/40' : 'bg-white border-slate-100 shadow-xl shadow-slate-200/20 hover:border-primary/20'}`}>
+    <div className="flex justify-between items-start mb-6">
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${dc ? 'bg-slate-900 text-slate-400' : 'bg-slate-50 text-slate-500'}`}>
+        <Database size={24} />
       </div>
-      <ActionButtons onEdit={onEdit} onDelete={onDelete} isDarkMode={isDarkMode} />
+      <div className="flex gap-2">
+        <button onClick={onEdit} className={`p-2.5 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-slate-800 text-blue-400' : 'hover:bg-slate-100 text-blue-500'}`}><Edit2 size={16} /></button>
+        <button onClick={onDelete} className={`p-2.5 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-slate-800 text-rose-400' : 'hover:bg-slate-100 text-rose-500'}`}><Trash2 size={16} /></button>
+      </div>
     </div>
-    <div className={`mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded transition-colors ${isDarkMode ? 'bg-slate-900 border border-slate-700 text-slate-400' : 'bg-white border border-slate-200 text-slate-600'}`}>
-      <span className={`w-2 h-2 rounded-full ${project.status === 'Activo' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span> {project.status || 'Activo'}
+    <h4 className={`text-[15px] font-black lowercase mb-2 ${dc ? 'text-slate-200' : 'text-slate-800'}`}>{project.name}</h4>
+    <div className="flex items-center justify-between mt-6">
+       <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{project.code}</span>
+       <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${project.status === 'Activo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+          {project.status || 'Activo'}
+       </span>
     </div>
   </div>
 );
 
-const PipelineRow = ({ pipeline, onEdit, onDelete, isDarkMode }: any) => (
-  <div className="flex items-center justify-between py-3 group">
-    <div className="flex items-center gap-4">
-      <div className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: pipeline.color }}></div>
-      <span className={`font-bold text-xs md:text-sm ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>{pipeline.name}</span>
-    </div>
+const PipelineRow = ({ pipeline, onEdit, onDelete, dc }: any) => (
+  <div className="flex items-center justify-between py-6 group transition-all">
     <div className="flex items-center gap-6">
-      <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold ${pipeline.visible !== false ? (isDarkMode ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-100 text-emerald-700') : (isDarkMode ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-500')}`}>
-        {pipeline.visible !== false ? 'Visible' : 'Oculto'}
+      <div className="w-5 h-5 rounded-full shadow-lg border-2 border-white dark:border-slate-800" style={{ backgroundColor: pipeline.color }}></div>
+      <span className={`text-[13px] font-black lowercase ${dc ? 'text-slate-300' : 'text-slate-800'}`}>{pipeline.name}</span>
+    </div>
+    <div className="flex items-center gap-8">
+      <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${pipeline.visible !== false ? (dc ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600') : (dc ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-500')}`}>
+        {pipeline.visible !== false ? 'visible' : 'oculto'}
       </span>
-      <ActionButtons onEdit={onEdit} onDelete={onDelete} isDarkMode={isDarkMode} />
+      <div className="flex gap-2">
+        <button onClick={onEdit} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-slate-800 text-blue-400' : 'hover:bg-slate-100 text-blue-500'}`}><Edit2 size={16} /></button>
+        <button onClick={onDelete} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-slate-800 text-rose-400' : 'hover:bg-slate-100 text-rose-500'}`}><Trash2 size={16} /></button>
+      </div>
     </div>
   </div>
 );
 
-const renderIcon = (iconStr: string, isDarkMode: boolean) => {
-  const cls = "text-slate-500";
+const SourceCard = ({ source, onEdit, onDelete, dc }: any) => (
+  <div className={`p-6 rounded-[28px] border transition-all hover:shadow-2xl ${dc ? 'bg-[#1E1E1E] border-slate-800 hover:border-primary/40' : 'bg-white border-slate-100 shadow-xl shadow-slate-200/20 hover:border-primary/20'}`}>
+    <div className="flex items-center justify-between mb-6">
+      <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition-colors ${dc ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
+        {renderIcon(source.icon, dc)}
+      </div>
+      <div className="flex gap-1">
+        <button onClick={onEdit} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-slate-800 text-blue-400' : 'hover:bg-slate-100 text-blue-500'}`}><Edit2 size={14} /></button>
+        <button onClick={onDelete} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-slate-800 text-rose-400' : 'hover:bg-slate-100 text-rose-500'}`}><Trash2 size={14} /></button>
+      </div>
+    </div>
+    <h4 className={`text-[13px] font-black lowercase ${dc ? 'text-slate-200' : 'text-slate-800'}`}>{source.name}</h4>
+    <div className="mt-4">
+       <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${source.visible !== false ? 'text-emerald-500 bg-emerald-500/10' : 'text-slate-400 bg-slate-400/10'}`}>
+          {source.visible !== false ? 'activa' : 'inactiva'}
+       </span>
+    </div>
+  </div>
+);
+
+const renderIcon = (iconStr: string, dc: boolean) => {
   switch (iconStr) {
-    case 'Facebook': return <Facebook className="text-blue-600" />;
-    case 'Instagram': return <Instagram className="text-pink-600" />;
-    case 'Smartphone': return <Smartphone className={isDarkMode ? 'text-slate-400' : 'text-slate-800'} />;
-    case 'Globe': return <Globe className="text-emerald-600" />;
-    case 'Users': return <Users className="text-indigo-500" />;
-    case 'Hash': return <Hash className="text-slate-600" />;
-    case 'Link': return <Link className="text-sky-500" />;
-    default: return <Globe className={cls} />;
+    case 'Facebook': return <Facebook className="text-blue-600" size={20} />;
+    case 'Instagram': return <Instagram className="text-pink-600" size={20} />;
+    case 'Smartphone': return <Smartphone className={dc ? 'text-slate-400' : 'text-slate-800'} size={20} />;
+    case 'Globe': return <Globe className="text-emerald-600" size={20} />;
+    case 'Users': return <Users className="text-indigo-500" size={20} />;
+    case 'Hash': return <Hash className="text-slate-600" size={20} />;
+    case 'Link': return <Link className="text-sky-500" size={20} />;
+    default: return <Globe className="text-slate-400" size={20} />;
   }
 };
-
-const SourceCard = ({ source, onEdit, onDelete, isDarkMode }: any) => (
-  <div className={`flex items-center justify-between p-3 border rounded-xl transition-all hover:shadow-lg ${isDarkMode ? 'bg-slate-800/50 border-slate-700 hover:border-primary/50' : 'bg-white border-slate-200 hover:border-primary/50'}`}>
-    <div className="flex items-center gap-3">
-      <div className={`p-2 rounded-lg border transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-100'}`}>
-        {renderIcon(source.icon, isDarkMode)}
-      </div>
-      <span className={`font-bold text-xs md:text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>{source.name}</span>
-    </div>
-    <ActionButtons onEdit={onEdit} onDelete={onDelete} isDarkMode={isDarkMode} />
-  </div>
-);
 
 export default Admin;
