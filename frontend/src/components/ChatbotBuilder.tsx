@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bot, Save, UploadCloud, MessageSquare, Play, Settings, RefreshCw, FileText, Key, Send, CheckCircle2, AlertTriangle, Loader2, Trash2, X } from 'lucide-react';
+import { Bot, Save, Play, Settings, RefreshCw, FileText, Key, Send, CheckCircle2, AlertTriangle, Loader2, Trash2, X, Mic, Network, MessageSquare, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -124,7 +124,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       });
       if (res.ok) {
         setSaveMsg('✅ Configuración guardada correctamente');
-        loadConfig(); // Recargar para actualizar ID si era nuevo
+        loadConfig(); 
       } else {
         setSaveMsg('❌ Error al guardar');
       }
@@ -152,7 +152,6 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     setTimeout(() => setSaveMsg(''), 4000);
   };
 
-  // Simulator: send message to AI
   const sendSimMessage = async () => {
     if (!simInput.trim() || simLoading) return;
     const userMsg = simInput.trim();
@@ -220,7 +219,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         </div>
         <div className={`p-4 border-t transition-colors ${isDarkMode ? 'border-slate-800' : 'border-slate-50'}`}>
           <button onClick={() => {
-            const newId = -Math.random();
+            const newId = Date.now();
             setSelectedBotId(newId);
             setBots([...bots, { id: newId, name: 'Nueva Campaña', provider: 'OpenAI', model: 'gpt-4o-mini', prompt: DEFAULT_PROMPT, activationKeywords: 'info,precio' }]);
           }} className="w-full py-3 bg-slate-900 dark:bg-slate-700 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:opacity-90 transition-all shadow-lg active:scale-95">
@@ -474,9 +473,6 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       </div>
     </div>
   );
-};
-
-export default ChatbotBuilder;
 };
 
 export default ChatbotBuilder;
