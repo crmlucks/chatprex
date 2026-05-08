@@ -7,7 +7,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
  const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
  const [filterType, setFilterType] = useState('todos');
+ const [filterProject, setFilterProject] = useState('todos');
+ const [filterStatus, setFilterStatus] = useState('todos');
+ const [showFilters, setShowFilters] = useState(false);
+ const [search, setSearch] = useState('');
  const [properties, setProperties] = useState<any[]>([]);
+ const [dbProjects, setDbProjects] = useState<any[]>([]);
  const { token } = useAuth();
 
  const fileInputRef = useRef<HTMLInputElement>(null);
@@ -22,7 +27,23 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
   } catch (err) { console.error(err); }
  };
 
- useEffect(() => { if (token) fetchProperties(); }, [token]);
+ const fetchProjects = async () => {
+  try {
+   const res = await fetch(`${API_URL}/api/data/projects`, {
+    headers: { Authorization: `Bearer ${token}` }
+   });
+   if (res.ok) setDbProjects(await res.json());
+  } catch (err) { console.error(err); }
+ };
+
+ useEffect(() => { 
+  if (token) {
+   fetchProperties(); 
+   fetchProjects();
+  }
+ }, [token]);
+
+ const uniqueDevelopers = Array.from(new Set(properties.map(p => p.developer).filter(Boolean)));
 
  const [showModal, setShowModal] = useState(false);
  const [formData, setFormData] = useState({
@@ -79,50 +100,104 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
   }
  };
 
- const filteredProperties = properties.filter(p => filterType === 'todos' || p.type?.toLowerCase() === filterType.toLowerCase());
+ const filteredProperties = properties.filter(p => {
+  const matchType = filterType === 'todos' || p.type?.toLowerCase() === filterType.toLowerCase() || (filterType === 'casa' && p.type?.toLowerCase() === 'casas');
+  const matchProject = filterProject === 'todos' || p.project === filterProject;
+  const matchStatus = filterStatus === 'todos' || p.status === filterStatus;
+  const searchLower = search.toLowerCase();
+  const matchSearch = !search || p.name?.toLowerCase().includes(searchLower) || p.location?.toLowerCase().includes(searchLower) || p.developer?.toLowerCase().includes(searchLower);
+  
+  return matchType && matchProject && matchStatus && matchSearch;
+ });
  const inputCls = "input-field";
 
  return (
-  <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 bg-surface-base">
-   <div className="max-w-7xl mx-auto space-y-6">
+  <div className={`flex-1 flex flex-col h-[calc(100vh-4rem)] md:h-full pb-24 md:pb-0 ${isDarkMode ? 'bg-surface-base' : 'bg-surface-base'}`}>
     
-    {/* Header */}
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-     <div className="flex items-center gap-3">
-       <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent">
-        <Home size={22} />
-       </div>
-       <div>
-        <h1 className="h1">Propiedades</h1>
-        <p className="body-text text-sm">Gestión de inventario inmobiliario</p>
-       </div>
+    <div className={`py-4 md:py-0 md:h-24 px-6 md:px-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shrink-0 transition-all ${isDarkMode ? 'bg-surface border-b border-edge' : 'bg-surface border-b border-edge shadow-sm'}`}>
+     
+     {/* Left side: Title + View Toggle */}
+     <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-start">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent shrink-0">
+         <Home size={22} />
+        </div>
+        <div className="flex flex-col">
+         <h1 className="h1">Propiedades</h1>
+         <p className="body-text mt-0.5 hidden md:block">Gestión de inventario inmobiliario</p>
+        </div>
+      </div>
+      
+      {/* View Toggle - moved to header like in Leads */}
+      <div className={`hidden md:flex p-1 rounded-xl ${isDarkMode ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
+       <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutGrid size={16} /></button>
+       <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={16} /></button>
+      </div>
      </div>
-     <button onClick={() => { resetForm(); setShowModal(true); }} className="btn-primary">
-       <Plus size={16} />
-       <span>Agregar propiedad</span>
-     </button>
+
+     {/* Right side: Search, Filters, Add Button */}
+     <div className="flex items-center justify-between gap-3 w-full md:w-auto">
+      <div className="relative w-1/2 md:w-64 shrink-0">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
+        <input type="text" placeholder="Buscar propiedad..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-9 pr-4 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-full ${isDarkMode ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
+      </div>
+      
+      <div className="flex items-center gap-2 ml-auto shrink-0">
+       <button onClick={() => setShowFilters(!showFilters)} className={`p-2.5 rounded-xl border transition-colors ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
+        <Filter size={16} />
+       </button>
+       <button onClick={() => { resetForm(); setShowModal(true); }} className="btn-primary flex items-center justify-center shrink-0 w-11 h-11 md:w-auto md:h-auto md:px-4 md:py-2.5 gap-2">
+        <Plus size={16} />
+        <span className="hidden md:inline">Agregar propiedad</span>
+       </button>
+      </div>
+     </div>
     </div>
 
-    {/* Toolbar */}
-    <div className="flex flex-wrap justify-between items-center gap-4">
-      <div className="flex items-center gap-3 flex-1 min-w-[280px]">
-       <div className="relative flex-1 max-w-md">
-         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
-         <input type="text" placeholder="Buscar propiedad..." className="input-field pl-9" />
-       </div>
-       <select value={filterType} onChange={e => setFilterType(e.target.value)} className="input-field w-auto text-xs py-2">
-         <option value="todos">Todos los tipos</option>
-         <option value="casas">Casas</option>
-         <option value="departamento">Departamentos</option>
-         <option value="terreno">Terrenos</option>
-         <option value="oficina">Oficinas</option>
-       </select>
+    {/* Main Content Area */}
+    <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+     
+     {/* Mobile View Toggle */}
+     <div className="md:hidden flex justify-end mb-4">
+      <div className={`flex p-1 rounded-xl ${isDarkMode ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
+       <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? (isDarkMode ? 'bg-accent text-content shadow-sm' : 'bg-surface text-content shadow-sm') : 'text-content-muted'}`}><LayoutGrid size={16} /></button>
+       <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-accent text-content shadow-sm' : 'bg-surface text-content shadow-sm') : 'text-content-muted'}`}><LayoutList size={16} /></button>
       </div>
-      <div className="flex p-0.5 rounded-lg border border-edge bg-surface">
-       <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-accent text-content' : 'text-content-muted hover:text-content'}`}><LayoutGrid size={16} /></button>
-       <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-accent text-content' : 'text-content-muted hover:text-content'}`}><LayoutList size={16} /></button>
-      </div>
-    </div>
+     </div>
+      
+      {/* Filters Row */}
+      {showFilters && (
+        <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl border border-edge bg-surface mb-6 animate-in fade-in slide-in-from-top-2 duration-200">
+         <div className="flex items-center gap-2 text-content-muted text-sm font-semibold mr-2 uppercase tracking-wider">
+           <Filter size={14} /> Filtros:
+         </div>
+         <select value={filterType} onChange={e => setFilterType(e.target.value)} className="input-field w-auto text-sm py-2 min-w-[160px] bg-surface-inset">
+           <option value="todos">Todos los tipos</option>
+           <option value="departamento">Departamentos</option>
+           <option value="casa">Casas</option>
+           <option value="terreno">Terrenos</option>
+           <option value="oficina">Oficinas</option>
+           <option value="deposito">Depósitos</option>
+           <option value="otros">Otros</option>
+         </select>
+         <select value={filterProject} onChange={e => setFilterProject(e.target.value)} className="input-field w-auto text-sm py-2 min-w-[160px] bg-surface-inset">
+           <option value="todos">Todos los proyectos</option>
+           {dbProjects.map((p: any) => <option key={p.id} value={p.name}>{p.name}</option>)}
+         </select>
+         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="input-field w-auto text-sm py-2 min-w-[160px] bg-surface-inset">
+           <option value="todos">Todos los estados</option>
+           <option value="disponible">Disponible</option>
+           <option value="reservado">Reservado</option>
+           <option value="vendido">Vendido</option>
+         </select>
+         
+         {(filterType !== 'todos' || filterProject !== 'todos' || filterStatus !== 'todos' || search !== '') && (
+           <button onClick={() => { setFilterType('todos'); setFilterProject('todos'); setFilterStatus('todos'); setSearch(''); }} className="text-xs font-medium text-rose-500 hover:text-rose-600 transition-colors ml-auto flex items-center gap-1 bg-rose-500/10 px-3 py-2 rounded-lg">
+             <X size={14} /> Limpiar filtros
+           </button>
+         )}
+        </div>
+      )}
 
     {/* Grid View */}
     {viewMode === 'grid' && (
@@ -222,33 +297,6 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 max-h-[70vh]">
           
-          {/* Images Section */}
-          <div className="flex flex-col sm:flex-row gap-6 items-start">
-           <div className="space-y-2 shrink-0">
-             <label className="label-text">Logo / Principal</label>
-             <div onClick={() => fileInputRef.current?.click()} className="w-24 h-24 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden">
-              {formData.avatar ? <img src={formData.avatar} className="w-full h-full object-cover" /> : <Upload size={20} className="text-content-muted" />}
-             </div>
-             <input type="file" ref={fileInputRef} className="hidden" onChange={e => handleImageUpload(e, true)} />
-           </div>
-           <div className="space-y-2 flex-1">
-             <label className="label-text">Galería (máx 3 fotos)</label>
-             <div className="flex flex-wrap gap-3">
-              {formData.images.map((img, i) => (
-               <div key={i} className="w-20 h-20 rounded-xl overflow-hidden relative border border-edge group">
-                 <img src={img} className="w-full h-full object-cover" />
-                 <button onClick={() => setFormData(prev => ({...prev, images: prev.images.filter((_, idx) => idx !== i)}))} className="absolute top-1 right-1 p-1 bg-red-500 text-content rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X size={10} /></button>
-               </div>
-              ))}
-              {formData.images.length < 3 && (
-                <div onClick={() => multipleFileInputRef.current?.click()} className="w-20 h-20 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors">
-                 <ImageIcon size={20} className="text-content-muted" />
-                </div>
-              )}
-             </div>
-             <input type="file" ref={multipleFileInputRef} multiple className="hidden" onChange={e => handleImageUpload(e, false)} />
-           </div>
-          </div>
 
           {/* Form Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -258,23 +306,31 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
            </div>
            <div>
              <label className="label-text mb-1.5 block">Proyecto</label>
-             <input type="text" value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} className={inputCls} placeholder="Ej. Residencial Las Dunas" />
+             <select value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} className={inputCls}>
+               <option value="">Seleccione un proyecto...</option>
+               {dbProjects.map((p: any) => <option key={p.id} value={p.name}>{p.name}</option>)}
+             </select>
            </div>
            <div>
              <label className="label-text mb-1.5 block">Desarrollador</label>
-             <input type="text" value={formData.developer} onChange={e => setFormData({...formData, developer: e.target.value})} className={inputCls} placeholder="Ej. Inmobiliaria Prexup" />
+             <select value={formData.developer} onChange={e => setFormData({...formData, developer: e.target.value})} className={inputCls}>
+               <option value="">Seleccione un desarrollador...</option>
+               {uniqueDevelopers.map(d => <option key={d as string} value={d as string}>{d}</option>)}
+             </select>
            </div>
            <div>
              <label className="label-text mb-1.5 block">RUC / ID fiscal</label>
              <input type="text" value={formData.ruc} onChange={e => setFormData({...formData, ruc: e.target.value})} className={inputCls} placeholder="20601234567" />
            </div>
            <div>
-             <label className="label-text mb-1.5 block">Tipo de unidad</label>
+             <label className="label-text mb-1.5 block">Tipo de propiedad</label>
              <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className={inputCls}>
               <option value="departamento">Departamento</option>
               <option value="casa">Casa</option>
-              <option value="oficina">Oficina</option>
               <option value="terreno">Terreno</option>
+              <option value="oficina">Oficina</option>
+              <option value="deposito">Depósito</option>
+              <option value="otros">Otros</option>
              </select>
            </div>
            <div>
@@ -318,6 +374,34 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
            <div className="sm:col-span-2">
              <label className="label-text mb-1.5 block">Notas internas</label>
              <textarea rows={3} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} placeholder="Detalles adicionales..." className={inputCls + " resize-none h-24"} />
+           </div>
+          </div>
+
+          {/* Images Section */}
+          <div className="flex flex-col sm:flex-row gap-6 items-start pt-6 border-t border-edge">
+           <div className="space-y-2 shrink-0">
+             <label className="label-text">Logo / Principal</label>
+             <div onClick={() => fileInputRef.current?.click()} className="w-24 h-24 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden">
+              {formData.avatar ? <img src={formData.avatar} className="w-full h-full object-cover" /> : <Upload size={20} className="text-content-muted" />}
+             </div>
+             <input type="file" ref={fileInputRef} className="hidden" onChange={e => handleImageUpload(e, true)} />
+           </div>
+           <div className="space-y-2 flex-1">
+             <label className="label-text">Galería (máx 3 fotos)</label>
+             <div className="flex flex-wrap gap-3">
+              {formData.images.map((img, i) => (
+               <div key={i} className="w-20 h-20 rounded-xl overflow-hidden relative border border-edge group">
+                 <img src={img} className="w-full h-full object-cover" />
+                 <button onClick={() => setFormData(prev => ({...prev, images: prev.images.filter((_, idx) => idx !== i)}))} className="absolute top-1 right-1 p-1 bg-red-500 text-content rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X size={10} /></button>
+               </div>
+              ))}
+              {formData.images.length < 3 && (
+                <div onClick={() => multipleFileInputRef.current?.click()} className="w-20 h-20 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors">
+                 <ImageIcon size={20} className="text-content-muted" />
+                </div>
+              )}
+             </div>
+             <input type="file" ref={multipleFileInputRef} multiple className="hidden" onChange={e => handleImageUpload(e, false)} />
            </div>
           </div>
         </div>

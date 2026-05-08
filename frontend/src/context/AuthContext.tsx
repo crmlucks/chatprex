@@ -22,6 +22,7 @@ interface AuthContextType {
   logout: () => void;
   hasRole: (...roles: string[]) => boolean;
   refreshUser: () => Promise<void>;
+  demoLogin: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -124,8 +125,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {}
   };
 
+  const demoLogin = () => {
+    const dummyUser: User = {
+      id: 999,
+      name: 'Usuario Demo',
+      email: 'demo@chatprex.com',
+      phone: '+51 900 000 000',
+      role: 'propietario',
+      status: 'activo',
+      avatar: ''
+    };
+    localStorage.setItem('chatprex_token', 'demo-token-123');
+    setToken('demo-token-123');
+    setUser(dummyUser);
+    setNeedsSetup(false);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, needsSetup, login, setup, logout, hasRole, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, loading, needsSetup, login, setup, logout, hasRole, refreshUser, demoLogin }}>
       {children}
     </AuthContext.Provider>
   );

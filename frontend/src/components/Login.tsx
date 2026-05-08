@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, LogIn, UserPlus, Bot, ShieldCheck, Loader2 } from 'lucide-react';
 
 const Login = () => {
- const { login, setup, needsSetup } = useAuth();
+ const { login, setup, needsSetup, demoLogin } = useAuth();
  const [isSetup, setIsSetup] = useState(false);
  const [showPassword, setShowPassword] = useState(false);
  const [error, setError] = useState('');
@@ -132,7 +132,7 @@ const Login = () => {
        </div>
       </div>
 
-      <div className="pt-2">
+      <div className="pt-2 space-y-3">
        <button
         type="submit"
         disabled={loading}
@@ -145,6 +145,14 @@ const Login = () => {
         ) : (
          <><LogIn size={18} /> Entrar al sistema</>
         )}
+       </button>
+       
+       <button
+        type="button"
+        onClick={demoLogin}
+        className="w-full py-3 rounded-lg bg-zinc-800 text-zinc-300 font-semibold text-sm hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2"
+       >
+        <Eye size={18} /> Acceso Demo (Modo Diseño)
        </button>
       </div>
      </form>

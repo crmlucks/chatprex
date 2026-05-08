@@ -193,9 +193,11 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  }
 
  return (
-  <div className={`flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 flex flex-col lg:flex-row gap-8 transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
+  <div className={`flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 flex flex-col gap-8 transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
    
-   {/* 1. Sidebar: Lista de bots */}
+   {/* Top Row: Sidebar & Editor */}
+   <div className="flex flex-col lg:flex-row gap-8">
+    {/* 1. Sidebar: Lista de bots */}
    <div className={`w-full lg:w-80 shrink-0 card-premium flex flex-col overflow-hidden`}>
     <div className={`p-6 border-b flex justify-between items-center transition-colors ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
      <div className="flex items-center gap-2">
@@ -418,9 +420,10 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
      </button>
     </div>
    </div>
+   </div>
 
    {/* 3. Simulator Panel */}
-   <div className={`w-full lg:w-96 rounded-xl border shadow-sm flex flex-col overflow-hidden shrink-0 transition-all ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
+   <div className={`w-full rounded-xl border shadow-sm flex flex-col overflow-hidden transition-all ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
     <div className={`p-6 border-b flex justify-between items-center transition-colors ${dc ? 'bg-surface-raised' : 'bg-surface-raised'}`}>
      <div className="flex items-center gap-3">
       <div className="w-10 h-10 rounded-2xl bg-surface/10 flex items-center justify-center text-accent"><Play size={20} /></div>

@@ -12,6 +12,8 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
  const [showTxForm, setShowTxForm] = useState(false);
  const [txForm, setTxForm] = useState({ date: new Date().toISOString().split('T')[0], client: '', concept: '', property: '', type: 'ingreso', amount: '', currency: 'local' });
  const [clients, setClients] = useState<any[]>([]);
+ const [properties, setProperties] = useState<any[]>([]);
+ const [agents, setAgents] = useState<any[]>([]);
  const { token } = useAuth();
  
  useEffect(() => {
@@ -24,10 +26,14 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
    })))).catch(() => {});
   fetch(`${API_URL}/api/data/finances/clients`, { headers })
    .then(r => r.json()).then(setClients).catch(() => {});
+  fetch(`${API_URL}/api/properties`, { headers })
+   .then(r => r.json()).then(setProperties).catch(() => {});
+  fetch(`${API_URL}/api/users`, { headers })
+   .then(r => r.json()).then(setAgents).catch(() => {});
  }, [token]);
 
  const [showClientForm, setShowClientForm] = useState(false);
- const [clientForm, setClientForm] = useState({ doc: '', name: '', phone: '', email: '', civilStatus: 'soltero', spouseDoc: '', spouseName: '', spousePhone: '', address: '', district: '', province: '', department: '' });
+ const [clientForm, setClientForm] = useState({ doc: '', name: '', phone: '', email: '', civilStatus: 'Soltero', spouseDoc: '', spouseName: '', spousePhone: '', address: '', district: '', province: '', department: '', notes: '', property: '', agent: '' });
 
  const filteredTransactions = useMemo(() => transactions.filter(t => { const d = new Date(t.date); return d.getMonth() === monthFilter && d.getFullYear() === yearFilter; }), [transactions, monthFilter, yearFilter]);
 
@@ -155,13 +161,65 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
        </div>
 
        {showClientForm && (
-        <form onSubmit={handleAddClient} className="card p-5">
-         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-           <div className="col-span-1 md:col-span-4 border-b border-edge pb-3"><h3 className="text-sm font-semibold text-content">Ficha del Cliente</h3></div>
-           <div><label className="label-text mb-1 block">Documento (DNI/RUC)</label><input type="text" required value={clientForm.doc} onChange={e => setClientForm({...clientForm, doc: e.target.value})} className="input-field" /></div>
-           <div className="col-span-2"><label className="label-text mb-1 block">Nombre completo</label><input type="text" required value={clientForm.name} onChange={e => setClientForm({...clientForm, name: e.target.value})} className="input-field" /></div>
-           <div><label className="label-text mb-1 block">Teléfono</label><input type="text" value={clientForm.phone} onChange={e => setClientForm({...clientForm, phone: e.target.value})} className="input-field" /></div>
-           <div className="col-span-1 md:col-span-4 flex justify-end"><button type="submit" className="btn-primary">Guardar Cliente</button></div>
+        <form onSubmit={handleAddClient} className="card p-5 border-accent/20">
+         <div className="flex items-center justify-between border-b border-edge pb-3 mb-4">
+          <h3 className="text-sm font-semibold text-content">Ficha del Cliente / Venta</h3>
+         </div>
+         
+         <div className="grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-y-3">
+          {/* Fila 1: Datos Principales */}
+          <div><label className="label-text mb-1 block">Documento</label><input type="text" required value={clientForm.doc} onChange={e => setClientForm({...clientForm, doc: e.target.value})} className="input-field text-xs py-2" placeholder="DNI / RUC"/></div>
+          <div className="md:col-span-2"><label className="label-text mb-1 block">Nombre completo</label><input type="text" required value={clientForm.name} onChange={e => setClientForm({...clientForm, name: e.target.value})} className="input-field text-xs py-2" placeholder="Nombres y Apellidos"/></div>
+          <div><label className="label-text mb-1 block">Estado Civil</label><select value={clientForm.civilStatus} onChange={e => setClientForm({...clientForm, civilStatus: e.target.value})} className="input-field text-xs py-2"><option value="Soltero">Soltero/a</option><option value="Casado">Casado/a</option><option value="Divorciado">Divorciado/a</option></select></div>
+
+          {/* Fila 2: Contacto */}
+          <div><label className="label-text mb-1 block">Teléfono</label><input type="text" value={clientForm.phone} onChange={e => setClientForm({...clientForm, phone: e.target.value})} className="input-field text-xs py-2" placeholder="+51..."/></div>
+          <div className="md:col-span-3"><label className="label-text mb-1 block">Email</label><input type="email" value={clientForm.email} onChange={e => setClientForm({...clientForm, email: e.target.value})} className="input-field text-xs py-2" placeholder="correo@ejemplo.com"/></div>
+
+          {/* Fila 3: Cónyuge (Condicional) */}
+          {clientForm.civilStatus === 'Casado' && (
+           <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4 p-3 bg-surface-inset rounded-xl border border-edge mt-1 mb-1">
+            <div className="md:col-span-4"><p className="text-xs font-bold text-content-muted">Datos del Cónyuge</p></div>
+            <div><label className="label-text mb-1 block">Documento Cónyuge</label><input type="text" value={clientForm.spouseDoc} onChange={e => setClientForm({...clientForm, spouseDoc: e.target.value})} className="input-field text-xs py-2 bg-surface" /></div>
+            <div className="md:col-span-2"><label className="label-text mb-1 block">Nombre Cónyuge</label><input type="text" value={clientForm.spouseName} onChange={e => setClientForm({...clientForm, spouseName: e.target.value})} className="input-field text-xs py-2 bg-surface" /></div>
+            <div><label className="label-text mb-1 block">Teléfono Cónyuge</label><input type="text" value={clientForm.spousePhone} onChange={e => setClientForm({...clientForm, spousePhone: e.target.value})} className="input-field text-xs py-2 bg-surface" /></div>
+           </div>
+          )}
+
+          {/* Fila 4: Ubicación */}
+          <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4 mt-1">
+           <div className="md:col-span-2"><label className="label-text mb-1 block">Domicilio</label><input type="text" value={clientForm.address} onChange={e => setClientForm({...clientForm, address: e.target.value})} className="input-field text-xs py-2" placeholder="Av. / Calle..." /></div>
+           <div><label className="label-text mb-1 block">Departamento</label><input type="text" value={clientForm.department} onChange={e => setClientForm({...clientForm, department: e.target.value})} className="input-field text-xs py-2" /></div>
+           <div><label className="label-text mb-1 block">Distrito</label><input type="text" value={clientForm.district} onChange={e => setClientForm({...clientForm, district: e.target.value})} className="input-field text-xs py-2" /></div>
+          </div>
+
+          {/* Fila 5: Gestión y Venta */}
+          <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pt-3 border-t border-edge border-dashed">
+           <div>
+            <label className="label-text mb-1 block">Propiedad de Interés / Venta</label>
+            <select value={clientForm.property} onChange={e => setClientForm({...clientForm, property: e.target.value})} className="input-field text-xs py-2">
+             <option value="">Seleccionar propiedad...</option>
+             {properties.map(p => <option key={p.id} value={p.id}>{p.name} - {p.project}</option>)}
+            </select>
+           </div>
+           <div>
+            <label className="label-text mb-1 block">Agente a cargo</label>
+            <select value={clientForm.agent} onChange={e => setClientForm({...clientForm, agent: e.target.value})} className="input-field text-xs py-2">
+             <option value="">Seleccionar agente...</option>
+             {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+           </div>
+          </div>
+
+          {/* Fila 6: Notas */}
+          <div className="md:col-span-4 mt-1">
+           <label className="label-text mb-1 block">Notas</label>
+           <textarea value={clientForm.notes} onChange={e => setClientForm({...clientForm, notes: e.target.value})} className="input-field text-xs py-2 h-16 resize-none" placeholder="Observaciones adicionales..."></textarea>
+          </div>
+
+          <div className="col-span-1 md:col-span-4 flex justify-end mt-2">
+           <button type="submit" className="btn-primary text-xs py-2">Guardar Ficha</button>
+          </div>
          </div>
         </form>
        )}

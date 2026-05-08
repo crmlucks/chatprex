@@ -35,13 +35,13 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  };
 
  const openModal = (type: string, item: any = null) => {
-  if (item) {
-   setFormData(item);
-  } else {
-   if (type === 'proyecto') setFormData({ name: '', code: '', status: 'Activo' });
-   else if (type === 'etapa') setFormData({ name: '', color: '#1649FF', visible: true });
-   else if (type === 'fuente') setFormData({ name: '', icon: 'Globe', visible: true });
-  }
+   if (item) {
+    setFormData(item);
+   } else {
+    if (type === 'proyecto') setFormData({ name: '', developer: '', contact: '', phone: '', email: '', address: '', currency: 'PEN', status: 'Activo', notes: '' });
+    else if (type === 'etapa') setFormData({ name: '', color: '#1649FF', visible: true });
+    else if (type === 'fuente') setFormData({ name: '', icon: 'Globe', visible: true });
+   }
   setModalType(type);
  };
  
@@ -162,28 +162,55 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    {/* Modal Genérico Standardized */}
    {modalType && (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-     <div className="card w-full max-w-xl p-6 relative">
+     <div className="card w-full max-w-xl p-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
       <button onClick={closeModal} className="absolute top-4 right-4 p-2 rounded-lg hover:bg-surface-inset transition-colors"><X size={18} className="text-content-muted" /></button>
       
       <h3 className="text-lg font-semibold text-content mb-6">Añadir {modalType}</h3>
       
       <form onSubmit={handleSave} className="space-y-8">
        {modalType === 'proyecto' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          <div className="md:col-span-2">
           <label className={label}>nombre del proyecto</label>
           <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={input} placeholder="Torre Esmeralda..." />
          </div>
          <div>
-          <label className={label}>código interno</label>
-          <input type="text" value={formData.code || ''} onChange={e => setFormData({...formData, code: e.target.value})} className={input} placeholder="PRJ-001" />
+          <label className={label}>desarrollador</label>
+          <input type="text" value={formData.developer || ''} onChange={e => setFormData({...formData, developer: e.target.value})} className={input} placeholder="Constructora ABC..." />
          </div>
          <div>
-          <label className={label}>estado inicial</label>
+          <label className={label}>contacto principal</label>
+          <input type="text" value={formData.contact || ''} onChange={e => setFormData({...formData, contact: e.target.value})} className={input} placeholder="Nombre del contacto..." />
+         </div>
+         <div>
+          <label className={label}>teléfono</label>
+          <input type="text" value={formData.phone || ''} onChange={e => setFormData({...formData, phone: e.target.value})} className={input} placeholder="+51 999..." />
+         </div>
+         <div>
+          <label className={label}>email</label>
+          <input type="email" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} className={input} placeholder="correo@ejemplo.com" />
+         </div>
+         <div className="md:col-span-2">
+          <label className={label}>dirección</label>
+          <input type="text" value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} className={input} placeholder="Av. Principal 123..." />
+         </div>
+         <div>
+          <label className={label}>tipo de moneda de venta</label>
+          <select value={formData.currency || 'PEN'} onChange={e => setFormData({...formData, currency: e.target.value})} className={input}>
+           <option value="PEN">Soles (S/)</option>
+           <option value="USD">Dólares ($)</option>
+          </select>
+         </div>
+         <div>
+          <label className={label}>estado</label>
           <select value={formData.status || 'Activo'} onChange={e => setFormData({...formData, status: e.target.value})} className={input}>
            <option value="Activo">Activo</option>
            <option value="Inactivo">Inactivo</option>
           </select>
+         </div>
+         <div className="md:col-span-2">
+          <label className={label}>notas</label>
+          <textarea value={formData.notes || ''} onChange={e => setFormData({...formData, notes: e.target.value})} className={`${input} h-16 resize-none`} placeholder="Información adicional..."></textarea>
          </div>
         </div>
        )}
@@ -197,9 +224,11 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <div className="grid grid-cols-2 gap-8 items-end">
           <div>
            <label className={label}>color distintivo</label>
-           <div className="flex gap-4">
-            <input type="color" value={formData.color || '#1649FF'} onChange={e => setFormData({...formData, color: e.target.value})} className="h-14 w-14 rounded-2xl p-0 cursor-pointer border-none" />
-            <input type="text" value={formData.color || '#1649FF'} onChange={e => setFormData({...formData, color: e.target.value})} className={input + ' font-mono'} />
+           <div className="flex gap-4 items-center">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-edge shrink-0">
+             <input type="color" value={formData.color || '#1649FF'} onChange={e => setFormData({...formData, color: e.target.value})} className="absolute -top-4 -left-4 w-24 h-24 cursor-pointer border-none p-0" />
+            </div>
+            <input type="text" value={formData.color || '#1649FF'} onChange={e => setFormData({...formData, color: e.target.value})} className={input + ' font-mono uppercase'} />
            </div>
           </div>
           <div className="flex items-center gap-4 h-14 bg-surface-inset dark:bg-surface-raised px-6 rounded-2xl border border-edge dark:border-edge">

@@ -119,124 +119,18 @@ const Automation = ({ isDarkMode }: { isDarkMode?: boolean }) => {
      </div>
     </div>
 
-    {/* Builder View */}
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
-      {/* Sidebar Flow List */}
-      <div className="lg:col-span-4 space-y-4">
-       <div className="card-premium p-3 flex items-center gap-3">
-         <Search className="text-content-muted ml-2" size={14} />
-         <input type="text" placeholder="Buscar flujo..." className="w-full bg-transparent border-none text-xs font-medium focus:ring-0 placeholder-slate-500" />
-       </div>
-
-       <div className="space-y-3 overflow-y-auto max-h-[600px] custom-scrollbar pr-1">
-         {automations.map(a => (
-          <button key={a.id} onClick={() => setSelectedId(a.id)}
-           className={`w-full p-5 rounded-2xl border text-left transition-all active:scale-[0.98] group relative ${selectedId === a.id ? 'bg-accent border-accent shadow-sm shadow-accent/10' : (dc ? 'bg-surface border-edge hover:border-edge' : 'bg-surface border-edge hover:shadow-md')}`}>
-            <div className="flex justify-between items-start mb-4">
-             <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${selectedId === a.id ? 'bg-surface/20 text-content' : 'bg-accent/10 text-accent'}`}>
-               {a.type === 'Envío masivo' ? <MessageCircle size={18} /> : <Zap size={18} />}
-             </div>
-             <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${a.status === 'Activo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-surface-inset0/10 text-content-muted'}`}>{a.status}</span>
-            </div>
-            <h3 className={`text-sm font-bold truncate mb-1 ${selectedId === a.id ? 'text-content' : (dc ? 'text-content' : 'text-content')}`}>{a.name}</h3>
-            <p className={`text-xs font-medium ${selectedId === a.id ? 'text-content/70' : 'text-content-muted'}`}>{a.type} • {a.delay}s espera</p>
-          </button>
-         ))}
-       </div>
+    {/* Contenido principal eliminado, ahora en Campañas */}
+    <div className="card-premium p-10 text-center flex flex-col items-center justify-center">
+      <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${dc ? 'bg-accent/10 text-accent' : 'bg-accent/10 text-accent'}`}>
+       <Zap size={40} />
       </div>
-
-      {/* Flow Editor */}
-      <div className="lg:col-span-8 card-premium flex flex-col min-h-[600px] overflow-hidden">
-       {/* Editor Header */}
-       <div className={`px-8 py-6 border-b flex justify-between items-center transition-colors ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
-         <div className="flex-1">
-          <input type="text" value={activeAuto?.name} onChange={e => {
-            const val = e.target.value;
-            setAutomations(prev => prev.map(a => a.id === selectedId ? {...a, name: val} : a));
-          }} className={`text-lg font-bold bg-transparent border-none focus:ring-0 w-full ${dc ? 'text-content' : 'text-content'}`} />
-         </div>
-         <div className="flex gap-3">
-          <button onClick={() => setAutomations(automations.filter(a => a.id !== selectedId))} className={`p-2.5 rounded-xl border transition-all ${dc ? 'border-edge text-content-muted hover:text-rose-500' : 'border-edge text-content-muted hover:text-rose-500 hover:bg-rose-50'}`}><Trash2 size={16} /></button>
-          <button className="btn-primary">Guardar cambios</button>
-         </div>
-       </div>
-
-       {/* Editor Body */}
-       <div className="flex-1 p-8 md:p-10 space-y-10 overflow-y-auto custom-scrollbar">
-         {/* Step 1 */}
-         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-surface-raised text-content flex items-center justify-center text-xs font-bold">1</div>
-            <h4 className="text-xs font-bold uppercase tracking-normal text-content-muted">Configuración del disparador</h4>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-             <label className="small-text font-bold text-content-muted ml-1">Tipo de automatización</label>
-             <select value={activeAuto?.type} onChange={e => setAutomations(automations.map(a => a.id === selectedId ? {...a, type: e.target.value} : a))} className={`w-full p-3 rounded-xl border text-xs font-bold outline-none transition-all ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface-inset border-edge text-content focus:border-accent '}`}>
-               <option>Envío masivo</option>
-               <option>Respuesta automática</option>
-               <option>Seguimiento inteligente</option>
-             </select>
-            </div>
-            <div className="space-y-2">
-             <label className="small-text font-bold text-content-muted ml-1">Tiempo de espera (segundos)</label>
-             <div className="flex items-center gap-4">
-               <input type="range" min="5" max="300" value={activeAuto?.delay} onChange={e => setAutomations(automations.map(a => a.id === selectedId ? {...a, delay: parseInt(e.target.value)} : a))} className="flex-1 accent-primary" />
-               <span className={`px-3 py-1.5 rounded-lg text-xs font-bold ${dc ? 'bg-surface-raised text-content' : 'bg-surface border text-content shadow-sm'}`}>{activeAuto?.delay}s</span>
-             </div>
-            </div>
-          </div>
-         </div>
-
-         {/* Step 2 */}
-         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-surface-raised text-content flex items-center justify-center text-xs font-bold">2</div>
-            <h4 className="text-xs font-bold uppercase tracking-normal text-content-muted">Contenido del mensaje</h4>
-          </div>
-          <div className="relative">
-            <textarea 
-             value={activeAuto?.content}
-             onChange={e => setAutomations(automations.map(a => a.id === selectedId ? {...a, content: e.target.value} : a))}
-             rows={5}
-             className={`w-full p-6 rounded-2xl border text-sm font-medium outline-none transition-all resize-none ${dc ? 'bg-surface-raised/50 border-edge text-content-secondary focus:border-accent' : 'bg-surface-inset border-edge text-content focus:border-accent '}`}
-             placeholder="Escriba el mensaje que se enviará automáticamente..."
-            />
-            <div className="absolute bottom-4 right-4 flex gap-2">
-             <button className={`p-2 rounded-lg border shadow-sm ${dc ? 'bg-surface-raised border-edge text-content-muted hover:text-content' : 'bg-surface border-edge text-content-muted hover:text-content'}`}><Plus size={16} /></button>
-            </div>
-          </div>
-          <p className="text-xs text-content-muted px-1 font-medium">Sugerencia: Use {"{{nombre}}"} para personalizar el mensaje con el nombre del contacto.</p>
-         </div>
-
-         {/* Step 3 */}
-         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-surface-raised text-content flex items-center justify-center text-xs font-bold">3</div>
-            <h4 className="text-xs font-bold uppercase tracking-normal text-content-muted">Audiencia objetivo</h4>
-          </div>
-          <div className={`p-8 rounded-xl border-2 border-dashed flex flex-col items-center text-center gap-4 ${dc ? 'bg-accent/5 border-accent/20 text-accent/70' : 'bg-accent/5 border-accent/20 text-accent'}`}>
-            <Users size={28} className="opacity-40" />
-            <div>
-             <p className="text-xs font-bold mb-1">Público: {activeAuto?.target}</p>
-             <p className="small-text opacity-70">Este flujo se activará para el segmento seleccionado.</p>
-            </div>
-            <button className="px-6 py-2 bg-accent text-content text-xs font-bold rounded-xl hover:bg-accent-dark transition-all shadow-lg shadow-accent/20">Cambiar audiencia</button>
-          </div>
-         </div>
-       </div>
-
-       {/* Editor Footer */}
-       <div className={`px-8 py-6 border-t flex justify-between items-center transition-colors ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
-         <div className="flex items-center gap-2">
-          <div className={`w-2.5 h-2.5 rounded-full ${activeAuto?.status === 'Activo' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></div>
-          <span className={`text-xs font-bold ${dc ? 'text-content-muted' : 'text-content-secondary'}`}>{activeAuto?.status === 'Activo' ? 'Flujo en ejecución' : 'Flujo en borrador'}</span>
-         </div>
-         <button onClick={() => setAutomations(automations.map(a => a.id === selectedId ? {...a, status: a.status === 'Activo' ? 'Borrador' : 'Activo'} : a))} className={`px-8 py-3 rounded-xl font-bold text-xs transition-all active:scale-95 ${activeAuto?.status === 'Activo' ? 'bg-rose-500 text-content shadow-sm shadow-rose-500/20' : 'bg-emerald-500 text-content shadow-sm shadow-emerald-500/20'}`}>
-          {activeAuto?.status === 'Activo' ? 'Detener flujo' : 'Activar ahora'}
-         </button>
-       </div>
-      </div>
+      <h2 className="h2 mb-2">Creación de flujos trasladada</h2>
+      <p className="body-text max-w-md mx-auto mb-8">
+       La creación de flujos de mensajes masivos y seguimientos se ha integrado en la nueva página de <strong>Campañas</strong> para una experiencia mucho más limpia y profesional.
+      </p>
+      <a href="/campaigns" className="btn-primary">
+       Ir a Campañas
+      </a>
     </div>
    </div>
 

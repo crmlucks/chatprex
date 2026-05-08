@@ -103,7 +103,7 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
         <select value={filterType} onChange={e => setFilterType(e.target.value as any)} className="input-field pl-9 text-xs py-2">
          <option value="todos">Todos los eventos</option>
-         {(Object.keys(typeConfig) as EventType[]).map(t => <option key={t} value={t}>{t}</option>)}
+         {(Object.keys(typeConfig) as EventType[]).map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
         </select>
       </div>
      </div>

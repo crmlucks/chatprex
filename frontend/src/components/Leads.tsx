@@ -41,6 +41,10 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
  const [selectedLead, setSelectedLead] = useState<any>(null);
  const [leadToEdit, setLeadToEdit] = useState<any>(null);
  const [showNewLead, setShowNewLead] = useState(false);
+ const [search, setSearch] = useState('');
+ const [showFilters, setShowFilters] = useState(false);
+ const [filterStatus, setFilterStatus] = useState('todos');
+ const [filterTag, setFilterTag] = useState('todos');
  const { showToast, showConfirm } = useToast();
  const [alarmItems, setAlarmItems] = useState<AlarmItem[]>([]);
  const { token } = useAuth();
@@ -194,40 +198,90 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
 
  const dc = isDarkMode;
 
+ const filteredLeads = leads.filter(l => {
+  const matchStatus = filterStatus === 'todos' || l.status === filterStatus;
+  const matchTag = filterTag === 'todos' || (l.tags && l.tags.some((t: string) => t.toLowerCase() === filterTag.toLowerCase()));
+  const searchLower = search.toLowerCase();
+  const matchSearch = !search || l.name?.toLowerCase().includes(searchLower) || l.phone?.toLowerCase().includes(searchLower) || l.email?.toLowerCase().includes(searchLower);
+  return matchStatus && matchTag && matchSearch;
+ });
+
  return (
   <div className={`flex-1 flex flex-col h-[calc(100vh-4rem)] md:h-full pb-24 md:pb-0 ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
    <AlarmSystem items={alarmItems} onDismiss={unregisterAlarmItem} />
    
-   <div className={`h-24 px-6 md:px-10 flex items-center justify-between shrink-0 transition-all ${dc ? 'bg-surface border-b border-edge' : 'bg-surface border-b border-edge shadow-sm'}`}>
-    <div className="flex items-center gap-8">
-     <div className="flex flex-col">
-      <h1 className="h1">Leads</h1>
-      <p className="body-text mt-0.5">Gestión de prospectos e interesados</p>
+   <div className={`py-4 md:py-0 md:h-24 px-6 md:px-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shrink-0 transition-all ${dc ? 'bg-surface border-b border-edge' : 'bg-surface border-b border-edge shadow-sm'}`}>
+    <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-start">
+     <div className="flex items-center gap-3">
+      <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent shrink-0">
+       <Users size={22} />
+      </div>
+      <div className="flex flex-col">
+       <h1 className="h1">Leads</h1>
+      </div>
      </div>
-     <div className={`flex p-1 rounded-xl ${dc ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
+     <div className={`hidden md:flex p-1 rounded-xl ${dc ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
       <button onClick={() => setViewMode('kanban')} className={`p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><KanbanSquare size={16} /></button>
       <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={16} /></button>
      </div>
     </div>
-    <div className="flex items-center gap-4">
-     <div className="relative hidden md:block">
+    
+    <div className="flex items-center justify-between gap-3 w-full md:w-auto">
+     <div className="relative w-1/2 md:w-64 shrink-0">
        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
-       <input type="text" placeholder="Buscar lead..." className={`pl-9 pr-4 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-64 ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
+       <input type="text" placeholder="Buscar lead..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-9 pr-4 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-full ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
      </div>
-     <button onClick={() => setShowNewLead(true)} className="btn-primary flex items-center gap-2">
-      <Plus size={16} /> <span>Nuevo lead</span>
-     </button>
+     <div className="flex items-center gap-2 ml-auto shrink-0">
+      <button onClick={() => setShowFilters(!showFilters)} className={`p-2.5 rounded-xl border transition-colors ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
+       <Filter size={16} />
+      </button>
+      <button onClick={() => setShowNewLead(true)} className="btn-primary flex items-center justify-center shrink-0 w-11 h-11 md:w-auto md:h-auto md:px-4 md:py-2.5 gap-2">
+       <Plus size={16} /> <span className="hidden md:inline">Nuevo lead</span>
+      </button>
+     </div>
     </div>
    </div>
 
    <div className="flex-1 overflow-x-auto p-4 md:p-8 h-full custom-scrollbar">
+    
+    <div className="md:hidden flex justify-end mb-4">
+     <div className={`flex p-1 rounded-xl ${dc ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
+      <button onClick={() => setViewMode('kanban')} className={`p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (dc ? 'bg-accent text-content shadow-sm' : 'bg-surface text-content shadow-sm') : 'text-content-muted'}`}><KanbanSquare size={16} /></button>
+      <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (dc ? 'bg-accent text-content shadow-sm' : 'bg-surface text-content shadow-sm') : 'text-content-muted'}`}><LayoutList size={16} /></button>
+     </div>
+    </div>
+
+    {showFilters && (
+     <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl border border-edge bg-surface mb-6 animate-in fade-in slide-in-from-top-2 duration-200">
+      <div className="flex items-center gap-2 text-content-muted text-sm font-semibold mr-2 uppercase tracking-wider">
+        <Filter size={14} /> Filtros:
+      </div>
+      <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="input-field w-auto text-sm py-2 min-w-[160px] bg-surface-inset">
+        <option value="todos">Todos los estados</option>
+        {pipelineStages.map(s => <option key={s} value={s}>{s}</option>)}
+      </select>
+      <select value={filterTag} onChange={e => setFilterTag(e.target.value)} className="input-field w-auto text-sm py-2 min-w-[160px] bg-surface-inset">
+        <option value="todos">Todos los tags</option>
+        <option value="caliente">Caliente</option>
+        <option value="prioridad">Prioridad</option>
+        <option value="inversionista">Inversionista</option>
+        <option value="cierre">Cierre</option>
+      </select>
+      {(filterStatus !== 'todos' || filterTag !== 'todos') && (
+        <button onClick={() => { setFilterStatus('todos'); setFilterTag('todos'); }} className="text-sm text-accent hover:underline ml-2">
+         Limpiar filtros
+        </button>
+      )}
+     </div>
+    )}
+
     {viewMode === 'kanban' ? (
      <div className="flex gap-8 h-full min-w-max pb-8">
       {pipelineStages.map(status => (
        <PipelineColumn 
         key={status} 
         status={status} 
-        leads={leads.filter(l => l.status === status)} 
+        leads={filteredLeads.filter(l => l.status === status)} 
         onDrop={handleDropLead} 
         onToggleBot={toggleBot} 
         onSelect={setSelectedLead}
@@ -239,7 +293,7 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
       ))}
      </div>
     ) : (
-     <ListView leads={leads} onSelect={setSelectedLead} onEdit={setLeadToEdit} isDarkMode={dc} onToggleBot={toggleBot} onDelete={deleteLead} onGoChat={setActiveTab} />
+     <ListView leads={filteredLeads} onSelect={setSelectedLead} onEdit={setLeadToEdit} isDarkMode={dc} onToggleBot={toggleBot} onDelete={deleteLead} onGoChat={setActiveTab} />
     )}
    </div>
 

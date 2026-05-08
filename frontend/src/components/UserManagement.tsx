@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, User } from '../context/AuthContext';
-import { Search, Plus, Edit2, Trash2, KeyRound, X, Shield, ShieldCheck, UserIcon, MoreHorizontal, UserPlus, Users } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, KeyRound, X, Shield, ShieldCheck, UserIcon, MoreHorizontal, UserPlus, Users, Upload } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -17,7 +17,16 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [editingUser, setEditingUser] = useState<User | null>(null);
  const [showPasswordModal, setShowPasswordModal] = useState<number | null>(null);
  const [newPassword, setNewPassword] = useState('');
- const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '', role: 'usuario' });
+ const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false });
+ const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = e.target.files;
+  if (!files || files.length === 0) return;
+  const reader = new FileReader();
+  reader.onloadend = () => setFormData(prev => ({ ...prev, avatar: reader.result as string }));
+  reader.readAsDataURL(files[0]);
+ };
  const [error, setError] = useState('');
  const [success, setSuccess] = useState('');
 
@@ -46,7 +55,7 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    if (!res.ok) throw new Error(data.error);
    setSuccess('Usuario creado exitosamente');
    setShowModal(false);
-   setFormData({ name: '', email: '', password: '', phone: '', role: 'usuario' });
+   setFormData({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false });
    fetchUsers();
    setTimeout(() => setSuccess(''), 3000);
   } catch (err: any) { setError(err.message); }
@@ -57,7 +66,7 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   if (!editingUser) return;
   setError('');
   try {
-   const body: any = { name: formData.name, email: formData.email, phone: formData.phone, role: formData.role };
+   const body: any = { name: formData.name, email: formData.email, phone: formData.phone, role: formData.role, status: formData.status, avatar: formData.avatar, canAccessIntegrations: formData.canAccessIntegrations };
    const res = await fetch(`${API_URL}/api/users/${editingUser.id}`, { method: 'PUT', headers, body: JSON.stringify(body) });
    const data = await res.json();
    if (!res.ok) throw new Error(data.error);
@@ -104,14 +113,14 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
  const openCreateModal = () => {
   setEditingUser(null);
-  setFormData({ name: '', email: '', password: '', phone: '', role: 'usuario' });
+  setFormData({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false });
   setError('');
   setShowModal(true);
  };
 
  const openEditModal = (u: User) => {
   setEditingUser(u);
-  setFormData({ name: u.name, email: u.email, password: '', phone: u.phone, role: u.role });
+  setFormData({ name: u.name, email: u.email, password: '', phone: u.phone, role: u.role, status: u.status || 'activo', avatar: u.avatar || '', canAccessIntegrations: (u as any).canAccessIntegrations || false });
   setError('');
   setShowModal(true);
  };
@@ -155,20 +164,20 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="relative">
        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-content-muted" size={18} />
-       <input type="text" placeholder="buscar por nombre o email..." value={search} onChange={e => setSearch(e.target.value)}
+       <input type="text" placeholder="Buscar por nombre o email..." value={search} onChange={e => setSearch(e.target.value)}
         className={input + ' pl-14'} />
       </div>
       <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className={input}>
-       <option value="">todos los roles</option>
-       <option value="propietario">propietario</option>
-       <option value="administrador">administrador</option>
-       <option value="usuario">usuario</option>
+       <option value="">Todos los roles</option>
+       <option value="propietario">Propietario</option>
+       <option value="administrador">Administrador</option>
+       <option value="usuario">Usuario</option>
       </select>
       <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className={input}>
-       <option value="">todos los estados</option>
-       <option value="activo">activo</option>
-       <option value="suspendido">suspendido</option>
-       <option value="inactivo">inactivo</option>
+       <option value="">Todos los estados</option>
+       <option value="activo">Activo</option>
+       <option value="suspendido">Suspendido</option>
+       <option value="inactivo">Inactivo</option>
       </select>
      </div>
     </div>
@@ -262,16 +271,43 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <label className={label}>teléfono</label>
          <input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className={input} />
         </div>
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 flex items-center gap-4 mb-2">
+         <div className="shrink-0">
+          <label className={label}>Avatar</label>
+          <div onClick={() => fileInputRef.current?.click()} className="w-16 h-16 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden bg-surface-inset">
+           {formData.avatar ? <img src={formData.avatar} className="w-full h-full object-cover" /> : <Upload size={20} className="text-content-muted" />}
+          </div>
+          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+         </div>
+         
+         <div className="flex-1 space-y-4">
+          <label className="flex items-center gap-3 p-3 rounded-lg border border-edge bg-surface cursor-pointer hover:bg-surface-inset transition-colors">
+           <input type="checkbox" checked={formData.canAccessIntegrations} onChange={e => setFormData({...formData, canAccessIntegrations: e.target.checked})} className="w-4 h-4 rounded text-accent focus:ring-accent bg-surface-inset border-edge" />
+           <div>
+            <span className="text-sm font-medium text-content block">Permitir acceso a Integraciones</span>
+            <span className="text-xs text-content-muted">Puede configurar WhatsApp, IA y Webhooks</span>
+           </div>
+          </label>
+         </div>
+        </div>
+
+        <div>
          <label className={label}>rol de sistema</label>
          <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className={input}>
-          <option value="usuario">usuario</option>
-          <option value="administrador">administrador</option>
-          <option value="propietario">propietario</option>
+          <option value="usuario">Usuario</option>
+          <option value="administrador">Administrador</option>
+          <option value="propietario">Propietario</option>
+         </select>
+        </div>
+        <div>
+         <label className={label}>estado de la cuenta</label>
+         <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })} className={input}>
+          <option value="activo">Activo</option>
+          <option value="inactivo">Desactivado / Inactivo</option>
          </select>
         </div>
        </div>
-       <div className="pt-6">
+       <div className="pt-4">
          <button type="submit" className="btn-primary w-full py-2.5">
           {editingUser ? 'guardar cambios' : 'crear nuevo usuario'}
          </button>
