@@ -17,11 +17,6 @@ import UserManagement from './components/UserManagement';
 import { ToastProvider } from './components/Toast';
 import AlarmSystem, { AlarmItem } from './components/AlarmSystem';
 
-const MOCK_ALARMS: AlarmItem[] = [
-  { id: '1', title: 'Llamar a Cliente Potencial', type: 'tarea', subtype: 'Llamada', dueDate: new Date().toISOString().split('T')[0], dueTime: new Date(Date.now() + 5 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }), leadName: 'Roberto Soto' },
-  { id: '2', title: 'Visita Villa las Palmas', type: 'cita', subtype: 'Visita', dueDate: new Date().toISOString().split('T')[0], dueTime: new Date(Date.now() + 6 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }), leadName: 'Familia Gómez' }
-];
-
 /**
  * Componente interno que renderiza la aplicación autenticada.
  * Se separa para poder usar useAuth() dentro de AuthProvider.
@@ -117,7 +112,7 @@ function AuthenticatedApp() {
       <main className="flex-1 flex flex-col relative h-full overflow-hidden">
         {renderContent()}
       </main>
-      <AlarmSystem items={MOCK_ALARMS} />
+      <AlarmSystem items={[]} />
     </div>
   );
 }

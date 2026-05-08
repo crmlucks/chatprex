@@ -132,6 +132,57 @@ export async function initDatabase() {
       );
     `);
 
+    // Crear tabla tasks (para Tareas, Citas, y Calendario)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS tasks (
+        id            SERIAL PRIMARY KEY,
+        title         VARCHAR(255) NOT NULL,
+        description   TEXT DEFAULT '',
+        type          VARCHAR(50) DEFAULT 'tarea',
+        status        VARCHAR(50) DEFAULT 'pendiente',
+        due_date      TIMESTAMPTZ,
+        lead_id       INTEGER,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Crear tabla notes
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS notes (
+        id            SERIAL PRIMARY KEY,
+        lead_id       INTEGER NOT NULL,
+        content       TEXT NOT NULL,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Crear tabla finances_clients (para Finanzas)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS finances_clients (
+        id            SERIAL PRIMARY KEY,
+        name          VARCHAR(150) NOT NULL,
+        email         VARCHAR(150) DEFAULT '',
+        phone         VARCHAR(50) DEFAULT '',
+        project       VARCHAR(150) DEFAULT '',
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Crear tabla transactions (para Finanzas)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS transactions (
+        id            SERIAL PRIMARY KEY,
+        type          VARCHAR(20) NOT NULL,
+        amount        DECIMAL(12,2) NOT NULL,
+        currency      VARCHAR(10) DEFAULT 'USD',
+        description   VARCHAR(255) NOT NULL,
+        date          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        client_id     INTEGER REFERENCES finances_clients(id),
+        status        VARCHAR(50) DEFAULT 'completado',
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
     // Add new columns if they don't exist (for existing installs)
     await client.query(`
       DO $$ BEGIN

@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowUpRight, ArrowDownRight, DollarSign, Download, Filter, UserPlus, FileText, Plus, Search, Calendar as CalendarIcon, MapPin, Users, Calculator } from 'lucide-react';
 
 export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const [activeTab, setActiveTab] = useState<'finances' | 'clients'>('finances');
   
   // --- STATE: FINANCES ---
@@ -9,11 +10,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth());
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
   
-  const [transactions, setTransactions] = useState([
-    { id: 1, date: '2026-05-14', client: 'Ana Gómez', concept: 'Anticipo Reserva', property: 'Villa las Palmas', type: 'ingreso', amount: 25000, currency: 'local' },
-    { id: 2, date: '2026-05-12', client: 'Agencia Marketing Z', concept: 'Campaña FB Ads', property: 'N/A', type: 'egreso', amount: 1200, currency: 'usd' },
-    { id: 3, date: '2026-05-10', client: 'Carlos Mendoza', concept: 'Pago Total Depa', property: 'Torre Central 4B', type: 'ingreso', amount: 120000, currency: 'local' },
-  ]);
+  const [transactions, setTransactions] = useState<any[]>([]);
 
   const [showTxForm, setShowTxForm] = useState(false);
   const [txForm, setTxForm] = useState({
@@ -27,9 +24,18 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
   });
 
   // --- STATE: CLIENTS ---
-  const [clients, setClients] = useState([
-    { id: 1, doc: '71234567', name: 'Ana Gómez', phone: '987654321', email: 'ana@email.com', civilStatus: 'soltero' }
-  ]);
+  const [clients, setClients] = useState<any[]>([]);
+
+  // Load data from API
+  useEffect(() => {
+    fetch(`${API_URL}/api/data/finances/transactions`)
+      .then(r => r.json()).then(data => setTransactions(data.map((t: any) => ({
+        id: t.id, date: t.date?.split('T')[0] || '', client: t.client_name || '', concept: t.description,
+        property: '', type: t.type, amount: Number(t.amount), currency: t.currency || 'local'
+      })))).catch(() => {});
+    fetch(`${API_URL}/api/data/finances/clients`)
+      .then(r => r.json()).then(setClients).catch(() => {});
+  }, []);
   const [showClientForm, setShowClientForm] = useState(false);
   const [clientForm, setClientForm] = useState({
     doc: '', name: '', phone: '', email: '', civilStatus: 'soltero',
@@ -67,7 +73,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
 
   const handleAddClient = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!clientForm.name || !clientForm.doc) return;
+    if (!clientForm.name) return;
     setClients([{ id: Date.now(), ...clientForm }, ...clients]);
     setShowClientForm(false);
   };

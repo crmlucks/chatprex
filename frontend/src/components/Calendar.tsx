@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Plus, X, Clock, User, CheckCircle2, XCircle, MapPin, Phone as PhoneIcon, Users, FileSignature, Bookmark, RotateCcw, Bot, Trash2 } from 'lucide-react';
 
 type EventType = 'Visita' | 'Llamada' | 'Reunión' | 'Seguimiento' | 'Firma' | 'Separación';
@@ -24,21 +24,26 @@ const statusStyles: Record<EventStatus, string> = {
 };
 
 export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const [view, setView] = useState<'month'|'week'|'day'>('month');
-  const [events, setEvents] = useState<CalEvent[]>([
-    { id:1, title:'Visita Torre Esmeralda', type:'Visita', date:'2026-05-15', time:'10:00', client:'Carlos Mendoza', status:'pendiente', priority:'Alta', lead:'Carlos Mendoza' },
-    { id:2, title:'Firma Contrato', type:'Firma', date:'2026-05-12', time:'14:00', client:'Ana Gómez', status:'completada', priority:'Alta' },
-    { id:3, title:'Llamada seguimiento', type:'Llamada', date:'2026-05-20', time:'11:00', client:'Lucía Santos', status:'pendiente', priority:'Media' },
-    { id:4, title:'Reunión Presencial', type:'Reunión', date:'2026-05-18', time:'09:00', client:'Juan Pérez', status:'cancelada', priority:'Baja' },
-    { id:5, title:'Separación Depto 4B', type:'Separación', date:'2026-05-15', time:'16:00', client:'María García', status:'pendiente', priority:'Alta' },
-    { id:6, title:'Seguimiento WhatsApp', type:'Seguimiento', date:'2026-05-19', time:'12:00', client:'Empresa Zeta', status:'pendiente', priority:'Media' },
-  ]);
+  const [events, setEvents] = useState<CalEvent[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/data/tasks`)
+      .then(r => r.json()).then(data => setEvents(data.map((t: any) => ({
+        id: t.id, title: t.title, type: (t.description || t.type || 'Visita') as EventType,
+        date: t.due_date ? t.due_date.split('T')[0] : new Date().toISOString().split('T')[0],
+        time: t.due_date ? new Date(t.due_date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false}) : '12:00',
+        client: '', status: (t.status || 'pendiente') as EventStatus, priority: 'Media' as Priority
+      })))).catch(() => {});
+  }, []);
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<CalEvent|null>(null);
-  const [form, setForm] = useState({ title:'', type:'Visita' as EventType, date:'2026-05-15', time:'12:00', client:'', status:'pendiente' as EventStatus, priority:'Media' as Priority, notes:'' });
+  const today = new Date().toISOString().split('T')[0];
+  const [form, setForm] = useState({ title:'', type:'Visita' as EventType, date: today, time:'12:00', client:'', status:'pendiente' as EventStatus, priority:'Media' as Priority, notes:'' });
   const [dragId, setDragId] = useState<number|null>(null);
 
-  const openNew = (date?: string, time?: string) => { setForm({ title:'', type:'Visita', date: date||'2026-05-15', time: time||'12:00', client:'', status:'pendiente', priority:'Media', notes:'' }); setEditing(null); setModal(true); };
+  const openNew = (date?: string, time?: string) => { setForm({ title:'', type:'Visita', date: date||today, time: time||'12:00', client:'', status:'pendiente', priority:'Media', notes:'' }); setEditing(null); setModal(true); };
   const openEdit = (ev: CalEvent, e: React.MouseEvent) => { e.stopPropagation(); setForm({ title:ev.title, type:ev.type, date:ev.date, time:ev.time, client:ev.client, status:ev.status, priority:ev.priority, notes:ev.notes||'' }); setEditing(ev); setModal(true); };
   const save = (e: React.FormEvent) => { e.preventDefault(); if(!form.title) return; if(editing) { setEvents(events.map(ev => ev.id===editing.id ? {...form, id:ev.id, lead:ev.lead} : ev)); } else { setEvents([...events, {...form, id:Date.now()}]); } setModal(false); };
   const del = () => { if(editing) { setEvents(events.filter(ev => ev.id !== editing.id)); setModal(false); } };

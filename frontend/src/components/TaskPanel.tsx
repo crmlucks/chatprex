@@ -1,17 +1,10 @@
 // src/components/TaskPanel.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Calendar as CalendarIcon, Filter, CheckCircle, Clock, XCircle } from 'lucide-react';
 
-// Mock task data – in a real app this would come from an API
-const MOCK_TASKS = [
-  { id: 1, title: 'Llamada a cliente Carlos', type: 'Call', status: 'Pending', date: '2026-05-08' },
-  { id: 2, title: 'Cita de visita a Villa Norte', type: 'Meeting', status: 'Completed', date: '2026-05-06' },
-  { id: 3, title: 'Enviar propuesta a Ana', type: 'Task', status: 'Pending', date: '2026-05-10' },
-  { id: 4, title: 'Revisar documentación de contrato', type: 'Task', status: 'Completed', date: '2026-05-04' },
-  { id: 5, title: 'Llamada de seguimiento', type: 'Call', status: 'Pending', date: '2026-05-09' },
-];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-type Task = typeof MOCK_TASKS[0];
+type Task = { id: number; title: string; type: string; status: string; date: string };
 
 type FilterState = {
   search: string;
@@ -22,6 +15,19 @@ type FilterState = {
 };
 
 export const TaskPanel: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode }) => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/data/tasks`)
+      .then(r => r.json())
+      .then(data => setTasks(data.map((t: any) => ({
+        id: t.id, title: t.title, type: t.type || 'Task',
+        status: t.status === 'completada' ? 'Completed' : 'Pending',
+        date: t.due_date ? t.due_date.split('T')[0] : ''
+      }))))
+      .catch(() => {});
+  }, []);
+
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     type: '',
@@ -32,7 +38,7 @@ export const TaskPanel: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode }) =>
 
   // Filtering logic – memoized for performance
   const filteredTasks = useMemo(() => {
-    return MOCK_TASKS.filter((t) => {
+    return tasks.filter((t) => {
       const matchesSearch = t.title.toLowerCase().includes(filters.search.toLowerCase());
       const matchesType = filters.type ? t.type === filters.type : true;
       const matchesStatus = filters.status ? t.status === filters.status : true;
@@ -40,7 +46,7 @@ export const TaskPanel: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode }) =>
       const matchesEnd = filters.endDate ? new Date(t.date) <= new Date(filters.endDate) : true;
       return matchesSearch && matchesType && matchesStatus && matchesStart && matchesEnd;
     });
-  }, [filters]);
+  }, [filters, tasks]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

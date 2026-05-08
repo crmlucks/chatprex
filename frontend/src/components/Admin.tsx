@@ -1,9 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, Users, Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X } from 'lucide-react';
 
 const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const [tab, setTab] = useState('usuarios');
   const [modalType, setModalType] = useState<string | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/users`)
+      .then(r => r.json()).then(setUsers).catch(() => {});
+    fetch(`${API_URL}/api/properties`)
+      .then(r => r.json())
+      .then(data => {
+        const uniqueProjects = [...new Map(data.filter((p: any) => p.project).map((p: any) => [p.project, p])).values()] as any[];
+        setProjects(uniqueProjects.map((p: any, i: number) => ({ name: p.project, code: `PRJ-${String(i+1).padStart(3,'0')}`, status: 'Activo' })));
+      }).catch(() => {});
+  }, []);
 
   const openModal = (type: string) => setModalType(type);
   const closeModal = () => setModalType(null);
@@ -36,9 +50,11 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                 </tr>
               </thead>
               <tbody className={`divide-y transition-colors ${isDarkMode ? 'divide-slate-800' : 'divide-slate-100'}`}>
-                <UserRow name="Carlos Admin" email="admin@chatprex.com" role="Administrador" roleColor={isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'} isDarkMode={isDarkMode} />
-                <UserRow name="María Ventas" email="maria@chatprex.com" role="Agente" roleColor={isDarkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700'} isDarkMode={isDarkMode} />
-                <UserRow name="Luis Agente" email="luis@chatprex.com" role="Agente" roleColor={isDarkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700'} isDarkMode={isDarkMode} />
+                {users.length === 0 ? (
+                  <tr><td colSpan={4} className="text-center py-6 text-slate-500 text-sm">Sin usuarios registrados</td></tr>
+                ) : users.map((u: any) => (
+                  <UserRow key={u.id} name={u.name} email={u.email} role={u.role || 'usuario'} roleColor={u.role === 'administrador' ? (isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700') : (isDarkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700')} isDarkMode={isDarkMode} />
+                ))}
               </tbody>
             </table>
           </div>
@@ -48,9 +64,11 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           <div>
             <Header tabTitle="Proyectos / Desarrollos" onAdd={() => openModal('proyecto')} isDarkMode={isDarkMode} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ProjectCard name="Torre Esmeralda" code="PRJ-001" status="Activo" isDarkMode={isDarkMode} />
-              <ProjectCard name="Residencial Los Pinos" code="PRJ-002" status="Activo" isDarkMode={isDarkMode} />
-              <ProjectCard name="Plaza Central" code="PRJ-003" status="Pausado" isDarkMode={isDarkMode} />
+              {projects.length === 0 ? (
+                <div className={`col-span-2 text-center py-8 text-sm ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>Sin proyectos registrados. Agrega propiedades para ver tus proyectos.</div>
+              ) : projects.map((p: any) => (
+                <ProjectCard key={p.name} name={p.name} code={p.code} status={p.status} isDarkMode={isDarkMode} />
+              ))}
             </div>
           </div>
         )}

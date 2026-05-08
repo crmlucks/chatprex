@@ -395,33 +395,70 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
   const [taskDate, setTaskDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [taskTime, setTaskTime] = useState('12:00');
   const { showToast } = useToast();
+  const { token } = useAuth();
 
-  const [tasks, setTasks] = useState([
-    { id: 1, text: 'Llamar para confirmar visita', type: 'Llamada', priority: 'Alta', status: 'pendiente', date: 'Mañana, 10:00 AM', dueDate: '', dueTime: '' },
-  ]);
+  const [tasks, setTasks] = useState<any[]>([]);
 
-  const toggleTask = (id: number) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, status: t.status === 'completada' ? 'pendiente' : 'completada' } : t));
+  useEffect(() => {
+    if (lead?.id) {
+      fetch(`${API_URL}/api/data/tasks?lead_id=${lead.id}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(data => setTasks(data.map((t: any) => ({
+          id: t.id, text: t.title, type: t.type || 'Tarea', priority: t.description || 'Media',
+          status: t.status, date: t.due_date ? new Date(t.due_date).toLocaleDateString() : '', dueDate: t.due_date?.split('T')[0] || '', dueTime: ''
+        })))).catch(() => {});
+    }
+  }, [lead?.id]);
+
+  const toggleTask = async (id: number) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    const newStatus = task.status === 'completada' ? 'pendiente' : 'completada';
+    setTasks(tasks.map(t => t.id === id ? { ...t, status: newStatus } : t));
+    try {
+      await fetch(`${API_URL}/api/data/tasks/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ title: task.text, description: task.priority, status: newStatus, due_date: task.dueDate || null })
+      });
+    } catch {}
   };
 
-  const addTask = () => {
+  const addTask = async () => {
     if(!newTask.trim()) return;
-    const id = Date.now();
-    setTasks([{ id, text: newTask, type: taskType, priority: taskPriority, status: 'pendiente', date: `${taskDate} ${taskTime}`, dueDate: taskDate, dueTime: taskTime }, ...tasks]);
-    setNewTask('');
+    try {
+      const res = await fetch(`${API_URL}/api/data/tasks`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ title: newTask, description: taskPriority, type: taskType, status: 'pendiente', due_date: `${taskDate}T${taskTime}`, lead_id: lead.id })
+      });
+      const saved = await res.json();
+      setTasks([{ id: saved.id, text: newTask, type: taskType, priority: taskPriority, status: 'pendiente', date: `${taskDate} ${taskTime}`, dueDate: taskDate, dueTime: taskTime }, ...tasks]);
+      setNewTask('');
+    } catch { showToast('Error al crear tarea', 'error'); }
   };
 
-  const [notes, setNotes] = useState([
-    { id: 1, author: 'Bot', text: 'El lead fue calificado con interés Alto. Preferencia de contacto por WhatsApp confirmada.', time: 'Hace 2 horas' },
-    { id: 2, author: 'AG', text: 'Presupuesto validado de $150k USD. Busca de 2 a 3 habitaciones.', time: 'Ayer' }
-  ]);
+  const [notes, setNotes] = useState<any[]>([]);
   const [newNote, setNewNote] = useState('');
 
-  const addNote = () => {
+  useEffect(() => {
+    if (lead?.id) {
+      fetch(`${API_URL}/api/data/notes?lead_id=${lead.id}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(data => setNotes(data.map((n: any) => ({
+          id: n.id, author: 'AG', text: n.content, time: new Date(n.created_at).toLocaleDateString()
+        })))).catch(() => {});
+    }
+  }, [lead?.id]);
+
+  const addNote = async () => {
     if(!newNote.trim()) return;
-    setNotes([{ id: Date.now(), author: 'AG', text: newNote, time: 'Ahora' }, ...notes]);
-    setNewNote('');
-    showToast('Nota guardada correctamente', 'success');
+    try {
+      const res = await fetch(`${API_URL}/api/data/notes`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ lead_id: lead.id, content: newNote })
+      });
+      const saved = await res.json();
+      setNotes([{ id: saved.id, author: 'AG', text: newNote, time: 'Ahora' }, ...notes]);
+      setNewNote('');
+      showToast('Nota guardada correctamente', 'success');
+    } catch { showToast('Error al guardar nota', 'error'); }
   };
 
   return (
@@ -552,22 +589,29 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
           {activeTab === 'historial' && (
             <div className="space-y-0 relative">
               <div className={`absolute left-[15px] top-4 bottom-4 w-0.5 ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
-              {[
-                { icon: 'bot', color: isDarkMode ? 'bg-purple-500/10 text-purple-400' : 'bg-purple-50 text-purple-600', title: 'Bot IA calificó al lead', desc: `Scoring actualizado a ${lead.score}. Proyecto: ${lead.project}.`, time: 'Hace 30 min' },
-                { icon: 'msg', color: isDarkMode ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600', title: 'Conversación WhatsApp', desc: 'El cliente preguntó por disponibilidad y precios del proyecto.', time: 'Hace 2 horas' },
-                { icon: 'task', color: isDarkMode ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600', title: 'Tarea completada', desc: 'Enviar brochure del proyecto — marcada por el agente.', time: 'Ayer' },
-                { icon: 'stage', color: isDarkMode ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-50 text-amber-700', title: `Etapa cambiada a "${lead.status}"`, desc: 'Lead movido en el pipeline por el asesor.', time: 'Hace 2 días' },
-                { icon: 'note', color: isDarkMode ? 'bg-slate-500/10 text-slate-400' : 'bg-slate-50 text-slate-600', title: 'Nota del agente', desc: 'Presupuesto confirmado, busca pago de contado.', time: 'Hace 3 días' },
-                { icon: 'call', color: isDarkMode ? 'bg-rose-500/10 text-rose-400' : 'bg-rose-50 text-rose-600', title: 'Llamada realizada', desc: 'Llamada de 4 min. Cliente solicita visita presencial.', time: 'Hace 5 días' },
-              ].map((item, i) => (
+              {[...tasks.filter(t => t.status === 'completada').map(t => ({
+                icon: 'task', color: isDarkMode ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600',
+                title: `Tarea completada: ${t.text}`, desc: `Tipo: ${t.type}`, time: t.date || ''
+              })), ...notes.map(n => ({
+                icon: 'note', color: isDarkMode ? 'bg-slate-500/10 text-slate-400' : 'bg-slate-50 text-slate-600',
+                title: `Nota de ${n.author}`, desc: n.text, time: n.time || ''
+              }))].length === 0 ? (
+                <div className={`p-8 text-center rounded-2xl border ${isDarkMode ? 'border-slate-800 text-slate-600' : 'border-slate-100 text-slate-400'}`}>
+                  <History size={28} className="mx-auto mb-2 opacity-40" />
+                  <p className="text-xs font-bold">Sin historial registrado</p>
+                  <p className="text-[10px] mt-1">Las tareas completadas y notas aparecerán aquí.</p>
+                </div>
+              ) : [...tasks.filter(t => t.status === 'completada').map(t => ({
+                icon: 'task', color: isDarkMode ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600',
+                title: `Tarea completada: ${t.text}`, desc: `Tipo: ${t.type}`, time: t.date || ''
+              })), ...notes.map(n => ({
+                icon: 'note', color: isDarkMode ? 'bg-slate-500/10 text-slate-400' : 'bg-slate-50 text-slate-600',
+                title: `Nota de ${n.author}`, desc: n.text, time: n.time || ''
+              }))].map((item, i) => (
                 <div key={i} className="flex gap-3 relative pl-0 py-2 group">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 z-10 border-2 ${isDarkMode ? 'border-[#181619] shadow-none' : 'border-white shadow-sm'} ${item.color}`}>
-                    {item.icon === 'bot' && <Bot size={14}/>}
-                    {item.icon === 'msg' && <MessageSquare size={14}/>}
                     {item.icon === 'task' && <CheckCircle2 size={14}/>}
-                    {item.icon === 'stage' && <ListTodo size={14}/>}
                     {item.icon === 'note' && <FileText size={14}/>}
-                    {item.icon === 'call' && <Phone size={14}/>}
                   </div>
                   <div className={`p-3 rounded-xl border flex-1 transition-all group-hover:shadow-sm ${isDarkMode ? 'bg-slate-800/40 border-slate-800 hover:border-slate-700' : 'bg-slate-50/50 border-slate-100 hover:border-slate-200'}`}>
                     <div className="flex justify-between items-start mb-0.5">
@@ -582,7 +626,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
           )}
 
           {activeTab === 'citas' && (
-            <ModalCitas leadName={lead.name} isDarkMode={isDarkMode} registerAlarm={registerAlarm} unregisterAlarm={unregisterAlarm} />
+            <ModalCitas leadName={lead.name} leadId={lead.id} isDarkMode={isDarkMode} registerAlarm={registerAlarm} unregisterAlarm={unregisterAlarm} />
           )}
         </div>
       </div>
@@ -590,51 +634,62 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
   );
 };
 
-const ModalCitas = ({ leadName, isDarkMode, registerAlarm, unregisterAlarm }: { leadName: string, isDarkMode?: boolean, registerAlarm?: any, unregisterAlarm?: any }) => {
+const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAlarm }: { leadName: string, leadId?: number, isDarkMode?: boolean, registerAlarm?: any, unregisterAlarm?: any }) => {
   const { showToast, showConfirm } = useToast();
-  const [citas, setCitas] = useState([
-    { id: 1, title: 'Visita Torre Esmeralda', type: 'Visita', date: '2026-05-16', time: '15:00', status: 'pendiente' as const },
-    { id: 2, title: 'Llamada de cierre', type: 'Llamada', date: '2026-05-18', time: '10:00', status: 'completada' as const },
-  ]);
+  const { token } = useAuth();
+  const [citas, setCitas] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [nTitle, setNTitle] = useState(''); const [nType, setNType] = useState('Visita'); const [nDate, setNDate] = useState('2026-05-20'); const [nTime, setNTime] = useState('12:00');
+  const today = new Date().toISOString().split('T')[0];
+  const [nTitle, setNTitle] = useState(''); const [nType, setNType] = useState('Visita'); const [nDate, setNDate] = useState(today); const [nTime, setNTime] = useState('12:00');
 
-  const addCita = () => {
-    if(!nTitle.trim()) return;
-    const id = Date.now();
-    setCitas([{ id, title: nTitle, type: nType, date: nDate, time: nTime, status: 'pendiente' }, ...citas]);
-    showToast(`Cita "${nTitle}" programada`, 'success');
-    // Register alarm
-    if (registerAlarm) {
-      registerAlarm({
-        id: `cita-${id}`,
-        title: nTitle,
-        type: 'cita',
-        subtype: nType,
-        dueDate: nDate,
-        dueTime: nTime,
-        leadName,
-      });
+  useEffect(() => {
+    if (leadId) {
+      fetch(`${API_URL}/api/data/tasks?lead_id=${leadId}&type=cita`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(data => setCitas(data.map((t: any) => ({
+          id: t.id, title: t.title, type: t.description || 'Visita',
+          date: t.due_date ? t.due_date.split('T')[0] : '', time: t.due_date ? new Date(t.due_date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false}) : '12:00',
+          status: t.status as 'pendiente' | 'completada'
+        })))).catch(() => {});
     }
-    setNTitle(''); setShowForm(false);
-  };
-  const toggleCita = (id: number) => {
-    setCitas(citas.map(c => {
-      if (c.id === id) {
-        const next = c.status === 'completada' ? 'pendiente' : 'completada';
-        showToast(`Cita marcada como ${next}`, next === 'completada' ? 'success' : 'info');
-        return { ...c, status: next as any };
+  }, [leadId]);
+
+  const addCita = async () => {
+    if(!nTitle.trim()) return;
+    try {
+      const res = await fetch(`${API_URL}/api/data/tasks`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ title: nTitle, description: nType, type: 'cita', status: 'pendiente', due_date: `${nDate}T${nTime}`, lead_id: leadId })
+      });
+      const saved = await res.json();
+      setCitas([{ id: saved.id, title: nTitle, type: nType, date: nDate, time: nTime, status: 'pendiente' }, ...citas]);
+      showToast(`Cita "${nTitle}" programada`, 'success');
+      if (registerAlarm) {
+        registerAlarm({ id: `cita-${saved.id}`, title: nTitle, type: 'cita', subtype: nType, dueDate: nDate, dueTime: nTime, leadName });
       }
-      return c;
-    }));
+      setNTitle(''); setShowForm(false);
+    } catch { showToast('Error al crear cita', 'error'); }
+  };
+  const toggleCita = async (id: number) => {
+    const cita = citas.find(c => c.id === id);
+    if (!cita) return;
+    const next = cita.status === 'completada' ? 'pendiente' : 'completada';
+    setCitas(citas.map(c => c.id === id ? { ...c, status: next } : c));
+    showToast(`Cita marcada como ${next}`, next === 'completada' ? 'success' : 'info');
+    try {
+      await fetch(`${API_URL}/api/data/tasks/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ title: cita.title, description: cita.type, status: next, due_date: cita.date ? `${cita.date}T${cita.time || '12:00'}` : null })
+      });
+    } catch {}
   };
   const delCita = (id: number) => {
     const cita = citas.find(c => c.id === id);
     showConfirm(
       `¿Eliminar la cita "${cita?.title || ''}"? Esta acción no se puede deshacer.`,
-      () => {
+      async () => {
         setCitas(citas.filter(c => c.id !== id));
         showToast('Cita eliminada', 'error');
+        try { await fetch(`${API_URL}/api/data/tasks/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); } catch {}
       },
       { confirmText: 'Eliminar', cancelText: 'Cancelar' }
     );
@@ -812,13 +867,7 @@ const NewLeadModal = ({ isDarkMode, onClose, onSave }: any) => {
 
             <div className="col-span-1">
               <label className={labelCls}>Proyecto de Interés</label>
-              <select value={form.project} onChange={e => setForm({...form, project: e.target.value})} className={inputCls}>
-                <option value="">Seleccionar proyecto...</option>
-                <option value="Torre Esmeralda">Torre Esmeralda</option>
-                <option value="Residencial Los Pinos">Residencial Los Pinos</option>
-                <option value="Plaza Comercial Sur">Plaza Comercial Sur</option>
-                <option value="Lotes Campestres">Lotes Campestres</option>
-              </select>
+              <ProjectSelect value={form.project} onChange={(v: string) => setForm({...form, project: v})} className={inputCls} />
             </div>
 
             <div className="col-span-2">
@@ -845,6 +894,25 @@ const NewLeadModal = ({ isDarkMode, onClose, onSave }: any) => {
 
       </div>
     </div>
+  );
+};
+
+const ProjectSelect = ({ value, onChange, className }: { value: string; onChange: (v: string) => void; className: string }) => {
+  const [projects, setProjects] = useState<string[]>([]);
+  const { token } = useAuth();
+  useEffect(() => {
+    fetch(`${API_URL}/api/properties`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(data => {
+        const unique = [...new Set(data.map((p: any) => p.project).filter(Boolean))] as string[];
+        setProjects(unique);
+      }).catch(() => {});
+  }, []);
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)} className={className}>
+      <option value="">Seleccionar proyecto...</option>
+      {projects.map(p => <option key={p} value={p}>{p}</option>)}
+    </select>
   );
 };
 
