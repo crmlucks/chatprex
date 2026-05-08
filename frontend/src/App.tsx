@@ -16,6 +16,7 @@ import Campaigns from './components/Campaigns';
 import UserManagement from './components/UserManagement';
 import { ToastProvider } from './components/Toast';
 import AlarmSystem, { AlarmItem } from './components/AlarmSystem';
+import { Bot } from 'lucide-react';
 
 /**
  * Componente interno que renderiza la aplicación autenticada.
@@ -23,7 +24,7 @@ import AlarmSystem, { AlarmItem } from './components/AlarmSystem';
  */
 function AuthenticatedApp() {
   const { user, loading, logout, hasRole } = useAuth();
-  const [activeTab, setActiveTab] = useState('Conversaciones');
+  const [activeTab, setActiveTab] = useState('Dashboard');
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('prexup_theme');
     return saved !== 'light';
@@ -39,13 +40,18 @@ function AuthenticatedApp() {
     }
   }, [isDarkMode]);
 
-  // Pantalla de carga
+  // Pantalla de carga premium
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-900">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="text-slate-400 text-sm font-medium">Cargando ChatPrex...</p>
+      <div className="flex h-screen w-full items-center justify-center bg-[#121212]">
+        <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-700">
+          <div className="w-16 h-16 bg-primary rounded-[24px] flex items-center justify-center shadow-2xl shadow-primary/40 animate-pulse">
+            <Bot className="text-white" size={32} />
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <h2 className="text-xl font-black tracking-tight text-white">ChatPrex</h2>
+            <p className="text-[10px] font-black uppercase tracking-[3px] text-primary opacity-60">Iniciando sistema premium</p>
+          </div>
         </div>
       </div>
     );
@@ -69,9 +75,12 @@ function AuthenticatedApp() {
 
     if (user.role === 'usuario' && restrictedTabs.includes(activeTab)) {
       return (
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <p className={`font-bold text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>🔒 Acceso Restringido</p>
-          <p className={`text-sm mt-2 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>No tienes permisos para acceder a este módulo.</p>
+        <div className="flex-1 flex flex-col items-center justify-center p-10 text-center animate-in fade-in duration-500">
+          <div className="w-20 h-20 rounded-[32px] bg-rose-500/10 flex items-center justify-center mb-6 border border-rose-500/20">
+             <Bot className="text-rose-500" size={40} />
+          </div>
+          <h2 className={`text-2xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Acceso restringido</h2>
+          <p className="body-text text-sm mt-3 max-w-sm opacity-60 font-bold uppercase tracking-widest text-[10px]">No tienes permisos para acceder a este módulo premium.</p>
         </div>
       );
     }
@@ -91,8 +100,8 @@ function AuthenticatedApp() {
       case 'Automatización': return <Automation isDarkMode={isDarkMode} />;
       case 'Usuarios': return <UserManagement isDarkMode={isDarkMode} />;
       default: return (
-        <div className="flex-1 flex items-center justify-center bg-surface-dim">
-          <p className="text-slate-500">Módulo en construcción...</p>
+        <div className="flex-1 flex flex-col items-center justify-center p-10 animate-in fade-in duration-500">
+          <p className="text-slate-500 font-black uppercase tracking-widest text-[11px] opacity-40">Módulo en construcción...</p>
         </div>
       );
     }

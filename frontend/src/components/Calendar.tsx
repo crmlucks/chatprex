@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Plus, X, Clock, User, CheckCircle2, XCircle, MapPin, Phone as PhoneIcon, Users, FileSignature, Bookmark, RotateCcw, Bot, Trash2, Filter, Calendar as CalIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-type EventType = 'Visita' | 'Llamada' | 'Reunión' | 'Seguimiento' | 'Firma' | 'Separación';
+type EventType = 'visita' | 'llamada' | 'reunión' | 'seguimiento' | 'firma' | 'separación';
 type EventStatus = 'pendiente' | 'completada' | 'cancelada';
-type Priority = 'Alta' | 'Media' | 'Baja';
+type Priority = 'alta' | 'media' | 'baja';
 
 interface CalEvent {
   id: number; title: string; type: EventType; date: string; time: string;
@@ -12,19 +12,19 @@ interface CalEvent {
 }
 
 const typeConfig: Record<EventType, { icon: any; color: string; bg: string; border: string }> = {
-  Visita: { icon: MapPin, color: 'text-blue-600', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-  Llamada: { icon: PhoneIcon, color: 'text-emerald-600', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  Reunión: { icon: Users, color: 'text-purple-600', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-  Seguimiento: { icon: RotateCcw, color: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  Firma: { icon: FileSignature, color: 'text-rose-600', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-  Separación: { icon: Bookmark, color: 'text-indigo-600', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
+  visita: { icon: MapPin, color: 'text-blue-600', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+  llamada: { icon: PhoneIcon, color: 'text-emerald-600', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+  reunión: { icon: Users, color: 'text-purple-600', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+  seguimiento: { icon: RotateCcw, color: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+  firma: { icon: FileSignature, color: 'text-rose-600', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
+  separación: { icon: Bookmark, color: 'text-indigo-600', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
 };
 
 export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
   const { token } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const [view, setView] = useState<'month'|'week'|'day'>('month');
-  const [filterType, setFilterType] = useState<EventType | 'Todos'>('Todos');
+  const [filterType, setFilterType] = useState<EventType | 'todos'>('todos');
   const [events, setEvents] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,10 +37,10 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
       .then(r => r.json())
       .then(data => {
         setEvents(data.map((t: any) => ({
-          id: t.id, title: t.title, type: (t.description || t.type || 'Visita') as EventType,
+          id: t.id, title: t.title, type: (t.description?.toLowerCase() || t.type?.toLowerCase() || 'visita') as EventType,
           date: t.due_date ? t.due_date.split('T')[0] : new Date().toISOString().split('T')[0],
           time: t.due_date ? new Date(t.due_date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false}) : '12:00',
-          client: t.lead_name || '', status: (t.status || 'pendiente') as EventStatus, priority: (t.priority || 'Media') as Priority
+          client: t.lead_name || '', status: (t.status || 'pendiente') as EventStatus, priority: (t.priority || 'media') as Priority
         })));
         setLoading(false);
       })
@@ -50,9 +50,9 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<CalEvent|null>(null);
   const todayStr = new Date().toISOString().split('T')[0];
-  const [form, setForm] = useState({ title:'', type:'Visita' as EventType, date: todayStr, time:'12:00', client:'', status:'pendiente' as EventStatus, priority:'Media' as Priority, notes:'' });
+  const [form, setForm] = useState({ title:'', type:'visita' as EventType, date: todayStr, time:'12:00', client:'', status:'pendiente' as EventStatus, priority:'media' as Priority, notes:'' });
 
-  const openNew = (date?: string, time?: string) => { setForm({ title:'', type:'Visita', date: date||todayStr, time: time||'12:00', client:'', status:'pendiente', priority:'Media', notes:'' }); setEditing(null); setModal(true); };
+  const openNew = (date?: string, time?: string) => { setForm({ title:'', type:'visita', date: date||todayStr, time: time||'12:00', client:'', status:'pendiente', priority:'media', notes:'' }); setEditing(null); setModal(true); };
   const openEdit = (ev: CalEvent, e: React.MouseEvent) => { e.stopPropagation(); setForm({ ...ev, notes: ev.notes||'' }); setEditing(ev); setModal(true); };
   
   const save = (e: React.FormEvent) => {
@@ -71,67 +71,67 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
   const daysInMonth = 31; 
   const startDay = new Date(2026, 4, 1).getDay(); // Mayo 2026 empieza Viernes (5)
   const cells = Array.from({length:35}, (_,i) => { const d = i-startDay+1; return d>0&&d<=daysInMonth ? d : null; });
-  const filteredEvents = events.filter(e => filterType === 'Todos' || e.type === filterType);
+  const filteredEvents = events.filter(e => filterType === 'todos' || e.type === filterType);
 
-  const inputCls = `w-full p-2.5 rounded-xl border text-xs font-bold outline-none transition-all focus:ring-4 focus:ring-primary/10 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white focus:border-primary' : 'bg-slate-50 border-slate-100 text-slate-800 focus:border-primary shadow-inner'}`;
-  const labelCls = `text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1`;
+  const dc = isDarkMode;
+  const inputCls = `w-full p-3 rounded-2xl border text-sm font-medium outline-none transition-all focus:ring-4 focus:ring-primary/10 ${dc ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-slate-50 border-slate-100 text-slate-800 focus:border-primary shadow-inner'}`;
 
   return (
-    <div className={`flex-1 flex flex-col overflow-hidden transition-colors ${isDarkMode ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
+    <div className={`flex-1 flex flex-col overflow-hidden transition-colors ${dc ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
       
       {/* Dynamic Header */}
-      <div className={`p-4 md:p-6 border-b flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+      <div className={`p-6 md:p-8 border-b flex flex-col md:flex-row justify-between items-start md:items-center gap-6 transition-colors ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isDarkMode ? 'bg-primary/20 text-primary shadow-inner' : 'bg-primary/10 text-primary'}`}>
-               <CalIcon size={24} />
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform hover:scale-105 ${dc ? 'bg-primary/20 text-primary shadow-inner' : 'bg-white text-primary border border-slate-100'}`}>
+               <CalIcon size={28} />
             </div>
             <div>
-               <h1 className={`text-xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Agenda y Tareas</h1>
-               <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Seguimiento de Mayo 2026</p>
+               <h1 className="h1">Agenda y tareas</h1>
+               <p className="body-text text-xs uppercase tracking-[2px] font-bold opacity-60">Seguimiento de mayo 2026</p>
             </div>
          </div>
          
-         <div className="flex items-center gap-2 w-full md:w-auto">
-            <div className={`flex p-1 rounded-xl w-full md:w-auto ${isDarkMode ? 'bg-slate-800/50' : 'bg-slate-100/50'}`}>
+         <div className="flex items-center gap-4 w-full md:w-auto">
+            <div className={`flex p-1.5 rounded-2xl w-full md:w-auto ${dc ? 'bg-slate-800' : 'bg-white border border-slate-100 shadow-md'}`}>
                {(['month','week','day'] as const).map(v => (
-                 <button key={v} onClick={() => setView(v)} className={`flex-1 md:px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${view===v ? (isDarkMode ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white shadow-md text-primary') : 'text-slate-500 hover:text-slate-400'}`}>
+                 <button key={v} onClick={() => setView(v)} className={`flex-1 md:px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${view===v ? 'bg-primary text-white shadow-lg' : 'text-slate-500 hover:text-slate-700'}`}>
                    {v==='month'?'Mes':v==='week'?'Semana':'Día'}
                  </button>
                ))}
             </div>
-            <button onClick={() => openNew()} className="p-3 bg-primary text-white rounded-2xl shadow-xl shadow-primary/20 active:scale-95 transition-all">
-               <Plus size={20} />
+            <button onClick={() => openNew()} className="btn-primary p-3.5 rounded-2xl shadow-2xl shadow-primary/30 active:scale-95 transition-all">
+               <Plus size={24} />
             </button>
          </div>
       </div>
 
       {/* Filter & Nav Bar */}
-      <div className={`px-4 md:px-6 py-3 border-b flex flex-col sm:flex-row justify-between items-center gap-4 transition-colors ${isDarkMode ? 'bg-[#1E1E1E]/50 border-slate-800' : 'bg-white border-slate-100'}`}>
-         <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-64">
-               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+      <div className={`px-6 md:px-8 py-4 border-b flex flex-col sm:flex-row justify-between items-center gap-6 transition-colors ${dc ? 'bg-[#1E1E1E]/50 border-slate-800' : 'bg-white border-slate-50'}`}>
+         <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-72">
+               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                <select value={filterType} onChange={e => setFilterType(e.target.value as any)} 
-                 className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-[11px] font-black uppercase tracking-widest outline-none appearance-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
-                  <option value="Todos">Todos los Eventos</option>
+                 className={`w-full pl-11 pr-5 py-3 rounded-[18px] border text-[11px] font-black uppercase tracking-widest outline-none appearance-none transition-all ${dc ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-100 text-slate-800 shadow-sm'}`}>
+                  <option value="todos">Todos los eventos</option>
                   {(Object.keys(typeConfig) as EventType[]).map(t => <option key={t} value={t}>{t}</option>)}
                </select>
             </div>
          </div>
-         <div className="flex items-center gap-4">
-            <button className={`p-2 rounded-xl transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-slate-100 text-slate-500 hover:text-slate-800'}`}><ChevronLeft size={20}/></button>
-            <span className={`text-xs font-black uppercase tracking-[3px] ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Mayo 2026</span>
-            <button className={`p-2 rounded-xl transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-slate-100 text-slate-500 hover:text-slate-800'}`}><ChevronRight size={20}/></button>
+         <div className="flex items-center gap-6">
+            <button className={`p-2.5 rounded-xl transition-all ${dc ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-white border border-slate-100 text-slate-500 hover:text-slate-800 shadow-sm'}`}><ChevronLeft size={20}/></button>
+            <span className={`text-[11px] font-black uppercase tracking-[3px] ${dc ? 'text-slate-300' : 'text-slate-700'}`}>Mayo 2026</span>
+            <button className={`p-2.5 rounded-xl transition-all ${dc ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-white border border-slate-100 text-slate-500 hover:text-slate-800 shadow-sm'}`}><ChevronRight size={20}/></button>
          </div>
       </div>
 
       {/* Calendar Area */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
-         <div className={`h-full min-h-[600px] rounded-[32px] border shadow-2xl overflow-hidden flex flex-col transition-all ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+      <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar">
+         <div className={`h-full min-h-[700px] rounded-[40px] border shadow-2xl overflow-hidden flex flex-col transition-all ${dc ? 'bg-[#1E1E1E] border-slate-800 shadow-none' : 'bg-white border-slate-100'}`}>
             
             {/* Week Headers */}
-            <div className={`grid grid-cols-7 border-b transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
+            <div className={`grid grid-cols-7 border-b transition-colors ${dc ? 'bg-slate-900 border-slate-800' : 'bg-slate-50/50 border-slate-50'}`}>
                {['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(d => (
-                 <div key={d} className="py-4 text-center text-[10px] font-black uppercase tracking-[2px] text-slate-500">{d}</div>
+                 <div key={d} className="py-5 text-center text-[10px] font-black uppercase tracking-[2px] text-slate-400">{d}</div>
                ))}
             </div>
 
@@ -144,20 +144,20 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
 
                  return (
                    <div key={i} onClick={() => day && openNew(ds)}
-                     className={`border-b border-r p-2 flex flex-col gap-1 cursor-pointer transition-all min-h-[100px] overflow-hidden ${!day ? (isDarkMode ? 'bg-slate-900/50' : 'bg-slate-50/50') : (isDarkMode ? 'hover:bg-white/5' : 'hover:bg-slate-50/50')} ${isToday ? (isDarkMode ? 'bg-primary/10' : 'bg-primary/5') : ''} ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+                     className={`border-b border-r p-3 flex flex-col gap-2 cursor-pointer transition-all min-h-[120px] overflow-hidden ${!day ? (dc ? 'bg-slate-900/50' : 'bg-slate-50/30') : (dc ? 'hover:bg-white/5' : 'hover:bg-slate-50/50')} ${isToday ? (dc ? 'bg-primary/5' : 'bg-primary/5 shadow-inner') : ''} ${dc ? 'border-slate-800' : 'border-slate-50'}`}>
                       {day && (
                         <>
                            <div className="flex justify-between items-center mb-1">
-                              <span className={`text-xs font-black ${isToday ? 'text-primary' : 'text-slate-500'}`}>{day}</span>
-                              {dayEvents.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-lg shadow-primary/50" />}
+                              <span className={`text-xs font-black ${isToday ? 'text-primary' : (dc ? 'text-slate-600' : 'text-slate-400')}`}>{day}</span>
+                              {dayEvents.length > 0 && <div className="w-2 h-2 rounded-full bg-primary shadow-lg shadow-primary/50 animate-pulse" />}
                            </div>
-                           <div className="space-y-1 overflow-hidden">
+                           <div className="space-y-1.5 overflow-hidden">
                               {dayEvents.slice(0, 3).map(ev => (
-                                <div key={ev.id} onClick={(e) => openEdit(ev, e)} className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter truncate border ${typeConfig[ev.type].bg} ${typeConfig[ev.type].color} ${typeConfig[ev.type].border}`}>
+                                <div key={ev.id} onClick={(e) => openEdit(ev, e)} className={`px-2.5 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-tighter truncate border transition-all hover:scale-105 hover:shadow-lg ${typeConfig[ev.type].bg} ${typeConfig[ev.type].color} ${typeConfig[ev.type].border}`}>
                                    {ev.time} {ev.title}
                                 </div>
                               ))}
-                              {dayEvents.length > 3 && <div className="text-[8px] font-black text-slate-400 pl-1">+{dayEvents.length - 3} MÁS</div>}
+                              {dayEvents.length > 3 && <div className="text-[8px] font-black text-slate-400 pl-1 uppercase tracking-widest">+{dayEvents.length - 3} más</div>}
                            </div>
                         </>
                       )}
@@ -170,66 +170,68 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
 
       {/* MODAL */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className={`rounded-[40px] shadow-2xl border w-full max-w-lg overflow-hidden flex flex-col ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-            <div className={`px-8 py-6 border-b flex justify-between items-center transition-colors ${isDarkMode ? 'bg-slate-800/50 border-slate-800' : 'bg-slate-50 border-slate-50'}`}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className={`rounded-[40px] shadow-2xl border w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
+            <div className={`px-10 py-8 border-b flex justify-between items-center transition-colors ${dc ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50/50 border-slate-50'}`}>
                <div>
-                  <h2 className={`text-xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{editing ? 'Editar Evento' : 'Nueva Cita'}</h2>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-primary">Detalles de la Agenda</p>
+                  <h2 className="h2">{editing ? 'Editar evento' : 'Nueva cita'}</h2>
+                  <p className="body-text text-[10px] uppercase tracking-widest font-bold opacity-60 mt-1">Detalles de la agenda comercial</p>
                </div>
-               <button onClick={() => setModal(false)} className={`p-2.5 rounded-2xl transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-white border shadow-sm text-slate-400 hover:text-slate-800'}`}><X size={20}/></button>
+               <button onClick={() => setModal(false)} className={`p-3 rounded-2xl transition-all ${dc ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-white border shadow-md text-slate-400 hover:text-slate-800'}`}><X size={20}/></button>
             </div>
             
-            <form onSubmit={save} className="p-8 space-y-6 overflow-y-auto custom-scrollbar max-h-[70vh]">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                     <label className={labelCls}>tipo de actividad</label>
+            <form onSubmit={save} className="p-10 space-y-8 overflow-y-auto custom-scrollbar max-h-[70vh]">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                     <label className="label-text">Tipo de actividad</label>
                      <select value={form.type} onChange={e => setForm({...form, type: e.target.value as any})} className={inputCls}>
-                        {(Object.keys(typeConfig) as EventType[]).map(t => <option key={t} value={t}>{t}</option>)}
+                        {(Object.keys(typeConfig) as EventType[]).map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                      </select>
                   </div>
-                  <div className="space-y-2">
-                     <label className={labelCls}>prioridad</label>
+                  <div className="space-y-3">
+                     <label className="label-text">Prioridad</label>
                      <select value={form.priority} onChange={e => setForm({...form, priority: e.target.value as any})} className={inputCls}>
-                        <option>Alta</option><option>Media</option><option>Baja</option>
+                        <option value="alta">Alta</option>
+                        <option value="media">Media</option>
+                        <option value="baja">Baja</option>
                      </select>
                   </div>
                </div>
 
-               <div className="space-y-2">
-                  <label className={labelCls}>título descriptivo</label>
-                  <input required type="text" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Ej: Visita al Proyecto Mirador..." className={inputCls} />
+               <div className="space-y-3">
+                  <label className="label-text">Título descriptivo</label>
+                  <input required type="text" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Ej: Visita al proyecto Mirador..." className={inputCls} />
                </div>
 
-               <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                     <label className={labelCls}>fecha</label>
+               <div className="grid grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                     <label className="label-text">Fecha</label>
                      <input required type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} className={inputCls} />
                   </div>
-                  <div className="space-y-2">
-                     <label className={labelCls}>hora</label>
+                  <div className="space-y-3">
+                     <label className="label-text">Hora</label>
                      <input required type="time" value={form.time} onChange={e => setForm({...form, time: e.target.value})} className={inputCls} />
                   </div>
                </div>
 
-               <div className="space-y-2">
-                  <label className={labelCls}>cliente / lead vinculado</label>
+               <div className="space-y-3">
+                  <label className="label-text">Cliente / Lead vinculado</label>
                   <div className="relative">
-                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                     <input type="text" value={form.client} onChange={e => setForm({...form, client: e.target.value})} placeholder="Nombre del cliente..." className={inputCls + " pl-9"} />
+                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                     <input type="text" value={form.client} onChange={e => setForm({...form, client: e.target.value})} placeholder="Nombre del cliente..." className={inputCls + " pl-12"} />
                   </div>
                </div>
 
-               <div className="space-y-2">
-                  <label className={labelCls}>notas adicionales</label>
-                  <textarea rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Instrucciones para el asesor..." className={inputCls + " resize-none"} />
+               <div className="space-y-3">
+                  <label className="label-text">Notas adicionales</label>
+                  <textarea rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Instrucciones para el asesor..." className={inputCls + " resize-none h-32"} />
                </div>
             </form>
 
-            <div className={`p-8 border-t flex flex-col sm:flex-row gap-4 transition-colors ${isDarkMode ? 'bg-[#181619]' : 'bg-slate-50/50'}`}>
-               {editing && <button type="button" onClick={del} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-rose-500 border border-rose-500/20 rounded-2xl hover:bg-rose-500/5 transition-all">Eliminar</button>}
-               <button onClick={save} className="flex-[2] py-4 bg-primary text-white text-[11px] font-black uppercase tracking-[2px] rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all active:scale-95">
-                  {editing ? 'Actualizar Evento' : 'Programar en Agenda'}
+            <div className={`p-10 border-t flex flex-col sm:flex-row gap-6 transition-colors ${dc ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50/50'}`}>
+               {editing && <button type="button" onClick={del} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-rose-500 border border-rose-500/20 rounded-[20px] hover:bg-rose-500/5 transition-all">Eliminar</button>}
+               <button onClick={save} className="flex-[2] btn-primary py-4 rounded-[20px] shadow-2xl shadow-primary/30 hover:bg-primary-dark transition-all active:scale-95">
+                  <span className="text-[11px] font-black uppercase tracking-[2px]">{editing ? 'Actualizar evento' : 'Programar en agenda'}</span>
                </button>
             </div>
           </div>

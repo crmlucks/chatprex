@@ -4,81 +4,123 @@
 
 @layer base {
   :root {
-    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-heading: 'Plus Jakarta Sans', var(--font-main);
+    --font-main: 'Inter', sans-serif;
+    --primary: 22 73 255;
+    --primary-foreground: 255 255 255;
+    --surface: 255 255 255;
+    --surface-dim: 248 250 252;
+    --border: 226 232 240;
+    --text-main: 30 41 59;
+    --text-muted: 100 116 139;
+  }
+
+  .dark {
+    --surface: 24 22 25;
+    --surface-dim: 18 16 19;
+    --border: 51 51 51;
+    --text-main: 248 250 252;
+    --text-muted: 156 163 175;
   }
 
   body {
-    @apply bg-surface-dim text-slate-800 antialiased;
     font-family: var(--font-main);
+    @apply bg-surface-dim text-slate-800 antialiased;
     letter-spacing: -0.01em;
-    line-height: 1.4;
+    line-height: 1.5;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
-    letter-spacing: -0.02em;
+  /* SISTEMA TIPOGRÁFICO GLOBAL */
+  
+  h1, .h1 {
+    @apply font-black tracking-tighter text-slate-900 dark:text-white;
+    font-size: 28px;
+    line-height: 36px;
+  }
+  @screen lg {
+    h1, .h1 {
+      font-size: 32px;
+      line-height: 40px;
+    }
+  }
+
+  h2, .h2 {
+    @apply font-black tracking-tight text-slate-800 dark:text-slate-100;
+    font-size: 22px;
+    line-height: 30px;
+  }
+  @screen lg {
+    h2, .h2 {
+      font-size: 24px;
+      line-height: 32px;
+    }
+  }
+
+  h3, .h3 {
+    @apply font-bold tracking-tight text-slate-800 dark:text-slate-100;
+    font-size: 18px;
+    line-height: 24px;
+  }
+  @screen lg {
+    h3, .h3 {
+      font-size: 20px;
+      line-height: 28px;
+    }
+  }
+
+  p, .body-text {
+    @apply font-medium text-slate-500 dark:text-slate-400;
+    font-size: 14px;
+    line-height: 22px;
+  }
+  @screen lg {
+    p, .body-text {
+      font-size: 15px;
+      line-height: 24px;
+    }
+  }
+
+  .label-text, .small-text {
+    @apply font-black text-slate-500 uppercase tracking-widest opacity-60;
+    font-size: 10px;
+    line-height: 16px;
+  }
+
+  /* Resetting case rule globally for specific content classes if needed */
+  .sentence-case {
+    text-transform: none !important;
+  }
+  .sentence-case::first-letter {
+    text-transform: uppercase !important;
   }
 }
-
-/* --- DARK MODE OVERRIDES --- */
-.dark .bg-white, .dark [class*="bg-white/"], .dark .glass-panel { background-color: #1e1e1e !important; }
-.dark .bg-slate-50, .dark [class*="bg-slate-50/"], .dark .bg-slate-100, .dark [class*="bg-slate-100/"] { background-color: #1e1e1e !important; }
-.dark .text-slate-800, .dark .text-slate-900, .dark .text-slate-700 { color: #f8fafc !important; }
-.dark .text-slate-600, .dark .text-slate-500, .dark .text-slate-400 { color: #9ca3af !important; }
-.dark .border-slate-200, .dark .border-slate-100, .dark .glass-panel { border-color: #333333 !important; }
-.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #333333 !important; }
-.dark .bg-surface-dim { background-color: transparent !important; }
-
-/* Tinted Backgrounds for Icons/Badges in Dark Mode */
-.dark .bg-blue-50, .dark [class*="bg-blue-50/"] { background-color: rgba(59, 130, 246, 0.15) !important; }
-.dark .bg-amber-50, .dark [class*="bg-amber-50/"] { background-color: rgba(245, 158, 11, 0.15) !important; }
-.dark .bg-emerald-50, .dark [class*="bg-emerald-50/"] { background-color: rgba(16, 185, 129, 0.15) !important; }
-.dark .bg-purple-50, .dark [class*="bg-purple-50/"] { background-color: rgba(168, 85, 247, 0.15) !important; }
-.dark .bg-rose-50, .dark [class*="bg-rose-50/"] { background-color: rgba(244, 63, 94, 0.15) !important; }
-.dark .bg-primary\/10 { background-color: rgba(22, 73, 255, 0.15) !important; }
-
-/* WhatsApp Simulator Overrides */
-.dark [class*="bg-[#e5ddd5]"] { background-color: #0b141a !important; background-blend-mode: overlay; }
-.dark [class*="bg-[#d9fdd3]"] { background-color: #005c4b !important; }
-.dark [class*="text-[#111b21]"] { color: #e9edef !important; }
-
-/* Form Elements */
-.dark input, .dark textarea, .dark select {
-  background-color: #1e1e1e !important;
-  color: #f8fafc !important;
-  border-color: #333333 !important;
-}
-.dark input::placeholder, .dark textarea::placeholder {
-  color: #6b7280 !important;
-}
-
-/* Modern Dark Mode Background */
-.dark body {
-  background-color: #181619;
-  background-image: none;
-}
-
 
 @layer components {
   .glass-panel {
-    @apply bg-white/90 backdrop-blur-md border border-white/20 shadow-sm;
+    @apply bg-white/90 dark:bg-[#1E1E1E]/90 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 shadow-2xl rounded-3xl;
   }
   
-  .message-bubble {
-    @apply px-4 py-2 rounded-2xl max-w-[85%] text-sm shadow-sm;
+  .card-premium {
+    @apply bg-white dark:bg-[#1E1E1E] border border-slate-200/50 dark:border-white/5 rounded-[32px] shadow-sm transition-all duration-300;
   }
-  .message-bubble-in {
-    @apply bg-white text-slate-800 rounded-tl-none;
+  .card-premium:hover {
+    @apply shadow-2xl shadow-slate-200/50 dark:shadow-black/50 border-primary/20;
   }
-  .message-bubble-out {
-    /* Fondo más suave (40% de opacidad) para el chat saliente */
-    @apply bg-primary/40 text-slate-900 rounded-tr-none border border-primary/10;
+
+  .input-premium {
+    @apply w-full p-4 rounded-2xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-[#0F0F0F] focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-medium;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white px-8 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 shadow-2xl shadow-primary/30 hover:brightness-110 hover:shadow-primary/40;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-8 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 hover:bg-slate-200 dark:hover:bg-slate-700;
   }
 }
 
-/* Scrollbar personalizada */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -87,8 +129,18 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary/40 rounded-full;
+  @apply bg-slate-200 dark:bg-slate-800 rounded-full transition-colors;
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary/70;
+  @apply bg-slate-300 dark:bg-slate-700;
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
 }

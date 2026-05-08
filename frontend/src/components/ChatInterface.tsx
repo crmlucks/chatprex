@@ -37,7 +37,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const [chats, setChats] = useState<{ [id: string]: Chat }>({});
   const [useN8n, setUseN8n] = useState(false);
   
-  // Respuestas Rápidas
+  // Quick Replies
   const [showQuickReplies, setShowQuickReplies] = useState(false);
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
   const [editingReply, setEditingReply] = useState<QuickReply | null>(null);
@@ -79,12 +79,12 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     }
   };
 
-  // Auto-scroll al fondo cuando hay mensajes nuevos
+  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chats, activeChat]);
 
-  // Conexión WebSockets para recibir mensajes en tiempo real
+  // WebSocket connection
   useEffect(() => {
     const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
     console.log(`[Socket] Conectando a ${socketUrl}...`);
@@ -126,7 +126,6 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
             ...existingChat,
             lastMessage: data.text,
             time: newMsg.time,
-            // Si no estamos en el chat actual, aumentamos los no leídos
             unread: activeChat === chatId ? 0 : existingChat.unread + 1,
             messages: [...existingChat.messages, newMsg]
           }
@@ -137,9 +136,9 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     return () => {
       newSocket.disconnect();
     };
-  }, []); // <-- Removido activeChat de aquí para evitar reconexiones constantes
+  }, []);
 
-  // Cargar la lista inicial de todos los chats al abrir la página
+  // Load initial chats
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -158,7 +157,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           
           setChats(prev => ({
             ...chatsObj,
-            ...prev // Preservar si llegaron mensajes por socket antes de que cargara
+            ...prev
           }));
         }
       } catch (err) {
@@ -169,11 +168,10 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     fetchChats();
   }, []);
 
-  // Cargar historial de mensajes al seleccionar un chat
+  // Load history
   useEffect(() => {
     if (!activeChat) return;
     
-    // Solo cargar si no hay mensajes (para evitar sobrescribir mensajes nuevos si ya están en memoria)
     if (chats[activeChat]?.messages?.length > 0) return;
 
     const fetchHistory = async () => {
@@ -233,7 +231,6 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const handleSendMessage = () => {
     if ((!inputText.trim() && !mediaBase64) || !activeChat || !socket) return;
     
-    // Enviar al Backend
     socket.emit('send-message', {
       to: activeChat,
       text: inputText,
@@ -241,7 +238,6 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       fileName: selectedFile?.name
     });
 
-    // Agregar a la UI inmediatamente
     const newMsg: ChatMessage = {
       id: Date.now().toString(),
       fromMe: true,
@@ -255,7 +251,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       ...prev,
       [activeChat]: {
         ...prev[activeChat],
-        lastMessage: inputText || '[Archivo Multimedia]',
+        lastMessage: inputText || '[Archivo multimedia]',
         time: newMsg.time,
         messages: [...prev[activeChat].messages, newMsg]
       }
@@ -274,7 +270,6 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
   const handleSelectChat = (id: string) => {
     setActiveChat(id);
-    // Limpiar unreads
     setChats(prev => ({
       ...prev,
       [id]: { ...prev[id], unread: 0 }
@@ -291,7 +286,6 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     setInputText(parsedText);
     if (reply.media) {
       setMediaBase64(reply.media);
-      // Construct a fake File object so the UI shows an attachment name
       if (reply.mimeType) {
         const fakeFile = new File([new Blob()], reply.fileName || 'archivo_adjunto', { type: reply.mimeType });
         setSelectedFile(fakeFile);
@@ -344,42 +338,48 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
   const activeChatData = activeChat ? chats[activeChat] : null;
   const chatList = Object.values(chats).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  const dc = isDarkMode;
 
   return (
-    <div className={`flex flex-1 h-[calc(100vh-4rem)] md:h-full overflow-hidden transition-colors ${isDarkMode ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
+    <div className={`flex flex-1 h-[calc(100vh-4rem)] md:h-full overflow-hidden transition-colors ${dc ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
       
-      {/* 1. Panel Izquierdo: Lista de Chats (WhatsApp Style) */}
-      <div className={`${activeChat ? 'hidden lg:flex' : 'flex'} w-full md:w-80 lg:w-96 border-r flex-col shadow-sm z-20 h-full transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
-        <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 border-b transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
-          <div className="flex items-center gap-2">
-            <h2 className={`font-bold text-[18px] md:text-[20px] ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Mensajes</h2>
-            <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">Live</span>
+      {/* 1. Sidebar: Chat List */}
+      <div className={`${activeChat ? 'hidden lg:flex' : 'flex'} w-full md:w-80 lg:w-96 border-r flex-col z-20 h-full transition-colors ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+        <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b transition-colors ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-50'}`}>
+          <div className="flex items-center gap-3">
+            <h2 className="h3">Mensajes</h2>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">
+               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+               <span className="text-[10px] font-bold uppercase tracking-wider">Live</span>
+            </div>
           </div>
-          <div className={`flex gap-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-            <button className={`p-2 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><Filter size={18} /></button>
-            <button className={`p-2 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><Plus size={18} /></button>
+          <div className={`flex gap-1 ${dc ? 'text-slate-400' : 'text-slate-500'}`}>
+            <button className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><Filter size={18} /></button>
+            <button className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}><Plus size={18} /></button>
           </div>
         </div>
 
         <div className="p-4 flex-shrink-0">
           <div className="relative group">
-            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${isDarkMode ? 'text-slate-500 group-focus-within:text-primary' : 'text-slate-400 group-focus-within:text-primary'}`} size={16} />
+            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${dc ? 'text-slate-500 group-focus-within:text-primary' : 'text-slate-400 group-focus-within:text-primary'}`} size={16} />
             <input 
               type="text" 
               placeholder="Buscar conversación..." 
-              className={`w-full pl-10 pr-4 py-2.5 border rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'}`}
+              className={`w-full pl-11 pr-4 py-3 border rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all ${dc ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-600 focus:border-primary' : 'bg-slate-50 border-slate-100 text-slate-800 placeholder-slate-400 focus:border-primary focus:bg-white'}`}
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-transparent">
+        <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-transparent p-2 space-y-1">
           {chatList.length === 0 ? (
-            <div className={`p-8 text-center mt-10 animate-pulse ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
-              <div className="w-16 h-16 bg-slate-200 dark:bg-slate-800 rounded-full mx-auto mb-4 flex items-center justify-center opacity-20">
+            <div className={`p-12 text-center mt-10 space-y-4 ${dc ? 'text-slate-600' : 'text-slate-400'}`}>
+              <div className={`w-20 h-20 rounded-full mx-auto flex items-center justify-center opacity-20 ${dc ? 'bg-slate-800' : 'bg-slate-100'}`}>
                  <MessageSquare size={32} />
               </div>
-              <p className="text-sm font-bold">Esperando mensajes...</p>
-              <p className="text-[10px] mt-2 uppercase tracking-widest opacity-60">Escanea el QR en Conexiones para activar</p>
+              <div>
+                <p className="text-sm font-bold">Esperando mensajes...</p>
+                <p className="body-text text-xs mt-2 uppercase tracking-widest opacity-60">Sincroniza WhatsApp para comenzar</p>
+              </div>
             </div>
           ) : (
             chatList.map(chat => (
@@ -391,7 +391,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                 unread={chat.unread} 
                 active={activeChat === chat.id} 
                 status={chat.status} 
-                isDarkMode={isDarkMode}
+                isDarkMode={dc}
                 onClick={() => handleSelectChat(chat.id)} 
               />
             ))
@@ -399,83 +399,87 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         </div>
       </div>
 
-      {/* 2. Panel Central: Conversación (Modern Layout) */}
-      <div className={`${activeChat ? 'flex' : 'hidden md:flex'} flex-1 flex-col relative h-full transition-colors ${isDarkMode ? 'bg-[#151316]' : 'bg-[#f0f2f5]'}`}>
+      {/* 2. Main Area: Conversation */}
+      <div className={`${activeChat ? 'flex' : 'hidden md:flex'} flex-1 flex-col relative h-full transition-colors ${dc ? 'bg-[#0f0f0f]' : 'bg-[#f0f2f5]'}`}>
         {activeChatData ? (
           <>
-            {/* Header Conversación */}
-            <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 md:px-6 backdrop-blur-md border-b z-30 transition-colors ${isDarkMode ? 'bg-[#1E1E1E]/90 border-slate-800' : 'bg-white/90 border-slate-200'}`}>
-              <div className="flex items-center gap-3 overflow-hidden">
-                <button onClick={() => setActiveChat(null)} className={`lg:hidden p-2 -ml-2 rounded-full transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-100'}`}>
+            {/* Header */}
+            <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 backdrop-blur-md border-b z-30 transition-colors ${dc ? 'bg-[#1E1E1E]/90 border-slate-800' : 'bg-white/90 border-slate-100'}`}>
+              <div className="flex items-center gap-4 overflow-hidden">
+                <button onClick={() => setActiveChat(null)} className={`lg:hidden p-2 -ml-2 rounded-full transition-colors ${dc ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-100'}`}>
                   <ArrowLeft size={20} />
                 </button>
-                <div className="relative">
-                  <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-10 h-10 rounded-full object-cover shadow-sm border ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`} />
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-[#1E1E1E] rounded-full"></div>
+                <div className="relative group cursor-pointer">
+                  <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-10 h-10 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-slate-700' : 'border-slate-100'}`} />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-[#1E1E1E] rounded-full"></div>
                 </div>
                 <div className="truncate">
-                  <h3 className={`font-bold text-[14px] md:text-[15px] truncate ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                  <h3 className={`text-sm font-bold truncate tracking-tight ${dc ? 'text-slate-100' : 'text-slate-800'}`}>
                     {activeChatData.name}
                   </h3>
-                  <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">En línea</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">En línea</span>
+                    <span className="text-slate-400 text-[10px]">•</span>
+                    <span className="text-slate-400 text-[10px] truncate">{activeChatData.id.split('@')[0]}</span>
+                  </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-1 md:gap-2">
-                <div className={`hidden sm:flex items-center p-1 rounded-xl transition-colors ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                   <button onClick={() => toggleN8nMode(false)} className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${!useN8n ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>Bot Local</button>
-                   <button onClick={() => toggleN8nMode(true)} className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${useN8n ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>Bot n8n</button>
+              <div className="flex items-center gap-2">
+                <div className={`hidden sm:flex items-center p-1 rounded-xl transition-colors ${dc ? 'bg-slate-800/50' : 'bg-slate-100'}`}>
+                   <button onClick={() => toggleN8nMode(false)} className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${!useN8n ? 'bg-primary text-white shadow-lg' : 'text-slate-500 hover:text-slate-400'}`}>Bot local</button>
+                   <button onClick={() => toggleN8nMode(true)} className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${useN8n ? 'bg-primary text-white shadow-lg' : 'text-slate-500 hover:text-slate-400'}`}>Bot n8n</button>
                 </div>
                 <div className="w-px h-6 mx-2 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
-                <button className={`p-2.5 rounded-xl text-primary transition-all active:scale-90 hover:bg-primary/10`}><Phone size={18} /></button>
+                <button className="p-2.5 rounded-xl text-primary transition-all active:scale-90 hover:bg-primary/10"><Phone size={18} /></button>
                 <button 
                   onClick={() => setShowQuickReplies(!showQuickReplies)}
                   className={`p-2.5 rounded-xl transition-all active:scale-90 lg:hidden ${showQuickReplies ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'text-amber-500 bg-amber-500/10'}`}
                 >
                   <Zap size={18} />
                 </button>
-                <button className={`p-2.5 rounded-xl transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}><MoreVertical size={18} /></button>
+                <button className={`p-2.5 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}><MoreVertical size={18} /></button>
               </div>
             </div>
 
             {/* Messages Area */}
-            <div className={`flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scrollbar transition-all ${isDarkMode ? 'bg-[#0b0a0b]' : 'bg-[#e5ddd5]'}`}
-                 style={!isDarkMode ? { backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")', backgroundAlpha: 0.1, backgroundSize: '400px' } : {}}>
-              <div className="flex justify-center mb-4">
-                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${isDarkMode ? 'bg-slate-800/80 text-slate-400' : 'bg-white/80 text-slate-500'}`}>Hoy</span>
+            <div className={`flex-1 overflow-y-auto p-6 flex flex-col gap-4 custom-scrollbar transition-all ${dc ? 'bg-[#0f0f0f]' : 'bg-[#efeae2]'}`}
+                 style={!dc ? { backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")', backgroundSize: '400px', opacity: 0.8 } : {}}>
+              <div className="flex justify-center mb-6">
+                <span className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${dc ? 'bg-slate-800/80 text-slate-400' : 'bg-white/80 text-slate-500'}`}>Hoy</span>
               </div>
               {activeChatData.messages.map(msg => (
-                <Message key={msg.id} type={msg.fromMe ? 'out' : 'in'} text={msg.text} time={msg.time} media={msg.media} mimeType={msg.mimeType} isDarkMode={isDarkMode} />
+                <Message key={msg.id} type={msg.fromMe ? 'out' : 'in'} text={msg.text} time={msg.time} media={msg.media} mimeType={msg.mimeType} isDarkMode={dc} />
               ))}
               <div ref={messagesEndRef} />
             </div>
 
             {/* File Preview */}
             {(selectedFile || mediaBase64) && (
-              <div className={`px-4 py-3 flex items-center justify-between border-t border-primary/20 animate-in slide-in-from-bottom duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-slate-50'}`}>
-                <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Paperclip size={18} /></div>
-                   <div className="max-w-[200px]">
-                      <p className={`text-xs font-bold truncate ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{selectedFile?.name || 'Archivo adjunto'}</p>
-                      <p className="text-[10px] text-slate-500">Listo para enviar</p>
+              <div className={`px-6 py-4 flex items-center justify-between border-t animate-in slide-in-from-bottom duration-300 ${dc ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-inner"><Paperclip size={20} /></div>
+                   <div className="max-w-md">
+                      <p className={`text-sm font-bold truncate ${dc ? 'text-white' : 'text-slate-800'}`}>{selectedFile?.name || 'Archivo adjunto'}</p>
+                      <p className="body-text text-[10px] uppercase tracking-widest mt-0.5">Listo para enviar</p>
                    </div>
                 </div>
-                <button onClick={() => { setSelectedFile(null); setMediaBase64(null); }} className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all">
-                  <X size={16} />
+                <button onClick={() => { setSelectedFile(null); setMediaBase64(null); }} className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-90">
+                  <X size={20} />
                 </button>
               </div>
             )}
 
             {/* Input Area */}
-            <div className={`p-4 border-t z-30 transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
-              <div className={`flex items-center gap-2 p-1.5 rounded-2xl border transition-all ${isDarkMode ? 'bg-slate-900 border-slate-700 focus-within:border-primary/50' : 'bg-slate-50 border-slate-200 focus-within:border-primary/50'}`}>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-2.5 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-white bg-amber-500 shadow-md' : (isDarkMode ? 'text-slate-500 hover:text-amber-500 hover:bg-amber-500/10' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-500/10')}`}>
-                    <Zap size={20} />
+            <div className={`p-6 border-t z-30 transition-colors ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100 shadow-[0_-4px_12px_rgba(0,0,0,0.02)]'}`}>
+              <div className={`flex items-center gap-3 p-2 rounded-2xl border transition-all ${dc ? 'bg-slate-900 border-slate-700 focus-within:border-primary/50' : 'bg-slate-50 border-slate-100 focus-within:border-primary/50 focus-within:bg-white shadow-inner focus-within:shadow-none'}`}>
+                <div className="flex items-center gap-1 pl-1">
+                  <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-3 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-white bg-amber-500 shadow-lg' : (dc ? 'text-slate-500 hover:text-amber-500 hover:bg-amber-500/10' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-500/10')}`}>
+                    <Zap size={22} />
                   </button>
                   <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-                  <button onClick={() => fileInputRef.current?.click()} className={`p-2.5 rounded-xl transition-all active:scale-95 ${isDarkMode ? 'text-slate-500 hover:text-primary hover:bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}>
-                    <Paperclip size={20} />
+                  <button onClick={() => fileInputRef.current?.click()} className={`p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-slate-500 hover:text-primary hover:bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}>
+                    <Paperclip size={22} />
                   </button>
                 </div>
                 <textarea 
@@ -484,12 +488,12 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
                   placeholder="Escribe un mensaje..."
-                  className={`flex-1 bg-transparent py-2 px-1 text-sm focus:outline-none resize-none max-h-32 custom-scrollbar ${isDarkMode ? 'text-white placeholder-slate-600' : 'text-slate-800 placeholder-slate-400'}`}
+                  className={`flex-1 bg-transparent py-3 px-1 text-sm font-medium focus:outline-none resize-none max-h-32 custom-scrollbar ${dc ? 'text-white placeholder-slate-600' : 'text-slate-800 placeholder-slate-400'}`}
                 />
-                <div className="flex items-center gap-1 px-1">
-                   <button className={`p-2.5 rounded-xl transition-all active:scale-95 ${isDarkMode ? 'text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10' : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-500/10'}`}><Smile size={20} /></button>
-                   <button onClick={handleSendMessage} className="bg-primary text-white p-3 rounded-xl transition-all active:scale-95 hover:bg-primary-dark shadow-lg shadow-primary/20 flex items-center justify-center">
-                     <Send size={18} />
+                <div className="flex items-center gap-2 pr-1">
+                   <button className={`p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10' : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-500/10'}`}><Smile size={22} /></button>
+                   <button onClick={handleSendMessage} className="bg-primary text-white p-4 rounded-2xl transition-all active:scale-90 hover:bg-primary-dark shadow-xl shadow-primary/30 flex items-center justify-center">
+                     <Send size={20} />
                    </button>
                 </div>
               </div>
@@ -497,122 +501,122 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-1000">
-            <div className={`w-32 h-32 rounded-3xl flex items-center justify-center shadow-2xl mb-8 transition-all rotate-3 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-100'}`}>
+            <div className={`w-32 h-32 rounded-[40px] flex items-center justify-center shadow-2xl mb-10 transition-all rotate-3 ${dc ? 'bg-slate-800/50 border border-slate-700' : 'bg-white border border-slate-100'}`}>
               <MessageSquare size={64} className="text-primary opacity-20" />
             </div>
-            <h2 className={`text-2xl font-black mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>ChatPrex Conversaciones</h2>
-            <p className={`max-w-xs text-sm font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>
-              Gestiona todos tus leads de WhatsApp en un solo lugar. Selecciona un chat para comenzar.
+            <h2 className="h1 mb-4">ChatPrex mensajes</h2>
+            <p className="body-text max-w-sm mx-auto">
+              Gestiona todos tus leads de WhatsApp en un solo lugar. Selecciona un chat para comenzar la comunicación.
             </p>
-            <div className="mt-10 flex gap-4">
-               <div className="flex flex-col items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center"><Zap size={20} /></div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">IA Activa</p>
+            <div className="mt-12 flex gap-8">
+               <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shadow-inner"><Zap size={24} /></div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">IA Activa</p>
                </div>
-               <div className="flex flex-col items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center"><CheckCircle2 size={20} /></div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Multicanal</p>
+               <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shadow-inner"><CheckCircle2 size={24} /></div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Multicanal</p>
                </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* 3. Panel Derecho: Respuestas Rápidas & Contexto (Desktop Sidebar) */}
-      <div className={`${showQuickReplies ? 'flex' : 'hidden'} lg:flex w-full md:w-80 lg:w-96 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
-        <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
-          <div className="flex items-center gap-2 text-amber-500">
-             <Zap size={20} />
-             <h2 className={`font-bold text-[16px] ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Respuestas</h2>
+      {/* 3. Right Sidebar: Quick Replies */}
+      <div className={`${showQuickReplies ? 'flex' : 'hidden'} lg:flex w-full md:w-80 lg:w-96 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+        <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b transition-colors ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-50'}`}>
+          <div className="flex items-center gap-3 text-amber-500">
+             <Zap size={20} fill="currentColor" />
+             <h2 className="h3">Respuestas</h2>
           </div>
           <button 
             onClick={() => { setReplyForm({}); setShowReplyForm(true); }}
-            className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
+            className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center hover:bg-primary-dark transition-all active:scale-90 shadow-lg shadow-primary/20"
           >
-            <Plus size={18} />
+            <Plus size={20} />
           </button>
         </div>
 
         {showReplyForm ? (
-          <div className="flex-1 flex flex-col p-6 overflow-y-auto custom-scrollbar space-y-5 animate-in fade-in duration-300">
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Título de la respuesta</label>
+          <div className="flex-1 flex flex-col p-8 overflow-y-auto custom-scrollbar space-y-8 animate-in fade-in duration-300">
+            <div className="space-y-3">
+              <label className="label-text ml-1">Título de la respuesta</label>
               <input 
                 type="text" 
-                placeholder="Ej: Bienvenida General" 
-                className={`w-full p-3 text-sm rounded-xl border focus:ring-2 focus:ring-primary/20 outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} 
+                placeholder="Ej: Bienvenida general" 
+                className={`w-full p-4 text-sm font-bold rounded-2xl border focus:ring-4 focus:ring-primary/10 outline-none transition-all ${dc ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-100 text-slate-800 shadow-inner'}`} 
                 value={replyForm.title || ''} 
                 onChange={e => setReplyForm({...replyForm, title: e.target.value})} 
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Contenido del mensaje</label>
+            <div className="space-y-3">
+              <label className="label-text ml-1">Contenido del mensaje</label>
               <textarea 
                 rows={8} 
-                placeholder="Escribe el mensaje..." 
-                className={`w-full p-3 text-sm rounded-xl border focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} 
+                placeholder="Escribe el mensaje aquí..." 
+                className={`w-full p-6 text-sm font-medium rounded-3xl border focus:ring-4 focus:ring-primary/10 outline-none transition-all resize-none leading-relaxed ${dc ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-700 shadow-inner'}`} 
                 value={replyForm.text || ''} 
                 onChange={e => setReplyForm({...replyForm, text: e.target.value})} 
               />
-              <p className="text-[10px] text-slate-500 font-medium italic">Puedes usar {"{{nombre}}"} para personalizar.</p>
+              <p className="body-text text-[10px] italic">Usa {"{{nombre}}"} para personalizar automáticamente.</p>
             </div>
             
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Archivo Adjunto</label>
-              <label className={`flex items-center gap-3 p-3 rounded-xl border border-dashed cursor-pointer transition-all hover:bg-primary/5 ${isDarkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-white'}`}>
-                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><Paperclip size={18} /></div>
+            <div className="space-y-3">
+              <label className="label-text ml-1">Archivo adjunto</label>
+              <label className={`flex items-center gap-4 p-5 rounded-3xl border-2 border-dashed cursor-pointer transition-all hover:bg-primary/5 ${dc ? 'border-slate-800 bg-slate-800/50 hover:border-primary/50' : 'border-slate-100 bg-slate-50 hover:border-primary/30'}`}>
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-inner"><Paperclip size={20} /></div>
                 <div className="flex-1 overflow-hidden">
-                   <p className="text-xs font-bold truncate">{replyForm.fileName || 'Seleccionar archivo'}</p>
-                   <p className="text-[10px] text-slate-500">Imagen, PDF o Video</p>
+                   <p className={`text-xs font-bold truncate ${dc ? 'text-slate-100' : 'text-slate-800'}`}>{replyForm.fileName || 'Seleccionar archivo'}</p>
+                   <p className="text-[10px] text-slate-500 font-medium">Imagen, PDF o video</p>
                 </div>
                 <input type="file" className="hidden" onChange={handleReplyFileChange} />
               </label>
             </div>
 
-            <div className="pt-4 flex gap-3 mt-auto">
-              <button onClick={() => setShowReplyForm(false)} className={`flex-1 py-3 text-xs rounded-xl font-bold transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Cancelar</button>
-              <button onClick={handleSaveReplyForm} className="flex-1 py-3 text-xs rounded-xl font-bold bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">Guardar</button>
+            <div className="pt-6 flex gap-4 mt-auto">
+              <button onClick={() => setShowReplyForm(false)} className={`flex-1 py-4 text-xs rounded-2xl font-bold transition-all active:scale-95 ${dc ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 shadow-sm'}`}>Cancelar</button>
+              <button onClick={handleSaveReplyForm} className="flex-1 py-4 text-xs rounded-2xl font-bold bg-primary text-white hover:bg-primary-dark transition-all active:scale-95 shadow-xl shadow-primary/20">Guardar</button>
             </div>
           </div>
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="p-4 border-b transition-colors bg-slate-50/50 dark:bg-slate-900/30">
-               <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                  <input type="text" placeholder="Buscar respuesta..." className={`w-full pl-9 pr-4 py-2 text-xs border rounded-xl outline-none ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`} />
+            <div className="p-5 border-b transition-colors bg-slate-50/50 dark:bg-slate-900/30">
+               <div className="relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={14} />
+                  <input type="text" placeholder="Buscar respuesta..." className={`w-full pl-10 pr-4 py-3 text-xs font-bold border rounded-2xl outline-none transition-all ${dc ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-white border-slate-100 focus:border-primary focus:bg-white shadow-sm'}`} />
                </div>
             </div>
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4">
               {quickReplies.length === 0 ? (
-                <div className="text-center py-10 opacity-30">
-                   <Zap size={48} className="mx-auto mb-4" />
-                   <p className="text-xs font-bold uppercase tracking-widest">Sin respuestas rápidas</p>
+                <div className="text-center py-20 opacity-20 space-y-4">
+                   <Zap size={64} className="mx-auto" />
+                   <p className="text-xs font-bold uppercase tracking-[2px]">Sin respuestas</p>
                 </div>
               ) : (
                 quickReplies.map(reply => (
-                  <div key={reply.id} className={`p-4 rounded-2xl border transition-all cursor-pointer group animate-in slide-in-from-right duration-300 ${isDarkMode ? 'bg-[#252525] border-slate-800 hover:border-primary/50' : 'bg-white border-slate-100 hover:border-primary/30 shadow-sm'}`}>
-                    <div className="flex justify-between items-start mb-2">
+                  <div key={reply.id} className={`p-6 rounded-3xl border transition-all cursor-pointer group animate-in slide-in-from-right duration-300 ${dc ? 'bg-[#252525] border-slate-800 hover:border-primary/50' : 'bg-white border-slate-50 hover:border-primary/30 shadow-sm hover:shadow-lg'}`}>
+                    <div className="flex justify-between items-start mb-3">
                       <div onClick={() => handleSelectQuickReply(reply)} className="flex-1">
-                        <h4 className={`font-bold text-[13px] mb-1 group-hover:text-primary transition-colors ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{reply.title}</h4>
+                        <h4 className={`text-sm font-bold mb-1 group-hover:text-primary transition-colors tracking-tight ${dc ? 'text-slate-100' : 'text-slate-800'}`}>{reply.title}</h4>
                       </div>
                       <div className="flex gap-1">
-                        <button onClick={(e) => { e.stopPropagation(); setReplyForm(reply); setShowReplyForm(true); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-500' : 'hover:bg-slate-100 text-slate-400'}`}><Edit2 size={12} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDeleteReply(reply.id); }} className={`p-1.5 rounded-lg hover:bg-rose-500/10 text-rose-500`}><Trash2 size={12} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); setReplyForm(reply); setShowReplyForm(true); }} className={`p-2 rounded-xl transition-all ${dc ? 'hover:bg-slate-700 text-slate-500 hover:text-white' : 'hover:bg-slate-100 text-slate-400 hover:text-primary'}`}><Edit2 size={14} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteReply(reply.id); }} className="p-2 rounded-xl hover:bg-rose-500/10 text-rose-500 transition-all"><Trash2 size={14} /></button>
                       </div>
                     </div>
-                    <p onClick={() => handleSelectQuickReply(reply)} className={`text-[11px] line-clamp-3 font-medium leading-relaxed ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>{reply.text}</p>
+                    <p onClick={() => handleSelectQuickReply(reply)} className={`body-text text-xs line-clamp-3 leading-relaxed ${dc ? 'text-slate-400' : 'text-slate-500'}`}>{reply.text}</p>
                     {reply.fileName && (
-                      <div className="mt-3 flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10 text-[10px] font-bold text-primary">
-                        <Paperclip size={10} /> {reply.fileName}
+                      <div className="mt-4 flex items-center gap-3 p-3 rounded-2xl bg-primary/5 border border-primary/10 text-[10px] font-bold text-primary shadow-sm">
+                        <Paperclip size={12} /> <span className="truncate">{reply.fileName}</span>
                       </div>
                     )}
                   </div>
                 ))
               )}
             </div>
-            <div className={`p-6 border-t text-center ${isDarkMode ? 'bg-slate-900/50' : 'bg-slate-50'}`}>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Truco Pro</p>
-                <p className="text-[11px] text-slate-500 font-medium italic">Presiona la tecla <span className="font-bold text-primary">/</span> en el chat para buscar rápido.</p>
+            <div className={`p-8 border-t text-center transition-colors ${dc ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50'}`}>
+                <p className="text-[10px] font-bold uppercase tracking-[2px] text-primary mb-2">Tip ChatPrex</p>
+                <p className="body-text text-[11px] italic">Usa el botón de rayo <span className="font-bold">/</span> para acceder rápido a tus plantillas guardadas.</p>
             </div>
           </div>
         )}
@@ -622,32 +626,34 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 };
 
 const ChatItem = ({ name, message, time, unread, active, status, onClick, isDarkMode }: any) => {
+  const dc = isDarkMode;
   const getStatusStyle = (s: string) => {
     const st = s.toLowerCase();
-    if (st.includes('nuevo')) return isDarkMode ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-100 text-blue-700';
-    if (st.includes('contactado')) return isDarkMode ? 'bg-sky-500/10 text-sky-400' : 'bg-sky-100 text-sky-700';
-    if (st.includes('cita')) return isDarkMode ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-100 text-amber-700';
-    if (st.includes('negociaci')) return isDarkMode ? 'bg-purple-500/10 text-purple-400' : 'bg-purple-100 text-purple-700';
-    if (st.includes('ganado') || st.includes('cierre')) return isDarkMode ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-100 text-emerald-700';
-    if (st.includes('perdido')) return isDarkMode ? 'bg-rose-500/10 text-rose-400' : 'bg-rose-100 text-rose-700';
-    return isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-700';
+    if (st.includes('nuevo')) return dc ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-700';
+    if (st.includes('contactado')) return dc ? 'bg-sky-500/10 text-sky-400' : 'bg-sky-50 text-sky-700';
+    if (st.includes('cita')) return dc ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-50 text-amber-700';
+    if (st.includes('negociaci')) return dc ? 'bg-purple-500/10 text-purple-400' : 'bg-purple-50 text-purple-700';
+    if (st.includes('ganado') || st.includes('cierre')) return dc ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-700';
+    if (st.includes('perdido')) return dc ? 'bg-rose-500/10 text-rose-400' : 'bg-rose-50 text-rose-700';
+    return dc ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600';
   };
 
   return (
-    <div onClick={onClick} className={`flex items-center gap-3 p-4 cursor-pointer border-b transition-all active:scale-[0.98] ${isDarkMode ? 'border-slate-800/50' : 'border-slate-50'} ${active ? (isDarkMode ? 'bg-primary/10 border-l-4 border-l-primary shadow-inner' : 'bg-primary/5 border-l-4 border-l-primary') : (isDarkMode ? 'hover:bg-white/5 border-l-4 border-l-transparent' : 'hover:bg-slate-50 border-l-4 border-l-transparent')}`}>
+    <div onClick={onClick} className={`flex items-center gap-4 p-4 cursor-pointer rounded-2xl transition-all active:scale-[0.98] relative group ${active ? (dc ? 'bg-primary/10 shadow-inner' : 'bg-primary/5') : (dc ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50')}`}>
+      {active && <div className="absolute left-0 top-4 bottom-4 w-1 bg-primary rounded-r-full"></div>}
       <div className="relative shrink-0">
-        <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-12 h-12 rounded-full object-cover shadow-sm border ${isDarkMode ? 'border-slate-700' : 'border-white'}`} />
-        {unread > 0 && <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full border-2 text-white text-[10px] font-bold flex items-center justify-center shadow-lg transition-colors border-white">{unread}</div>}
+        <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-14 h-14 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-slate-700' : 'border-white'}`} />
+        {unread > 0 && <div className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-rose-500 rounded-full border-2 text-white text-[10px] font-black flex items-center justify-center shadow-lg animate-bounce border-white dark:border-slate-900">{unread}</div>}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-center mb-1">
-          <h4 className={`font-semibold text-[13px] truncate ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>{name}</h4>
-          <span className={`text-[11px] whitespace-nowrap font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>{time}</span>
+          <h4 className={`text-sm font-bold truncate tracking-tight ${dc ? 'text-slate-100' : 'text-slate-800'}`}>{name}</h4>
+          <span className={`text-[10px] whitespace-nowrap font-bold uppercase tracking-tight ${dc ? 'text-slate-500' : 'text-slate-400'}`}>{time}</span>
         </div>
-        <p className={`text-[12px] truncate mb-1.5 font-normal ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>{message}</p>
+        <p className={`text-xs truncate mb-2 font-medium ${dc ? 'text-slate-500' : 'text-slate-500'}`}>{message}</p>
         <div className="flex items-center">
-          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md lowercase tracking-wider ${getStatusStyle(status || '')}`}>
-            {status || 'sin estado'}
+          <span className={`text-[9px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm ${getStatusStyle(status || '')}`}>
+            {status || 'Sin estado'}
           </span>
         </div>
       </div>
@@ -656,28 +662,29 @@ const ChatItem = ({ name, message, time, unread, active, status, onClick, isDark
 };
 
 const Message = ({ type, text, time, media, mimeType, isDarkMode }: any) => {
+  const dc = isDarkMode;
   const isOut = type === 'out';
   return (
     <div className={`flex flex-col ${isOut ? 'items-end' : 'items-start'} group animate-in slide-in-from-bottom-2 duration-300`}>
-      <div className={`message-bubble ${isOut ? (isDarkMode ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'message-bubble-out') : (isDarkMode ? 'bg-[#1E1E1E] text-slate-200 border border-slate-800 shadow-sm' : 'message-bubble-in')} relative max-w-[85%] rounded-2xl p-3`}>
+      <div className={`relative max-w-[85%] rounded-[24px] p-4 shadow-xl transition-all hover:shadow-2xl ${isOut ? (dc ? 'bg-primary text-white rounded-tr-none' : 'bg-primary text-white rounded-tr-none') : (dc ? 'bg-[#1E1E1E] text-slate-100 border border-slate-800 rounded-tl-none' : 'bg-white text-slate-800 rounded-tl-none')}`}>
         {media && mimeType?.startsWith('image/') && (
-          <img src={media} className="max-w-[200px] sm:max-w-xs rounded-xl mb-2 cursor-pointer hover:opacity-90 transition-opacity border border-white/10 shadow-lg" alt="Media" />
+          <img src={media} className="max-w-full sm:max-w-xs rounded-2xl mb-3 cursor-pointer hover:opacity-95 transition-opacity border border-white/10 shadow-lg" alt="Media" />
         )}
         {media && mimeType?.startsWith('video/') && (
-          <video src={media} controls className="max-w-[200px] sm:max-w-xs rounded-xl mb-2 shadow-lg" />
+          <video src={media} controls className="max-w-full sm:max-w-xs rounded-2xl mb-3 shadow-lg" />
         )}
         {media && mimeType?.startsWith('audio/') && (
-          <audio src={media} controls className="max-w-[200px] sm:max-w-xs mb-2 opacity-90" />
+          <audio src={media} controls className="max-w-full sm:max-w-xs mb-3 opacity-95 h-10" />
         )}
         {media && !mimeType?.startsWith('image/') && !mimeType?.startsWith('video/') && !mimeType?.startsWith('audio/') && (
-           <a href={media} download className={`flex items-center gap-2 p-3 rounded-xl mb-2 text-sm underline truncate transition-colors ${isDarkMode ? 'bg-white/5 hover:bg-white/10' : 'bg-black/5 hover:bg-black/10'}`}>
-             📁 Archivo adjunto
+           <a href={media} download className={`flex items-center gap-3 p-4 rounded-2xl mb-3 text-sm font-bold truncate transition-all ${dc ? 'bg-white/5 hover:bg-white/10' : 'bg-black/5 hover:bg-black/10'}`}>
+             <Paperclip size={18} /> Archivo adjunto
            </a>
         )}
-        {text && <p className="leading-relaxed text-[12px] md:text-[13px] font-normal">{text}</p>}
-        <div className={`flex items-center gap-1 mt-1 justify-end transition-colors ${isOut ? (isDarkMode ? 'text-white/60' : 'text-slate-600') : (isDarkMode ? 'text-slate-500' : 'text-slate-400')}`}>
-          <span className="text-[11px] font-medium tracking-tight">{time}</span>
-          {isOut && <CheckCircle2 size={12} className={isOut ? (isDarkMode ? 'text-white' : 'text-blue-500') : ''} />}
+        {text && <p className="text-[13px] font-medium leading-relaxed">{text}</p>}
+        <div className={`flex items-center gap-2 mt-2 justify-end transition-opacity opacity-70 group-hover:opacity-100 ${isOut ? 'text-white' : (dc ? 'text-slate-500' : 'text-slate-400')}`}>
+          <span className="text-[10px] font-bold tracking-widest">{time}</span>
+          {isOut && <CheckCircle2 size={14} className={dc ? 'text-white' : 'text-white'} />}
         </div>
       </div>
     </div>

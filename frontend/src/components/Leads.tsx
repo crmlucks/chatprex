@@ -33,14 +33,6 @@ const getStatusBadgeColor = (status: string) => {
   }
 };
 
-// Helper to generate a date/time X minutes from now (for demo alarms)
-const getTimeFromNow = (minutesFromNow: number) => {
-  const d = new Date(Date.now() + minutesFromNow * 60 * 1000);
-  const date = d.toISOString().split('T')[0];
-  const time = d.toTimeString().slice(0, 5);
-  return { date, time };
-};
-
 const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTab?: (tab: string) => void }) => {
   const [viewMode, setViewMode] = useState<'kanban'|'list'>(() => {
     return typeof window !== 'undefined' && window.innerWidth < 768 ? 'list' : 'kanban';
@@ -200,32 +192,37 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
     }
   };
 
+  const dc = isDarkMode;
+
   return (
-    <div className={`flex-1 flex flex-col h-[calc(100vh-4rem)] md:h-full pb-24 md:pb-0 ${isDarkMode ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
+    <div className={`flex-1 flex flex-col h-[calc(100vh-4rem)] md:h-full pb-24 md:pb-0 ${dc ? 'bg-[#121212]' : 'bg-surface-dim'}`}>
       <AlarmSystem items={alarmItems} onDismiss={unregisterAlarmItem} />
       
-      <div className={`h-20 border-b px-6 md:px-10 flex items-center justify-between shrink-0 transition-all ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
-        <div className="flex items-center gap-6">
+      <div className={`h-24 px-6 md:px-10 flex items-center justify-between shrink-0 transition-all ${dc ? 'bg-[#1E1E1E] border-b border-slate-800' : 'bg-white border-b border-slate-100 shadow-sm'}`}>
+        <div className="flex items-center gap-8">
           <div className="flex flex-col">
-            <h1 className={`text-xl font-black tracking-tight lowercase ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Leads e Interesados</h1>
-            <p className="text-[10px] font-black uppercase tracking-[2px] text-slate-500">gestión de prospectos</p>
+            <h1 className="h1">Leads</h1>
+            <p className="body-text mt-0.5">Gestión de prospectos e interesados</p>
           </div>
-          <div className={`flex p-1 rounded-xl transition-colors ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50 border border-slate-100'}`}>
-            <button onClick={() => setViewMode('kanban')} className={`p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (isDarkMode ? 'bg-primary text-white shadow-lg' : 'bg-primary text-white shadow-md') : 'text-slate-400 hover:text-slate-600'}`}><KanbanSquare size={16} /></button>
-            <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-primary text-white shadow-lg' : 'bg-primary text-white shadow-md') : 'text-slate-400 hover:text-slate-600'}`}><LayoutList size={16} /></button>
+          <div className={`flex p-1 rounded-xl ${dc ? 'bg-slate-900' : 'bg-slate-50 border border-slate-100 shadow-inner'}`}>
+            <button onClick={() => setViewMode('kanban')} className={`p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (dc ? 'bg-primary text-white shadow-lg' : 'bg-primary text-white shadow-md') : 'text-slate-400 hover:text-slate-600'}`}><KanbanSquare size={16} /></button>
+            <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (dc ? 'bg-primary text-white shadow-lg' : 'bg-primary text-white shadow-md') : 'text-slate-400 hover:text-slate-600'}`}><LayoutList size={16} /></button>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button className={`p-2.5 rounded-xl border transition-all active:scale-95 ${isDarkMode ? 'border-slate-700 text-slate-400 bg-slate-800 hover:bg-slate-700' : 'border-slate-200 text-slate-500 bg-white hover:bg-slate-50 shadow-sm'}`}><Filter size={16} /></button>
-          <button onClick={() => setShowNewLead(true)} className="bg-primary text-white px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all active:scale-95 flex items-center gap-2">
-            <Plus size={16} /> <span className="hidden sm:inline">Nuevo Lead</span>
+        <div className="flex items-center gap-4">
+          <div className="relative hidden md:block">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+             <input type="text" placeholder="Buscar lead..." className={`pl-9 pr-4 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-64 ${dc ? 'bg-slate-800 border-slate-700 text-white focus:border-primary' : 'bg-white border-slate-200 focus:border-primary shadow-sm'}`} />
+          </div>
+          <button onClick={() => setShowNewLead(true)} className="btn-primary flex items-center gap-2">
+            <Plus size={16} /> <span>Nuevo lead</span>
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-x-auto p-4 md:p-6 h-full">
+      <div className="flex-1 overflow-x-auto p-4 md:p-8 h-full custom-scrollbar">
         {viewMode === 'kanban' ? (
-          <div className="flex gap-6 h-full min-w-max">
+          <div className="flex gap-8 h-full min-w-max pb-8">
             {pipelineStages.map(status => (
               <PipelineColumn 
                 key={status} 
@@ -237,95 +234,95 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
                 onEdit={setLeadToEdit}
                 onDelete={deleteLead}
                 onGoChat={setActiveTab}
-                isDarkMode={isDarkMode}
+                isDarkMode={dc}
               />
             ))}
           </div>
         ) : (
-          <ListView leads={leads} onSelect={setSelectedLead} onEdit={setLeadToEdit} isDarkMode={isDarkMode} onToggleBot={toggleBot} onDelete={deleteLead} onGoChat={setActiveTab} />
+          <ListView leads={leads} onSelect={setSelectedLead} onEdit={setLeadToEdit} isDarkMode={dc} onToggleBot={toggleBot} onDelete={deleteLead} onGoChat={setActiveTab} />
         )}
       </div>
 
-      {selectedLead && <LeadModal lead={selectedLead} isDarkMode={isDarkMode} onClose={() => setSelectedLead(null)} registerAlarm={registerAlarmItem} unregisterAlarm={unregisterAlarmItem} />}
-      {showNewLead && <NewLeadModal isDarkMode={isDarkMode} onClose={() => setShowNewLead(false)} onSave={addLead} pipelineStages={pipelineStages} />}
-      {leadToEdit && <NewLeadModal editLead={leadToEdit} isDarkMode={isDarkMode} onClose={() => setLeadToEdit(null)} onSave={updateLead} pipelineStages={pipelineStages} />}
+      {selectedLead && <LeadModal lead={selectedLead} isDarkMode={dc} onClose={() => setSelectedLead(null)} registerAlarm={registerAlarmItem} unregisterAlarm={unregisterAlarmItem} />}
+      {showNewLead && <NewLeadModal isDarkMode={dc} onClose={() => setShowNewLead(false)} onSave={addLead} pipelineStages={pipelineStages} />}
+      {leadToEdit && <NewLeadModal editLead={leadToEdit} isDarkMode={dc} onClose={() => setLeadToEdit(null)} onSave={updateLead} pipelineStages={pipelineStages} />}
     </div>
   );
 };
 
 const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, onGoChat }: any) => {
+  const dc = isDarkMode;
   if (!leads || leads.length === 0) return (
-    <div className={`rounded-2xl border p-12 text-center ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-400'}`}>
-      <Search size={40} className="mx-auto mb-3 opacity-30" />
-      <p className="text-sm font-bold">Sin leads todavía</p>
-      <p className="text-xs mt-1">Haz clic en "+ Nuevo Lead" para comenzar</p>
+    <div className={`card-premium p-16 text-center flex flex-col items-center justify-center ${dc ? 'text-slate-500' : 'text-slate-400'}`}>
+      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${dc ? 'bg-slate-800/50' : 'bg-slate-50'}`}>
+        <Search size={32} className="opacity-30" />
+      </div>
+      <h3 className="h3">Sin leads todavía</h3>
+      <p className="body-text mt-1">Haz clic en "Nuevo lead" para comenzar a gestionar tu embudo</p>
     </div>
   );
   return (
-    <div className={`rounded-[32px] border shadow-xl overflow-hidden overflow-x-auto h-full ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
-      <table className="w-full text-left border-collapse min-w-[900px]">
+    <div className="card-premium overflow-hidden overflow-x-auto">
+      <table className="w-full text-left">
         <thead>
-          <tr className={`border-b text-[10px] font-black uppercase tracking-widest transition-all ${isDarkMode ? 'bg-slate-900/50 border-slate-800 text-slate-500' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
-            <th className="px-8 py-5 font-black">lead / contacto</th>
-            <th className="px-8 py-5 font-black">estado</th>
-            <th className="px-8 py-5 font-black">scoring</th>
-            <th className="px-8 py-5 font-black">proyecto</th>
-            <th className="px-8 py-5 font-black">asistente ia</th>
-            <th className="px-8 py-5 pr-10 text-right font-black">acciones</th>
+          <tr className={`text-[11px] font-bold text-slate-500 border-b ${dc ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
+            <th className="px-8 py-5">Lead / Contacto</th>
+            <th className="px-8 py-5">Estado</th>
+            <th className="px-8 py-5">Scoring</th>
+            <th className="px-8 py-5">Proyecto</th>
+            <th className="px-8 py-5">Asistente IA</th>
+            <th className="px-8 py-5 text-right">Acciones</th>
           </tr>
         </thead>
-        <tbody className={`divide-y transition-colors ${isDarkMode ? 'divide-slate-800' : 'divide-slate-100'}`}>
+        <tbody className={`divide-y ${dc ? 'divide-slate-800' : 'divide-slate-100'}`}>
           {leads.map((lead: any) => {
             const sc = getScoreColor(lead.score);
             return (
-            <tr key={lead.id} className={`h-[42px] transition-colors ${isDarkMode ? 'hover:bg-white/5' : 'hover:bg-slate-50'}`}>
-              <td className="px-4 py-2 pl-6 cursor-pointer" onClick={() => onSelect(lead)}>
+            <tr key={lead.id} className={`group hover:bg-slate-50 dark:hover:bg-white/5 transition-colors`}>
+              <td className="px-8 py-4 cursor-pointer" onClick={() => onSelect(lead)}>
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${dc ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
                     {lead.name.charAt(0)}
                   </div>
                   <div>
-                    <div className={`text-[13px] font-semibold ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>{lead.name}</div>
-                    <div className="text-[11px] text-slate-500">{lead.phone}</div>
+                    <div className={`text-sm font-bold ${dc ? 'text-slate-200' : 'text-slate-800'}`}>{lead.name}</div>
+                    <div className="text-[11px] font-medium text-slate-500">{lead.phone}</div>
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-2">
-                <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
+              <td className="px-8 py-4">
+                <span className={`text-[10px] px-2 py-1 rounded-lg font-bold ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
               </td>
-              <td className="px-4 py-2">
+              <td className="px-8 py-4">
                 <div className="flex items-center gap-2">
-                  <div className={`w-12 h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                    <div className={`${sc.bar} h-full rounded-full`} style={{ width: lead.score }}></div>
+                  <div className={`w-16 h-1.5 rounded-full overflow-hidden ${dc ? 'bg-slate-800' : 'bg-slate-100 shadow-inner'}`}>
+                    <div className={`${sc.bar} h-full rounded-full transition-all duration-700`} style={{ width: lead.score }}></div>
                   </div>
-                  <span className={`text-[11px] font-bold flex items-center gap-1 ${sc.text}`}>{lead.score} <BrainCircuit size={10} className="opacity-50" title="Scoring generado por IA" /></span>
+                  <span className={`text-[11px] font-bold flex items-center gap-1 ${sc.text}`}>{lead.score}%</span>
                 </div>
               </td>
-              <td className="px-4 py-2 text-[12px] text-slate-500 font-medium">{lead.project || '—'}</td>
-              <td className="px-4 py-2">
+              <td className="px-8 py-4 text-xs text-slate-500 font-semibold">{lead.project || '—'}</td>
+              <td className="px-8 py-4">
                 <button 
                   onClick={() => onToggleBot(lead.id)}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all ${lead.botActive ? (isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-50 text-purple-600') : (isDarkMode ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-400')}`}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${lead.botActive ? (dc ? 'bg-primary/20 border-primary/30 text-primary' : 'bg-primary/10 border-primary/20 text-primary shadow-sm') : (dc ? 'bg-slate-800 border-slate-700 text-slate-500' : 'bg-slate-50 border-slate-100 text-slate-400')}`}
                 >
                   <Bot size={14} className={lead.botActive ? 'animate-pulse' : ''} />
-                  <span className="text-[10px] font-bold">{lead.botActive ? 'Activo' : 'Off'}</span>
+                  <span className="text-[11px] font-bold">{lead.botActive ? 'Activo' : 'Inactivo'}</span>
                 </button>
               </td>
-              <td className="px-4 py-2 text-right pr-6">
-                <div className="inline-flex items-center gap-0.5">
-                  <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-1.5 rounded-lg transition-colors inline-block ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}>
+              <td className="px-8 py-4 text-right">
+                <div className="inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-lg transition-colors inline-block ${dc ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}>
                     <Phone size={14} />
                   </a>
-                  <button title="Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}>
+                  <button title="Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-lg transition-colors ${dc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}>
                     <MessageSquare size={14} />
                   </button>
-                  <button title="Activar Bot" onClick={() => onToggleBot(lead.id)} className={`p-1.5 rounded-lg transition-colors ${lead.botActive ? 'text-purple-400' : (isDarkMode ? 'text-slate-500 hover:bg-slate-800' : 'text-slate-400 hover:bg-slate-100')}`}>
-                    <Bot size={14} />
-                  </button>
-                  <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}>
+                  <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-lg transition-colors ${dc ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}>
                     <Edit size={14} />
                   </button>
-                  <button title="Eliminar" onClick={() => onDelete(lead.id)} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-400 hover:bg-rose-50'}`}>
+                  <button title="Eliminar" onClick={() => onDelete(lead.id)} className={`p-2 rounded-lg transition-colors ${dc ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-400 hover:bg-rose-50'}`}>
                     <Trash2 size={14} />
                   </button>
                 </div>
@@ -339,38 +336,39 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
 };
 
 const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode }: any) => {
+  const dc = isDarkMode;
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
   const handleDrop = (e: React.DragEvent) => { e.preventDefault(); onDrop(e.dataTransfer.getData('leadId'), status); };
   
   const getStatusColor = (st: string) => {
     switch (st) {
-      case 'Nuevo': return isDarkMode ? 'text-blue-400' : 'text-blue-500';
-      case 'Contactado': return isDarkMode ? 'text-amber-400' : 'text-amber-500';
-      case 'Cita': return isDarkMode ? 'text-purple-400' : 'text-purple-500';
-      case 'Negociación': return isDarkMode ? 'text-emerald-400' : 'text-emerald-500';
-      case 'Cerrado': return isDarkMode ? 'text-slate-400' : 'text-slate-500';
+      case 'Nuevo': return dc ? 'text-blue-400' : 'text-blue-600';
+      case 'Contactado': return dc ? 'text-amber-400' : 'text-amber-600';
+      case 'Cita': return dc ? 'text-purple-400' : 'text-purple-600';
+      case 'Negociación': return dc ? 'text-emerald-400' : 'text-emerald-600';
+      case 'Cerrado': return dc ? 'text-slate-400' : 'text-slate-600';
       default: return 'text-primary';
     }
   };
 
   return (
-    <div onDragOver={handleDragOver} onDrop={handleDrop} className="flex flex-col w-72 md:w-85 shrink-0">
-      <div className="flex items-center justify-between mb-6 px-4">
+    <div onDragOver={handleDragOver} onDrop={handleDrop} className="flex flex-col w-80 shrink-0">
+      <div className="flex items-center justify-between mb-6 px-2">
         <div className="flex items-center gap-3">
-          <div className={`w-2 h-2 rounded-full ${getStatusColor(status).replace('text', 'bg')}`} />
-          <h3 className={`text-[11px] font-black uppercase tracking-widest ${getStatusColor(status)}`}>{status}</h3>
-          <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg ${isDarkMode ? 'bg-slate-900 text-slate-600' : 'bg-slate-100 text-slate-400'}`}>{leads.length}</span>
+          <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(status).replace('text', 'bg')}`} />
+          <h3 className={`text-xs font-bold ${getStatusColor(status)}`}>{status}</h3>
+          <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg ${dc ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>{leads.length}</span>
         </div>
       </div>
-      <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-2 pb-10">
+      <div className="flex-1 space-y-5 overflow-y-auto custom-scrollbar pr-2 pb-10">
         {leads.length === 0 && (
-          <div className={`p-10 rounded-[24px] border-2 border-dashed text-center flex flex-col items-center justify-center gap-2 ${isDarkMode ? 'border-slate-800/50 text-slate-700' : 'border-slate-100 text-slate-300'}`}>
+          <div className={`p-12 rounded-[28px] border-2 border-dashed text-center flex flex-col items-center justify-center gap-3 ${dc ? 'border-slate-800/50 text-slate-700' : 'border-slate-100 text-slate-300'}`}>
             <Plus size={24} className="opacity-20" />
-            <p className="text-[10px] font-black uppercase tracking-widest">vacío</p>
+            <p className="text-[11px] font-bold">Columna vacía</p>
           </div>
         )}
         {leads.map((lead: any) => (
-          <LeadCard key={lead.id} lead={lead} onToggleBot={onToggleBot} onSelect={onSelect} onEdit={onEdit} onDelete={onDelete} onGoChat={onGoChat} isDarkMode={isDarkMode} />
+          <LeadCard key={lead.id} lead={lead} onToggleBot={onToggleBot} onSelect={onSelect} onEdit={onEdit} onDelete={onDelete} onGoChat={onGoChat} isDarkMode={dc} />
         ))}
       </div>
     </div>
@@ -378,53 +376,57 @@ const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onEdit, 
 };
 
 const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode }: any) => {
+  const dc = isDarkMode;
   const handleDragStart = (e: React.DragEvent) => { e.dataTransfer.setData('leadId', lead.id); };
   const sc = getScoreColor(lead.score || '0');
   return (
     <div draggable onDragStart={handleDragStart} onDoubleClick={() => onSelect(lead)}
-      className={`p-5 rounded-[28px] border shadow-sm cursor-grab active:cursor-grabbing transition-all hover:shadow-xl hover:border-primary/40 group ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100 shadow-slate-200/50'}`}>
+      className="card-premium group p-5 cursor-grab active:cursor-grabbing hover:border-primary/40 transition-all">
       <div className="flex justify-between items-start mb-4 gap-3">
         <div className="flex flex-col min-w-0">
-          <h4 className={`text-[13px] font-black lowercase truncate group-hover:text-primary transition-colors ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{lead.name}</h4>
+          <h4 className={`text-sm font-bold truncate group-hover:text-primary transition-colors ${dc ? 'text-white' : 'text-slate-800'}`}>{lead.name}</h4>
           <div className="flex items-center gap-1.5 text-slate-500 mt-1">
-            <Phone size={10} className="text-emerald-500 shrink-0" /><span className="text-[10px] font-bold tracking-tight truncate">{lead.phone}</span>
+            <Phone size={12} className="text-emerald-500 shrink-0" />
+            <span className="text-[11px] font-semibold truncate">{lead.phone}</span>
           </div>
         </div>
         <button onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }}
-          className={`p-2 rounded-xl shrink-0 transition-all active:scale-90 ${lead.botActive ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
+          className={`p-2 rounded-xl shrink-0 transition-all active:scale-90 ${lead.botActive ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
           <Bot size={14} className={lead.botActive ? 'animate-pulse' : ''} />
         </button>
       </div>
       
-      <div className="flex gap-2 flex-wrap mb-4">
-        {(lead.tags || []).map((tag: string, i: number) => (
-          <span key={i} className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border ${getTagColor(tag)}`}>{tag}</span>
-        ))}
-      </div>
+      {lead.tags && lead.tags.length > 0 && (
+        <div className="flex gap-2 flex-wrap mb-4">
+          {lead.tags.map((tag: string, i: number) => (
+            <span key={i} className={`text-[9px] font-bold px-2 py-0.5 rounded-lg border ${getTagColor(tag)}`}>{tag}</span>
+          ))}
+        </div>
+      )}
       
-      <div className="space-y-3">
-        <div className={`flex items-center justify-between pt-4 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-50'}`}>
-          <div className="flex items-center gap-2.5 flex-1 min-w-0">
-            <div className={`w-9 h-9 rounded-2xl shrink-0 flex items-center justify-center text-[10px] font-black relative ${sc.bg} ${sc.text}`} title="Scoring generado por IA">
-              {lead.score || '0%'}
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center shadow-sm">
-                 <BrainCircuit size={8} className="text-primary" />
+      <div className="space-y-4">
+        <div className={`flex items-center justify-between pt-4 border-t ${dc ? 'border-slate-800' : 'border-slate-100'}`}>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-[10px] font-bold relative ${sc.bg} ${sc.text}`} title="Scoring generado por IA">
+              {lead.score || '0'}%
+              <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center shadow-sm">
+                 <BrainCircuit size={10} className="text-primary" />
               </div>
             </div>
             <div className="flex flex-col min-w-0 flex-1">
-              <span className={`text-[10px] font-black lowercase truncate w-full ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{lead.project || 'sin proyecto'}</span>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate w-full">{lead.source || 'orgánico'}</span>
+              <span className={`text-[11px] font-bold truncate ${dc ? 'text-slate-300' : 'text-slate-700'}`}>{lead.project || 'Sin proyecto'}</span>
+              <span className="text-[10px] font-medium text-slate-400 truncate">{lead.source || 'Orgánico'}</span>
             </div>
           </div>
         </div>
-        <div className={`flex items-center justify-between pt-3 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-50'}`} onClick={e => e.stopPropagation()}>
-          <div className="flex gap-1.5">
-            <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-xl inline-flex items-center transition-all active:scale-90 ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}><Phone size={14} /></a>
-            <button title="Chat" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-xl transition-all active:scale-90 ${isDarkMode ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}><MessageSquare size={14} /></button>
+        <div className={`flex items-center justify-between pt-3 border-t ${dc ? 'border-slate-800' : 'border-slate-100'}`} onClick={e => e.stopPropagation()}>
+          <div className="flex gap-1">
+            <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}><Phone size={14} /></a>
+            <button title="Chat" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}><MessageSquare size={14} /></button>
           </div>
-          <div className="flex gap-1.5">
-            <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-xl transition-all active:scale-90 ${isDarkMode ? 'text-slate-500 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}><Edit size={14} /></button>
-            <button title="Eliminar" onClick={() => onDelete(lead.id)} className="p-2 rounded-xl transition-all active:scale-90 text-rose-400 hover:bg-rose-50"><Trash2 size={14} /></button>
+          <div className="flex gap-1">
+            <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-slate-500 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}><Edit size={14} /></button>
+            <button title="Eliminar" onClick={() => onDelete(lead.id)} className="p-2 rounded-lg transition-all active:scale-90 text-rose-400 hover:bg-rose-50"><Trash2 size={14} /></button>
           </div>
         </div>
       </div>
@@ -433,6 +435,7 @@ const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isD
 };
 
 const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }: any) => {
+  const dc = isDarkMode;
   const [activeTab, setActiveTab] = useState<'tareas'|'notas'|'citas'|'historial'>('tareas');
   const [newTask, setNewTask] = useState('');
   const [taskPriority, setTaskPriority] = useState('Media');
@@ -507,77 +510,82 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className={`w-full max-w-4xl h-[90vh] flex flex-col shadow-2xl relative animate-in fade-in zoom-in duration-300 rounded-3xl overflow-hidden border ${isDarkMode ? 'bg-[#181619] border-slate-800' : 'bg-white border-slate-200'}`}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className={`w-full max-w-4xl h-[85vh] rounded-[32px] border shadow-2xl overflow-hidden flex flex-col ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
         
-        <div className={`p-4 border-b shrink-0 ${isDarkMode ? 'border-slate-800/50 bg-[#1E1E1E]' : 'border-slate-100 bg-slate-50'}`}>
-          <div className="flex gap-3 items-center">
-            <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl font-bold shadow-sm border border-primary/20">
+        {/* Modal Header */}
+        <div className={`px-8 py-6 border-b flex justify-between items-center transition-colors ${dc ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50 border-slate-50'}`}>
+          <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold ${dc ? 'bg-primary/20 text-primary' : 'bg-primary/10 text-primary'}`}>
               {lead.name.charAt(0)}
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className={`text-[16px] md:text-[18px] font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{lead.name}</h2>
-                <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
+              <div className="flex items-center gap-3">
+                <h2 className="h2">{lead.name}</h2>
+                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
               </div>
+              <p className="small-text mt-0.5">{lead.phone} • {lead.email || 'Sin email'}</p>
             </div>
           </div>
-          <button onClick={onClose} className={`absolute top-4 right-4 p-1.5 rounded-full transition-colors ${isDarkMode ? 'text-slate-500 hover:text-white hover:bg-white/10' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200'}`}>
-            <X size={18} />
+          <button onClick={onClose} className={`p-2 rounded-xl transition-all ${dc ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-white border text-slate-400 hover:text-slate-800 shadow-sm'}`}>
+            <X size={20} />
           </button>
         </div>
 
-        <div className={`flex border-b ${isDarkMode ? 'border-slate-800/50' : 'border-slate-100'}`}>
+        {/* Tabs */}
+        <div className={`flex px-6 border-b ${dc ? 'border-slate-800/50 bg-[#1E1E1E]' : 'border-slate-100 bg-white'}`}>
           {['tareas', 'notas', 'citas', 'historial'].map((tab) => (
             <button 
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`flex-1 py-2.5 text-[12px] md:text-[13px] font-bold capitalize border-b-2 transition-all ${activeTab === tab ? 'border-primary text-primary bg-primary/5' : isDarkMode ? 'border-transparent text-slate-500 hover:text-slate-300' : 'border-transparent text-slate-400 hover:text-slate-700'}`}
+              className={`px-6 py-4 text-xs font-bold capitalize transition-all relative ${activeTab === tab ? 'text-primary' : 'text-slate-400 hover:text-slate-600'}`}
             >
               {tab}
+              {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full"></div>}
             </button>
           ))}
         </div>
 
-        <div className={`flex-1 overflow-y-auto p-4 custom-scrollbar ${isDarkMode ? 'bg-[#181619]' : 'bg-white'}`}>
+        {/* Modal Body */}
+        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
           {activeTab === 'tareas' && (
-            <div className="space-y-6">
-              <div className={`p-4 rounded-2xl border shadow-sm ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+            <div className="space-y-8">
+              <div className={`p-6 rounded-2xl border shadow-sm ${dc ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
                 <input 
                   value={newTask}
                   onChange={(e) => setNewTask(e.target.value)}
-                  placeholder="Escribe una nueva tarea..."
-                  className={`w-full text-[13px] bg-transparent border-none focus:outline-none mb-4 ${isDarkMode ? 'text-slate-200 placeholder-slate-600' : 'text-slate-700 placeholder-slate-400'}`}
+                  placeholder="¿Qué necesitas hacer con este lead?"
+                  className={`w-full text-sm font-medium bg-transparent border-none focus:outline-none mb-6 ${dc ? 'text-slate-200 placeholder-slate-600' : 'text-slate-700 placeholder-slate-400'}`}
                 />
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-                  <select value={taskType} onChange={e=>setTaskType(e.target.value)} className={`text-[11px] font-bold p-2 border rounded-lg bg-transparent outline-none ${isDarkMode ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
+                <div className="flex flex-wrap gap-3 mb-6">
+                  <select value={taskType} onChange={e=>setTaskType(e.target.value)} className={`text-[11px] font-bold px-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-600 shadow-sm'}`}>
                     <option>Llamada</option><option>Visita</option><option>Email</option><option>WhatsApp</option>
                   </select>
-                  <select value={taskPriority} onChange={e=>setTaskPriority(e.target.value)} className={`text-[11px] font-bold p-2 border rounded-lg bg-transparent outline-none ${isDarkMode ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
+                  <select value={taskPriority} onChange={e=>setTaskPriority(e.target.value)} className={`text-[11px] font-bold px-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-600 shadow-sm'}`}>
                     <option>Alta</option><option>Media</option><option>Baja</option>
                   </select>
-                  <input type="date" value={taskDate} onChange={e=>setTaskDate(e.target.value)} className={`text-[11px] font-bold p-2 border rounded-lg bg-transparent outline-none ${isDarkMode ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-600'}`} />
-                  <input type="time" value={taskTime} onChange={e=>setTaskTime(e.target.value)} className={`text-[11px] font-bold p-2 border rounded-lg bg-transparent outline-none ${isDarkMode ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-600'}`} />
+                  <input type="date" value={taskDate} onChange={e=>setTaskDate(e.target.value)} className={`text-[11px] font-bold px-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-600 shadow-sm'}`} />
+                  <input type="time" value={taskTime} onChange={e=>setTaskTime(e.target.value)} className={`text-[11px] font-bold px-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-600 shadow-sm'}`} />
                 </div>
-                <div className="flex justify-end pt-3 border-t border-slate-100/10">
-                  <button onClick={addTask} className="bg-primary text-white py-2 px-5 rounded-xl text-[12px] font-bold flex items-center gap-2 hover:bg-primary-dark transition-all shadow-sm active:scale-95">
-                    <Plus size={16} /> Añadir Tarea
+                <div className="flex justify-end pt-4 border-t border-slate-200/5 dark:border-slate-800">
+                  <button onClick={addTask} className="btn-primary flex items-center gap-2">
+                    <Plus size={16} /> Agregar tarea
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {tasks.map(task => (
-                  <div key={task.id} className={`p-3 rounded-2xl border flex items-center justify-between transition-all ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-slate-50/50 border-slate-100 hover:border-slate-200'}`}>
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => toggleTask(task.id)} className={`transition-all ${task.status === 'completada' ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-600 hover:text-primary'}`}>
-                        {task.status === 'completada' ? <CheckCircle2 size={20} className="fill-emerald-500/5" /> : <Circle size={20} />}
+                  <div key={task.id} className={`p-4 rounded-2xl border flex items-center justify-between transition-all ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100 hover:shadow-md'}`}>
+                    <div className="flex items-center gap-4">
+                      <button onClick={() => toggleTask(task.id)} className={`transition-all ${task.status === 'completada' ? 'text-emerald-500' : 'text-slate-300 hover:text-primary'}`}>
+                        {task.status === 'completada' ? <CheckCircle2 size={24} className="fill-emerald-500/5" /> : <Circle size={24} />}
                       </button>
                       <div>
-                        <p className={`text-[13px] font-semibold ${task.status === 'completada' ? 'text-slate-500 line-through' : (isDarkMode ? 'text-slate-200' : 'text-slate-800')}`}>{task.text}</p>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1"><Clock size={12} className="text-blue-500" /> <span className="text-emerald-500 font-semibold">{task.date}</span></span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${task.priority === 'Alta' ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-500'}`}>{task.priority}</span>
+                        <p className={`text-sm font-bold ${task.status === 'completada' ? 'text-slate-400 line-through' : (dc ? 'text-slate-200' : 'text-slate-800')}`}>{task.text}</p>
+                        <div className="flex items-center gap-4 mt-1.5">
+                          <span className="text-[11px] font-bold text-emerald-500 flex items-center gap-1.5"><Clock size={12} /> {task.date}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${task.priority === 'Alta' ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-500'}`}>{task.priority}</span>
                         </div>
                       </div>
                     </div>
@@ -588,42 +596,36 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
           )}
 
           {activeTab === 'notas' && (
-            <div className="space-y-6">
-              <div className={`p-4 rounded-2xl border shadow-sm ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
+            <div className="space-y-8">
+              <div className={`p-6 rounded-2xl border shadow-sm ${dc ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
                 <textarea 
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
-                  placeholder="Registrar observaciones, objeciones detectadas, nivel de interés..."
-                  className="w-full text-sm bg-transparent border-none focus:outline-none resize-none min-h-[80px] text-slate-700 placeholder-slate-400"
+                  placeholder="Escribe tus observaciones aquí..."
+                  className={`w-full text-sm font-medium bg-transparent border-none focus:outline-none resize-none min-h-[100px] ${dc ? 'text-slate-200 placeholder-slate-600' : 'text-slate-700 placeholder-slate-400'}`}
                 />
-                <div className="flex justify-between items-center mt-3 border-t border-slate-100 pt-3">
-                  <div className="flex gap-2">
-                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors flex items-center gap-2 text-xs font-medium border border-slate-200"><FileText size={14}/> Objeción</button>
-                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors flex items-center gap-2 text-xs font-medium border border-slate-200"><MessageSquare size={14}/> Preferencia</button>
-                  </div>
-                  <button onClick={addNote} className="bg-primary text-white py-2 px-5 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-primary-dark transition-all shadow-sm active:scale-95">
-                    <Send size={16} /> Guardar Nota
+                <div className="flex justify-end items-center mt-4 border-t border-slate-200/5 pt-4">
+                  <button onClick={addNote} className="btn-primary flex items-center gap-2">
+                    <Send size={16} /> Guardar nota
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {notes.map(note => (
-                  <div key={note.id} className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-sm border-2 border-white ${note.author === 'Bot' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
-                        {note.author === 'Bot' ? <Bot size={14} /> : 'AG'}
+                  <div key={note.id} className="flex gap-4">
+                    <div className="flex flex-col items-center shrink-0">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold border-2 ${dc ? 'bg-slate-800 border-slate-900 text-slate-400' : 'bg-white border-slate-50 shadow-sm text-blue-600'}`}>
+                        {note.author === 'Bot' ? <Bot size={18} /> : 'AG'}
                       </div>
-                      <div className="w-0.5 h-full bg-slate-200 mt-1 opacity-50"></div>
+                      <div className={`w-0.5 h-full mt-2 opacity-20 ${dc ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
                     </div>
-                    <div className="bg-white dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex-1 mb-1 hover:shadow-md transition-shadow">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-[12px] font-bold text-slate-800 dark:text-slate-300">
-                          {note.author}
-                        </span>
-                        <span className="text-[11px] font-medium text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-md">{note.time}</span>
+                    <div className={`flex-1 p-5 rounded-2xl border shadow-sm ${dc ? 'bg-slate-800/40 border-slate-800' : 'bg-white border-slate-100'}`}>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className={`text-[12px] font-bold ${dc ? 'text-slate-300' : 'text-slate-800'}`}>{note.author}</span>
+                        <span className="text-[11px] font-bold text-slate-400">{note.time}</span>
                       </div>
-                      <p className="text-[12px] md:text-[13px] text-slate-700 dark:text-slate-400 leading-relaxed">{note.text}</p>
+                      <p className="body-text">{note.text}</p>
                     </div>
                   </div>
                 ))}
@@ -632,38 +634,36 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
           )}
 
           {activeTab === 'historial' && (
-            <div className="space-y-0 relative">
-              <div className={`absolute left-[15px] top-4 bottom-4 w-0.5 ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
+            <div className="space-y-0 relative pl-8">
+              <div className={`absolute left-[15px] top-0 bottom-0 w-0.5 ${dc ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
               {[...tasks.filter(t => t.status === 'completada').map(t => ({
-                icon: 'task', color: isDarkMode ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600',
+                icon: 'task', color: dc ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-50 text-emerald-600',
                 title: `Tarea completada: ${t.text}`, desc: `Tipo: ${t.type}`, time: t.date || ''
               })), ...notes.map(n => ({
-                icon: 'note', color: isDarkMode ? 'bg-slate-500/10 text-slate-400' : 'bg-slate-50 text-slate-600',
+                icon: 'note', color: dc ? 'bg-slate-500/15 text-slate-400' : 'bg-slate-50 text-slate-600',
                 title: `Nota de ${n.author}`, desc: n.text, time: n.time || ''
               }))].length === 0 ? (
-                <div className={`p-8 text-center rounded-2xl border ${isDarkMode ? 'border-slate-800 text-slate-600' : 'border-slate-100 text-slate-400'}`}>
-                  <History size={28} className="mx-auto mb-2 opacity-40" />
-                  <p className="text-xs font-bold">Sin historial registrado</p>
-                  <p className="text-[10px] mt-1">Las tareas completadas y notas aparecerán aquí.</p>
+                <div className="card-premium p-12 text-center flex flex-col items-center">
+                  <History size={32} className="opacity-20 mb-3" />
+                  <p className="text-sm font-bold text-slate-400">Sin historial registrado</p>
                 </div>
               ) : [...tasks.filter(t => t.status === 'completada').map(t => ({
-                icon: 'task', color: isDarkMode ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600',
+                icon: 'task', color: dc ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-50 text-emerald-600',
                 title: `Tarea completada: ${t.text}`, desc: `Tipo: ${t.type}`, time: t.date || ''
               })), ...notes.map(n => ({
-                icon: 'note', color: isDarkMode ? 'bg-slate-500/10 text-slate-400' : 'bg-slate-50 text-slate-600',
+                icon: 'note', color: dc ? 'bg-slate-500/15 text-slate-400' : 'bg-slate-50 text-slate-600',
                 title: `Nota de ${n.author}`, desc: n.text, time: n.time || ''
               }))].map((item, i) => (
-                <div key={i} className="flex gap-3 relative pl-0 py-2 group">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 z-10 border-2 ${isDarkMode ? 'border-[#181619] shadow-none' : 'border-white shadow-sm'} ${item.color}`}>
-                    {item.icon === 'task' && <CheckCircle2 size={14}/>}
-                    {item.icon === 'note' && <FileText size={14}/>}
+                <div key={i} className="flex gap-6 relative py-4 group">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 z-10 border-2 ${dc ? 'border-[#1E1E1E]' : 'border-white shadow-sm'} ${item.color}`}>
+                    {item.icon === 'task' ? <CheckCircle2 size={14}/> : <FileText size={14}/>}
                   </div>
-                  <div className={`p-3 rounded-xl border flex-1 transition-all group-hover:shadow-sm ${isDarkMode ? 'bg-slate-800/40 border-slate-800 hover:border-slate-700' : 'bg-slate-50/50 border-slate-100 hover:border-slate-200'}`}>
-                    <div className="flex justify-between items-start mb-0.5">
-                      <span className={`text-xs font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{item.title}</span>
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md ${isDarkMode ? 'text-slate-400 bg-slate-800' : 'text-slate-500 bg-white shadow-sm border border-slate-100'}`}>{item.time}</span>
+                  <div className={`flex-1 p-4 rounded-xl border transition-all group-hover:shadow-sm ${dc ? 'bg-slate-800/40 border-slate-800' : 'bg-slate-700 hover:border-slate-600'}`}>
+                    <div className="flex justify-between items-start mb-1">
+                      <span className={`text-xs font-bold ${dc ? 'text-white' : 'text-slate-800'}`}>{item.title}</span>
+                      <span className="text-[10px] font-bold text-slate-400">{item.time}</span>
                     </div>
-                    <p className={`text-[11px] leading-tight ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>{item.desc}</p>
+                    <p className="body-text text-xs">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -671,7 +671,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
           )}
 
           {activeTab === 'citas' && (
-            <ModalCitas leadName={lead.name} leadId={lead.id} isDarkMode={isDarkMode} registerAlarm={registerAlarm} unregisterAlarm={unregisterAlarm} />
+            <ModalCitas leadName={lead.name} leadId={lead.id} isDarkMode={dc} registerAlarm={registerAlarm} unregisterAlarm={unregisterAlarm} />
           )}
         </div>
       </div>
@@ -679,7 +679,8 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
   );
 };
 
-const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAlarm }: { leadName: string, leadId?: number, isDarkMode?: boolean, registerAlarm?: any, unregisterAlarm?: any }) => {
+const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAlarm }: any) => {
+  const dc = isDarkMode;
   const { showToast, showConfirm } = useToast();
   const { token } = useAuth();
   const [citas, setCitas] = useState<any[]>([]);
@@ -740,77 +741,67 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
     );
   };
 
-  const typeIcon = (t: string) => {
-    if(t==='Visita') return <CalendarDays size={14} className="text-blue-500"/>;
-    if(t==='Llamada') return <Phone size={14} className="text-emerald-500"/>;
-    if(t==='Reunión') return <ListTodo size={14} className="text-purple-500"/>;
-    return <CalendarDays size={14} className="text-slate-400"/>;
-  };
-
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className={`text-xs font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Gestión de Citas</h3>
-          <p className="text-[9px] text-slate-500 font-medium tracking-tight">Citas activas para <strong className={isDarkMode ? 'text-primary' : 'text-primary'}>{leadName}</strong></p>
+          <h3 className="h3">Gestión de citas</h3>
+          <p className="body-text">Citas activas para <strong className="text-primary">{leadName}</strong></p>
         </div>
-        <button onClick={() => setShowForm(!showForm)} className="bg-primary text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-primary-dark flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
-          <Plus size={14}/> Nueva Cita
+        <button onClick={() => setShowForm(!showForm)} className="btn-primary flex items-center gap-2">
+          <Plus size={16}/> Programar cita
         </button>
       </div>
 
       {showForm && (
-        <div className={`p-4 rounded-xl border shadow-lg space-y-3 animate-in slide-in-from-top duration-300 ${isDarkMode ? 'bg-slate-800 border-indigo-500/30' : 'bg-slate-50 border-emerald-500/20'}`}>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold tracking-wider text-slate-400 lowercase">asunto</label>
-              <input type="text" value={nTitle} onChange={e=>setNTitle(e.target.value)} placeholder="Ej: Visita al Penthouse 502..." className={`w-full p-2 rounded-lg text-xs outline-none transition-all border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-white border-slate-200 text-slate-800 focus:border-primary'}`}/>
+        <div className={`p-6 rounded-2xl border shadow-lg space-y-5 animate-in slide-in-from-top duration-300 ${dc ? 'bg-slate-800 border-primary/20' : 'bg-slate-50 border-primary/10 shadow-primary/5'}`}>
+            <div className="space-y-2">
+              <label className="small-text font-bold text-slate-500 ml-1">Asunto de la cita</label>
+              <input type="text" value={nTitle} onChange={e=>setNTitle(e.target.value)} placeholder="Ej: Visita al Penthouse 502" className={`w-full p-3 rounded-xl text-xs font-bold outline-none transition-all border ${dc ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-white border-slate-200 text-slate-800 focus:border-primary shadow-inner'}`}/>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold tracking-wider text-slate-400 lowercase">tipo</label>
-                <select value={nType} onChange={e=>setNType(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}>
-                  <option>Visita</option><option>Llamada</option><option>Reunión</option><option>Seguimiento</option><option>Firma</option>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <label className="small-text font-bold text-slate-500 ml-1">Tipo</label>
+                <select value={nType} onChange={e=>setNType(e.target.value)} className={`w-full p-3 rounded-xl text-[11px] font-bold outline-none border ${dc ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-inner'}`}>
+                  <option>Visita</option><option>Llamada</option><option>Reunión</option><option>Firma</option>
                 </select>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold tracking-wider text-slate-400 lowercase">fecha</label>
-                <input type="date" value={nDate} onChange={e=>setNDate(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}/>
+              <div className="space-y-2">
+                <label className="small-text font-bold text-slate-500 ml-1">Fecha</label>
+                <input type="date" value={nDate} onChange={e=>setNDate(e.target.value)} className={`w-full p-3 rounded-xl text-[11px] font-bold outline-none border ${dc ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-inner'}`}/>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold tracking-wider text-slate-400 lowercase">hora</label>
-                <input type="time" value={nTime} onChange={e=>setNTime(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}/>
+              <div className="space-y-2">
+                <label className="small-text font-bold text-slate-500 ml-1">Hora</label>
+                <input type="time" value={nTime} onChange={e=>setNTime(e.target.value)} className={`w-full p-3 rounded-xl text-[11px] font-bold outline-none border ${dc ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-inner'}`}/>
               </div>
-            <div className="flex items-end">
-              <button onClick={addCita} className="w-full bg-slate-800 dark:bg-primary text-white p-2 rounded-lg text-[10px] font-bold hover:opacity-90 shadow-sm transition-all active:scale-95">Confirmar</button>
+              <div className="flex items-end">
+                <button onClick={addCita} className="w-full bg-primary text-white p-3 rounded-xl text-xs font-bold hover:bg-primary-dark shadow-lg shadow-primary/20 transition-all active:scale-95">Confirmar cita</button>
+              </div>
             </div>
-          </div>
         </div>
       )}
 
-      <div className={`rounded-xl border overflow-hidden shadow-sm divide-y transition-all ${isDarkMode ? 'bg-slate-900/40 border-slate-800 divide-slate-800/50' : 'bg-white border-slate-100 divide-slate-50'}`}>
+      <div className={`rounded-2xl border overflow-hidden shadow-sm divide-y ${dc ? 'bg-slate-900/40 border-slate-800 divide-slate-800' : 'bg-white border-slate-100 divide-slate-50'}`}>
         {citas.length === 0 ? (
-          <div className="p-8 text-center text-slate-500 text-[11px] italic bg-slate-50/50 dark:bg-transparent">Sin citas programadas.</div>
+          <div className="p-10 text-center text-slate-400 text-xs italic">Sin citas programadas todavía.</div>
         ) : citas.map(c => (
-          <div key={c.id} className={`p-3 flex items-center gap-3 transition-all ${c.status==='completada'?'opacity-50':'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
-            <button onClick={() => toggleCita(c.id)} className={`transition-all ${c.status==='completada'?'text-emerald-500':'text-slate-300 dark:text-slate-600 hover:text-primary'}`}>
-              {c.status==='completada' ? <CheckCircle2 size={18} className="fill-emerald-500/10"/> : <Circle size={18}/>}
+          <div key={c.id} className={`p-4 flex items-center gap-4 transition-all ${c.status==='completada'?'opacity-50':'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
+            <button onClick={() => toggleCita(c.id)} className={`transition-all ${c.status==='completada'?'text-emerald-500':'text-slate-300 hover:text-primary'}`}>
+              {c.status==='completada' ? <CheckCircle2 size={20}/> : <Circle size={20}/>}
             </button>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className={`flex items-center gap-1 text-[8px] uppercase font-black tracking-widest px-1.5 py-0.5 rounded-full ${c.type==='Visita'?'bg-blue-500/10 text-blue-500':c.type==='Llamada'?'bg-emerald-500/10 text-emerald-500':'bg-purple-500/10 text-purple-500'}`}>
-                  {typeIcon(c.type)} {c.type}
+              <div className="flex items-center gap-3 mb-1">
+                <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${c.type==='Visita'?'bg-blue-500/10 text-blue-500':c.type==='Llamada'?'bg-emerald-500/10 text-emerald-500':'bg-purple-500/10 text-purple-500'}`}>
+                  {c.type}
                 </span>
+                <span className={`text-sm font-bold ${dc ? 'text-white' : 'text-slate-800'}`}>{c.title}</span>
               </div>
-              <p className={`text-xs font-bold leading-tight ${c.status==='completada'?'text-slate-500 line-through':isDarkMode?'text-white':'text-slate-800'}`}>{c.title}</p>
-            </div>
-            <div className={`flex flex-col items-end gap-1`}>
-              <div className={`flex items-center gap-1.5 text-[9px] font-bold px-2 py-1 rounded-lg border shadow-sm ${isDarkMode?'bg-slate-800 border-slate-700 text-slate-300':'bg-slate-50 border-slate-100 text-slate-600'}`}>
-                <Clock size={10} className="text-primary"/> {c.date} • {c.time}
+              <div className="flex items-center gap-4 text-[11px] font-bold text-slate-400">
+                <span className="flex items-center gap-1.5"><Calendar size={12}/> {c.date}</span>
+                <span className="flex items-center gap-1.5"><Clock size={12}/> {c.time}</span>
               </div>
-              <button onClick={() => delCita(c.id)} className="text-[8px] font-bold text-rose-500 hover:bg-rose-500/10 px-1.5 py-0.5 rounded transition-colors flex items-center gap-1">
-                <Trash2 size={10}/> Eliminar
-              </button>
             </div>
+            <button onClick={() => delCita(c.id)} className="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><Trash2 size={16}/></button>
           </div>
         ))}
       </div>
@@ -818,142 +809,69 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
   );
 };
 
-const NewLeadModal = ({ onClose, onSave, isDarkMode, editLead, pipelineStages }: any) => {
-  const [form, setForm] = useState(editLead || {
-    name: '', 
-    phone: '', 
-    email: '', 
-    status: 'Nuevo', 
-    budget: '', 
-    currency: 'USD',
-    source: 'WhatsApp', 
-    project: '', 
-    details: '',
-    score: '50%' // Default score
-  });
-
-  const inputCls = `w-full px-3 py-2 border rounded-xl text-[13px] font-medium outline-none transition-all ${
-    isDarkMode 
-      ? 'bg-slate-900/50 border-slate-700 text-white focus:border-primary focus:bg-slate-900' 
-      : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-primary focus:bg-white'
-  }`;
-
-  const labelCls = `block text-[10px] font-bold mb-1 tracking-wider lowercase ${
-    isDarkMode ? 'text-slate-400' : 'text-slate-500'
-  }`;
+const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }: any) => {
+  const dc = isDarkMode;
+  const [formData, setFormData] = useState(editLead || { name: '', phone: '', email: '', project: '', status: 'Nuevo', score: '50', source: 'Directo' });
+  
+  const inputCls = `w-full p-3 rounded-xl border text-xs font-bold outline-none transition-all focus:ring-2 focus:ring-primary/10 ${dc ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-white border-slate-200 text-slate-800 focus:border-primary shadow-inner'}`;
+  const labelCls = `text-[11px] font-bold text-slate-500 mb-1.5 block ml-1`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className={`w-full max-w-lg rounded-3xl border shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 ${isDarkMode ? 'bg-[#1E1E1E] border-slate-700' : 'bg-white border-slate-200'}`}>
-        
-        {/* Encabezado Premium */}
-        <div className={`px-6 py-4 flex justify-between items-center border-b ${isDarkMode ? 'border-slate-800 bg-slate-800/20' : 'border-slate-100 bg-slate-50/50'}`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-inner ${isDarkMode ? 'bg-primary/20 text-primary' : 'bg-primary/10 text-primary'}`}>
-              <Users size={16} />
-            </div>
-            <div>
-              <h3 className={`text-base font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{editLead ? 'Editar Lead' : 'Registrar Lead'}</h3>
-              <p className="text-[10px] text-slate-500 font-bold">{editLead ? 'Modifica los datos del prospecto' : 'Añade un nuevo prospecto al CRM'}</p>
-            </div>
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className={`w-full max-w-lg rounded-[32px] border shadow-2xl overflow-hidden flex flex-col ${dc ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-100'}`}>
+        <div className={`px-8 py-6 border-b flex justify-between items-center ${dc ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50 border-slate-50'}`}>
+          <div>
+            <h2 className="h2">{editLead ? 'Editar lead' : 'Nuevo lead'}</h2>
+            <p className="small-text mt-0.5">Información básica de contacto</p>
           </div>
-          <button onClick={onClose} className={`p-1.5 rounded-xl transition-all ${isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-200 text-slate-500'}`}>
-            <X size={18} />
-          </button>
+          <button onClick={onClose} className={`p-2 rounded-xl transition-all ${dc ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-white border text-slate-400 hover:text-slate-800 shadow-sm'}`}><X size={20} /></button>
         </div>
-
-        {/* Formulario Compacto a 2 Columnas */}
-        <form onSubmit={e => { e.preventDefault(); if (form.name && form.phone) onSave(form); }} className="p-6 overflow-y-auto max-h-[75vh] custom-scrollbar">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-            
-            <div className="col-span-2">
-              <label className={labelCls}>nombre completo *</label>
-              <input required autoFocus value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Ej. Juan Pérez" className={inputCls} />
+        <div className="p-8 space-y-6">
+          <div className="grid grid-cols-1 gap-5">
+            <div>
+              <label className={labelCls}>Nombre completo</label>
+              <input type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} placeholder="Ej: Juan Pérez" className={inputCls} />
             </div>
-
-            <div className="col-span-1">
-              <label className={labelCls}>teléfono *</label>
-              <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+52 1..." className={inputCls} />
-            </div>
-
-            <div className="col-span-1">
-              <label className={labelCls}>email</label>
-              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="correo@ejemplo.com" className={inputCls} />
-            </div>
-
-            <div className="col-span-1">
-              <label className={labelCls}>etapa del pipeline</label>
-              <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className={inputCls}>
-                {pipelineStages?.length ? pipelineStages.map((s: string) => <option key={s} value={s}>{s}</option>) : (
-                  <>
-                    <option>Nuevo</option>
-                    <option>Contactado</option>
-                    <option>Cita</option>
-                    <option>Negociación</option>
-                    <option>Cerrado</option>
-                  </>
-                )}
-              </select>
-            </div>
-
-            <div className="col-span-1">
-              <label className={labelCls}>presupuesto</label>
-              <div className="flex gap-2">
-                <select value={form.currency} onChange={e => setForm({...form, currency: e.target.value})} className={`${inputCls} !w-[90px] shrink-0`}>
-                  <option value="USD">USD $</option>
-                  <option value="MXN">MXN $</option>
-                  <option value="COP">COP $</option>
-                  <option value="EUR">EUR €</option>
-                  <option value="PEN">PEN S/</option>
-                  <option value="ARS">ARS $</option>
-                  <option value="CLP">CLP $</option>
-                  <option value="BRL">BRL R$</option>
-                </select>
-                <input value={form.budget} onChange={e => setForm({...form, budget: e.target.value})} placeholder="150,000" className={inputCls} />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>WhatsApp / Teléfono</label>
+                <input type="text" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} placeholder="+51 900..." className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Email</label>
+                <input type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} placeholder="juan@email.com" className={inputCls} />
               </div>
             </div>
-
-            <div className="col-span-1">
-              <label className={labelCls}>origen / fuente</label>
-              <select value={form.source} onChange={e => setForm({...form, source: e.target.value})} className={inputCls}>
-                <option value="WhatsApp">WhatsApp</option>
+            <div className="grid grid-cols-2 gap-4">
+               <div>
+                <label className={labelCls}>Estado inicial</label>
+                <select value={formData.status} onChange={e=>setFormData({...formData, status: e.target.value})} className={inputCls}>
+                  {pipelineStages.map((s:string) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={labelCls}>Proyecto de interés</label>
+                <ProjectSelect value={formData.project} onChange={(v: string) => setFormData({...formData, project: v})} className={inputCls} />
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>Origen del lead</label>
+              <select value={formData.source} onChange={e=>setFormData({...formData, source: e.target.value})} className={inputCls}>
+                <option value="Directo">Directo</option>
                 <option value="Facebook">Facebook</option>
                 <option value="Instagram">Instagram</option>
-                <option value="TikTok">TikTok</option>
-                <option value="LinkedIn">LinkedIn</option>
-                <option value="X">X (Twitter)</option>
-                <option value="Referido">Referido</option>
-                <option value="Orgánico">Orgánico / Web</option>
+                <option value="Landing Page">Landing page</option>
+                <option value="Recomendado">Recomendado</option>
               </select>
             </div>
-
-            <div className="col-span-1">
-              <label className={labelCls}>proyecto de interés</label>
-              <ProjectSelect value={form.project} onChange={(v: string) => setForm({...form, project: v})} className={inputCls} />
-            </div>
-
-            <div className="col-span-2">
-              <label className={labelCls}>detalle / notas de interés</label>
-              <textarea 
-                value={form.details} 
-                onChange={e => setForm({...form, details: e.target.value})} 
-                placeholder="Busca 3 habitaciones, con vista al mar, necesita financiamiento..." 
-                className={`${inputCls} h-20 resize-none`} 
-              />
-            </div>
           </div>
-        </form>
-
-        {/* Footer con Botones */}
-        <div className={`px-6 py-4 border-t flex justify-end gap-3 ${isDarkMode ? 'border-slate-800 bg-slate-800/30' : 'border-slate-100 bg-slate-50'}`}>
-          <button type="button" onClick={onClose} className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-200'}`}>
-            Cancelar
-          </button>
-          <button onClick={() => { if (form.name && form.phone) onSave(form); }} className="px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-dark transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center gap-2">
-            Guardar Lead
+        </div>
+        <div className={`px-8 py-6 border-t flex items-center justify-end gap-4 ${dc ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
+          <button onClick={onClose} className="text-xs font-bold text-slate-500 hover:text-slate-800 px-4">Cancelar</button>
+          <button onClick={() => onSave(formData)} className="btn-primary">
+            {editLead ? 'Actualizar registro' : 'Crear lead'}
           </button>
         </div>
-
       </div>
     </div>
   );
