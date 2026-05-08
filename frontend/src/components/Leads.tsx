@@ -757,25 +757,25 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
 
       {showForm && (
         <div className={`p-4 rounded-xl border shadow-lg space-y-3 animate-in slide-in-from-top duration-300 ${isDarkMode ? 'bg-slate-800 border-indigo-500/30' : 'bg-slate-50 border-emerald-500/20'}`}>
-          <div className="space-y-1">
-            <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>asunto</label>
-            <input type="text" value={nTitle} onChange={e=>setNTitle(e.target.value)} placeholder="Ej: Visita al Penthouse 502..." className={`w-full p-2 rounded-lg text-xs outline-none transition-all border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-white border-slate-200 text-slate-800 focus:border-primary'}`}/>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <div className="space-y-1">
-              <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>tipo</label>
-              <select value={nType} onChange={e=>setNType(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}>
-                <option>Visita</option><option>Llamada</option><option>Reunión</option><option>Seguimiento</option><option>Firma</option>
-              </select>
+              <label className="text-[10px] font-bold tracking-wider text-slate-400 lowercase">asunto</label>
+              <input type="text" value={nTitle} onChange={e=>setNTitle(e.target.value)} placeholder="Ej: Visita al Penthouse 502..." className={`w-full p-2 rounded-lg text-xs outline-none transition-all border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-primary' : 'bg-white border-slate-200 text-slate-800 focus:border-primary'}`}/>
             </div>
-            <div className="space-y-1">
-              <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>fecha</label>
-              <input type="date" value={nDate} onChange={e=>setNDate(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}/>
-            </div>
-            <div className="space-y-1">
-              <label className={`text-[9px] font-bold tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>hora</label>
-              <input type="time" value={nTime} onChange={e=>setNTime(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}/>
-            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold tracking-wider text-slate-400 lowercase">tipo</label>
+                <select value={nType} onChange={e=>setNType(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}>
+                  <option>Visita</option><option>Llamada</option><option>Reunión</option><option>Seguimiento</option><option>Firma</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold tracking-wider text-slate-400 lowercase">fecha</label>
+                <input type="date" value={nDate} onChange={e=>setNDate(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}/>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold tracking-wider text-slate-400 lowercase">hora</label>
+                <input type="time" value={nTime} onChange={e=>setNTime(e.target.value)} className={`w-full p-2 rounded-lg text-[10px] outline-none border ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'}`}/>
+              </div>
             <div className="flex items-end">
               <button onClick={addCita} className="w-full bg-slate-800 dark:bg-primary text-white p-2 rounded-lg text-[10px] font-bold hover:opacity-90 shadow-sm transition-all active:scale-95">Confirmar</button>
             </div>
@@ -834,7 +834,7 @@ const NewLeadModal = ({ onClose, onSave, isDarkMode, editLead, pipelineStages }:
       : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-primary focus:bg-white'
   }`;
 
-  const labelCls = `block text-[9px] font-bold mb-1 tracking-wider ${
+  const labelCls = `block text-[10px] font-bold mb-1 tracking-wider lowercase ${
     isDarkMode ? 'text-slate-400' : 'text-slate-500'
   }`;
 

@@ -160,16 +160,16 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               {modalType === 'proyecto' && (
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                   <div>
-                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre del proyecto</label>
+                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre del proyecto</label>
                     <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="Ej. Torre Esmeralda" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>código (opcional)</label>
+                      <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>código (opcional)</label>
                       <input type="text" value={formData.code || ''} onChange={e => setFormData({...formData, code: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="PRJ-001" />
                     </div>
                     <div>
-                      <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>estado</label>
+                      <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>estado</label>
                       <select value={formData.status || 'Activo'} onChange={e => setFormData({...formData, status: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
                         <option value="Activo">Activo</option>
                         <option value="Inactivo">Inactivo</option>
@@ -182,11 +182,11 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               {modalType === 'etapa' && (
                 <>
                   <div>
-                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre de la etapa</label>
+                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre de la etapa</label>
                     <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="Ej. Contactado" />
                   </div>
                   <div>
-                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>color hex</label>
+                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>color hex</label>
                     <div className="flex gap-2">
                       <input type="color" value={formData.color || '#3b82f6'} onChange={e => setFormData({...formData, color: e.target.value})} className="h-10 w-10 border border-slate-200 rounded p-0 cursor-pointer" />
                       <input type="text" value={formData.color || '#3b82f6'} onChange={e => setFormData({...formData, color: e.target.value})} className="flex-1 border border-slate-200 rounded-lg px-4 py-2 text-sm font-mono focus:outline-none focus:border-primary" />
@@ -205,11 +205,11 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               {modalType === 'fuente' && (
                 <>
                   <div>
-                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre de la fuente</label>
+                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>nombre de la fuente</label>
                     <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`} placeholder="Ej. Facebook Ads" />
                   </div>
                   <div>
-                    <label className={`block text-[9px] font-bold mb-1 tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>icono (opcional)</label>
+                    <label className={`block text-[10px] font-bold mb-1 tracking-wider lowercase ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>icono (opcional)</label>
                     <select value={formData.icon || 'Globe'} onChange={e => setFormData({...formData, icon: e.target.value})} className={`w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary ${isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
                       <option value="Facebook">Facebook</option>
                       <option value="Instagram">Instagram</option>

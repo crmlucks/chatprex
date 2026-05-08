@@ -257,7 +257,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                 <div className="flex gap-4 mb-2 items-start">
                   {/* Avatar Upload */}
                   <div className="flex flex-col gap-1 shrink-0">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">logo</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">logo</label>
                     <div 
                       onClick={() => fileInputRef.current?.click()}
                       className="w-16 h-16 bg-[#1E293B] border border-slate-700/50 rounded-xl flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors overflow-hidden group relative"
@@ -274,8 +274,8 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                   </div>
 
                   {/* Property Photos Upload */}
-                  <div className="flex-1 flex flex-col gap-1">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider flex justify-between">
+                  <div className="flex flex-col gap-1 flex-1">
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase flex justify-between">
                       <span>fotos ({formData.images?.length || 0}/3)</span>
                     </label>
                     <div className="flex gap-2">
@@ -301,12 +301,12 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
                   <div className="col-span-1 md:col-span-4">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">título de la propiedad</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">título de la propiedad</label>
                     <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ej. Lujoso Dpto en Miraflores" className="w-full mt-1 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white placeholder-slate-500 outline-none focus:border-primary transition-all" />
                   </div>
 
                   <div className="col-span-1 md:col-span-2">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">tipo</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">tipo</label>
                     <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full mt-1 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white outline-none focus:border-primary transition-all">
                       <option value="Casa">Casa</option>
                       <option value="Departamento">Departamento</option>
@@ -317,17 +317,17 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                   </div>
 
                   <div className="col-span-1 md:col-span-3">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">proyecto</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">proyecto</label>
                     <input type="text" list="projects-list" value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} placeholder="Nombre del proyecto" className="w-full mt-1 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white placeholder-slate-500 outline-none focus:border-primary transition-all" />
                   </div>
 
                   <div className="col-span-1 md:col-span-3">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">desarrollador</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">desarrollador</label>
                     <input type="text" list="developers-list" value={formData.developer} onChange={e => setFormData({...formData, developer: e.target.value})} placeholder="Inmobiliaria" className="w-full mt-1 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white placeholder-slate-500 outline-none focus:border-primary transition-all" />
                   </div>
 
                   <div className="col-span-1 md:col-span-2">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">estado</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">estado</label>
                     <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full mt-1 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white outline-none focus:border-primary transition-all">
                       <option value="Disponible">🟢 Disponible</option>
                       <option value="Reservado">🟠 Reservado</option>
@@ -336,7 +336,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                   </div>
 
                   <div className="col-span-1 md:col-span-4">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">precio y moneda</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">precio y moneda</label>
                     <div className="flex gap-2 mt-1">
                       <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})} className="w-20 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white outline-none focus:border-primary transition-all">
                         <option value="USD">USD</option>
@@ -347,22 +347,22 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                   </div>
 
                   <div className="col-span-1 md:col-span-4">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">ubicación</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">ubicación</label>
                     <input required type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} placeholder="Dirección" className="w-full mt-1 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white placeholder-slate-500 outline-none focus:border-primary transition-all" />
                   </div>
 
                   <div className="col-span-1 md:col-span-1">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">área m²</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">área m²</label>
                     <input type="number" value={formData.area} onChange={e => setFormData({...formData, area: e.target.value})} placeholder="120" className="w-full mt-1 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white placeholder-slate-500 outline-none focus:border-primary transition-all" />
                   </div>
 
                   <div className="col-span-1 md:col-span-1">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">hab.</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">hab.</label>
                     <input type="number" value={formData.rooms} onChange={e => setFormData({...formData, rooms: e.target.value})} placeholder="3" className="w-full mt-1 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white placeholder-slate-500 outline-none focus:border-primary transition-all" />
                   </div>
 
                   <div className="col-span-1 md:col-span-6">
-                    <label className="text-[9px] text-slate-400 font-bold tracking-wider">detalles adicionales</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">detalles adicionales</label>
                     <textarea rows={2} value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})} placeholder="Amenities, cochera, vista..." className="w-full mt-1 p-2 bg-[#1E293B] border border-slate-700/50 rounded-lg text-xs text-white placeholder-slate-500 outline-none focus:border-primary transition-all resize-none"></textarea>
                   </div>
                 </div>

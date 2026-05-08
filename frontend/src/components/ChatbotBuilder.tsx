@@ -202,8 +202,8 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               className={`w-full text-left px-3 py-3 rounded-xl flex items-center gap-3 transition-all ${selectedBotId === b.id ? 'bg-primary/10 text-primary' : (isDarkMode ? 'hover:bg-slate-800 text-slate-300' : 'hover:bg-slate-50 text-slate-700')}`}>
               <Bot size={18} className={selectedBotId === b.id ? 'text-primary' : (isDarkMode ? 'text-slate-500' : 'text-slate-400')} />
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-bold truncate">{b.name}</p>
-                <p className="text-[10px] truncate opacity-70">Keywords: {b.activationKeywords}</p>
+                <p className="text-sm font-bold truncate lowercase">{b.name}</p>
+                <p className="text-[10px] truncate opacity-70 lowercase">keywords: {b.activationKeywords}</p>
               </div>
             </button>
           ))}
@@ -238,13 +238,13 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         {/* Tabs */}
         <div className={`flex px-6 border-b overflow-x-auto transition-colors ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
           {[
-            { id: 'prompt', label: 'Personalidad (Prompt)' },
-            { id: 'brain', label: 'Motor IA (Cerebro)' },
-            { id: 'knowledge', label: 'Base de Conocimiento' },
-            { id: 'settings', label: 'Comportamiento' },
+            { id: 'prompt', label: 'personalidad (prompt)' },
+            { id: 'brain', label: 'motor ia (cerebro)' },
+            { id: 'knowledge', label: 'base de conocimiento' },
+            { id: 'settings', label: 'comportamiento' },
           ].map(t => (
             <button key={t.id} onClick={() => setActiveTab(t.id)}
-              className={`py-4 px-4 font-bold text-[12px] md:text-[13px] border-b-2 transition-all whitespace-nowrap ${activeTab === t.id ? 'border-primary text-primary' : (isDarkMode ? 'border-transparent text-slate-500 hover:text-slate-300' : 'border-transparent text-slate-500 hover:text-slate-800')}`}>
+              className={`py-4 px-4 font-bold text-[12px] md:text-[13px] border-b-2 transition-all whitespace-nowrap lowercase ${activeTab === t.id ? 'border-primary text-primary' : (isDarkMode ? 'border-transparent text-slate-500 hover:text-slate-300' : 'border-transparent text-slate-500 hover:text-slate-800')}`}>
               {t.label}
             </button>
           ))}
@@ -255,8 +255,8 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           {activeTab === 'prompt' && (
             <div className="space-y-4">
               <div className="flex justify-between items-end mb-2">
-                <label className={`block text-[13px] font-bold ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>Instrucciones Principales del Bot</label>
-                <button onClick={() => setPrompt(DEFAULT_PROMPT)} className="text-[11px] text-primary font-bold flex items-center gap-1 hover:underline"><RefreshCw size={12} /> Cargar Plantilla Inmobiliaria</button>
+                <label className={`block text-[10px] font-bold lowercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>instrucciones principales del bot</label>
+                <button onClick={() => setPrompt(DEFAULT_PROMPT)} className="text-[10px] text-primary font-bold flex items-center gap-1 hover:underline lowercase"><RefreshCw size={12} /> cargar plantilla inmobiliaria</button>
               </div>
               <textarea
                 value={prompt}
@@ -280,13 +280,13 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className={labelCls}>Proveedor de IA</label>
+                  <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-2 block">proveedor de ia</label>
                   <select value={provider} onChange={e => { setProvider(e.target.value); setModel(PROVIDER_MODELS[e.target.value][0]); }} className={inputCls}>
                     {Object.keys(PROVIDER_MODELS).map(p => <option key={p} value={p}>{p}{p === 'OpenAI' ? ' (Recomendado)' : p === 'Groq' ? ' (Ultra-rápido)' : p === 'DeepSeek' ? ' (Económico)' : ''}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className={labelCls}>Modelo Específico</label>
+                  <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-2 block">modelo específico</label>
                   <select value={model} onChange={e => setModel(e.target.value)} className={inputCls}>
                     {(PROVIDER_MODELS[provider] || []).map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
@@ -294,7 +294,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               </div>
 
               <div>
-                <label className={labelCls}>API Key del Proveedor</label>
+                <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-2 block">api key del proveedor</label>
                 <div className="relative">
                   <input
                     type="password"
@@ -329,7 +329,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               </div>
 
               <div>
-                <label className={labelCls}>Información del Proyecto / Producto</label>
+                <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-2 block">información del proyecto / producto</label>
                 <textarea
                   value={knowledge}
                   onChange={e => setKnowledge(e.target.value)}

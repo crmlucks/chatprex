@@ -122,25 +122,31 @@ const Dashboard = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
         {/* Pipeline Mini */}
         <div className={card + ' p-5'}>
-          <h3 className={`text-sm font-bold mb-4 ${dc ? 'text-slate-200' : 'text-slate-800'}`}>Pipeline de Leads</h3>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className={`font-bold text-sm ${dc ? 'text-slate-200' : 'text-slate-800'}`}>pipeline por etapa</h3>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{stats.leads || 0} leads</span>
+          </div>
+          <div className="space-y-4">
             {Object.entries(pipelineCounts).length > 0 ? Object.entries(pipelineCounts).map(([status, count]) => {
-              const colors: Record<string, string> = { Nuevo: 'bg-blue-500', Contactado: 'bg-amber-500', Cita: 'bg-purple-500', 'Negociación': 'bg-emerald-500', Cerrado: 'bg-slate-500' };
-              const bg = colors[status] || 'bg-primary';
               const pct = stats.leads > 0 ? Math.round((count / stats.leads) * 100) : 0;
               return (
-                <div key={status} className={`flex-1 min-w-[100px] p-3 rounded-xl border ${dc ? 'border-slate-800 bg-slate-800/30' : 'border-slate-100 bg-slate-50'}`}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className={`text-[9px] font-bold tracking-wider lowercase ${dc ? 'text-slate-400' : 'text-slate-500'}`}>{status}</span>
-                    <span className={`text-xs font-bold ${dc ? 'text-white' : 'text-slate-800'}`}>{count}</span>
+                <div key={status}>
+                  <div className="flex justify-between text-[11px] mb-1.5 font-bold">
+                    <span className={`capitalize ${dc ? 'text-slate-400' : 'text-slate-500'}`}>{status}</span>
+                    <span className={dc ? 'text-slate-300' : 'text-slate-700'}>{count} ({pct}%)</span>
                   </div>
-                  <div className={`h-1.5 rounded-full ${dc ? 'bg-slate-700' : 'bg-slate-200'}`}>
-                    <div className={`h-full rounded-full ${bg} transition-all`} style={{ width: `${pct}%` }}></div>
+                  <div className={`w-full h-1.5 rounded-full overflow-hidden transition-colors ${dc ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                    <div 
+                      className="h-full bg-primary rounded-full transition-all duration-1000 ease-out" 
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
                 </div>
               );
             }) : (
-              <div className={`w-full text-center py-6 text-sm font-medium ${dc ? 'text-slate-600' : 'text-slate-400'}`}>Sin leads registrados aún</div>
+              <div className="text-center py-6">
+                <p className="text-xs text-slate-500">no hay datos en el pipeline</p>
+              </div>
             )}
           </div>
         </div>

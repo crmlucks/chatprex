@@ -148,8 +148,8 @@ const Automation = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
             <div className="space-y-4">
               <div>
-                <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                  URL del Webhook (Catch Hook)
+                <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-2 block">
+                  url del webhook (catch hook)
                 </label>
                 <input 
                   type="url" 
@@ -219,8 +219,8 @@ const Automation = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
             <div className="space-y-4">
               <div>
-                <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                  Private App Access Token
+                <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-2 block">
+                  private app access token
                 </label>
                 <input 
                   type="password" 

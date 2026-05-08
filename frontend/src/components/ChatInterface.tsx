@@ -151,7 +151,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         
         if (res.ok) {
           const chatsList = await res.json();
-          const chatsObj: Record<string, ChatData> = {};
+          const chatsObj: Record<string, Chat> = {};
           chatsList.forEach((c: any) => {
             chatsObj[c.id] = c;
           });
@@ -570,8 +570,8 @@ const ChatItem = ({ name, message, time, unread, active, status, onClick, isDark
         </div>
         <p className={`text-[12px] truncate mb-1.5 font-normal ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>{message}</p>
         <div className="flex items-center">
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${getStatusStyle(status || '')}`}>
-            {status || 'Sin Estado'}
+          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md lowercase tracking-wider ${getStatusStyle(status || '')}`}>
+            {status || 'sin estado'}
           </span>
         </div>
       </div>

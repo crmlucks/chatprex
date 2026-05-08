@@ -158,37 +158,37 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
                 <h3 className="font-semibold text-slate-800 mb-3 md:mb-4 flex items-center gap-2 text-sm"><DollarSign size={18} className="text-primary"/> Registrar Movimiento</h3>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-3">
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-[10px] text-slate-500 font-medium">Fecha</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">fecha</label>
                     <input type="date" required value={txForm.date} onChange={e => setTxForm({...txForm, date: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-[10px] text-slate-500 font-medium">Tipo</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">tipo</label>
                     <select value={txForm.type} onChange={e => setTxForm({...txForm, type: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
                       <option value="ingreso">Ingreso</option>
                       <option value="egreso">Egreso</option>
                     </select>
                   </div>
                   <div className="col-span-2">
-                    <label className="text-[10px] text-slate-500 font-medium">Concepto</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">concepto</label>
                     <input type="text" required placeholder="Concepto" value={txForm.concept} onChange={e => setTxForm({...txForm, concept: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="col-span-1">
-                    <label className="text-[10px] text-slate-500 font-medium">Moneda</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">moneda</label>
                     <select value={txForm.currency} onChange={e => setTxForm({...txForm, currency: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
                       <option value="local">Local</option>
                       <option value="usd">USD</option>
                     </select>
                   </div>
                   <div className="col-span-1">
-                    <label className="text-[10px] text-slate-500 font-medium">Monto</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">monto</label>
                     <input type="number" required placeholder="0.00" value={txForm.amount} onChange={e => setTxForm({...txForm, amount: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="col-span-2">
-                    <label className="text-[10px] text-slate-500 font-medium">Cliente</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">cliente</label>
                     <input type="text" placeholder="Buscar..." value={txForm.client} onChange={e => setTxForm({...txForm, client: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="col-span-2">
-                    <label className="text-[10px] text-slate-500 font-medium">Propiedad</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">propiedad</label>
                     <input type="text" placeholder="Buscar..." value={txForm.property} onChange={e => setTxForm({...txForm, property: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="col-span-2 flex items-end">
@@ -204,14 +204,14 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className={`p-5 rounded-2xl border shadow-sm flex items-center justify-between transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
                 <div>
-                  <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest mb-1">Ingresos Totales</p>
+                  <p className="text-slate-500 text-[10px] font-bold lowercase tracking-wider mb-1">ingresos totales</p>
                   <h4 className={`text-[18px] md:text-[20px] font-bold ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>{formatMoney(income)}</h4>
                 </div>
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-emerald-500/10 text-emerald-500' : 'bg-emerald-50 text-emerald-500'}`}><ArrowUpRight size={20} /></div>
               </div>
               <div className={`p-5 rounded-2xl border shadow-sm flex items-center justify-between transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
                 <div>
-                  <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest mb-1">Egresos Totales</p>
+                  <p className="text-slate-500 text-[10px] font-bold lowercase tracking-wider mb-1">egresos totales</p>
                   <h4 className={`text-[18px] md:text-[20px] font-bold ${isDarkMode ? 'text-rose-400' : 'text-rose-600'}`}>{formatMoney(expense)}</h4>
                 </div>
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-rose-500/10 text-rose-500' : 'bg-rose-50 text-rose-500'}`}><ArrowDownRight size={20} /></div>
@@ -219,7 +219,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
               <div className={`p-5 rounded-2xl border shadow-sm flex items-center justify-between relative overflow-hidden transition-colors ${isDarkMode ? 'bg-[#1E1E1E] border-slate-800' : 'bg-white border-slate-200'}`}>
                 <div className={`absolute -right-4 -bottom-4 opacity-5 transition-colors ${isDarkMode ? 'text-white' : 'text-slate-900'}`}><DollarSign size={80} /></div>
                 <div className="relative z-10">
-                  <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest mb-1">Balance Neto</p>
+                  <p className="text-slate-500 text-[10px] font-bold lowercase tracking-wider mb-1">balance neto</p>
                   <h4 className={`text-[18px] md:text-[20px] font-bold tracking-tight ${income - expense >= 0 ? (isDarkMode ? 'text-primary' : 'text-primary') : 'text-rose-500'}`}>
                     {formatMoney(income - expense)}
                   </h4>
@@ -303,28 +303,28 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
                 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-y-3 md:gap-y-5 relative z-10">
                   {/* Datos Personales */}
-                  <div className="col-span-1 md:col-span-4"><h4 className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Datos Personales</h4></div>
+                  <div className="col-span-1 md:col-span-4"><h4 className="text-[10px] font-bold text-slate-400 lowercase tracking-wider">datos personales</h4></div>
                   
                   <div className="col-span-1 md:col-span-1">
-                    <label className="text-[10px] md:text-xs text-slate-600 font-medium">Documento (DNI/ID)</label>
-                    <input type="text" required value={clientForm.doc} onChange={e => setClientForm({...clientForm, doc: e.target.value})} className="w-full mt-1 md:mt-1.5 p-1.5 md:p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm" />
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">documento (dni/id)</label>
+                    <input type="text" required value={clientForm.doc} onChange={e => setClientForm({...clientForm, doc: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm" />
                   </div>
                   <div className="col-span-1 md:col-span-2">
-                    <label className="text-[10px] md:text-xs text-slate-600 font-medium">Nombre y Apellidos</label>
-                    <input type="text" required value={clientForm.name} onChange={e => setClientForm({...clientForm, name: e.target.value})} className="w-full mt-1 md:mt-1.5 p-1.5 md:p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm" />
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">nombre y apellidos</label>
+                    <input type="text" required value={clientForm.name} onChange={e => setClientForm({...clientForm, name: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm" />
                   </div>
                   <div className="col-span-1 md:col-span-1">
-                    <label className="text-[10px] md:text-xs text-slate-600 font-medium">Teléfono</label>
-                    <input type="text" value={clientForm.phone} onChange={e => setClientForm({...clientForm, phone: e.target.value})} className="w-full mt-1 md:mt-1.5 p-1.5 md:p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm" />
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">teléfono</label>
+                    <input type="text" value={clientForm.phone} onChange={e => setClientForm({...clientForm, phone: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm" />
                   </div>
                   
                   <div className="col-span-1 md:col-span-2">
-                    <label className="text-[10px] md:text-xs text-slate-600 font-medium">Email</label>
-                    <input type="email" value={clientForm.email} onChange={e => setClientForm({...clientForm, email: e.target.value})} className="w-full mt-1 md:mt-1.5 p-1.5 md:p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm" />
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">email</label>
+                    <input type="email" value={clientForm.email} onChange={e => setClientForm({...clientForm, email: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm" />
                   </div>
                   <div className="col-span-1 md:col-span-2">
-                    <label className="text-[10px] md:text-xs text-slate-600 font-medium">Estado Civil</label>
-                    <select value={clientForm.civilStatus} onChange={e => setClientForm({...clientForm, civilStatus: e.target.value})} className="w-full mt-1 md:mt-1.5 p-1.5 md:p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm">
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase">estado civil</label>
+                    <select value={clientForm.civilStatus} onChange={e => setClientForm({...clientForm, civilStatus: e.target.value})} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm">
                       <option value="soltero">Soltero/a</option>
                       <option value="casado">Casado/a</option>
                       <option value="divorciado">Divorciado/a</option>

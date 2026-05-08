@@ -132,7 +132,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                 <p className="text-[11px] md:text-[12px] text-slate-500 mt-1 font-medium">Personaliza tu estrategia de comunicación</p>
               </div>
               <div className="p-6 space-y-4">
-                <label className={`block text-[10px] font-bold tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>selecciona tu estrategia</label>
+                <label className="text-[10px] font-bold tracking-wider text-slate-400 lowercase mb-2 block">selecciona tu estrategia</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <StrategyCard 
                     icon={<Zap size={18} />} 
@@ -277,7 +277,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                             <p className="text-xs text-amber-700 mt-1 font-medium">Recomendación: Enviar 1 mensaje mensual o quincenal máximo para evitar saturar al cliente y mantener una relación saludable.</p>
                           </div>
                         </div>
-                        <label className={`text-xs font-bold mb-1 block tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>motivo de postventa</label>
+                        <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-2 block">motivo de postventa</label>
                         <div className="grid grid-cols-2 gap-3">
                           {[
                             { id: 'cumpleanos', label: 'Cumpleaños' },
@@ -297,7 +297,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                       </div>
                     ) : campaignType === 'seguimiento' ? (
                       <div className="grid grid-cols-2 gap-3">
-                        <label className="text-xs font-bold text-slate-500 col-span-2 mb-1 tracking-wider">estrategia de seguimiento (calentar leads)</label>
+                        <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-2 block col-span-2">estrategia de seguimiento (calentar leads)</label>
                         {[
                           { id: 'frios', label: 'Leads Fríos (>30 días)' },
                           { id: 'sin_respuesta', label: 'Sin respuesta a cotización' },
@@ -315,7 +315,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                       </div>
                     ) : (
                       <div>
-                        <label className="text-xs font-bold text-slate-500 block mb-2 tracking-wider">filtrar por etapa del pipeline (masivo)</label>
+                        <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-2 block">filtrar por etapa del pipeline (masivo)</label>
                         <select 
                           value={dbFilter} 
                           onChange={(e) => setDbFilter(e.target.value)}
@@ -437,12 +437,12 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                 <p className="text-sm text-slate-600">Intervalo aleatorio entre mensajes (Segundos)</p>
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
-                    <label className="text-xs text-slate-500 mb-1 block">Mínimo</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-1 block">mínimo</label>
                     <input type="number" value={minDelay} onChange={(e) => setMinDelay(Number(e.target.value))} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-center" />
                   </div>
                   <div className="text-slate-400 mt-5">-</div>
                   <div className="flex-1">
-                    <label className="text-xs text-slate-500 mb-1 block">Máximo</label>
+                    <label className="text-[10px] text-slate-400 font-bold tracking-wider lowercase mb-1 block">máximo</label>
                     <input type="number" value={maxDelay} onChange={(e) => setMaxDelay(Number(e.target.value))} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-center" />
                   </div>
                 </div>
