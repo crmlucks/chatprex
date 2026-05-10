@@ -121,38 +121,138 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     <div className="flex-1 min-h-[600px]">
 
      {tab === 'proyectos' && (
-      <div className="space-y-8">
+      <div className="space-y-6">
        <Header tabTitle="Proyectos y desarrollos" desc="Gestiona los proyectos inmobiliarios disponibles para venta." onAdd={() => openModal('proyecto')} dc={dc} />
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {projects.length === 0 ? (
-         <div className={`col-span-2 text-center py-20 ${dc ? 'text-content-secondary' : 'text-content-muted'} font-bold`}>No hay proyectos registrados</div>
-        ) : projects.map((p: any) => (
-         <ProjectCard key={p.id} project={p} onEdit={() => openModal('proyecto', p)} onDelete={() => handleDelete('proyecto', p.id)} dc={dc} />
-        ))}
+       <div className="card overflow-hidden">
+        <table className="w-full text-left">
+         <thead>
+          <tr className={`text-[10px] font-bold text-content-muted border-b uppercase tracking-wider ${dc ? 'bg-surface-raised border-edge' : 'bg-surface-inset border-edge'}`}>
+           <th className="px-6 py-4">Proyecto</th>
+           <th className="px-6 py-4">Desarrollador / Contacto</th>
+           <th className="px-6 py-4 text-center">Estado</th>
+           <th className="px-6 py-4 text-right">Acciones</th>
+          </tr>
+         </thead>
+         <tbody className={`divide-y ${dc ? 'divide-edge' : 'divide-slate-100'}`}>
+          {projects.length === 0 ? (
+           <tr><td colSpan={4} className="px-6 py-10 text-center text-xs font-bold text-content-muted uppercase">No hay proyectos registrados</td></tr>
+          ) : projects.map((p: any) => (
+           <tr key={p.id} className="group hover:bg-surface-inset transition-colors">
+            <td className="px-6 py-4">
+             <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${dc ? 'bg-surface-raised text-content-muted' : 'bg-slate-100 text-content-muted'}`}>
+               <Database size={16} />
+              </div>
+              <span className="text-sm font-bold text-content">{p.name}</span>
+             </div>
+            </td>
+            <td className="px-6 py-4">
+             <div className="flex flex-col">
+              <span className="text-xs font-semibold text-content">{p.developer || '—'}</span>
+              <span className="text-[10px] text-content-muted">{p.contact || 'Sin contacto'}</span>
+             </div>
+            </td>
+            <td className="px-6 py-4 text-center">
+             <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-tight ${p.status === 'Activo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+              {p.status || 'Activo'}
+             </span>
+            </td>
+            <td className="px-6 py-4 text-right">
+             <div className="flex justify-end gap-1">
+              <button onClick={() => openModal('proyecto', p)} className="p-2 rounded-lg hover:bg-surface-raised text-accent transition-all active:scale-90"><Edit2 size={14} /></button>
+              <button onClick={() => handleDelete('proyecto', p.id)} className="p-2 rounded-lg hover:bg-surface-raised text-red-500 transition-all active:scale-90"><Trash2 size={14} /></button>
+             </div>
+            </td>
+           </tr>
+          ))}
+         </tbody>
+        </table>
        </div>
       </div>
      )}
 
      {tab === 'pipeline' && (
-      <div className="space-y-8">
+      <div className="space-y-6">
        <Header tabTitle="Etapas del pipeline" desc="Define los estados por los que pasan tus prospectos." onAdd={() => openModal('etapa')} dc={dc} />
-       <div className={card + ' p-5'}>
-        <div className="divide-y divide-edge">
-         {pipeline.map((p: any) => (
-          <PipelineRow key={p.id} pipeline={p} onEdit={() => openModal('etapa', p)} onDelete={() => handleDelete('etapa', p.id)} dc={dc} />
-         ))}
-        </div>
+       <div className="card overflow-hidden">
+        <table className="w-full text-left">
+         <thead>
+          <tr className={`text-[10px] font-bold text-content-muted border-b uppercase tracking-wider ${dc ? 'bg-surface-raised border-edge' : 'bg-surface-inset border-edge'}`}>
+           <th className="px-6 py-4">Etapa</th>
+           <th className="px-6 py-4 text-center">Visibilidad</th>
+           <th className="px-6 py-4 text-right">Acciones</th>
+          </tr>
+         </thead>
+         <tbody className={`divide-y ${dc ? 'divide-edge' : 'divide-slate-100'}`}>
+          {pipeline.length === 0 ? (
+           <tr><td colSpan={3} className="px-6 py-10 text-center text-xs font-bold text-content-muted uppercase">No hay etapas definidas</td></tr>
+          ) : pipeline.map((p: any) => (
+           <tr key={p.id} className="group hover:bg-surface-inset transition-colors">
+            <td className="px-6 py-4">
+             <div className="flex items-center gap-3">
+              <div className="w-4 h-4 rounded-full border border-edge shrink-0" style={{ backgroundColor: p.color }}></div>
+              <span className="text-sm font-bold text-content">{p.name}</span>
+             </div>
+            </td>
+            <td className="px-6 py-4 text-center">
+             <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-tight ${p.visible !== false ? 'bg-emerald-500/10 text-emerald-500' : 'bg-surface-raised text-content-muted'}`}>
+              {p.visible !== false ? 'visible' : 'oculto'}
+             </span>
+            </td>
+            <td className="px-6 py-4 text-right">
+             <div className="flex justify-end gap-1">
+              <button onClick={() => openModal('etapa', p)} className="p-2 rounded-lg hover:bg-surface-raised text-accent transition-all active:scale-90"><Edit2 size={14} /></button>
+              <button onClick={() => handleDelete('etapa', p.id)} className="p-2 rounded-lg hover:bg-surface-raised text-red-500 transition-all active:scale-90"><Trash2 size={14} /></button>
+             </div>
+            </td>
+           </tr>
+          ))}
+         </tbody>
+        </table>
        </div>
       </div>
      )}
 
      {tab === 'fuentes' && (
-      <div className="space-y-8">
+      <div className="space-y-6">
        <Header tabTitle="Fuentes de origen" desc="Canales desde donde llegan tus clientes potenciales." onAdd={() => openModal('fuente')} dc={dc} />
-       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {sources.map((s: any) => (
-         <SourceCard key={s.id} source={s} onEdit={() => openModal('fuente', s)} onDelete={() => handleDelete('fuente', s.id)} dc={dc} />
-        ))}
+       <div className="card overflow-hidden">
+        <table className="w-full text-left">
+         <thead>
+          <tr className={`text-[10px] font-bold text-content-muted border-b uppercase tracking-wider ${dc ? 'bg-surface-raised border-edge' : 'bg-surface-inset border-edge'}`}>
+           <th className="px-6 py-4">Fuente</th>
+           <th className="px-6 py-4 text-center">Estado</th>
+           <th className="px-6 py-4 text-right">Acciones</th>
+          </tr>
+         </thead>
+         <tbody className={`divide-y ${dc ? 'divide-edge' : 'divide-slate-100'}`}>
+          {sources.length === 0 ? (
+           <tr><td colSpan={3} className="px-6 py-10 text-center text-xs font-bold text-content-muted uppercase">No hay fuentes configuradas</td></tr>
+          ) : sources.map((s: any) => (
+           <tr key={s.id} className="group hover:bg-surface-inset transition-colors">
+            <td className="px-6 py-4">
+             <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg border border-edge flex items-center justify-center shrink-0 ${dc ? 'bg-surface-raised' : 'bg-white shadow-sm'}`}>
+               {renderIcon(s.icon, dc)}
+              </div>
+              <span className="text-sm font-bold text-content">{s.name}</span>
+             </div>
+            </td>
+            <td className="px-6 py-4 text-center">
+             <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-tight ${s.visible !== false ? 'bg-emerald-500/10 text-emerald-500' : 'bg-surface-raised text-content-muted'}`}>
+              {s.visible !== false ? 'activa' : 'inactiva'}
+             </span>
+            </td>
+            <td className="px-6 py-4 text-right">
+             <div className="flex justify-end gap-1">
+              <button onClick={() => openModal('fuente', s)} className="p-2 rounded-lg hover:bg-surface-raised text-accent transition-all active:scale-90"><Edit2 size={14} /></button>
+              <button onClick={() => handleDelete('fuente', s.id)} className="p-2 rounded-lg hover:bg-surface-raised text-red-500 transition-all active:scale-90"><Trash2 size={14} /></button>
+             </div>
+            </td>
+           </tr>
+          ))}
+         </tbody>
+        </table>
        </div>
       </div>
      )}
@@ -171,46 +271,46 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
        {modalType === 'proyecto' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          <div className="md:col-span-2">
-          <label className={label}>nombre del proyecto</label>
+          <label className={label}>Nombre del proyecto</label>
           <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={input} placeholder="Torre Esmeralda..." />
          </div>
          <div>
-          <label className={label}>desarrollador</label>
+          <label className={label}>Desarrollador</label>
           <input type="text" value={formData.developer || ''} onChange={e => setFormData({...formData, developer: e.target.value})} className={input} placeholder="Constructora ABC..." />
          </div>
          <div>
-          <label className={label}>contacto principal</label>
+          <label className={label}>Contacto principal</label>
           <input type="text" value={formData.contact || ''} onChange={e => setFormData({...formData, contact: e.target.value})} className={input} placeholder="Nombre del contacto..." />
          </div>
          <div>
-          <label className={label}>teléfono</label>
+          <label className={label}>Teléfono</label>
           <input type="text" value={formData.phone || ''} onChange={e => setFormData({...formData, phone: e.target.value})} className={input} placeholder="+51 999..." />
          </div>
          <div>
-          <label className={label}>email</label>
+          <label className={label}>Email</label>
           <input type="email" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} className={input} placeholder="correo@ejemplo.com" />
          </div>
          <div className="md:col-span-2">
-          <label className={label}>dirección</label>
+          <label className={label}>Dirección</label>
           <input type="text" value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} className={input} placeholder="Av. Principal 123..." />
          </div>
          <div>
-          <label className={label}>tipo de moneda de venta</label>
+          <label className={label}>Tipo de moneda de venta</label>
           <select value={formData.currency || 'PEN'} onChange={e => setFormData({...formData, currency: e.target.value})} className={input}>
            <option value="PEN">Soles (S/)</option>
            <option value="USD">Dólares ($)</option>
           </select>
          </div>
          <div>
-          <label className={label}>estado</label>
+          <label className={label}>Estado</label>
           <select value={formData.status || 'Activo'} onChange={e => setFormData({...formData, status: e.target.value})} className={input}>
            <option value="Activo">Activo</option>
            <option value="Inactivo">Inactivo</option>
           </select>
          </div>
          <div className="md:col-span-2">
-          <label className={label}>notas</label>
-          <textarea value={formData.notes || ''} onChange={e => setFormData({...formData, notes: e.target.value})} className={`${input} h-16 resize-none`} placeholder="Información adicional..."></textarea>
+          <label className={label}>Notas</label>
+          <textarea value={formData.notes || ''} onChange={e => setFormData({...formData, notes: e.target.value})} className={`${input} h-14 resize-none`} placeholder="Información adicional..."></textarea>
          </div>
         </div>
        )}
@@ -240,26 +340,24 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
        )}
 
        {modalType === 'fuente' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          <div className="md:col-span-2">
-          <label className={label}>nombre de la fuente</label>
+          <label className={label}>Nombre de la fuente</label>
           <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className={input} placeholder="Facebook Ads..." />
          </div>
          <div>
-          <label className={label}>icono representativo</label>
+          <label className={label}>Icono representativo</label>
           <select value={formData.icon || 'Globe'} onChange={e => setFormData({...formData, icon: e.target.value})} className={input}>
+           <option value="Globe">Web / Globo</option>
            <option value="Facebook">Facebook</option>
            <option value="Instagram">Instagram</option>
-           <option value="Smartphone">Smartphone</option>
-           <option value="Globe">Web / Globo</option>
-           <option value="Users">Referido</option>
-           <option value="Hash">Hashtag</option>
-           <option value="Link">Enlace Directo</option>
+           <option value="Smartphone">WhatsApp / Móvil</option>
+           <option value="Target">Publicidad / Ads</option>
           </select>
          </div>
-         <div className="flex items-center gap-4 h-14 bg-surface-inset dark:bg-surface-raised px-6 rounded-2xl border border-edge dark:border-edge">
-          <input type="checkbox" className="w-5 h-5 rounded-lg border-2 border-accent text-accent focus:ring-0" checked={formData.visible !== false} onChange={e => setFormData({...formData, visible: e.target.checked})} />
-          <span className={`text-xs font-semibold lowercase ${dc ? 'text-content-secondary' : 'text-content-secondary'}`}>fuente activa</span>
+         <div className="flex items-center gap-3 h-9 bg-surface-inset dark:bg-surface-raised px-4 rounded-xl border border-edge mt-5">
+           <input type="checkbox" className="w-4 h-4 rounded-md border-2 border-accent text-accent focus:ring-0" checked={formData.visible !== false} onChange={e => setFormData({...formData, visible: e.target.checked})} />
+           <span className="text-[10px] font-bold text-content-secondary uppercase tracking-tight">Fuente activa</span>
          </div>
         </div>
        )}
@@ -296,65 +394,6 @@ const MenuBtn = ({ active, onClick, icon, label, dc }: any) => (
  </button>
 );
 
-const ProjectCard = ({ project, onEdit, onDelete, dc }: any) => (
- <div className="card p-5 hover:bg-surface-inset transition-colors">
-  <div className="flex justify-between items-start mb-4">
-   <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-surface-inset text-content-muted">
-    <Database size={20} />
-   </div>
-   <div className="flex gap-1.5">
-    <button onClick={onEdit} className="p-2 rounded-lg hover:bg-surface-inset text-accent transition-colors"><Edit2 size={14} /></button>
-    <button onClick={onDelete} className="p-2 rounded-lg hover:bg-surface-inset text-red-500 transition-colors"><Trash2 size={14} /></button>
-   </div>
-  </div>
-  <h4 className="text-sm font-semibold text-content mb-2">{project.name}</h4>
-  <div className="flex items-center justify-between mt-3">
-    <span className="text-xs text-content-muted">{project.code}</span>
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${project.status === 'Activo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
-     {project.status || 'Activo'}
-    </span>
-  </div>
- </div>
-);
-
-const PipelineRow = ({ pipeline, onEdit, onDelete, dc }: any) => (
- <div className="flex items-center justify-between py-4 group transition-colors">
-  <div className="flex items-center gap-3">
-   <div className="w-4 h-4 rounded-full border border-edge" style={{ backgroundColor: pipeline.color }}></div>
-   <span className="text-sm font-medium text-content">{pipeline.name}</span>
-  </div>
-  <div className="flex items-center gap-4">
-   <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${pipeline.visible !== false ? 'bg-emerald-500/10 text-emerald-500' : 'bg-surface-inset text-content-muted'}`}>
-    {pipeline.visible !== false ? 'visible' : 'oculto'}
-   </span>
-   <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-    <button onClick={onEdit} className="p-1.5 rounded-lg hover:bg-surface-inset text-accent transition-colors"><Edit2 size={14} /></button>
-    <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-surface-inset text-red-500 transition-colors"><Trash2 size={14} /></button>
-   </div>
-  </div>
- </div>
-);
-
-const SourceCard = ({ source, onEdit, onDelete, dc }: any) => (
- <div className="card p-5 hover:bg-surface-inset transition-colors group">
-  <div className="flex items-center justify-between mb-4">
-   <div className="w-10 h-10 rounded-lg border border-edge flex items-center justify-center bg-surface-inset">
-    {renderIcon(source.icon, dc)}
-   </div>
-   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-    <button onClick={onEdit} className="p-1.5 rounded-lg hover:bg-surface-inset text-accent transition-colors"><Edit2 size={14} /></button>
-    <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-surface-inset text-red-500 transition-colors"><Trash2 size={14} /></button>
-   </div>
-  </div>
-  <h4 className="text-sm font-medium text-content">{source.name}</h4>
-  <div className="mt-3">
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${source.visible !== false ? 'text-emerald-500 bg-emerald-500/10' : 'text-content-muted bg-surface-inset'}`}>
-     {source.visible !== false ? 'activa' : 'inactiva'}
-    </span>
-  </div>
- </div>
-);
-
 const renderIcon = (iconStr: string, dc: boolean) => {
  switch (iconStr) {
   case 'Facebook': return <Facebook className="text-blue-600" size={20} />;
@@ -364,6 +403,7 @@ const renderIcon = (iconStr: string, dc: boolean) => {
   case 'Users': return <Users className="text-indigo-500" size={20} />;
   case 'Hash': return <Hash className="text-content-secondary" size={20} />;
   case 'Link': return <Link className="text-sky-500" size={20} />;
+  case 'Target': return <Target className="text-red-500" size={20} />;
   default: return <Globe className="text-content-muted" size={20} />;
  }
 };
