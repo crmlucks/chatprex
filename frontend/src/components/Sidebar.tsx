@@ -61,6 +61,7 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
           <NavItem onClick={() => setActiveTab('Inventario')} icon={<Home size={18} />} label="Propiedades" active={activeTab === 'Inventario'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Finanzas')} icon={<DollarSign size={18} />} label="Finanzas" active={activeTab === 'Finanzas'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Campañas')} icon={<PieChart size={18} />} label="Campañas" active={activeTab === 'Campañas'} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Inteligencia')} icon={<Zap size={18} />} label="Lead Intelligence" active={activeTab === 'Inteligencia'} collapsed={isCollapsed} />
         </nav>
 
         <div className={`p-3 border-t border-edge shrink-0 flex flex-col gap-0.5`}>

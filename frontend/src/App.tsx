@@ -13,6 +13,7 @@ import Automation from './components/Automation';
 import Chatbots from './components/Chatbots';
 import ChatbotBuilder from './components/ChatbotBuilder';
 import Campaigns from './components/Campaigns';
+import LeadIntelligence from './components/LeadIntelligence';
 import UserManagement from './components/UserManagement';
 import { ToastProvider } from './components/Toast';
 import AlarmSystem, { AlarmItem } from './components/AlarmSystem';
@@ -94,6 +95,7 @@ function AuthenticatedApp() {
    case 'Inventario': return <Properties isDarkMode={isDarkMode} />;
    case 'Finanzas': return <Finances isDarkMode={isDarkMode} />;
    case 'Campañas': return <Campaigns isDarkMode={isDarkMode} />;
+   case 'Inteligencia': return <LeadIntelligence isDarkMode={isDarkMode} />;
    case 'Administración': return <Admin isDarkMode={isDarkMode} />;
    case 'Conexión WP': return <Chatbots isDarkMode={isDarkMode} />;
    case 'Constructor Bots': return <ChatbotBuilder isDarkMode={isDarkMode} />;

@@ -172,6 +172,48 @@ export async function initDatabase() {
       );
     `);
 
+    // Crear tabla lead_score_history (Lead Intelligence)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS lead_score_history (
+        id            SERIAL PRIMARY KEY,
+        lead_id       INTEGER NOT NULL,
+        score         INTEGER NOT NULL DEFAULT 0,
+        breakdown     JSONB DEFAULT '{}'::jsonb,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Crear tabla follow_up_rules
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS follow_up_rules (
+        id            SERIAL PRIMARY KEY,
+        name          VARCHAR(150) NOT NULL,
+        trigger_type  VARCHAR(50) NOT NULL DEFAULT 'inactivity',
+        trigger_value INTEGER NOT NULL DEFAULT 48,
+        action_type   VARCHAR(50) NOT NULL DEFAULT 'task',
+        action_template TEXT DEFAULT '',
+        enabled       BOOLEAN DEFAULT true,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Crear tabla follow_up_queue  
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS follow_up_queue (
+        id            SERIAL PRIMARY KEY,
+        lead_id       INTEGER NOT NULL,
+        rule_id       INTEGER,
+        action_type   VARCHAR(50) NOT NULL,
+        message       TEXT DEFAULT '',
+        fire_at       TIMESTAMPTZ NOT NULL,
+        status        VARCHAR(20) DEFAULT 'pending',
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await client.query('CREATE INDEX IF NOT EXISTS idx_score_history_lead ON lead_score_history (lead_id);');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_follow_up_queue_status ON follow_up_queue (status, fire_at);');
+
     // Crear tabla campaigns
     await client.query(`
       CREATE TABLE IF NOT EXISTS campaigns (
