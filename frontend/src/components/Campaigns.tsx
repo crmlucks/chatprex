@@ -199,7 +199,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
           </div>
           <div className="flex items-center gap-3">
             <Users size={16} className="text-content-muted shrink-0" />
-            <p className="text-sm font-medium text-content-secondary">{c.recipient_source === 'manual' ? 'Ingreso Manual' : \`CRM: \${c.db_filter}\`}</p>
+            <p className="text-sm font-medium text-content-secondary">{c.recipient_source === 'manual' ? 'Ingreso Manual' : `CRM: ${c.db_filter}`}</p>
           </div>
          </div>
 
