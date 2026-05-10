@@ -537,6 +537,14 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
   } catch { showToast('Error al crear tarea', 'error'); }
  };
 
+ const deleteTask = async (id: number) => {
+  setTasks(tasks.filter(t => t.id !== id));
+  try {
+   await fetch(`${API_URL}/api/data/tasks/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+   showToast('Tarea eliminada', 'info');
+  } catch {}
+ };
+
  const [notes, setNotes] = useState<any[]>([]);
  const [newNote, setNewNote] = useState('');
 
@@ -563,6 +571,28 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
   } catch { showToast('Error al guardar nota', 'error'); }
  };
 
+ const deleteNote = async (id: number) => {
+  setNotes(notes.filter(n => n.id !== id));
+  try {
+   await fetch(`${API_URL}/api/data/notes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+   showToast('Nota eliminada', 'info');
+  } catch {}
+ };
+
+ const [history, setHistory] = useState<any[]>([]);
+ const [historyLoading, setHistoryLoading] = useState(false);
+
+ useEffect(() => {
+  if (lead?.id && activeTab === 'historial') {
+   setHistoryLoading(true);
+   fetch(`${API_URL}/api/data/history/${lead.id}`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(r => r.json())
+    .then(data => { if(Array.isArray(data)) setHistory(data); })
+    .catch(() => {})
+    .finally(() => setHistoryLoading(false));
+  }
+ }, [lead?.id, activeTab]);
+
  return (
   <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-300">
    <div className={`w-full max-w-4xl h-[85vh] rounded-xl border shadow-sm overflow-hidden flex flex-col ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
@@ -581,7 +611,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
        <p className="small-text mt-0.5">{lead.phone} • {lead.email || 'Sin email'}</p>
       </div>
      </div>
-     <button onClose={onClose} className={`p-2 rounded-xl transition-all ${dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-surface border text-content-muted hover:text-content shadow-sm'}`}>
+     <button onClick={onClose} className={`p-2 rounded-xl transition-all ${dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-surface border text-content-muted hover:text-content shadow-sm'}`}>
       <X size={20} />
      </button>
     </div>
@@ -629,20 +659,29 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
        </div>
 
        <div className="space-y-3">
+        {tasks.length === 0 && (
+         <div className="card-premium p-12 text-center flex flex-col items-center">
+          <ListTodo size={32} className="opacity-20 mb-3" />
+          <p className="text-sm font-bold text-content-muted">Sin tareas registradas</p>
+          <p className="text-xs text-content-muted mt-1">Agrega tu primera tarea arriba</p>
+         </div>
+        )}
         {tasks.map(task => (
-         <div key={task.id} className={`p-4 rounded-2xl border flex items-center justify-between transition-all ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge hover:shadow-md'}`}>
-          <div className="flex items-center gap-4">
-           <button onClick={() => toggleTask(task.id)} className={`transition-all ${task.status === 'completada' ? 'text-emerald-500' : 'text-content-secondary hover:text-accent'}`}>
-            {task.status === 'completada' ? <CheckCircle2 size={24} className="fill-emerald-500/5" /> : <Circle size={24} />}
+         <div key={task.id} className={`p-4 rounded-2xl border flex items-center justify-between transition-all group ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge hover:shadow-md'}`}>
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+           <button onClick={() => toggleTask(task.id)} className={`shrink-0 transition-all ${task.status === 'completada' ? 'text-emerald-500' : 'text-content-secondary hover:text-accent'}`}>
+            {task.status === 'completada' ? <CheckCircle2 size={22} /> : <Circle size={22} />}
            </button>
-           <div>
-            <p className={`text-sm font-bold ${task.status === 'completada' ? 'text-content-muted line-through' : (dc ? 'text-content' : 'text-content')}`}>{task.text}</p>
-            <div className="flex items-center gap-4 mt-1.5">
-             <span className="text-xs font-bold text-emerald-500 flex items-center gap-1.5"><Clock size={12} /> {task.date}</span>
-             <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${task.priority === 'Alta' ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-500'}`}>{task.priority}</span>
+           <div className="min-w-0 flex-1">
+            <p className={`text-sm font-bold truncate ${task.status === 'completada' ? 'text-content-muted line-through' : 'text-content'}`}>{task.text}</p>
+            <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+             <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-lg ${task.type === 'Llamada' ? 'bg-emerald-500/10 text-emerald-500' : task.type === 'Visita' ? 'bg-blue-500/10 text-blue-500' : task.type === 'Email' ? 'bg-purple-500/10 text-purple-500' : 'bg-amber-500/10 text-amber-500'}`}>{task.type}</span>
+             <span className="text-xs font-bold text-content-muted flex items-center gap-1"><Clock size={11} /> {task.date}</span>
+             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${task.priority === 'Alta' ? 'bg-rose-500/10 text-rose-500' : task.priority === 'Baja' ? 'bg-slate-500/10 text-slate-500' : 'bg-blue-500/10 text-blue-500'}`}>{task.priority}</span>
             </div>
            </div>
           </div>
+          <button onClick={() => deleteTask(task.id)} className="p-2 text-content-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100 shrink-0 ml-2"><Trash2 size={14} /></button>
          </div>
         ))}
        </div>
@@ -677,50 +716,71 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
           <div className={`flex-1 p-5 rounded-2xl border shadow-sm ${dc ? 'bg-surface-raised/40 border-edge' : 'bg-surface border-edge'}`}>
            <div className="flex justify-between items-center mb-2">
             <span className={`text-[12px] font-bold ${dc ? 'text-content-secondary' : 'text-content'}`}>{note.author}</span>
-            <span className="text-xs font-bold text-content-muted">{note.time}</span>
+             <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-content-muted">{note.time}</span>
+              <button onClick={() => deleteNote(note.id)} className="p-1 text-content-muted hover:text-rose-500 rounded-lg transition-all">
+               <Trash2 size={12} />
+              </button>
+             </div>
+            </div>
+            <p className="body-text">{note.text}</p>
            </div>
-           <p className="body-text">{note.text}</p>
           </div>
-         </div>
-        ))}
+         ))}
+         {notes.length === 0 && (
+          <div className="p-8 text-center text-content-muted text-xs italic">
+           Sin notas registradas todavía.
+          </div>
+         )}
+        </div>
        </div>
       </div>
      )}
 
      {activeTab === 'historial' && (
       <div className="space-y-0 relative pl-8">
-       <div className={`absolute left-[15px] top-0 bottom-0 w-0.5 ${dc ? 'bg-surface-raised' : 'bg-slate-100'}`}></div>
-       {[...tasks.filter(t => t.status === 'completada').map(t => ({
-        icon: 'task', color: dc ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-50 text-emerald-600',
-        title: `Tarea completada: ${t.text}`, desc: `Tipo: ${t.type}`, time: t.date || ''
-       })), ...notes.map(n => ({
-        icon: 'note', color: dc ? 'bg-surface-inset0/15 text-content-muted' : 'bg-surface-inset text-content-secondary',
-        title: `Nota de ${n.author}`, desc: n.text, time: n.time || ''
-       }))].length === 0 ? (
+       <div className={`absolute left-[15px] top-0 bottom-0 w-0.5 ${dc ? 'bg-surface-raised' : 'bg-slate-200'}`}></div>
+       {historyLoading ? (
+        <div className="p-12 text-center">
+         <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+         <p className="text-sm font-bold text-content-muted">Cargando historial...</p>
+        </div>
+       ) : history.length === 0 ? (
         <div className="card-premium p-12 text-center flex flex-col items-center">
          <History size={32} className="opacity-20 mb-3" />
          <p className="text-sm font-bold text-content-muted">Sin historial registrado</p>
+         <p className="text-xs text-content-muted mt-1">Las tareas, notas y mensajes de WhatsApp aparecerán aquí</p>
         </div>
-       ) : [...tasks.filter(t => t.status === 'completada').map(t => ({
-        icon: 'task', color: dc ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-50 text-emerald-600',
-        title: `Tarea completada: ${t.text}`, desc: `Tipo: ${t.type}`, time: t.date || ''
-       })), ...notes.map(n => ({
-        icon: 'note', color: dc ? 'bg-surface-inset0/15 text-content-muted' : 'bg-surface-inset text-content-secondary',
-        title: `Nota de ${n.author}`, desc: n.text, time: n.time || ''
-       }))].map((item, i) => (
-        <div key={i} className="flex gap-6 relative py-4 group">
-         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 z-10 border-2 ${dc ? 'border-[#1E1E1E]' : 'border-white shadow-sm'} ${item.color}`}>
-          {item.icon === 'task' ? <CheckCircle2 size={14}/> : <FileText size={14}/>}
-         </div>
-         <div className={`flex-1 p-4 rounded-xl border transition-all group-hover:shadow-sm ${dc ? 'bg-surface-raised/40 border-edge' : 'bg-slate-700 hover:border-slate-600'}`}>
-          <div className="flex justify-between items-start mb-1">
-           <span className={`text-xs font-bold ${dc ? 'text-content' : 'text-content'}`}>{item.title}</span>
-           <span className="text-xs font-bold text-content-muted">{item.time}</span>
+       ) : history.map((item: any, i: number) => {
+        const gc = () => { 
+         if (item.category === 'task') return item.status === 'completada' ? (dc ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-50 text-emerald-600') : (dc ? 'bg-blue-500/15 text-blue-400' : 'bg-blue-50 text-blue-600');
+         if (item.category === 'note') return dc ? 'bg-purple-500/15 text-purple-400' : 'bg-purple-50 text-purple-600';
+         if (item.icon === 'sent') return dc ? 'bg-accent/15 text-accent' : 'bg-accent/10 text-accent';
+         return dc ? 'bg-slate-500/15 text-slate-400' : 'bg-slate-100 text-slate-600';
+        };
+        const gi = () => { 
+         if (item.category === 'task') return item.icon === 'calendar' ? <CalendarDays size={14}/> : <CheckCircle2 size={14}/>;
+         if (item.category === 'note') return <FileText size={14}/>;
+         return item.icon === 'sent' ? <Send size={14}/> : <MessageSquare size={14}/>;
+        };
+        const ts = new Date(item.timestamp);
+        const timeStr = ts.toLocaleDateString('es', { day: '2-digit', month: 'short' }) + ' ' + ts.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+        return (
+         <div key={item.id || i} className="flex gap-6 relative py-3 group">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 border-2 ${dc ? 'border-[#1E1E1E]' : 'border-white shadow-sm'} ${gc()}`}>
+           {gi()}
           </div>
-          <p className="body-text text-xs">{item.desc}</p>
+          <div className={`flex-1 p-4 rounded-xl border transition-all group-hover:shadow-sm ${dc ? 'bg-surface-raised/40 border-edge' : 'bg-surface border-edge'}`}>
+           <div className="flex justify-between items-start mb-1 gap-2">
+            <span className="text-xs font-bold text-content">{item.title}</span>
+            <span className="text-[10px] font-bold text-content-muted whitespace-nowrap">{timeStr}</span>
+           </div>
+           {item.description && <p className="text-xs text-content-muted leading-relaxed line-clamp-2">{item.description}</p>}
+           {item.status && <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-lg ${item.status === 'completada' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>{item.status}</span>}
+          </div>
          </div>
-        </div>
-       ))}
+        );
+       })}
       </div>
      )}
 

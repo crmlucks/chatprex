@@ -99,6 +99,88 @@ router.delete('/notes/:id', async (req, res) => {
   }
 });
 
+// --- LEAD HISTORY (unified timeline) ---
+router.get('/history/:leadId', async (req, res) => {
+  try {
+    const { leadId } = req.params;
+    
+    // Get lead phone for message lookup
+    const leadRes = await pool.query('SELECT phone FROM leads WHERE id = $1', [leadId]);
+    const phone = leadRes.rows[0]?.phone || '';
+    
+    // 1. Tasks
+    const tasksRes = await pool.query(
+      'SELECT id, title, description, type, status, due_date, created_at FROM tasks WHERE lead_id = $1 ORDER BY created_at DESC',
+      [leadId]
+    );
+    
+    // 2. Notes
+    const notesRes = await pool.query(
+      'SELECT id, content, created_at FROM notes WHERE lead_id = $1 ORDER BY created_at DESC',
+      [leadId]
+    );
+    
+    // 3. WhatsApp messages (last 50)
+    let messages: any[] = [];
+    if (phone) {
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      const msgRes = await pool.query(
+        `SELECT id, text, from_me, timestamp FROM evolution_messages 
+         WHERE chat_id LIKE $1 
+         ORDER BY timestamp DESC LIMIT 50`,
+        [`${cleanPhone}%`]
+      );
+      messages = msgRes.rows;
+    }
+    
+    // Build unified timeline
+    const timeline: any[] = [];
+    
+    for (const t of tasksRes.rows) {
+      timeline.push({
+        id: `task-${t.id}`,
+        category: 'task',
+        icon: t.type === 'cita' ? 'calendar' : 'task',
+        title: t.type === 'cita' ? `Cita: ${t.title}` : `Tarea: ${t.title}`,
+        description: t.description || '',
+        status: t.status,
+        timestamp: t.created_at,
+        due_date: t.due_date
+      });
+    }
+    
+    for (const n of notesRes.rows) {
+      timeline.push({
+        id: `note-${n.id}`,
+        category: 'note',
+        icon: 'note',
+        title: 'Nota agregada',
+        description: n.content,
+        timestamp: n.created_at
+      });
+    }
+    
+    for (const m of messages) {
+      timeline.push({
+        id: `msg-${m.id}`,
+        category: 'message',
+        icon: m.from_me ? 'sent' : 'received',
+        title: m.from_me ? 'Mensaje enviado' : 'Mensaje recibido',
+        description: (m.text || '').substring(0, 120),
+        timestamp: m.timestamp
+      });
+    }
+    
+    // Sort by timestamp descending
+    timeline.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    res.json(timeline.slice(0, 100));
+  } catch (error) {
+    console.error('Error fetching history', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // --- FINANCES: CLIENTS ---
 router.get('/finances/clients', async (req, res) => {
   try {
