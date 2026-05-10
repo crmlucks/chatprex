@@ -287,7 +287,6 @@ async function setWebhook(): Promise<void> {
     console.log(`[Evolution] Webhook set (${res.status}): ${text.substring(0, 200)}`);
 
     if (!res.ok) {
-      // Fallback: intentar con PUT /webhook/set
       const res2 = await safeFetch(`${EVOLUTION_API_URL}/webhook/set/${INSTANCE_NAME}`, {
         method: 'PUT',
         headers: getHeaders(),
@@ -297,11 +296,8 @@ async function setWebhook(): Promise<void> {
       console.log(`[Evolution] Webhook set PUT (${res2.status}): ${text2.substring(0, 200)}`);
     }
 
-    // Verificar webhook configurado
     try {
-      const checkRes = await safeFetch(`${EVOLUTION_API_URL}/webhook/find/${INSTANCE_NAME}`, {
-        headers: getHeaders(),
-      });
+      const checkRes = await safeFetch(`${EVOLUTION_API_URL}/webhook/find/${INSTANCE_NAME}`, { headers: getHeaders() });
       const checkText = await checkRes.text();
       console.log(`[Evolution] Webhook actual: ${checkText.substring(0, 300)}`);
     } catch {}
@@ -315,13 +311,53 @@ async function setWebhook(): Promise<void> {
 //  ENVIAR MENSAJE
 // ═══════════════════════════════════════════════════
 export const sendEvolutionMessage = async (to: string, text: string) => {
-  const number = to.includes('@s.whatsapp.net') ? to : `${to}@s.whatsapp.net`;
+  const cleanNumber = to.replace('@s.whatsapp.net', '').replace('@lid', '').split(':')[0];
+  const jidNumber = to.includes('@') ? to : `${to}@s.whatsapp.net`;
+  
+  console.log(`[Evolution] sendText → clean: ${cleanNumber}, jid: ${jidNumber}`);
+  
   try {
-    await safeFetch(`${EVOLUTION_API_URL}/message/sendText/${INSTANCE_NAME}`, {
+    // Intento 1: número limpio + text directo (Evolution v2)
+    const res = await safeFetch(`${EVOLUTION_API_URL}/message/sendText/${INSTANCE_NAME}`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ number, options: { delay: 1200 }, text }), // Evolution v2 usa 'text' directamente
+      body: JSON.stringify({ number: cleanNumber, options: { delay: 1200 }, text }),
     });
+    const resText = await res.text();
+    
+    if (res.ok) {
+      console.log(`[Evolution] ✅ Mensaje enviado a ${cleanNumber}`);
+      return;
+    }
+    console.error(`[Evolution] intento 1 falló (${res.status}): ${resText.substring(0, 300)}`);
+    
+    // Intento 2: con JID completo
+    const res2 = await safeFetch(`${EVOLUTION_API_URL}/message/sendText/${INSTANCE_NAME}`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ number: jidNumber, options: { delay: 1200 }, text }),
+    });
+    const resText2 = await res2.text();
+    
+    if (res2.ok) {
+      console.log(`[Evolution] ✅ Mensaje enviado a ${jidNumber} (JID)`);
+      return;
+    }
+    console.error(`[Evolution] intento 2 falló (${res2.status}): ${resText2.substring(0, 300)}`);
+    
+    // Intento 3: formato textMessage (Evolution v1)
+    const res3 = await safeFetch(`${EVOLUTION_API_URL}/message/sendText/${INSTANCE_NAME}`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ number: cleanNumber, options: { delay: 1200 }, textMessage: { text } }),
+    });
+    const resText3 = await res3.text();
+    
+    if (res3.ok) {
+      console.log(`[Evolution] ✅ Mensaje enviado (v1 textMessage)`);
+    } else {
+      console.error(`[Evolution] ❌ Todos los intentos fallaron. Último (${res3.status}): ${resText3.substring(0, 300)}`);
+    }
   } catch (error: any) {
     console.error('[Evolution] Error enviando mensaje:', error.message);
   }
@@ -329,7 +365,7 @@ export const sendEvolutionMessage = async (to: string, text: string) => {
 
 /** Enviar multimedia (imagen, video, audio, documento) */
 export const sendEvolutionMedia = async (to: string, mediaBase64: string, caption?: string, fileName?: string) => {
-  const number = to.includes('@s.whatsapp.net') ? to : `${to}@s.whatsapp.net`;
+  const number = to.replace('@s.whatsapp.net', '').replace('@lid', '').split(':')[0];
 
   // Determinar tipo de media del data URI
   const mimeMatch = mediaBase64.match(/^data:([^;]+);base64,/);
@@ -364,12 +400,42 @@ export const sendEvolutionMedia = async (to: string, mediaBase64: string, captio
   }
 
   try {
-    await safeFetch(`${EVOLUTION_API_URL}/message/${endpoint}/${INSTANCE_NAME}`, {
+    const res = await safeFetch(`${EVOLUTION_API_URL}/message/${endpoint}/${INSTANCE_NAME}`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(payload),
     });
-    console.log(`[Evolution] ✅ Media enviado a ${number} (${mimeType})`);
+    const resText = await res.text();
+    if (!res.ok) {
+      console.error(`[Evolution] sendMedia falló (${res.status}): ${resText.substring(0, 400)}`);
+      
+      // Fallback: intentar con formato alternativo (mediaUrl en vez de media base64)
+      if (endpoint === 'sendMedia') {
+        const fallbackPayload = {
+          number,
+          options: { delay: 1200 },
+          mediaMessage: {
+            mediatype: payload.mediaMessage.mediatype,
+            caption: caption || '',
+            media: mediaBase64, // enviar el data URI completo original
+            fileName: fileName || 'archivo',
+          },
+        };
+        const res2 = await safeFetch(`${EVOLUTION_API_URL}/message/sendMedia/${INSTANCE_NAME}`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify(fallbackPayload),
+        });
+        const resText2 = await res2.text();
+        if (!res2.ok) {
+          console.error(`[Evolution] sendMedia fallback también falló (${res2.status}): ${resText2.substring(0, 300)}`);
+        } else {
+          console.log(`[Evolution] ✅ Media enviado a ${number} (fallback)`);
+        }
+      }
+    } else {
+      console.log(`[Evolution] ✅ Media enviado a ${number} (${mimeType})`);
+    }
   } catch (error: any) {
     console.error('[Evolution] Error enviando media:', error.message);
   }

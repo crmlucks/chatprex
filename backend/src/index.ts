@@ -71,7 +71,12 @@ io.on('connection', (socket) => {
 
   // Enviar mensaje de texto desde el CRM al WhatsApp
   socket.on('send-message', async (data: { to: string; text: string; media?: string; fileName?: string }) => {
-    console.log(`[Socket] Enviando mensaje a ${data.to}: ${data.text?.substring(0, 50)}`);
+    console.log(`[Socket] ═══ SEND-MESSAGE RECIBIDO ═══`);
+    console.log(`[Socket] To: ${data.to}`);
+    console.log(`[Socket] Text: ${data.text?.substring(0, 80)}`);
+    console.log(`[Socket] Media: ${data.media ? `SI (${data.media.substring(0, 30)}... ${data.media.length} chars)` : 'NO'}`);
+    console.log(`[Socket] FileName: ${data.fileName || '(ninguno)'}`);
+    
     try {
       const { sendEvolutionMessage, sendEvolutionMedia } = await import('./evolution');
       
@@ -80,20 +85,24 @@ io.on('connection', (socket) => {
         const { default: pool } = await import('./db');
         const phone = data.to.split('@')[0];
         await pool.query('UPDATE leads SET bot_active = false WHERE phone = $1', [phone]);
-        console.log(`[Bot] ⏸️ Bot desactivado automáticamente para ${phone} por intervención humana`);
+        console.log(`[Bot] ⏸️ Bot desactivado para ${phone}`);
       } catch (dbErr: any) {
         console.error('[Bot] Error desactivando bot:', dbErr.message);
       }
 
       if (data.media && data.media.startsWith('data:')) {
-        // Enviar multimedia
+        console.log(`[Socket] → Enviando MULTIMEDIA...`);
         await sendEvolutionMedia(data.to, data.media, data.text, data.fileName);
       } else if (data.text) {
-        // Enviar texto
+        console.log(`[Socket] → Enviando TEXTO...`);
         await sendEvolutionMessage(data.to, data.text);
+      } else {
+        console.log(`[Socket] ⚠️ No hay texto ni media para enviar`);
       }
+      console.log(`[Socket] ═══ SEND-MESSAGE COMPLETADO ═══`);
     } catch (err: any) {
-      console.error('[Socket] Error enviando mensaje:', err.message);
+      console.error('[Socket] ❌ Error enviando mensaje:', err.message);
+      socket.emit('send-error', { error: err.message });
     }
   });
 
