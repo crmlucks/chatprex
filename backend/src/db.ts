@@ -158,6 +158,24 @@ export async function initDatabase() {
       );
     `);
 
+    // Crear tabla campaigns
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS campaigns (
+        id                SERIAL PRIMARY KEY,
+        name              VARCHAR(255) NOT NULL,
+        type              VARCHAR(50) DEFAULT 'Envío masivo',
+        message           TEXT,
+        use_ai            BOOLEAN DEFAULT false,
+        recipient_source  VARCHAR(50) DEFAULT 'database',
+        db_filter         VARCHAR(100) DEFAULT 'todos',
+        manual_recipients TEXT DEFAULT '',
+        status            VARCHAR(50) DEFAULT 'Borrador',
+        progress          INTEGER DEFAULT 0,
+        created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
     // Crear tabla finances_clients (para Finanzas)
     await client.query(`
       CREATE TABLE IF NOT EXISTS finances_clients (

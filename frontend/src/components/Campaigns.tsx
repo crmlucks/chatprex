@@ -6,13 +6,9 @@ import { useAuth } from '../context/AuthContext';
 export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
  const { token } = useAuth();
  
- const [campaigns, setCampaigns] = useState<any[]>([
-  { id: 1, name: 'Campaña Lanzamiento Abril', type: 'Envío masivo', status: 'Borrador', message: '¡Hola! Tenemos un nuevo proyecto...', recipients: 'CRM: Todos', progress: 0 },
-  { id: 2, name: 'Seguimiento Visitas Fin de Semana', type: 'Seguimiento', status: 'Activo', message: '¿Qué te pareció el recorrido?', recipients: 'CRM: Interesados', progress: 45 }
- ]);
-
+ const [campaigns, setCampaigns] = useState<any[]>([]);
  const [showModal, setShowModal] = useState(false);
- const [activeTab, setActiveTab] = useState('mensaje'); // mensaje, audiencia, ajustes
+ const [activeTab, setActiveTab] = useState('mensaje');
  const [editingCampaign, setEditingCampaign] = useState<any>(null);
 
  // Form state
@@ -30,18 +26,44 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
  });
 
  const [status, setStatus] = useState('idle');
+ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+ const fetchCampaigns = async () => {
+  try {
+   const res = await fetch(`${API_URL}/api/campaigns`, {
+    headers: { Authorization: `Bearer ${token}` }
+   });
+   if (res.ok) {
+    const data = await res.json();
+    setCampaigns(data);
+   }
+  } catch (err) {
+   console.error('Error fetching campaigns', err);
+  }
+ };
+
+ React.useEffect(() => {
+  if (token) fetchCampaigns();
+  const interval = setInterval(() => {
+     setCampaigns(prev => {
+        if (prev.some(c => c.status === 'Activo')) fetchCampaigns();
+        return prev;
+     });
+  }, 10000);
+  return () => clearInterval(interval);
+ }, [token]);
 
  const openModal = (campaign?: any) => {
   if (campaign) {
    setEditingCampaign(campaign);
    setFormData({
     name: campaign.name,
-    type: campaign.type,
+    type: campaign.type || 'Envío masivo',
     message: campaign.message || '',
-    useAI: false,
-    recipientSource: 'database',
-    dbFilter: 'todos',
-    manualRecipients: '',
+    useAI: campaign.use_ai || false,
+    recipientSource: campaign.recipient_source || 'database',
+    dbFilter: campaign.db_filter || 'todos',
+    manualRecipients: campaign.manual_recipients || '',
     minDelay: 10,
     maxDelay: 30,
     mediaName: ''
@@ -65,22 +87,58 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
   setShowModal(true);
  };
 
- const saveCampaign = () => {
-  if (editingCampaign) {
-   setCampaigns(campaigns.map(c => c.id === editingCampaign.id ? { ...c, name: formData.name, type: formData.type, message: formData.message } : c));
-  } else {
-   setCampaigns([...campaigns, { id: Date.now(), name: formData.name, type: formData.type, status: 'Borrador', message: formData.message, recipients: 'CRM', progress: 0 }]);
+ const saveCampaign = async () => {
+  try {
+   const payload = {
+    name: formData.name,
+    type: formData.type,
+    message: formData.message,
+    use_ai: formData.useAI,
+    recipient_source: formData.recipientSource,
+    db_filter: formData.dbFilter,
+    manual_recipients: formData.manualRecipients,
+    status: editingCampaign ? editingCampaign.status : 'Borrador'
+   };
+   
+   const method = editingCampaign ? 'PUT' : 'POST';
+   const url = editingCampaign ? `${API_URL}/api/campaigns/${editingCampaign.id}` : `${API_URL}/api/campaigns`;
+   const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload)
+   });
+   if (res.ok) {
+    fetchCampaigns();
+    setShowModal(false);
+   }
+  } catch (err) {
+   console.error('Error saving campaign', err);
   }
-  setShowModal(false);
  };
 
- const startCampaignLive = (id: number) => {
-  setCampaigns(campaigns.map(c => c.id === id ? { ...c, status: 'Activo', progress: 1 } : c));
+ const startCampaignLive = async (id: number) => {
+  try {
+   setCampaigns(campaigns.map(c => c.id === id ? { ...c, status: 'Activo', progress: 0 } : c));
+   await fetch(`${API_URL}/api/campaigns/${id}/start`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+   });
+  } catch (err) {
+   console.error('Error starting campaign', err);
+  }
  };
 
- const deleteCampaign = (id: number) => {
+ const deleteCampaign = async (id: number) => {
   if(confirm("¿Eliminar esta campaña?")) {
-   setCampaigns(campaigns.filter(c => c.id !== id));
+   try {
+    const res = await fetch(`${API_URL}/api/campaigns/${id}`, {
+     method: 'DELETE',
+     headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) fetchCampaigns();
+   } catch (err) {
+    console.error('Error deleting campaign', err);
+   }
   }
  };
 
@@ -141,7 +199,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
           </div>
           <div className="flex items-center gap-3">
             <Users size={16} className="text-content-muted shrink-0" />
-            <p className="text-sm font-medium text-content-secondary">{c.recipients}</p>
+            <p className="text-sm font-medium text-content-secondary">{c.recipient_source === 'manual' ? 'Ingreso Manual' : \`CRM: \${c.db_filter}\`}</p>
           </div>
          </div>
 
