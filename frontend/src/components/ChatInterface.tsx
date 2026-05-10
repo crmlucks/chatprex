@@ -666,8 +666,8 @@ const Message = ({ type, text, time, media, mimeType, isDarkMode }: any) => {
  const dc = isDarkMode;
  const isOut = type === 'out';
  return (
-  <div className={`flex flex-col ${isOut ? 'items-end' : 'items-start'} group animate-in slide-in-from-bottom-2 duration-300`}>
-   <div className={`relative max-w-[85%] rounded-xl p-4 shadow-sm transition-all hover:shadow-sm ${isOut ? (dc ? 'bg-accent text-content rounded-tr-none' : 'bg-accent text-content rounded-tr-none') : (dc ? 'bg-surface text-content border border-edge rounded-tl-none' : 'bg-surface text-content rounded-tl-none')}`}>
+  <div className={`flex flex-col ${isOut ? 'items-end' : 'items-start'} group animate-in slide-in-from-bottom-2 duration-300 w-full`}>
+   <div className={`relative max-w-[85%] sm:max-w-[75%] md:max-w-[65%] rounded-2xl p-4 shadow-sm transition-all hover:shadow-md ${isOut ? 'bg-accent text-white rounded-tr-sm' : (dc ? 'bg-surface text-content border border-edge rounded-tl-sm' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-sm')}`}>
     {media && mimeType?.startsWith('image/') && (
      <img src={media} className="max-w-full sm:max-w-xs rounded-2xl mb-3 cursor-pointer hover:opacity-95 transition-opacity border border-white/10 shadow-lg" alt="Media" />
     )}
@@ -682,10 +682,10 @@ const Message = ({ type, text, time, media, mimeType, isDarkMode }: any) => {
        <Paperclip size={18} /> Archivo adjunto
       </a>
     )}
-    {text && <p className="text-sm font-medium leading-relaxed">{text}</p>}
-    <div className={`flex items-center gap-2 mt-2 justify-end transition-opacity opacity-70 group-hover:opacity-100 ${isOut ? 'text-content' : (dc ? 'text-content-muted' : 'text-content-muted')}`}>
+    {text && <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap break-words">{text}</p>}
+    <div className={`flex items-center gap-1.5 mt-2 justify-end transition-opacity opacity-70 group-hover:opacity-100 ${isOut ? 'text-white/90' : (dc ? 'text-content-muted' : 'text-slate-500')}`}>
      <span className="text-xs font-bold tracking-normal">{time}</span>
-     {isOut && <CheckCircle2 size={14} className={dc ? 'text-content' : 'text-content'} />}
+     {isOut && <CheckCircle2 size={12} className="text-white/90" />}
     </div>
    </div>
   </div>
