@@ -1005,8 +1005,10 @@ const ProjectSelect = ({ value, onChange, className }: { value: string; onChange
   fetch(`${API_URL}/api/properties`, { headers: { Authorization: `Bearer ${token}` } })
    .then(r => r.json())
    .then(data => {
-    const unique = [...new Set(data.map((p: any) => p.project).filter(Boolean))] as string[];
-    setProjects(unique);
+    if (Array.isArray(data)) {
+     const unique = [...new Set(data.map((p: any) => p.project).filter(Boolean))] as string[];
+     setProjects(unique);
+    }
    }).catch(() => {});
  }, []);
  return (

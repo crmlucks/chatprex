@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X, Link, Settings, Database, Filter, Target } from 'lucide-react';
+import { Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X, Link, Settings, Database, Filter, Target, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -105,15 +105,15 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         <Settings size={24} />
        </div>
        <div>
-        <h1 className={`text-xl font-semibold tracking-tight lowercase ${dc ? 'text-content' : 'text-content'}`}>Administración</h1>
-        <p className="text-xs font-semibold uppercase tracking-normal text-content-muted">configuración central</p>
+        <h1 className={`text-xl font-semibold tracking-tight capitalize ${dc ? 'text-content' : 'text-content'}`}>Administración</h1>
+        <p className="text-xs font-semibold uppercase tracking-normal text-content-muted">Configuración central</p>
        </div>
      </div>
      
      <div className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 scrollbar-hide">
-      <MenuBtn active={tab === 'proyectos'} onClick={() => setTab('proyectos')} icon={<Layers size={18} />} label="proyectos y desarrollos" dc={dc} />
-      <MenuBtn active={tab === 'pipeline'} onClick={() => setTab('pipeline')} icon={<Target size={18} />} label="etapas del pipeline" dc={dc} />
-      <MenuBtn active={tab === 'fuentes'} onClick={() => setTab('fuentes')} icon={<Globe size={18} />} label="fuentes de origen" dc={dc} />
+      <MenuBtn active={tab === 'proyectos'} onClick={() => setTab('proyectos')} icon={<Layers size={18} />} label="Proyectos y desarrollos" dc={dc} />
+      <MenuBtn active={tab === 'pipeline'} onClick={() => setTab('pipeline')} icon={<Target size={18} />} label="Etapas del pipeline" dc={dc} />
+      <MenuBtn active={tab === 'fuentes'} onClick={() => setTab('fuentes')} icon={<Globe size={18} />} label="Fuentes de origen" dc={dc} />
      </div>
     </div>
 
@@ -122,10 +122,10 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
      {tab === 'proyectos' && (
       <div className="space-y-8">
-       <Header tabTitle="proyectos y desarrollos" desc="Gestiona los proyectos inmobiliarios disponibles para venta." onAdd={() => openModal('proyecto')} dc={dc} />
+       <Header tabTitle="Proyectos y desarrollos" desc="Gestiona los proyectos inmobiliarios disponibles para venta." onAdd={() => openModal('proyecto')} dc={dc} />
        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {projects.length === 0 ? (
-         <div className={`col-span-2 text-center py-20 ${dc ? 'text-content-secondary' : 'text-content-muted'} font-bold lowercase`}>no hay proyectos registrados</div>
+         <div className={`col-span-2 text-center py-20 ${dc ? 'text-content-secondary' : 'text-content-muted'} font-bold`}>No hay proyectos registrados</div>
         ) : projects.map((p: any) => (
          <ProjectCard key={p.id} project={p} onEdit={() => openModal('proyecto', p)} onDelete={() => handleDelete('proyecto', p.id)} dc={dc} />
         ))}
@@ -135,7 +135,7 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
      {tab === 'pipeline' && (
       <div className="space-y-8">
-       <Header tabTitle="etapas del pipeline" desc="Define los estados por los que pasan tus prospectos." onAdd={() => openModal('etapa')} dc={dc} />
+       <Header tabTitle="Etapas del pipeline" desc="Define los estados por los que pasan tus prospectos." onAdd={() => openModal('etapa')} dc={dc} />
        <div className={card + ' p-5'}>
         <div className="divide-y divide-edge">
          {pipeline.map((p: any) => (
@@ -148,7 +148,7 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
      {tab === 'fuentes' && (
       <div className="space-y-8">
-       <Header tabTitle="fuentes de origen" desc="Canales desde donde llegan tus clientes potenciales." onAdd={() => openModal('fuente')} dc={dc} />
+       <Header tabTitle="Fuentes de origen" desc="Canales desde donde llegan tus clientes potenciales." onAdd={() => openModal('fuente')} dc={dc} />
        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {sources.map((s: any) => (
          <SourceCard key={s.id} source={s} onEdit={() => openModal('fuente', s)} onDelete={() => handleDelete('fuente', s.id)} dc={dc} />
