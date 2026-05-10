@@ -1,0 +1,9 @@
+node_modules
+.git
+.docker
+dist
+build
+frontend/node_modules
+backend/node_modules
+.env
+*.log
