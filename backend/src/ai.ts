@@ -76,8 +76,12 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
     console.error("[AI] Error al cargar propiedades:", e);
   }
 
-  // Agregar regla estricta anti-alucinación
-  systemPrompt += `\n\n--- REGLA ESTRICTA DE VERACIDAD ---
+  // Agregar regla estricta anti-alucinación y Fecha Actual
+  const now = new Date();
+  systemPrompt += `\n\n--- FECHA Y HORA ACTUAL ---
+La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Lima' })}. Usa esto como referencia para agendar citas.
+
+--- REGLA ESTRICTA DE VERACIDAD ---
 ESTÁ ESTRICTAMENTE PROHIBIDO INVENTAR propiedades, precios, amenidades o características. 
 DEBES basar tus respuestas ÚNICAMENTE en la "Base de Conocimiento" y en el "Inventario Disponible". 
 Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indicar que no tienes esa información a la mano y que un asesor humano lo confirmará a la brevedad. NO ASUMAS NADA.`;
@@ -147,14 +151,118 @@ Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indi
       baseURL: baseURL,
     });
 
-    const completion = await openai.chat.completions.create({
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "agendar_cita",
+          description: "Agenda una nueva cita o visita en el calendario del CRM.",
+          parameters: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Asunto de la cita (ej. Visita al proyecto X)" },
+              date_iso: { type: "string", description: "Fecha y hora en formato ISO 8601 (ej. 2026-05-12T10:00:00-05:00)" },
+              description: { type: "string", description: "Notas adicionales sobre la visita" }
+            },
+            required: ["title", "date_iso"]
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "reprogramar_cita",
+          description: "Reprograma la cita pendiente del cliente a una nueva fecha y hora.",
+          parameters: {
+            type: "object",
+            properties: {
+              new_date_iso: { type: "string", description: "Nueva fecha y hora en formato ISO 8601" }
+            },
+            required: ["new_date_iso"]
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "cancelar_cita",
+          description: "Cancela la cita pendiente del cliente.",
+          parameters: {
+            type: "object",
+            properties: {}
+          }
+        }
+      }
+    ];
+
+    let completion = await openai.chat.completions.create({
       model: model,
       messages: conversationHistory[fromJid] as any,
       temperature: 0.7,
-      max_tokens: 200,
+      max_tokens: 300,
+      tools: tools as any,
+      tool_choice: "auto",
     });
 
-    const aiText = completion.choices[0].message?.content || 'Disculpa, no entendí bien.';
+    let responseMessage = completion.choices[0].message;
+
+    // Procesar llamada a herramientas (Function Calling)
+    if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
+      conversationHistory[fromJid].push(responseMessage as any);
+      
+      const leadRes = await pool.query('SELECT id FROM leads WHERE phone = $1', [phone]);
+      const leadId = leadRes.rowCount > 0 ? leadRes.rows[0].id : null;
+
+      for (const toolCall of responseMessage.tool_calls) {
+        const functionName = toolCall.function.name;
+        try {
+          const args = toolCall.function.arguments ? JSON.parse(toolCall.function.arguments) : {};
+          
+          if (functionName === 'agendar_cita') {
+            await pool.query(
+              "INSERT INTO tasks (title, description, type, status, due_date, lead_id) VALUES ($1, $2, 'cita', 'pendiente', $3, $4)",
+              [args.title, args.description || '', args.date_iso, leadId]
+            );
+            conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Cita agendada exitosamente en la base de datos." } as any);
+          } 
+          else if (functionName === 'reprogramar_cita') {
+            const updateRes = await pool.query(
+              "UPDATE tasks SET due_date = $1 WHERE lead_id = $2 AND type = 'cita' AND status = 'pendiente' RETURNING id",
+              [args.new_date_iso, leadId]
+            );
+            if (updateRes.rowCount && updateRes.rowCount > 0) {
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Cita reprogramada exitosamente." } as any);
+            } else {
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "No se encontró ninguna cita pendiente para reprogramar." } as any);
+            }
+          }
+          else if (functionName === 'cancelar_cita') {
+            const delRes = await pool.query(
+              "DELETE FROM tasks WHERE lead_id = $1 AND type = 'cita' AND status = 'pendiente' RETURNING id",
+              [leadId]
+            );
+            if (delRes.rowCount && delRes.rowCount > 0) {
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Cita cancelada exitosamente." } as any);
+            } else {
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "No se encontró ninguna cita pendiente para cancelar." } as any);
+            }
+          }
+        } catch (e: any) {
+          conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: \`Error del sistema al ejecutar la función: \${e.message}\` } as any);
+        }
+      }
+
+      // Obtener respuesta final de la IA después de ejecutar la herramienta
+      completion = await openai.chat.completions.create({
+        model: model,
+        messages: conversationHistory[fromJid] as any,
+        temperature: 0.7,
+        max_tokens: 250,
+      });
+      responseMessage = completion.choices[0].message;
+    }
+
+    const aiText = responseMessage.content || 'Cita procesada con éxito.';
     conversationHistory[fromJid].push({ role: 'assistant', content: aiText });
     return aiText;
 
