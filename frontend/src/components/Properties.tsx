@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
- const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
+ const [viewMode, setViewMode] = useState<'grid'|'list'>('list');
  const [filterType, setFilterType] = useState('todos');
  const [filterProject, setFilterProject] = useState('todos');
  const [filterStatus, setFilterStatus] = useState('todos');
@@ -47,10 +47,10 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
  const [showModal, setShowModal] = useState(false);
  const [formData, setFormData] = useState({
-  id: null as number | null, name: '', project: '', developer: '', type: 'departamento', 
+  id: null as number | null, name: '', project: '', type: 'departamento', 
   price: '', currency: 'USD', location: '', area: '', 
-  rooms: '', notes: '', status: 'disponible', avatar: '', images: [] as string[],
-  contactNumber: '', email: '', ruc: ''
+  rooms: '', bathrooms: '', parking: '', floor: '',
+  notes: '', status: 'disponible', avatar: '', images: [] as string[]
  });
 
  const handleSave = async (e: React.FormEvent) => {
@@ -82,7 +82,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
   } catch (err) { console.error(err); }
  };
 
- const resetForm = () => setFormData({ id: null, name: '', project: '', developer: '', type: 'departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', notes: '', status: 'disponible', avatar: '', images: [], contactNumber: '', email: '', ruc: '' });
+ const resetForm = () => setFormData({ id: null, name: '', project: '', type: 'departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', bathrooms: '', parking: '', floor: '', notes: '', status: 'disponible', avatar: '', images: [] });
 
  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isAvatar: boolean = false) => {
   const files = e.target.files;
@@ -199,82 +199,127 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
         </div>
       )}
 
-    {/* Grid View */}
+    {/* Grid View — excludes terrenos (no tienen imagen relevante) */}
     {viewMode === 'grid' && (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-       {filteredProperties.map(p => (
+       {filteredProperties.filter(p => p.type?.toLowerCase() !== 'terreno').map(p => (
         <div key={p.id} className="card group overflow-hidden flex flex-col h-full">
           <div className="h-48 relative overflow-hidden shrink-0">
-           <img src={p.images?.[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800'} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+           <img src={p.images?.[0] || p.avatar || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800'} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
            <div className="absolute top-3 left-3">
-             <span className={`text-xs font-medium px-2 py-1 rounded-md border ${p.status === 'disponible' ? 'bg-emerald-500/20 text-emerald-600 border-emerald-500/30' : 'bg-red-500/20 text-red-600 border-red-500/30'}`}>{p.status}</span>
+             <span className={`text-xs font-bold px-2 py-1 rounded-lg border backdrop-blur-sm ${p.status === 'disponible' ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30' : p.status === 'reservado' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' : 'bg-rose-500/20 text-rose-500 border-rose-500/30'}`}>{p.status}</span>
            </div>
            <div className="absolute bottom-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-             <button onClick={() => { setFormData(p); setShowModal(true); }} className="w-8 h-8 rounded-lg bg-surface/80 text-content flex items-center justify-center hover:bg-accent hover:text-content transition-colors"><Edit2 size={14} /></button>
-             <button onClick={() => deleteProperty(p.id)} className="w-8 h-8 rounded-lg bg-red-500 text-content flex items-center justify-center hover:bg-red-600 transition-colors"><Trash2 size={14} /></button>
+             <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || ''}); setShowModal(true); }} className="w-8 h-8 rounded-lg bg-surface/90 backdrop-blur text-content flex items-center justify-center hover:bg-accent hover:text-white transition-colors shadow-sm"><Edit2 size={14} /></button>
+             <button onClick={() => deleteProperty(p.id)} className="w-8 h-8 rounded-lg bg-rose-500/90 backdrop-blur text-white flex items-center justify-center hover:bg-rose-600 transition-colors shadow-sm"><Trash2 size={14} /></button>
            </div>
           </div>
           <div className="p-4 flex flex-col flex-1 space-y-3">
            <div>
-             <h3 className="font-medium text-sm text-content truncate">{p.name}</h3>
+             <h3 className="font-bold text-sm text-content truncate">{p.name}</h3>
+             {p.project && <span className="text-[11px] font-medium text-accent">{p.project}</span>}
              <div className="flex items-center gap-1.5 text-content-muted mt-1">
               <MapPin size={12} className="shrink-0 text-accent/60" />
               <span className="text-xs truncate">{p.location || 'Sin ubicación'}</span>
              </div>
            </div>
+           {(p.rooms || p.bathrooms || p.parking) && (
+            <div className="flex gap-2 flex-wrap">
+             {p.rooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-surface-inset text-content-muted">{p.rooms} hab</span>}
+             {p.bathrooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-surface-inset text-content-muted">{p.bathrooms} baños</span>}
+             {p.parking && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-surface-inset text-content-muted">{p.parking} est.</span>}
+            </div>
+           )}
            <div className="flex justify-between items-center pt-3 border-t border-edge mt-auto">
-             <span className="text-base font-semibold text-accent">{p.currency} {p.price}</span>
-             <span className="text-xs text-content-muted">{p.area} m²</span>
+             <span className="text-base font-black text-accent">{p.currency} {Number(p.price).toLocaleString()}</span>
+             <span className="text-xs font-bold text-content-muted">{p.area} m²</span>
            </div>
           </div>
         </div>
        ))}
+       {filteredProperties.filter(p => p.type?.toLowerCase() !== 'terreno').length === 0 && (
+        <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4 card-premium p-12 text-center">
+         <Home size={32} className="mx-auto mb-3 opacity-20" />
+         <p className="text-sm font-bold text-content-muted">Sin propiedades con imágenes</p>
+         <p className="text-xs text-content-muted mt-1">Los terrenos solo aparecen en la vista de lista</p>
+        </div>
+       )}
       </div>
     )}
 
-    {/* List View */}
+    {/* List View — muestra TODAS las propiedades */}
     {viewMode === 'list' && (
-      <div className="card overflow-hidden overflow-x-auto">
+      <div className="card-premium overflow-hidden overflow-x-auto">
        <table className="w-full text-left">
          <thead>
-          <tr className="text-xs font-medium text-content-muted border-b border-edge bg-surface-inset">
-            <th className="px-5 py-3">Propiedad</th>
-            <th className="px-5 py-3">Proyecto / Desarrollador</th>
-            <th className="px-5 py-3 text-right">Precio</th>
-            <th className="px-5 py-3">Estado</th>
-            <th className="px-5 py-3 text-right">Acciones</th>
+          <tr className={`text-[11px] font-bold text-content-muted uppercase tracking-wider border-b ${isDarkMode ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
+            <th className="px-5 py-4">Propiedad</th>
+            <th className="px-5 py-4">Proyecto</th>
+            <th className="px-5 py-4">Estado</th>
+            <th className="px-5 py-4 text-right">Precio</th>
+            <th className="px-5 py-4 text-right">Área</th>
+            <th className="px-5 py-4 hidden lg:table-cell">Ubicación</th>
+            <th className="px-5 py-4 hidden xl:table-cell">Detalles</th>
+            <th className="px-5 py-4 text-right">Acciones</th>
           </tr>
          </thead>
-         <tbody className="divide-y divide-edge">
-          {filteredProperties.map(p => (
+         <tbody className={`divide-y ${isDarkMode ? 'divide-edge' : 'divide-slate-100'}`}>
+          {filteredProperties.map(p => {
+           const isBuilding = !['terreno','deposito'].includes(p.type?.toLowerCase() || '');
+           return (
            <tr key={p.id} className="hover:bg-surface-inset transition-colors group">
              <td className="px-5 py-3">
               <div className="flex items-center gap-3">
-                <img src={p.avatar || 'https://via.placeholder.com/80'} className="w-10 h-10 rounded-lg object-cover border border-edge" alt="" />
-                <div>
-                 <div className="font-medium text-sm text-content">{p.name}</div>
-                 <div className="text-xs text-content-muted mt-0.5">{p.type} • {p.area} m²</div>
+                <div className="w-10 h-10 rounded-lg overflow-hidden border border-edge shrink-0 bg-surface-inset">
+                 {p.avatar ? <img src={p.avatar} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-content-muted"><Home size={16} /></div>}
+                </div>
+                <div className="min-w-0">
+                 <div className="font-bold text-sm text-content truncate max-w-[180px]">{p.name}</div>
+                 <div className="text-[11px] font-medium text-content-muted mt-0.5 capitalize">{p.type}</div>
                 </div>
               </div>
              </td>
              <td className="px-5 py-3">
-              <div className="text-xs font-medium text-accent">{p.project}</div>
-              <div className="text-xs text-content-muted mt-0.5">{p.developer}</div>
-             </td>
-             <td className="px-5 py-3 text-right">
-              <div className="text-sm font-semibold text-emerald-500">{p.currency} {p.price}</div>
+              <span className="text-xs font-bold text-accent">{p.project || '—'}</span>
              </td>
              <td className="px-5 py-3">
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${p.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>{p.status}</span>
+              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg capitalize ${p.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-500' : p.status === 'reservado' ? 'bg-amber-500/10 text-amber-500' : 'bg-rose-500/10 text-rose-500'}`}>{p.status}</span>
              </td>
              <td className="px-5 py-3 text-right">
-              <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => { setFormData(p); setShowModal(true); }} className="p-1.5 rounded-lg border border-edge text-content-muted hover:text-accent transition-colors"><Edit2 size={14} /></button>
-                <button onClick={() => deleteProperty(p.id)} className="p-1.5 rounded-lg border border-edge text-red-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
+              <div className="text-xs font-black text-content">{p.currency} {Number(p.price).toLocaleString()}</div>
+             </td>
+             <td className="px-5 py-3 text-right">
+              <span className="text-xs font-bold text-content-muted">{p.area ? `${p.area} m²` : '—'}</span>
+             </td>
+             <td className="px-5 py-3 hidden lg:table-cell">
+              <div className="flex items-center gap-1.5 max-w-[200px]">
+               <MapPin size={12} className="shrink-0 text-accent/60" />
+               <span className="text-xs text-content-muted truncate">{p.location || '—'}</span>
+              </div>
+             </td>
+             <td className="px-5 py-3 hidden xl:table-cell">
+              {isBuilding ? (
+               <div className="flex gap-1.5 flex-wrap">
+                {p.rooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500">{p.rooms} hab</span>}
+                {p.bathrooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-500">{p.bathrooms} baños</span>}
+                {p.parking && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-500">{p.parking} est.</span>}
+                {p.floor && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500">P{p.floor}</span>}
+               </div>
+              ) : (
+               <span className="text-[10px] text-content-muted italic">N/A</span>
+              )}
+             </td>
+             <td className="px-5 py-3 text-right">
+              <div className="flex justify-end gap-1">
+                <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || ''}); setShowModal(true); }} className={`p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
+                <button onClick={() => deleteProperty(p.id)} className="p-2 rounded-lg text-rose-400 hover:text-rose-500 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
               </div>
              </td>
            </tr>
-          ))}
+          );})}
+          {filteredProperties.length === 0 && (
+           <tr><td colSpan={8} className="px-5 py-12 text-center text-content-muted text-sm font-bold">Sin propiedades registradas</td></tr>
+          )}
          </tbody>
        </table>
       </div>
@@ -296,86 +341,84 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 max-h-[70vh]">
-          
-
-          {/* Form Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <div className="sm:col-span-2">
-             <label className="label-text mb-1.5 block">Nombre comercial</label>
-             <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ej. Departamento Luxury 402" className={inputCls} />
-           </div>
-           <div>
-             <label className="label-text mb-1.5 block">Proyecto</label>
-             <select value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} className={inputCls}>
-               <option value="">Seleccione un proyecto...</option>
-               {dbProjects.map((p: any) => <option key={p.id} value={p.name}>{p.name}</option>)}
-             </select>
-           </div>
-           <div>
-             <label className="label-text mb-1.5 block">Desarrollador</label>
-             <select value={formData.developer} onChange={e => setFormData({...formData, developer: e.target.value})} className={inputCls}>
-               <option value="">Seleccione un desarrollador...</option>
-               {uniqueDevelopers.map(d => <option key={d as string} value={d as string}>{d}</option>)}
-             </select>
-           </div>
-           <div>
-             <label className="label-text mb-1.5 block">RUC / ID fiscal</label>
-             <input type="text" value={formData.ruc} onChange={e => setFormData({...formData, ruc: e.target.value})} className={inputCls} placeholder="20601234567" />
-           </div>
-           <div>
-             <label className="label-text mb-1.5 block">Tipo de propiedad</label>
-             <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className={inputCls}>
-              <option value="departamento">Departamento</option>
-              <option value="casa">Casa</option>
-              <option value="terreno">Terreno</option>
-              <option value="oficina">Oficina</option>
-              <option value="deposito">Depósito</option>
-              <option value="otros">Otros</option>
-             </select>
-           </div>
-           <div>
-             <label className="label-text mb-1.5 block">Teléfono de contacto</label>
-             <input type="tel" value={formData.contactNumber} onChange={e => setFormData({...formData, contactNumber: e.target.value})} className={inputCls} placeholder="+51 900 000 000" />
-           </div>
-           <div>
-             <label className="label-text mb-1.5 block">Email de contacto</label>
-             <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className={inputCls} placeholder="ventas@inmobiliaria.com" />
-           </div>
-           <div>
-             <label className="label-text mb-1.5 block">Precio de venta</label>
-             <div className="flex gap-2">
-              <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})} className="input-field w-24">
-                <option value="USD">USD</option>
-                <option value="PEN">PEN</option>
+           {/* Form Grid */}
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <label className="label-text mb-1.5 block">Nombre comercial</label>
+              <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ej. Departamento Luxury 402" className={inputCls} />
+            </div>
+            <div>
+              <label className="label-text mb-1.5 block">Proyecto</label>
+              <select value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} className={inputCls}>
+                <option value="">Seleccione un proyecto...</option>
+                {dbProjects.map((p: any) => <option key={p.id} value={p.name}>{p.name}</option>)}
               </select>
-              <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className={inputCls} placeholder="0.00" />
-             </div>
+            </div>
+            <div>
+              <label className="label-text mb-1.5 block">Tipo de propiedad</label>
+              <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className={inputCls}>
+               <option value="departamento">Departamento</option>
+               <option value="casa">Casa</option>
+               <option value="terreno">Terreno</option>
+               <option value="oficina">Oficina</option>
+               <option value="local">Local comercial</option>
+               <option value="deposito">Depósito</option>
+               <option value="otros">Otros</option>
+              </select>
+            </div>
+            <div>
+              <label className="label-text mb-1.5 block">Precio de venta</label>
+              <div className="flex gap-2">
+               <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})} className="input-field w-24">
+                 <option value="USD">USD</option>
+                 <option value="PEN">PEN</option>
+                 <option value="MXN">MXN</option>
+                 <option value="COP">COP</option>
+               </select>
+               <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className={inputCls} placeholder="0.00" />
+              </div>
+            </div>
+            <div>
+              <label className="label-text mb-1.5 block">Estado de venta</label>
+              <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className={inputCls}>
+               <option value="disponible">Disponible</option>
+               <option value="reservado">Reservado</option>
+               <option value="vendido">Vendido</option>
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="label-text mb-1.5 block">Ubicación / Dirección</label>
+              <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className={inputCls} placeholder="Ej. Av. Larco 123, Miraflores" />
+            </div>
+            <div>
+              <label className="label-text mb-1.5 block">Área total (m²)</label>
+              <input type="number" value={formData.area} onChange={e => setFormData({...formData, area: e.target.value})} className={inputCls} placeholder="0.00" />
+            </div>
+            {formData.type !== 'terreno' && formData.type !== 'deposito' && (
+             <>
+              <div>
+                <label className="label-text mb-1.5 block">Habitaciones</label>
+                <input type="number" value={formData.rooms} onChange={e => setFormData({...formData, rooms: e.target.value})} className={inputCls} placeholder="0" />
+              </div>
+              <div>
+                <label className="label-text mb-1.5 block">Baños</label>
+                <input type="number" value={formData.bathrooms} onChange={e => setFormData({...formData, bathrooms: e.target.value})} className={inputCls} placeholder="0" />
+              </div>
+              <div>
+                <label className="label-text mb-1.5 block">Estacionamientos</label>
+                <input type="number" value={formData.parking} onChange={e => setFormData({...formData, parking: e.target.value})} className={inputCls} placeholder="0" />
+              </div>
+              <div>
+                <label className="label-text mb-1.5 block">Piso / Nivel</label>
+                <input type="text" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} className={inputCls} placeholder="Ej. 4to piso" />
+              </div>
+             </>
+            )}
+            <div className="sm:col-span-2">
+              <label className="label-text mb-1.5 block">Notas internas</label>
+              <textarea rows={3} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} placeholder="Detalles adicionales..." className={inputCls + " resize-none h-24"} />
+            </div>
            </div>
-           <div>
-             <label className="label-text mb-1.5 block">Estado de venta</label>
-             <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className={inputCls}>
-              <option value="disponible">Disponible</option>
-              <option value="reservado">Reservado</option>
-              <option value="vendido">Vendido</option>
-             </select>
-           </div>
-           <div className="sm:col-span-2">
-             <label className="label-text mb-1.5 block">Ubicación / Dirección</label>
-             <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className={inputCls} placeholder="Ej. Av. Larco 123, Miraflores" />
-           </div>
-           <div>
-             <label className="label-text mb-1.5 block">Área total (m²)</label>
-             <input type="number" value={formData.area} onChange={e => setFormData({...formData, area: e.target.value})} className={inputCls} placeholder="0.00" />
-           </div>
-           <div>
-             <label className="label-text mb-1.5 block">Habitaciones</label>
-             <input type="number" value={formData.rooms} onChange={e => setFormData({...formData, rooms: e.target.value})} className={inputCls} placeholder="0" />
-           </div>
-           <div className="sm:col-span-2">
-             <label className="label-text mb-1.5 block">Notas internas</label>
-             <textarea rows={3} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} placeholder="Detalles adicionales..." className={inputCls + " resize-none h-24"} />
-           </div>
-          </div>
 
           {/* Images Section */}
           <div className="flex flex-col sm:flex-row gap-6 items-start pt-6 border-t border-edge">
