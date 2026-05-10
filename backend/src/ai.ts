@@ -248,7 +248,7 @@ Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indi
             }
           }
         } catch (e: any) {
-          conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: \`Error del sistema al ejecutar la función: \${e.message}\` } as any);
+          conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Error del sistema al ejecutar la función: ${e.message}` } as any);
         }
       }
 
