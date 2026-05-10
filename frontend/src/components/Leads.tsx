@@ -868,7 +868,7 @@ const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }:
  const [formData, setFormData] = useState(editLead || { 
   name: '', phone: '', email: '', project: '', status: 'Nuevo', 
   score: '50', source: '', advisor_id: '', currency: 'USD', 
-  budget_amount: '', interest: '', notes: '' 
+  budget_amount: '', interest: '', notes: '', birth_date: '' 
  });
  const [leadSources, setLeadSources] = useState<any[]>([]);
  const [advisors, setAdvisors] = useState<any[]>([]);
@@ -915,9 +915,15 @@ const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }:
         <p className="text-[10px] text-content-muted mt-1 ml-1 italic">Código país + número sin espacios ni +</p>
        </div>
       </div>
-      <div>
-       <label className={labelCls}>Email</label>
-       <input type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} placeholder="juan@email.com" className={inputCls} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+       <div>
+        <label className={labelCls}>Email</label>
+        <input type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} placeholder="juan@email.com" className={inputCls} />
+       </div>
+       <div>
+        <label className={labelCls}>Fecha de Nacimiento</label>
+        <input type="date" value={formData.birth_date || ''} onChange={e=>setFormData({...formData, birth_date: e.target.value})} className={inputCls} />
+       </div>
       </div>
      </div>
 

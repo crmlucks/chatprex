@@ -79,9 +79,17 @@ campaignRouter.post('/:id/start', authMiddleware, async (req, res) => {
     // 3. Get leads based on filter
     let phones: string[] = [];
     if (campaign.recipient_source === 'database') {
-      let query = 'SELECT phone, name FROM leads WHERE phone IS NOT NULL AND phone != \'\'';
-      if (campaign.db_filter !== 'todos') {
-        query += ` AND status = '${campaign.db_filter}'`; // Simplify for now
+      let query = 'SELECT phone, name, birth_date FROM leads WHERE phone IS NOT NULL AND phone != \'\'';
+      if (campaign.db_filter === 'cumpleaños') {
+        // Asumiendo formato YYYY-MM-DD en birth_date, buscamos los que coincidan en mes y día
+        const today = new Date();
+        const monthDay = `-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        query += ` AND birth_date LIKE '%${monthDay}'`;
+      } else if (campaign.db_filter === 'referidos') {
+        // Campaña de referidos típicamente va a los clientes cerrados
+        query += ` AND status = 'Cerrado'`;
+      } else if (campaign.db_filter !== 'todos') {
+        query += ` AND status = '${campaign.db_filter}'`;
       }
       const leadsRes = await pool.query(query);
       

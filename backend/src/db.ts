@@ -72,10 +72,24 @@ export async function initDatabase() {
         status        VARCHAR(50) DEFAULT 'Nuevo',
         tags          JSONB DEFAULT '[]'::jsonb,
         bot_active    BOOLEAN DEFAULT false,
+        email         VARCHAR(150) DEFAULT '',
+        source        VARCHAR(150) DEFAULT '',
+        advisor_id    INTEGER,
+        currency      VARCHAR(10) DEFAULT 'USD',
+        budget_amount DECIMAL(15,2) DEFAULT 0,
+        notes         TEXT DEFAULT '',
+        interest      TEXT DEFAULT '',
+        birth_date    VARCHAR(20) DEFAULT '',
         created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    // Añadir columnas si no existen por actualizaciones pasadas
+    try {
+      await client.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS birth_date VARCHAR(20) DEFAULT \'\';');
+    } catch(e) {}
+
 
     // Crear tabla properties
     await client.query(`

@@ -379,7 +379,9 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                <option value="todos">Todos los leads registrados</option>
                <option value="nuevo">Leads Nuevos (sin contactar)</option>
                <option value="interesado">Contactos Interesados</option>
-               <option value="cerrado">Cierres Ganados</option>
+               <option value="Cerrado">Cierres Ganados (Post Venta)</option>
+               <option value="cumpleaños">Cumpleaños Hoy</option>
+               <option value="referidos">Campaña de Referidos</option>
               </select>
              </div>
              
