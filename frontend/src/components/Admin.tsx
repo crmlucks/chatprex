@@ -90,9 +90,9 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  };
 
  const dc = isDarkMode;
- const card = `card`;
- const input = `input-field`;
- const label = "label-text mb-1.5 block";
+ const card = `card p-4 md:p-6`;
+ const input = `input-field py-1.5 h-9 text-[11px]`;
+ const label = "text-[10px] font-bold text-content-muted mb-1 block ml-1 uppercase tracking-tight";
 
  return (
   <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 bg-surface-base">
@@ -165,9 +165,9 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
      <div className="card w-full max-w-xl p-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
       <button onClick={closeModal} className="absolute top-4 right-4 p-2 rounded-lg hover:bg-surface-inset transition-colors"><X size={18} className="text-content-muted" /></button>
       
-      <h3 className="text-lg font-semibold text-content mb-6">Añadir {modalType}</h3>
+      <h3 className="text-md font-bold text-content mb-4">Añadir {modalType}</h3>
       
-      <form onSubmit={handleSave} className="space-y-8">
+      <form onSubmit={handleSave} className="space-y-5">
        {modalType === 'proyecto' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          <div className="md:col-span-2">
