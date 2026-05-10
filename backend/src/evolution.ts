@@ -49,6 +49,33 @@ export const initEvolution = (io: Server) => {
       console.log(`[Evolution] QR solicitado manualmente por usuario`);
       handleEvolutionFlow(socket);
     });
+
+    socket.on('send-message', async (data: { to: string; text: string; media?: string; mimeType?: string; fileName?: string }) => {
+      try {
+        console.log(`[Evolution] Mensaje manual recibido desde UI para ${data.to}`);
+        if (data.media) {
+          await sendEvolutionMedia(data.to, data.media, data.text, data.fileName);
+        } else {
+          await sendEvolutionMessage(data.to, data.text);
+        }
+        
+        // Guardar proactivamente en la base de datos para asegurar que no desaparezca al recargar
+        try {
+          const msgId = `manual-${Date.now()}`;
+          const cleanTo = data.to.includes('@') ? data.to : `${data.to}@s.whatsapp.net`;
+          await pool.query(
+            `INSERT INTO evolution_messages (id, chat_id, text, from_me, timestamp, media_type)
+             VALUES ($1, $2, $3, true, $4, $5)
+             ON CONFLICT (id) DO NOTHING`,
+            [msgId, cleanTo, data.text, new Date().toISOString(), data.mimeType || null]
+          );
+        } catch (dbErr: any) {
+          console.error('[Evolution] Error guardando mensaje manual en BD:', dbErr.message);
+        }
+      } catch (err) {
+        console.error('[Evolution] Error enviando mensaje manual:', err);
+      }
+    });
   });
 };
 
