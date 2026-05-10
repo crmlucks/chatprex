@@ -938,7 +938,7 @@ const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }:
  const [formData, setFormData] = useState(editLead || { 
   name: '', phone: '', email: '', project: '', status: 'Nuevo', 
   score: '50', source: '', advisor_id: '', currency: 'USD', 
-  budget_amount: '', interest: '', notes: '', birth_date: '' 
+  budget_amount: '', interest: '', notes: '' 
  });
  const [leadSources, setLeadSources] = useState<any[]>([]);
  const [advisors, setAdvisors] = useState<any[]>([]);
@@ -989,10 +989,6 @@ const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }:
        <div>
         <label className={labelCls}>Email</label>
         <input type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} placeholder="juan@email.com" className={inputCls} />
-       </div>
-       <div>
-        <label className={labelCls}>Fecha de Nacimiento</label>
-        <input type="date" value={formData.birth_date || ''} onChange={e=>setFormData({...formData, birth_date: e.target.value})} className={inputCls} />
        </div>
       </div>
      </div>
