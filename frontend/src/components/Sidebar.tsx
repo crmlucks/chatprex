@@ -55,13 +55,12 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
 
         <nav className={`flex-1 py-3 flex flex-col gap-0.5 overflow-x-hidden overflow-y-auto ${isCollapsed ? 'px-2' : 'px-3'}`}>
           <NavItem onClick={() => setActiveTab('Dashboard')} icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'Dashboard'} collapsed={isCollapsed} />
-          <NavItem onClick={() => setActiveTab('Conversaciones')} icon={<MessageSquare size={18} />} label="Conversaciones" active={activeTab === 'Conversaciones'} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Inteligencia')} icon={<Zap size={18} />} label="Lead Intelligence" active={activeTab === 'Inteligencia'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Leads Pipeline')} icon={<Users size={18} />} label="Pipeline de leads" active={activeTab === 'Leads Pipeline'} collapsed={isCollapsed} />
-          <NavItem onClick={() => setActiveTab('Calendario')} icon={<Calendar size={18} />} label="Agenda y tareas" active={activeTab === 'Calendario'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Inventario')} icon={<Home size={18} />} label="Propiedades" active={activeTab === 'Inventario'} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Calendario')} icon={<Calendar size={18} />} label="Agenda y tareas" active={activeTab === 'Calendario'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Finanzas')} icon={<DollarSign size={18} />} label="Finanzas" active={activeTab === 'Finanzas'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Campañas')} icon={<PieChart size={18} />} label="Campañas" active={activeTab === 'Campañas'} collapsed={isCollapsed} />
-          <NavItem onClick={() => setActiveTab('Inteligencia')} icon={<Zap size={18} />} label="Lead Intelligence" active={activeTab === 'Inteligencia'} collapsed={isCollapsed} />
         </nav>
 
         <div className={`p-3 border-t border-edge shrink-0 flex flex-col gap-0.5`}>

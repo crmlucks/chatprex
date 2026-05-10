@@ -137,7 +137,7 @@ const FollowUpSection = ({ title, icon, color, items, dc }: any) => (
    {items.map((item: any) => (
     <div key={item.id} className={`flex items-center gap-4 p-4 rounded-xl border transition-all hover:shadow-sm ${dc ? 'bg-surface-raised border-edge' : 'bg-surface border-edge'}`}>
      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-${color}-500/10 text-${color}-500`}>
-      <span className="text-xs font-black">{item.score || '?'}%</span>
+      <span className="text-xs font-black">{item.score || '?'}</span>
      </div>
      <div className="flex-1 min-w-0">
       <p className="text-sm font-bold text-content truncate">{item.name}</p>

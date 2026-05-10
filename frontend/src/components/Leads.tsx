@@ -317,74 +317,85 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
  );
  return (
   <div className="card-premium overflow-hidden overflow-x-auto">
-   <table className="w-full text-left">
-    <thead>
-     <tr className={`text-xs font-bold text-content-muted border-b ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
-      <th className="px-8 py-5">Lead / Contacto</th>
-      <th className="px-8 py-5">Estado</th>
-      <th className="px-8 py-5">Scoring</th>
-      <th className="px-8 py-5">Proyecto</th>
-      <th className="px-8 py-5">Asistente IA</th>
-      <th className="px-8 py-5 text-right">Acciones</th>
-     </tr>
-    </thead>
-    <tbody className={`divide-y ${dc ? 'divide-slate-800' : 'divide-slate-100'}`}>
-     {leads.map((lead: any) => {
-      const sc = getScoreColor(lead.score);
-      return (
-      <tr key={lead.id} className={`group hover:bg-surface-inset transition-colors`}>
-       <td className="px-8 py-4 cursor-pointer" onClick={() => onSelect(lead)}>
-        <div className="flex items-center gap-3">
-         <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${dc ? 'bg-surface-raised text-content-muted' : 'bg-slate-100 text-content-muted'}`}>
-          {lead.name.charAt(0)}
-         </div>
-         <div>
-          <div className={`text-sm font-bold ${dc ? 'text-content' : 'text-content'}`}>{lead.name}</div>
-          <div className="text-xs font-medium text-content-muted">{lead.phone}</div>
-         </div>
-        </div>
-       </td>
-       <td className="px-8 py-4">
-        <span className={`text-xs px-2 py-1 rounded-lg font-bold ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
-       </td>
-       <td className="px-8 py-4">
-        <div className="flex items-center gap-2">
-         <div className={`w-16 h-1.5 rounded-full overflow-hidden ${dc ? 'bg-surface-raised' : 'bg-slate-100 '}`}>
-          <div className={`${sc.bar} h-full rounded-full transition-all duration-700`} style={{ width: lead.score }}></div>
-         </div>
-         <span className={`text-xs font-bold flex items-center gap-1 ${sc.text}`}>{lead.score}%</span>
-        </div>
-       </td>
-       <td className="px-8 py-4 text-xs text-content-muted font-semibold">{lead.project || '—'}</td>
-       <td className="px-8 py-4">
-        <button 
-         onClick={() => onToggleBot(lead.id)}
-         className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${lead.botActive ? (dc ? 'bg-accent/20 border-accent/30 text-accent' : 'bg-accent/10 border-accent/20 text-accent shadow-sm') : (dc ? 'bg-surface-raised border-edge text-content-muted' : 'bg-surface-inset border-edge text-content-muted')}`}
-        >
-         <Bot size={14} className={lead.botActive ? 'animate-pulse' : ''} />
-         <span className="text-xs font-bold">{lead.botActive ? 'Activo' : 'Inactivo'}</span>
-        </button>
-       </td>
-       <td className="px-8 py-4 text-right">
-        <div className="inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-         <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-lg transition-colors inline-block ${dc ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}>
-          <Phone size={14} />
-         </a>
-         <button title="Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-lg transition-colors ${dc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}>
-          <MessageSquare size={14} />
-         </button>
-         <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-lg transition-colors ${dc ? 'text-content-muted hover:text-content hover:bg-surface-raised' : 'text-content-muted hover:text-content-secondary hover:bg-slate-100'}`}>
-          <Edit size={14} />
-         </button>
-         <button title="Eliminar" onClick={() => onDelete(lead.id)} className={`p-2 rounded-lg transition-colors ${dc ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-400 hover:bg-rose-50'}`}>
-          <Trash2 size={14} />
-         </button>
-        </div>
-       </td>
+    <table className="w-full text-left">
+     <thead>
+      <tr className={`text-[11px] font-bold text-content-muted border-b uppercase tracking-wider ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
+       <th className="px-6 py-4">Lead / Contacto</th>
+       <th className="px-6 py-4">Estado</th>
+       <th className="px-6 py-4">Scoring IA</th>
+       <th className="px-6 py-4">Proyecto</th>
+       <th className="px-6 py-4">Asesor</th>
+       <th className="px-6 py-4">Tags</th>
+       <th className="px-6 py-4 text-right">Acciones</th>
       </tr>
-     );})}
-    </tbody>
-   </table>
+     </thead>
+     <tbody className={`divide-y ${dc ? 'divide-edge' : 'divide-slate-100'}`}>
+      {leads.map((lead: any) => {
+       const sc = getScoreColor(lead.score);
+       return (
+       <tr key={lead.id} className={`group hover:bg-surface-inset transition-colors`}>
+        <td className="px-6 py-4 cursor-pointer" onClick={() => onSelect(lead)}>
+         <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${dc ? 'bg-surface-raised text-accent' : 'bg-accent/10 text-accent shadow-sm'}`}>
+           {lead.name?.charAt(0).toUpperCase() || 'L'}
+          </div>
+          <div className="min-w-0">
+           <div className={`text-sm font-bold ${dc ? 'text-content' : 'text-content'} truncate max-w-[150px]`}>{lead.name}</div>
+           <div className="text-xs font-semibold text-content-muted">{lead.phone}</div>
+          </div>
+         </div>
+        </td>
+        <td className="px-6 py-4">
+         <span className={`text-[10px] px-2.5 py-1 rounded-lg font-bold uppercase tracking-tight ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
+        </td>
+        <td className="px-6 py-4">
+         <div className="flex items-center gap-2">
+          <div className={`w-12 h-1.5 rounded-full overflow-hidden ${dc ? 'bg-surface-raised' : 'bg-slate-100 '}`}>
+           <div className={`${sc.bar} h-full rounded-full transition-all duration-700`} style={{ width: `${lead.score}%` }}></div>
+          </div>
+          <span className={`text-[11px] font-black flex items-center gap-1 ${sc.text}`}>{lead.score}%</span>
+         </div>
+        </td>
+        <td className="px-6 py-4">
+         <span className="text-xs font-bold text-accent truncate max-w-[120px] block">{lead.project || '—'}</span>
+        </td>
+        <td className="px-6 py-4">
+         <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-500 uppercase shrink-0">
+           {lead.advisor_name?.charAt(0) || 'U'}
+          </div>
+          <span className="text-xs font-semibold text-content-muted truncate max-w-[100px]">{lead.advisor_name || 'Sin asignar'}</span>
+         </div>
+        </td>
+        <td className="px-6 py-4">
+         <div className="flex gap-1 flex-wrap max-w-[120px]">
+          {lead.tags && lead.tags.length > 0 ? (
+           lead.tags.slice(0, 2).map((t: string, i: number) => (
+            <span key={i} className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${getTagColor(t)}`}>{t}</span>
+           ))
+          ) : <span className="text-[10px] text-content-muted italic">Sin tags</span>}
+         </div>
+        </td>
+        <td className="px-6 py-4 text-right">
+         <div className="inline-flex items-center gap-0.5">
+          <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}>
+           <Phone size={14} />
+          </a>
+          <button title="Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}>
+           <MessageSquare size={14} />
+          </button>
+          <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}>
+           <Edit size={14} />
+          </button>
+          <button title="Eliminar" onClick={() => onDelete(lead.id)} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-400 hover:bg-rose-50'}`}>
+           <Trash2 size={14} />
+          </button>
+         </div>
+        </td>
+       </tr>
+      );})}
+     </tbody>
+    </table>
   </div>
  );
 };
