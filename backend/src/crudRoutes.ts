@@ -181,6 +181,48 @@ router.get('/finances/transactions', async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
+
+router.post('/finances/transactions', async (req, res) => {
+  const { client, concept, type, amount, currency, date, property } = req.body;
+  try {
+    // Try to find client_id by name
+    let clientId = null;
+    if (client) {
+      const clientRes = await pool.query('SELECT id FROM finances_clients WHERE name ILIKE $1 LIMIT 1', [client]);
+      if (clientRes.rows.length > 0) clientId = clientRes.rows[0].id;
+    }
+    const result = await pool.query(
+      `INSERT INTO transactions (client_id, type, amount, description, concept, currency, date, property_id) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [clientId, type, amount, concept, concept, currency || 'local', date || new Date(), property ? parseInt(property) : null]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.put('/finances/transactions/:id', async (req, res) => {
+  const { type, amount, concept, currency, date } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE transactions SET type=$1, amount=$2, description=$3, concept=$4, currency=$5, date=$6 WHERE id=$7 RETURNING *',
+      [type, amount, concept, concept, currency, date, req.params.id]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.delete('/finances/transactions/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM transactions WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: 'Database error' }); }
+});
 // --- ADMIN: PROJECTS ---
 router.get('/projects', async (req, res) => {
   try {

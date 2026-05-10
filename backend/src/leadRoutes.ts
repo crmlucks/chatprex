@@ -17,11 +17,11 @@ leadRouter.get('/', authMiddleware, async (req, res) => {
 
 // POST new lead
 leadRouter.post('/', authMiddleware, async (req, res) => {
-  const { name, phone, score, budget, project, status, tags, botActive } = req.body;
+  const { name, phone, score, budget, project, status, tags, botActive, email, source, advisor_id, currency, budget_amount, notes, interest } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO leads (name, phone, score, budget, project, status, tags, bot_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      `INSERT INTO leads (name, phone, score, budget, project, status, tags, bot_active, email, source, advisor_id, currency, budget_amount, notes, interest)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
       [
         name, 
         phone, 
@@ -30,7 +30,14 @@ leadRouter.post('/', authMiddleware, async (req, res) => {
         project || '', 
         status || 'Nuevo', 
         JSON.stringify(tags || []), 
-        botActive || false
+        botActive || false,
+        email || '',
+        source || '',
+        advisor_id || null,
+        currency || 'USD',
+        budget_amount || 0,
+        notes || '',
+        interest || ''
       ]
     );
     res.status(201).json(result.rows[0]);
@@ -43,12 +50,13 @@ leadRouter.post('/', authMiddleware, async (req, res) => {
 // PUT update lead
 leadRouter.put('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { name, phone, score, budget, project, status, tags, botActive } = req.body;
+  const { name, phone, score, budget, project, status, tags, botActive, email, source, advisor_id, currency, budget_amount, notes, interest } = req.body;
   try {
     const result = await pool.query(
       `UPDATE leads 
-       SET name=$1, phone=$2, score=$3, budget=$4, project=$5, status=$6, tags=$7, bot_active=$8, updated_at=NOW()
-       WHERE id=$9 RETURNING *`,
+       SET name=$1, phone=$2, score=$3, budget=$4, project=$5, status=$6, tags=$7, bot_active=$8, 
+           email=$9, source=$10, advisor_id=$11, currency=$12, budget_amount=$13, notes=$14, interest=$15, updated_at=NOW()
+       WHERE id=$16 RETURNING *`,
       [
         name, 
         phone, 
@@ -57,7 +65,14 @@ leadRouter.put('/:id', authMiddleware, async (req, res) => {
         project, 
         status, 
         JSON.stringify(tags || []), 
-        botActive, 
+        botActive,
+        email || '',
+        source || '',
+        advisor_id || null,
+        currency || 'USD',
+        budget_amount || 0,
+        notes || '',
+        interest || '',
         id
       ]
     );

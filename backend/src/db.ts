@@ -256,6 +256,13 @@ export async function initDatabase() {
         ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS name VARCHAR(150) DEFAULT 'Bot Principal';
         
         ALTER TABLE leads ADD COLUMN IF NOT EXISTS bot_id INTEGER DEFAULT 1;
+        ALTER TABLE leads ADD COLUMN IF NOT EXISTS email VARCHAR(150) DEFAULT '';
+        ALTER TABLE leads ADD COLUMN IF NOT EXISTS source VARCHAR(100) DEFAULT '';
+        ALTER TABLE leads ADD COLUMN IF NOT EXISTS advisor_id INTEGER;
+        ALTER TABLE leads ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'USD';
+        ALTER TABLE leads ADD COLUMN IF NOT EXISTS budget_amount DECIMAL(15,2) DEFAULT 0;
+        ALTER TABLE leads ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT '';
+        ALTER TABLE leads ADD COLUMN IF NOT EXISTS interest TEXT DEFAULT '';
 
         ALTER TABLE properties ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '';
         ALTER TABLE properties ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
@@ -282,6 +289,12 @@ export async function initDatabase() {
         ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT '';
         ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS property_id INTEGER;
         ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS agent_id INTEGER;
+
+        -- Nuevos campos para Transacciones
+        ALTER TABLE transactions ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';
+        ALTER TABLE transactions ADD COLUMN IF NOT EXISTS concept TEXT DEFAULT '';
+        ALTER TABLE transactions ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'local';
+        ALTER TABLE transactions ADD COLUMN IF NOT EXISTS property_id INTEGER;
       END $$;
     `);
     

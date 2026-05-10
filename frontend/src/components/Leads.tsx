@@ -581,7 +581,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
        <p className="small-text mt-0.5">{lead.phone} • {lead.email || 'Sin email'}</p>
       </div>
      </div>
-     <button onClick={onClose} className={`p-2 rounded-xl transition-all ${dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-surface border text-content-muted hover:text-content shadow-sm'}`}>
+     <button onClose={onClose} className={`p-2 rounded-xl transition-all ${dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-surface border text-content-muted hover:text-content shadow-sm'}`}>
       <X size={20} />
      </button>
     </div>
@@ -865,42 +865,86 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
 
 const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }: any) => {
  const dc = isDarkMode;
- const [formData, setFormData] = useState(editLead || { name: '', phone: '', email: '', project: '', status: 'Nuevo', score: '50', source: 'Directo' });
+ const [formData, setFormData] = useState(editLead || { 
+  name: '', phone: '', email: '', project: '', status: 'Nuevo', 
+  score: '50', source: '', advisor_id: '', currency: 'USD', 
+  budget_amount: '', interest: '', notes: '' 
+ });
+ const [leadSources, setLeadSources] = useState<any[]>([]);
+ const [advisors, setAdvisors] = useState<any[]>([]);
+ const { token } = useAuth();
  
- const inputCls = `w-full p-3 rounded-xl border text-xs font-bold outline-none transition-all focus:ring-2 focus:ring-accent/10 ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge text-content focus:border-accent '}`;
- const labelCls = `text-xs font-bold text-content-muted mb-1.5 block ml-1`;
+ useEffect(() => {
+  if (token) {
+   fetch(`${API_URL}/api/data/sources`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(r => r.json()).then(d => { if(Array.isArray(d)) setLeadSources(d); }).catch(() => {});
+   fetch(`${API_URL}/api/users`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(r => r.json()).then(d => { 
+      if(Array.isArray(d)) setAdvisors(d); 
+      else if(d && Array.isArray(d.users)) setAdvisors(d.users);
+    }).catch(() => {});
+  }
+ }, [token]);
+ 
+ const inputCls = `w-full px-3 py-2 rounded-lg border text-[11px] font-bold outline-none transition-all focus:ring-2 focus:ring-accent/10 ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge text-content focus:border-accent '}`;
+ const labelCls = `text-[10px] font-bold text-content-muted mb-1 block ml-1 uppercase tracking-tight`;
 
  return (
   <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-300">
-   <div className={`w-full max-w-lg rounded-xl border shadow-sm overflow-hidden flex flex-col ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
-    <div className={`px-8 py-6 border-b flex justify-between items-center ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
+   <div className={`w-full max-w-2xl rounded-xl border shadow-sm overflow-hidden flex flex-col max-h-[90vh] ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
+    <div className={`px-8 py-5 border-b flex justify-between items-center shrink-0 ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
      <div>
       <h2 className="h2">{editLead ? 'Editar lead' : 'Nuevo lead'}</h2>
-      <p className="small-text mt-0.5">Información básica de contacto</p>
+      <p className="small-text mt-0.5">Registro completo del prospecto</p>
      </div>
      <button onClick={onClose} className={`p-2 rounded-xl transition-all ${dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-surface border text-content-muted hover:text-content shadow-sm'}`}><X size={20} /></button>
     </div>
-    <div className="p-8 space-y-6">
-     <div className="grid grid-cols-1 gap-5">
+    
+    <div className="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
+     {/* Datos Personales */}
+     <div className="space-y-3">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-accent">Datos de contacto</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+       <div>
+        <label className={labelCls}>Nombre completo</label>
+        <input type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} placeholder="Ej: Juan Pérez" className={inputCls} />
+       </div>
+       <div>
+        <label className={labelCls}>WhatsApp / Teléfono (Formato Evolution)</label>
+        <input type="text" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} placeholder="521XXXXXXXXXX" className={inputCls} />
+        <p className="text-[10px] text-content-muted mt-1 ml-1 italic">Código país + número sin espacios ni +</p>
+       </div>
+      </div>
       <div>
-       <label className={labelCls}>Nombre completo</label>
-       <input type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} placeholder="Ej: Juan Pérez" className={inputCls} />
+       <label className={labelCls}>Email</label>
+       <input type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} placeholder="juan@email.com" className={inputCls} />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+     </div>
+
+     {/* Clasificación y Asignación */}
+     <div className="space-y-3">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-accent">Clasificación y Asignación</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
        <div>
-        <label className={labelCls}>WhatsApp / Teléfono</label>
-        <input type="text" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} placeholder="+51 900..." className={inputCls} />
-       </div>
-       <div>
-        <label className={labelCls}>Email</label>
-        <input type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} placeholder="juan@email.com" className={inputCls} />
-       </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-        <label className={labelCls}>Estado inicial</label>
+        <label className={labelCls}>Estado (Etapa del Pipeline)</label>
         <select value={formData.status} onChange={e=>setFormData({...formData, status: e.target.value})} className={inputCls}>
          {pipelineStages.map((s:string) => <option key={s} value={s}>{s}</option>)}
+        </select>
+       </div>
+       <div>
+        <label className={labelCls}>Fuente de origen</label>
+        <select value={formData.source} onChange={e=>setFormData({...formData, source: e.target.value})} className={inputCls}>
+         <option value="">Seleccionar fuente...</option>
+         {leadSources.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+        </select>
+       </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div>
+        <label className={labelCls}>Asesor asignado</label>
+        <select value={formData.advisor_id} onChange={e=>setFormData({...formData, advisor_id: e.target.value})} className={inputCls}>
+         <option value="">Sin asignar</option>
+         {advisors.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
        </div>
        <div>
@@ -908,21 +952,44 @@ const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }:
         <ProjectSelect value={formData.project} onChange={(v: string) => setFormData({...formData, project: v})} className={inputCls} />
        </div>
       </div>
+     </div>
+
+     {/* Presupuesto */}
+     <div className="space-y-3">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-accent">Presupuesto</p>
+      <div className="grid grid-cols-3 gap-3">
+       <div>
+        <label className={labelCls}>Moneda</label>
+        <select value={formData.currency} onChange={e=>setFormData({...formData, currency: e.target.value})} className={inputCls}>
+         <option value="USD">USD ($)</option>
+         <option value="PEN">PEN (S/)</option>
+         <option value="EUR">EUR (€)</option>
+        </select>
+       </div>
+       <div className="col-span-2">
+        <label className={labelCls}>Monto</label>
+        <input type="number" value={formData.budget_amount} onChange={e=>setFormData({...formData, budget_amount: e.target.value})} placeholder="0.00" className={inputCls} />
+       </div>
+      </div>
+     </div>
+
+     {/* Notas e Interés */}
+     <div className="space-y-3">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-accent">Detalles Adicionales</p>
       <div>
-       <label className={labelCls}>Origen del lead</label>
-       <select value={formData.source} onChange={e=>setFormData({...formData, source: e.target.value})} className={inputCls}>
-        <option value="Directo">Directo</option>
-        <option value="Facebook">Facebook</option>
-        <option value="Instagram">Instagram</option>
-        <option value="Landing Page">Landing page</option>
-        <option value="Recomendado">Recomendado</option>
-       </select>
+       <label className={labelCls}>Interés específico</label>
+       <input type="text" value={formData.interest} onChange={e=>setFormData({...formData, interest: e.target.value})} placeholder="Ej: Departamento 3 dorms con vista" className={inputCls} />
+      </div>
+      <div>
+       <label className={labelCls}>Notas importantes</label>
+       <textarea value={formData.notes} onChange={e=>setFormData({...formData, notes: e.target.value})} placeholder="Observaciones relevantes..." rows={3} className={`${inputCls} resize-none`} />
       </div>
      </div>
     </div>
-    <div className={`px-8 py-6 border-t flex items-center justify-end gap-4 ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
-     <button onClick={onClose} className="text-xs font-bold text-content-muted hover:text-content px-4">Cancelar</button>
-     <button onClick={() => onSave(formData)} className="btn-primary">
+
+    <div className={`px-8 py-4 border-t flex items-center justify-end gap-3 shrink-0 ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
+     <button onClick={onClose} className="text-[11px] font-bold text-content-muted hover:text-content px-4">Cancelar</button>
+     <button onClick={() => onSave(formData)} className="btn-primary py-2 px-6 text-[11px]">
       {editLead ? 'Actualizar registro' : 'Crear lead'}
      </button>
     </div>

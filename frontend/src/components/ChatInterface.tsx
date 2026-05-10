@@ -43,6 +43,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [editingReply, setEditingReply] = useState<QuickReply | null>(null);
  const [showReplyForm, setShowReplyForm] = useState(false);
  const [replyForm, setReplyForm] = useState<Partial<QuickReply>>({});
+ const [previewReply, setPreviewReply] = useState<QuickReply | null>(null);
  
  const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -434,7 +435,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         <button className="p-2.5 rounded-xl text-accent transition-all active:scale-90 hover:bg-accent/10"><Phone size={18} /></button>
         <button 
          onClick={() => setShowQuickReplies(!showQuickReplies)}
-         className={`p-2.5 rounded-xl transition-all active:scale-90 lg:hidden ${showQuickReplies ? 'bg-amber-500 text-content shadow-lg shadow-amber-500/20' : 'text-amber-500 bg-amber-500/10'}`}
+         className={`p-2.5 rounded-xl transition-all active:scale-90 ${showQuickReplies ? 'bg-amber-500 text-content shadow-lg shadow-amber-500/20' : 'text-amber-500 bg-amber-500/10'}`}
         >
          <Zap size={18} />
         </button>
@@ -523,7 +524,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    </div>
 
    {/* 3. Right Sidebar: Quick Replies */}
-   <div className={`${showQuickReplies ? 'flex' : 'hidden'} lg:flex w-full md:w-80 lg:w-96 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
+   <div className={`${showQuickReplies ? 'flex' : 'hidden'} absolute right-0 top-0 bottom-0 w-72 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 shadow-2xl ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
     <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge-light'}`}>
      <div className="flex items-center gap-3 text-amber-500">
        <Zap size={20} fill="currentColor" />
@@ -586,15 +587,15 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <input type="text" placeholder="Buscar respuesta..." className={`w-full pl-10 pr-4 py-3 text-xs font-bold border rounded-2xl outline-none transition-all ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent focus:bg-surface shadow-sm'}`} />
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
        {quickReplies.length === 0 ? (
-        <div className="text-center py-20 opacity-20 space-y-4">
-          <Zap size={64} className="mx-auto" />
+        <div className="text-center py-12 opacity-20 space-y-3">
+          <Zap size={40} className="mx-auto" />
           <p className="text-xs font-bold uppercase tracking-normal">Sin respuestas</p>
         </div>
        ) : (
         quickReplies.map(reply => (
-         <div key={reply.id} className={`p-6 rounded-xl border transition-all cursor-pointer group animate-in slide-in-from-right duration-300 ${dc ? 'bg-[#252525] border-edge hover:border-accent/50' : 'bg-surface border-edge-light hover:border-accent/30 shadow-sm hover:shadow-lg'}`}>
+         <div key={reply.id} className={`relative p-3 rounded-lg border transition-all cursor-pointer group ${dc ? 'bg-[#252525] border-edge hover:border-accent/50' : 'bg-surface border-edge-light hover:border-accent/30 shadow-sm hover:shadow-lg'}`}>
           <div className="flex justify-between items-start mb-3">
            <div onClick={() => handleSelectQuickReply(reply)} className="flex-1">
             <h4 className={`text-sm font-bold mb-1 group-hover:text-accent transition-colors tracking-tight ${dc ? 'text-content' : 'text-content'}`}>{reply.title}</h4>
