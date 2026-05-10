@@ -7,11 +7,11 @@ const router = express.Router();
 router.get('/tasks', async (req, res) => {
   try {
     const { lead_id, type } = req.query;
-    let query = 'SELECT * FROM tasks WHERE 1=1';
+    let query = 'SELECT t.*, l.name as lead_name FROM tasks t LEFT JOIN leads l ON t.lead_id = l.id WHERE 1=1';
     let params: any[] = [];
-    if (lead_id) { params.push(lead_id); query += ` AND lead_id = $${params.length}`; }
-    if (type) { params.push(type); query += ` AND type = $${params.length}`; }
-    query += ' ORDER BY due_date ASC, id DESC';
+    if (lead_id) { params.push(lead_id); query += ` AND t.lead_id = $${params.length}`; }
+    if (type) { params.push(type); query += ` AND t.type = $${params.length}`; }
+    query += ' ORDER BY t.due_date ASC, t.id DESC';
     
     const result = await pool.query(query, params);
     res.json(result.rows);
@@ -36,11 +36,11 @@ router.post('/tasks', async (req, res) => {
 });
 
 router.put('/tasks/:id', async (req, res) => {
-  const { title, description, status, due_date } = req.body;
+  const { title, description, type, status, due_date } = req.body;
   try {
     const result = await pool.query(
-      'UPDATE tasks SET title=$1, description=$2, status=$3, due_date=$4 WHERE id=$5 RETURNING *',
-      [title, description, status, due_date, req.params.id]
+      'UPDATE tasks SET title=$1, description=$2, status=$3, due_date=$4, type=COALESCE($5, type) WHERE id=$6 RETURNING *',
+      [title, description, status, due_date, type || null, req.params.id]
     );
     res.json(result.rows[0]);
   } catch (error) {
