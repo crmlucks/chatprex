@@ -734,8 +734,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
          )}
         </div>
        </div>
-      </div>
-     )}
+      )}
 
      {activeTab === 'historial' && (
       <div className="space-y-0 relative pl-8">
