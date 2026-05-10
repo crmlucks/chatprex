@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus, X, Clock, User, CheckCircle2, MapPin, Phone as PhoneIcon, Users, FileSignature, Bookmark, RotateCcw, Trash2, Filter, Calendar as CalIcon, ListTodo } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Clock, User, CheckCircle2, MapPin, Phone as PhoneIcon, Users, FileSignature, Bookmark, RotateCcw, Trash2, Filter, Calendar as CalIcon, ListTodo, CalendarDays } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from './Toast';
 
@@ -165,50 +165,52 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
  };
 
  const filteredEvents = events.filter(e => filterType === 'todos' || e.type === filterType);
+ const input = `input-field py-1.5 h-9 text-[11px]`;
+ const label = "text-[10px] font-bold text-content-muted mb-1 block ml-1 uppercase tracking-tight";
 
  return (
   <div className="flex-1 flex flex-col overflow-hidden bg-surface-base">
 
    {/* Header */}
-   <div className="p-4 md:p-6 border-b border-edge flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface">
+   <div className="p-4 md:p-6 border-b border-edge flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface shadow-sm">
      <div className="flex items-center gap-3">
-      <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent">
-        <CalIcon size={22} />
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${dc ? 'bg-accent/20 text-accent' : 'bg-accent/10 text-accent'}`}>
+        <CalIcon size={20} />
       </div>
       <div>
-        <h1 className="h1">Agenda y Tareas</h1>
-        <p className="body-text text-sm">{monthNames[month]} {year} • {events.length} eventos</p>
+        <h1 className="text-xl font-bold tracking-tight text-content">Agenda y Tareas</h1>
+        <p className="text-[10px] font-bold text-content-muted uppercase tracking-wider">{monthNames[month]} {year} • {events.length} eventos</p>
       </div>
      </div>
-     <div className="flex items-center gap-3 w-full md:w-auto">
-      <div className="flex p-0.5 rounded-lg border border-edge bg-surface w-full md:w-auto">
+     <div className="flex items-center gap-2 w-full md:w-auto">
+      <div className={`flex p-1 rounded-xl border border-edge ${dc ? 'bg-surface-raised' : 'bg-white shadow-sm'} w-full md:w-auto`}>
         {(['month', 'week', 'day'] as const).map(v => (
-         <button key={v} onClick={() => setView(v)} className={`flex-1 md:px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${view === v ? 'bg-accent text-content' : 'text-content-muted hover:text-content'}`}>
+         <button key={v} onClick={() => setView(v)} className={`flex-1 md:px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${view === v ? 'bg-accent text-content shadow-sm' : 'text-content-muted hover:text-content'}`}>
           {v === 'month' ? 'Mes' : v === 'week' ? 'Semana' : 'Día'}
          </button>
         ))}
       </div>
-      <button onClick={() => openNew()} className="btn-primary px-3 py-2">
+      <button onClick={() => openNew()} className="btn-primary p-2 rounded-xl shadow-lg shadow-accent/20 transition-all hover:scale-105 active:scale-95">
         <Plus size={18} />
       </button>
      </div>
    </div>
 
    {/* Filter & Nav */}
-   <div className="px-4 md:px-6 py-3 border-b border-edge flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface">
+   <div className="px-4 md:px-6 py-2.5 border-b border-edge flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface/50">
      <div className="flex items-center gap-3 w-full sm:w-auto">
-      <div className="relative flex-1 sm:w-60">
-        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
-        <select value={filterType} onChange={e => setFilterType(e.target.value)} className="input-field pl-9 text-xs py-2">
+      <div className="relative flex-1 sm:w-56">
+        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={12} />
+        <select value={filterType} onChange={e => setFilterType(e.target.value)} className={`${input} pl-9`}>
          <option value="todos">Todos los eventos</option>
          {Object.keys(typeConfig).map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
         </select>
       </div>
      </div>
      <div className="flex items-center gap-4">
-      <button onClick={prevMonth} className="p-2 rounded-lg border border-edge text-content-muted hover:text-content transition-colors"><ChevronLeft size={16} /></button>
-      <span className="text-xs font-semibold text-content min-w-[120px] text-center">{monthNames[month]} {year}</span>
-      <button onClick={nextMonth} className="p-2 rounded-lg border border-edge text-content-muted hover:text-content transition-colors"><ChevronRight size={16} /></button>
+      <button onClick={prevMonth} className="p-1.5 rounded-lg border border-edge text-content-muted hover:text-content transition-colors"><ChevronLeft size={14} /></button>
+      <span className="text-[11px] font-black uppercase tracking-widest text-content min-w-[120px] text-center">{monthNames[month]} {year}</span>
+      <button onClick={nextMonth} className="p-1.5 rounded-lg border border-edge text-content-muted hover:text-content transition-colors"><ChevronRight size={14} /></button>
      </div>
    </div>
 
@@ -219,10 +221,10 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
       <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
      </div>
     ) : (
-     <div className="h-full min-h-[600px] rounded-xl border border-edge bg-surface overflow-hidden flex flex-col">
-      <div className="grid grid-cols-7 border-b border-edge bg-surface-inset">
+     <div className="h-full min-h-[600px] rounded-2xl border border-edge bg-surface overflow-hidden flex flex-col shadow-sm">
+      <div className={`grid grid-cols-7 border-b border-edge ${dc ? 'bg-surface-raised' : 'bg-surface-inset'}`}>
         {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
-         <div key={d} className="py-3 text-center text-xs font-medium text-content-muted">{d}</div>
+         <div key={d} className="py-2.5 text-center text-[10px] font-black uppercase tracking-widest text-content-muted">{d}</div>
         ))}
       </div>
       <div className="flex-1 grid grid-cols-7">
@@ -232,24 +234,24 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
          const isToday = day === todayDate.getDate() && month === todayDate.getMonth() && year === todayDate.getFullYear();
          return (
           <div key={i} onClick={() => day && openNew(ds)}
-           className={`border-b border-r border-edge p-2 flex flex-col gap-1 cursor-pointer transition-colors min-h-[100px] overflow-hidden ${!day ? 'bg-surface-inset/50' : 'hover:bg-surface-inset'} ${isToday ? 'bg-accent/5' : ''}`}>
+           className={`border-b border-r border-edge p-2 flex flex-col gap-1 cursor-pointer transition-colors min-h-[100px] overflow-hidden ${!day ? 'bg-surface-inset/30' : 'hover:bg-surface-inset'} ${isToday ? 'bg-accent/5' : ''}`}>
            {day && (
             <>
               <div className="flex justify-between items-center mb-0.5">
-               <span className={`text-xs font-medium ${isToday ? 'bg-accent text-white w-6 h-6 rounded-full flex items-center justify-center' : 'text-content-muted'}`}>{day}</span>
-               {dayEvents.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-accent" />}
+               <span className={`text-[10px] font-black ${isToday ? 'bg-accent text-white w-5 h-5 rounded-lg flex items-center justify-center shadow-md shadow-accent/20' : 'text-content-muted opacity-50'}`}>{day}</span>
+               {dayEvents.length > 0 && <div className="w-1 h-1 rounded-full bg-accent" />}
               </div>
               <div className="space-y-1 overflow-hidden">
                {dayEvents.slice(0, 3).map(ev => {
                 const style = getTypeStyle(ev.type);
                 return (
                  <div key={ev.id} onClick={(e) => openEdit(ev, e)}
-                  className={`px-1.5 py-0.5 rounded text-xs font-medium truncate border transition-colors hover:opacity-80 ${style.bg} ${style.color} ${style.border} ${ev.status === 'completada' ? 'opacity-50 line-through' : ''}`}>
+                  className={`px-1.5 py-0.5 rounded-lg text-[9px] font-bold truncate border transition-all hover:translate-x-0.5 ${style.bg} ${style.color} ${style.border} ${ev.status === 'completada' ? 'opacity-30 line-through' : ''}`}>
                   {ev.time} {ev.title}
                  </div>
                 );
                })}
-               {dayEvents.length > 3 && <div className="text-xs text-content-muted pl-1">+{dayEvents.length - 3} más</div>}
+               {dayEvents.length > 3 && <div className="text-[8px] font-bold text-content-muted pl-1 uppercase">+{dayEvents.length - 3} más</div>}
               </div>
             </>
            )}
@@ -261,102 +263,79 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
     )}
    </div>
 
-   {/* Sidebar: Today's tasks */}
-   {view === 'day' && (
-    <div className="border-t border-edge p-6 bg-surface max-h-[40vh] overflow-y-auto">
-     <h3 className="text-sm font-bold text-content mb-4">Tareas del día ({todayStr})</h3>
-     <div className="space-y-2">
-      {filteredEvents.filter(e => e.date === todayStr).length === 0 && (
-       <p className="text-xs text-content-muted italic">Sin eventos programados para hoy.</p>
-      )}
-      {filteredEvents.filter(e => e.date === todayStr).map(ev => {
-       const style = getTypeStyle(ev.type);
-       const Icon = style.icon;
-       return (
-        <div key={ev.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${dc ? 'bg-surface-raised/40 border-edge' : 'bg-surface border-edge hover:shadow-sm'}`}>
-         <button onClick={(e) => toggleStatus(ev, e)} className={`shrink-0 ${ev.status === 'completada' ? 'text-emerald-500' : 'text-content-muted hover:text-accent'}`}>
-          <CheckCircle2 size={18} />
-         </button>
-         <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${style.bg} ${style.color}`}><Icon size={14} /></div>
-         <div className="flex-1 min-w-0">
-          <p className={`text-xs font-bold truncate ${ev.status === 'completada' ? 'line-through text-content-muted' : 'text-content'}`}>{ev.title}</p>
-          <p className="text-[10px] text-content-muted">{ev.time} • {ev.client || 'Sin cliente'}</p>
-         </div>
-         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${ev.priority === 'alta' ? 'bg-rose-500/10 text-rose-500' : ev.priority === 'baja' ? 'bg-slate-500/10 text-slate-500' : 'bg-blue-500/10 text-blue-500'}`}>{ev.priority}</span>
-        </div>
-       );
-      })}
-     </div>
-    </div>
-   )}
-
    {/* Modal */}
    {modal && (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-     <div className="rounded-xl border border-edge bg-surface shadow-lg w-full max-w-lg overflow-hidden flex flex-col">
-      <div className="px-6 py-4 border-b border-edge flex justify-between items-center bg-surface-inset">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+     <div className={`rounded-2xl border border-edge bg-surface shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 ${dc ? 'bg-surface' : 'bg-white'}`}>
+      <div className={`px-6 py-4 border-b border-edge flex justify-between items-center ${dc ? 'bg-surface-raised/50' : 'bg-surface-inset/50'}`}>
         <div>
-         <h2 className="h2">{editing ? 'Editar evento' : 'Nueva cita'}</h2>
-         <p className="label-text mt-0.5">Detalles de la agenda comercial</p>
+         <h2 className="text-md font-bold text-content leading-tight">{editing ? 'Editar evento' : 'Nueva cita'}</h2>
+         <p className="text-[10px] font-bold text-content-muted uppercase tracking-wider mt-0.5">Detalles de la agenda comercial</p>
         </div>
-        <button onClick={() => setModal(false)} className="p-2 rounded-lg border border-edge text-content-muted hover:text-content transition-colors"><X size={18} /></button>
+        <button onClick={() => setModal(false)} className="p-2 rounded-lg hover:bg-surface-inset text-content-muted hover:text-content transition-all"><X size={18} /></button>
       </div>
 
-      <form onSubmit={save} className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
+      <form onSubmit={save} className="p-6 space-y-4 overflow-y-auto max-h-[70vh]">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-         <div className="space-y-1.5">
-           <label className="label-text">Tipo de actividad</label>
-           <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value as any })} className="input-field">
+         <div>
+           <label className={label}>Tipo de actividad</label>
+           <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value as any })} className={input}>
             {Object.keys(typeConfig).map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
            </select>
          </div>
-         <div className="space-y-1.5">
-           <label className="label-text">Prioridad</label>
-           <select value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value as any })} className="input-field">
+         <div>
+           <label className={label}>Prioridad</label>
+           <select value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value as any })} className={input}>
             <option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option>
            </select>
          </div>
         </div>
-        <div className="space-y-1.5">
-         <label className="label-text">Título descriptivo</label>
-         <input required type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ej: Visita al proyecto Mirador..." className="input-field" />
+        <div>
+         <label className={label}>Título descriptivo</label>
+         <input required type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ej: Visita al proyecto Mirador..." className={input} />
         </div>
         <div className="grid grid-cols-2 gap-4">
-         <div className="space-y-1.5">
-           <label className="label-text">Fecha</label>
-           <input required type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="input-field" />
+         <div className="relative">
+           <label className={label}>Fecha</label>
+           <div className="relative">
+            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 pointer-events-none" size={14} />
+            <input required type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className={`${input} pl-9`} />
+           </div>
          </div>
-         <div className="space-y-1.5">
-           <label className="label-text">Hora</label>
-           <input required type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} className="input-field" />
+         <div className="relative">
+           <label className={label}>Hora</label>
+           <div className="relative">
+            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 pointer-events-none" size={14} />
+            <input required type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} className={`${input} pl-9`} />
+           </div>
          </div>
         </div>
-        <div className="space-y-1.5">
-         <label className="label-text">Cliente / Lead vinculado</label>
+        <div>
+         <label className={label}>Cliente / Lead vinculado</label>
          <div className="relative">
-           <User className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={16} />
-           <input type="text" value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} placeholder="Nombre del cliente..." className="input-field pl-9" />
+           <User className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
+           <input type="text" value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} placeholder="Nombre del cliente..." className={`${input} pl-9`} />
          </div>
         </div>
         {editing && (
-         <div className="space-y-1.5">
-          <label className="label-text">Estado</label>
-          <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value as any })} className="input-field">
+         <div>
+          <label className={label}>Estado</label>
+          <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value as any })} className={input}>
            <option value="pendiente">Pendiente</option>
            <option value="completada">Completada</option>
            <option value="cancelada">Cancelada</option>
           </select>
          </div>
         )}
-        <div className="space-y-1.5">
-         <label className="label-text">Notas adicionales</label>
-         <textarea rows={3} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Instrucciones para el asesor..." className="input-field resize-none h-24" />
+        <div>
+         <label className={label}>Notas adicionales</label>
+         <textarea rows={2} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Instrucciones para el asesor..." className={`${input} resize-none h-16`} />
         </div>
       </form>
 
-      <div className="p-6 border-t border-edge flex flex-col sm:flex-row gap-3 bg-surface-inset">
-        {editing && <button type="button" onClick={del} className="flex-1 py-2 text-sm font-medium text-red-500 border border-red-500/20 rounded-lg hover:bg-red-500/5 transition-colors">Eliminar</button>}
-        <button onClick={save} className="flex-[2] btn-primary py-2">
+      <div className={`p-5 border-t border-edge flex flex-col sm:flex-row gap-2 ${dc ? 'bg-surface-raised/50' : 'bg-surface-inset/50'}`}>
+        {editing && <button type="button" onClick={del} className="flex-1 py-2 text-[11px] font-black uppercase tracking-widest text-red-500 border border-red-500/20 rounded-xl hover:bg-red-500/5 transition-colors">Eliminar</button>}
+        <button onClick={save} className="flex-[2] btn-primary py-2 text-[11px] font-black uppercase tracking-widest shadow-lg shadow-accent/20">
          {editing ? 'Actualizar evento' : 'Programar en agenda'}
         </button>
       </div>
