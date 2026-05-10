@@ -151,7 +151,7 @@ const AlarmBanner = ({ alarm, onDismiss }: { alarm: ActiveAlarm; onDismiss: () =
   );
 };
 
-export const AlarmSystem = ({ items, enabled = true }: { items: AlarmItem[], enabled?: boolean }) => {
+export const AlarmSystem = ({ items, enabled = true, onDismiss }: { items: AlarmItem[], enabled?: boolean, onDismiss?: (id: string) => void }) => {
   const [activeAlarms, setActiveAlarms] = useState<ActiveAlarm[]>([]);
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);

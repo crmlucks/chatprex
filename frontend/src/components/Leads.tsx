@@ -4,7 +4,7 @@ import { useToast } from './Toast';
 import AlarmSystem, { AlarmItem } from './AlarmSystem';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
 
 const getScoreColor = (score: string) => {
  const n = parseInt(score);
