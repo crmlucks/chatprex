@@ -9,6 +9,7 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
  const [campaigns, setCampaigns] = useState<any[]>([]);
  const [showModal, setShowModal] = useState(false);
  const [activeTab, setActiveTab] = useState('mensaje');
+ const [listTab, setListTab] = useState('Todas');
  const [editingCampaign, setEditingCampaign] = useState<any>(null);
  const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -180,16 +181,29 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
         <input type="text" placeholder="Buscar campañas..." className={`${inputClass} pl-10`} />
       </div>
-      <div className={`flex p-1 rounded-xl ${dc ? 'bg-surface-raised border border-edge' : 'bg-white border border-edge shadow-sm'}`}>
-        <button className="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg bg-accent text-content shadow-sm">Todas</button>
-        <button className="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg text-content-muted hover:text-content">Activas</button>
-        <button className="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg text-content-muted hover:text-content">Borradores</button>
-      </div>
+       <div className={`flex p-1 rounded-xl ${dc ? 'bg-surface-raised border border-edge' : 'bg-white border border-edge shadow-sm'}`}>
+         {['Todas', 'Activas', 'Seguimiento', 'Post Venta', 'Borradores'].map(t => (
+           <button 
+             key={t}
+             onClick={() => setListTab(t)}
+             className={`px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${listTab === t ? 'bg-accent text-content shadow-sm' : 'text-content-muted hover:text-content'}`}
+           >
+             {t}
+           </button>
+         ))}
+       </div>
     </div>
 
     {/* Campaigns Grid */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {campaigns.map(c => (
+      {campaigns.filter(c => {
+         if (listTab === 'Todas') return true;
+         if (listTab === 'Activas') return c.status === 'Activo';
+         if (listTab === 'Borradores') return c.status === 'Borrador';
+         if (listTab === 'Seguimiento') return c.type === 'Seguimiento';
+         if (listTab === 'Post Venta') return c.type === 'Post venta';
+         return true;
+       }).map(c => (
        <div key={c.id} className="card overflow-hidden flex flex-col h-full hover:shadow-lg transition-all group border-edge">
          <div className={`p-4 border-b flex justify-between items-start ${dc ? 'bg-surface-raised/30 border-edge' : 'bg-surface-inset/30 border-slate-100'}`}>
           <div>

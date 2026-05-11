@@ -13,7 +13,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
  const [search, setSearch] = useState('');
  const [properties, setProperties] = useState<any[]>([]);
  const [dbProjects, setDbProjects] = useState<any[]>([]);
- const { token } = useAuth();
+ const { token, user } = useAuth();
 
  const fileInputRef = useRef<HTMLInputElement>(null);
  const multipleFileInputRef = useRef<HTMLInputElement>(null);
@@ -209,9 +209,23 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
            <div className="absolute top-3 left-3">
              <span className={`text-xs font-bold px-2 py-1 rounded-lg border backdrop-blur-sm ${p.status === 'disponible' ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30' : p.status === 'reservado' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' : 'bg-rose-500/20 text-rose-500 border-rose-500/30'}`}>{p.status}</span>
            </div>
+            <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
+              {p.avatar && (
+                <div className="w-10 h-10 rounded-xl border-2 border-white/50 bg-white overflow-hidden shadow-lg backdrop-blur-sm">
+                  <img src={p.avatar} className="w-full h-full object-contain p-1" alt="Logo" />
+                </div>
+              )}
+              {p.images?.length > 0 && (
+                <div className="px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-xl">
+                  <ImageIcon size={10} /> {p.images.length} Fotos
+                </div>
+              )}
+            </div>
            <div className="absolute bottom-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-             <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || ''}); setShowModal(true); }} className="w-8 h-8 rounded-lg bg-surface/90 backdrop-blur text-content flex items-center justify-center hover:bg-accent hover:text-white transition-colors shadow-sm"><Edit2 size={14} /></button>
-             <button onClick={() => deleteProperty(p.id)} className="w-8 h-8 rounded-lg bg-rose-500/90 backdrop-blur text-white flex items-center justify-center hover:bg-rose-600 transition-colors shadow-sm"><Trash2 size={14} /></button>
+             <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || []}); setShowModal(true); }} className="w-8 h-8 rounded-lg bg-surface/90 backdrop-blur text-content flex items-center justify-center hover:bg-accent hover:text-white transition-colors shadow-sm"><Edit2 size={14} /></button>
+             { (user?.role === 'propietario' || user?.role === 'administrador') && (
+               <button onClick={() => deleteProperty(p.id)} className="w-8 h-8 rounded-lg bg-rose-500/90 backdrop-blur text-white flex items-center justify-center hover:bg-rose-600 transition-colors shadow-sm"><Trash2 size={14} /></button>
+             )}
            </div>
           </div>
           <div className="p-4 flex flex-col flex-1 space-y-3">
@@ -311,8 +325,10 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
              </td>
              <td className="px-5 py-3 text-right">
               <div className="flex justify-end gap-1">
-                <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || ''}); setShowModal(true); }} className={`p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
-                <button onClick={() => deleteProperty(p.id)} className="p-2 rounded-lg text-rose-400 hover:text-rose-500 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
+                <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || []}); setShowModal(true); }} className={`p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
+                { (user?.role === 'propietario' || user?.role === 'administrador') && (
+                  <button onClick={() => deleteProperty(p.id)} className="p-2 rounded-lg text-rose-400 hover:text-rose-500 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
+                )}
               </div>
              </td>
            </tr>

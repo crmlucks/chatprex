@@ -149,36 +149,74 @@ const FollowUpTab = ({ data, dc }: any) => {
  );
 };
 
+const FollowUpItem = ({ item, color, dc }: any) => {
+ const [showStrategy, setShowStrategy] = useState(false);
+ const scoreVal = typeof item.score === 'string' ? item.score.replace('%', '') : item.score;
+ 
+ // Simulación de estrategia IA si no viene desde el backend
+ const strategy = item.ai_strategy || `🌟 Análisis Predictivo:
+• El lead tiene un score de ${scoreVal}%, indicando interés moderado/alto.
+• Lleva en estado "${item.status}" por un tiempo crítico.
+
+🎯 Estrategia Sugerida para el Asesor:
+1. Contactar enfatizando beneficios de exclusividad o descuentos limitados.
+2. Agendar visita guiada (virtual o presencial) para concretar decisión.
+3. Preguntar directamente sobre los obstáculos para invertir en este momento.`;
+
+ return (
+  <div className={`flex flex-col rounded-xl border transition-all ${showStrategy ? (dc ? 'bg-surface-raised border-accent/40 shadow-sm' : 'bg-white border-accent/40 shadow-md') : (dc ? 'bg-surface-raised border-edge hover:bg-surface-inset' : 'bg-white border-edge shadow-sm hover:shadow-md')} overflow-hidden`}>
+   <div className="flex items-center gap-4 p-3 cursor-pointer select-none" onClick={() => setShowStrategy(!showStrategy)}>
+    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border bg-${color}-500/5 border-${color}-500/20 text-${color}-500`}>
+     <span className="text-[11px] font-black">{scoreVal}%</span>
+    </div>
+    <div className="flex-1 min-w-0">
+     <p className="text-xs font-bold text-content truncate">{item.name}</p>
+     <p className="text-[10px] text-content-muted font-bold mt-0.5 uppercase tracking-tight truncate">{item.reason}</p>
+    </div>
+    <div className="flex items-center gap-3 text-[10px] text-content-muted shrink-0" onClick={e => e.stopPropagation()}>
+     <span className={`px-2 py-0.5 rounded-md font-bold uppercase tracking-tighter ${dc ? 'bg-surface border border-edge' : 'bg-surface-inset border border-edge'}`}>{item.status}</span>
+     {item.advisor_name && <span className="hidden lg:inline font-bold uppercase text-[9px] tracking-tight">{item.advisor_name}</span>}
+     <div className="flex gap-1 items-center ml-2">
+      <button onClick={() => setShowStrategy(!showStrategy)} title="Ver Estrategia IA" className={`p-2 rounded-lg transition-all active:scale-90 ${showStrategy ? 'bg-accent/20 text-accent' : 'hover:bg-accent/10 text-accent/70'}`}>
+       <BrainCircuit size={14} className={showStrategy ? 'animate-pulse' : ''} />
+      </button>
+      <a href={`tel:${item.phone}`} title="Llamar" className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-90"><Phone size={14}/></a>
+      <button title="Conversación" className="p-2 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-all active:scale-90"><MessageSquare size={14}/></button>
+     </div>
+    </div>
+   </div>
+   
+   {showStrategy && (
+    <div className={`p-4 pt-0 border-t ${dc ? 'border-edge/50' : 'border-edge/50'} animate-in slide-in-from-top-2 duration-200`}>
+     <div className={`mt-3 p-4 rounded-xl border ${dc ? 'bg-accent/5 border-accent/20' : 'bg-accent/5 border-accent/20'}`}>
+      <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2 mb-3">
+       <BrainCircuit size={12} /> Guía de Cierre Personalizada (IA)
+      </h4>
+      <div className={`text-xs font-medium space-y-1.5 leading-relaxed ${dc ? 'text-content-secondary' : 'text-content-secondary'}`}>
+       <p className="whitespace-pre-line">{strategy}</p>
+      </div>
+      <div className="mt-4 pt-3 border-t border-accent/10 flex justify-end">
+       <button className="text-[10px] font-bold text-accent hover:underline uppercase tracking-wider flex items-center gap-1">
+        Generar nueva estrategia <RefreshCw size={10} />
+       </button>
+      </div>
+     </div>
+    </div>
+   )}
+  </div>
+ );
+};
+
 const FollowUpSection = ({ title, icon, color, items, dc }: any) => (
  <div>
   <div className={`flex items-center gap-2 mb-2 text-${color}-500 px-1`}>
    {icon} <span className="text-[10px] font-black uppercase tracking-widest">{title}</span>
    <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-${color}-500/15 text-${color}-500`}>{items.length}</span>
   </div>
-  <div className="space-y-1.5">
-   {items.map((item: any) => {
-    // Limpieza de score para evitar %%
-    const scoreVal = typeof item.score === 'string' ? item.score.replace('%', '') : item.score;
-    return (
-     <div key={item.id} className={`flex items-center gap-4 p-3 rounded-xl border transition-all hover:bg-surface-inset group ${dc ? 'bg-surface-raised border-edge' : 'bg-white border-edge shadow-sm hover:shadow-md'}`}>
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border bg-${color}-500/5 border-${color}-500/20 text-${color}-500`}>
-       <span className="text-[11px] font-black">{scoreVal}%</span>
-      </div>
-      <div className="flex-1 min-w-0">
-       <p className="text-xs font-bold text-content truncate">{item.name}</p>
-       <p className="text-[10px] text-content-muted font-bold mt-0.5 uppercase tracking-tight truncate">{item.reason}</p>
-      </div>
-      <div className="flex items-center gap-3 text-[10px] text-content-muted shrink-0">
-       <span className={`px-2 py-0.5 rounded-md font-bold uppercase tracking-tighter ${dc ? 'bg-surface border border-edge' : 'bg-surface-inset border border-edge'}`}>{item.status}</span>
-       {item.advisor_name && <span className="hidden lg:inline font-bold uppercase text-[9px] tracking-tight">{item.advisor_name}</span>}
-       <div className="flex gap-1 items-center ml-2">
-        <a href={`tel:${item.phone}`} className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-90"><Phone size={14}/></a>
-        <button className="p-2 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-all active:scale-90"><MessageSquare size={14}/></button>
-       </div>
-      </div>
-     </div>
-    );
-   })}
+  <div className="space-y-2">
+   {items.map((item: any) => (
+    <FollowUpItem key={item.id} item={item} color={color} dc={dc} />
+   ))}
   </div>
  </div>
 );

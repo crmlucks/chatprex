@@ -14,6 +14,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
  const [clients, setClients] = useState<any[]>([]);
  const [properties, setProperties] = useState<any[]>([]);
  const [agents, setAgents] = useState<any[]>([]);
+ const [editingClient, setEditingClient] = useState<any>(null);
  const { token } = useAuth();
  
  useEffect(() => {
@@ -61,22 +62,52 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
     } catch (err) { console.error(err); }
   };
 
-  const handleAddClient = async (e: React.FormEvent) => { 
+   const handleAddClient = async (e: React.FormEvent) => { 
     e.preventDefault(); 
     if (!clientForm.name) return; 
     try {
-      const res = await fetch(`${API_URL}/api/data/finances/clients`, {
-        method: 'POST',
+      const isEdit = !!editingClient;
+      const url = isEdit ? `${API_URL}/api/data/finances/clients/${editingClient.id}` : `${API_URL}/api/data/finances/clients`;
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(clientForm)
       });
       if (res.ok) {
-        const newClient = await res.json();
-        setClients([newClient, ...clients]);
+        const saved = await res.json();
+        if (isEdit) {
+          setClients(clients.map(c => c.id === saved.id ? saved : c));
+        } else {
+          setClients([saved, ...clients]);
+        }
         setShowClientForm(false);
+        setEditingClient(null);
         setClientForm({ doc: '', name: '', phone: '', email: '', civilStatus: 'Soltero', spouseDoc: '', spouseName: '', spousePhone: '', address: '', district: '', province: '', department: '', notes: '', property: '', agent: '' });
       }
     } catch (err) { console.error(err); }
+  };
+
+  const openEditClient = (client: any) => {
+    setEditingClient(client);
+    setClientForm({
+      doc: client.doc || '',
+      name: client.name || '',
+      phone: client.phone || '',
+      email: client.email || '',
+      civilStatus: client.civil_status || client.civilStatus || 'Soltero',
+      spouseDoc: client.spouse_doc || client.spouseDoc || '',
+      spouseName: client.spouse_name || client.spouseName || '',
+      spousePhone: client.spouse_phone || client.spousePhone || '',
+      address: client.address || '',
+      district: client.district || '',
+      province: client.province || '',
+      department: client.department || '',
+      notes: client.notes || '',
+      property: client.property_id || client.property || '',
+      agent: client.agent_id || client.agent || ''
+    });
+    setShowClientForm(true);
+    setActiveTab('clients');
   };
  const formatMoney = (amount: number) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -188,7 +219,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={16} />
           <input type="text" placeholder="Buscar por documento, nombre o celular..." className="input-field pl-10" />
         </div>
-        <button onClick={() => setShowClientForm(!showClientForm)} className="btn-primary">
+        <button onClick={() => { if(showClientForm) setEditingClient(null); setShowClientForm(!showClientForm); }} className="btn-primary">
           <UserPlus size={16} /> {showClientForm ? 'Cancelar' : 'Nuevo cliente'}
         </button>
        </div>
@@ -196,7 +227,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
        {showClientForm && (
         <form onSubmit={handleAddClient} className="card p-5 border-accent/20">
          <div className="flex items-center justify-between border-b border-edge pb-3 mb-4">
-          <h3 className="text-sm font-semibold text-content">Ficha del Cliente / Venta</h3>
+          <h3 className="text-sm font-semibold text-content">{editingClient ? 'Editar Ficha del Cliente' : 'Nueva Ficha del Cliente / Venta'}</h3>
          </div>
          
          <div className="grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-y-3">
@@ -251,7 +282,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
           </div>
 
           <div className="col-span-1 md:col-span-4 flex justify-end mt-2">
-           <button type="submit" className="btn-primary text-xs py-2">Guardar Ficha</button>
+           <button type="submit" className="btn-primary text-xs py-2">{editingClient ? 'Actualizar Ficha' : 'Guardar Ficha'}</button>
           </div>
          </div>
         </form>
@@ -267,7 +298,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
                <td className="px-5 py-3 text-xs font-medium text-content-muted">{c.doc}</td>
                <td className="px-5 py-3"><p className="text-sm font-medium text-content">{c.name}</p><p className="text-xs text-content-muted">{c.phone || '-'}</p></td>
                <td className="px-5 py-3"><span className="text-xs font-medium px-2 py-0.5 rounded-md bg-surface-inset text-content-muted">{c.civilStatus}</span></td>
-               <td className="px-5 py-3 text-right"><button className="text-xs font-medium text-accent hover:underline">Ver ficha</button></td>
+               <td className="px-5 py-3 text-right"><button onClick={() => openEditClient(c)} className="text-xs font-medium text-accent hover:underline">Ver / Editar</button></td>
               </tr>
              ))}
            </tbody>

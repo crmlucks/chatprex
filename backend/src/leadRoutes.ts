@@ -1,6 +1,6 @@
 import express from 'express';
 import pool from './db';
-import { authMiddleware } from './authMiddleware';
+import { authMiddleware, requireRole } from './authMiddleware';
 
 const leadRouter = express.Router();
 
@@ -87,7 +87,7 @@ leadRouter.put('/:id', authMiddleware, async (req, res) => {
 });
 
 // DELETE lead
-leadRouter.delete('/:id', authMiddleware, async (req, res) => {
+leadRouter.delete('/:id', authMiddleware, requireRole('propietario', 'administrador'), async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query('DELETE FROM leads WHERE id=$1 RETURNING id, phone', [id]);

@@ -47,7 +47,7 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
  const [filterTag, setFilterTag] = useState('todos');
  const { showToast, showConfirm } = useToast();
  const [alarmItems, setAlarmItems] = useState<AlarmItem[]>([]);
- const { token } = useAuth();
+ const { token, user } = useAuth();
 
  const fetchLeads = async () => {
   try {
@@ -384,12 +384,17 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
           <button title="Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}>
            <MessageSquare size={14} />
           </button>
+          <button title={lead.botActive ? "Desactivar Bot" : "Activar Bot IA"} onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }} className={`p-2 rounded-lg transition-all active:scale-90 ${lead.botActive ? 'text-accent hover:bg-accent/10' : (dc ? 'text-content-muted hover:text-content hover:bg-surface-raised' : 'text-content-muted hover:text-content-secondary hover:bg-slate-100')}`}>
+           <Bot size={14} className={lead.botActive ? 'animate-pulse' : ''} />
+          </button>
           <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}>
            <Edit size={14} />
           </button>
-          <button title="Eliminar" onClick={() => onDelete(lead.id)} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-400 hover:bg-rose-50'}`}>
-           <Trash2 size={14} />
-          </button>
+          { (user?.role === 'propietario' || user?.role === 'administrador') && (
+           <button title="Eliminar" onClick={() => onDelete(lead.id)} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-400 hover:bg-rose-50'}`}>
+            <Trash2 size={14} />
+           </button>
+          )}
          </div>
         </td>
        </tr>
@@ -442,59 +447,80 @@ const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onEdit, 
 
 const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode }: any) => {
  const dc = isDarkMode;
+ const { user } = useAuth();
  const handleDragStart = (e: React.DragEvent) => { e.dataTransfer.setData('leadId', lead.id); };
  const sc = getScoreColor(lead.score || '0');
  return (
   <div draggable onDragStart={handleDragStart} onDoubleClick={() => onSelect(lead)}
-   className="card-premium group p-5 cursor-grab active:cursor-grabbing hover:border-accent/40 transition-all">
-   <div className="flex justify-between items-start mb-4 gap-3">
-    <div className="flex flex-col min-w-0">
-     <h4 className={`text-sm font-bold truncate group-hover:text-accent transition-colors ${dc ? 'text-content' : 'text-content'}`}>{lead.name}</h4>
-     <div className="flex items-center gap-1.5 text-content-muted mt-1">
+   className="card-premium group p-5 cursor-grab active:cursor-grabbing hover:border-accent/40 transition-all flex flex-col gap-4">
+   
+   {/* Encabezado: Nombre, Bot, y Scoring */}
+   <div className="flex justify-between items-start gap-3">
+    <div className="flex flex-col min-w-0 flex-1">
+     <div className="flex items-center gap-2 mb-1">
+      <h4 className={`text-sm font-bold truncate group-hover:text-accent transition-colors ${dc ? 'text-content' : 'text-content'}`}>{lead.name}</h4>
+      {lead.botActive && (
+        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent/20 text-accent" title="Bot Activo">
+         <Bot size={12} className="animate-pulse" />
+        </span>
+      )}
+     </div>
+     <div className="flex items-center gap-1.5 text-content-muted">
       <Phone size={12} className="text-emerald-500 shrink-0" />
       <span className="text-xs font-semibold truncate">{lead.phone}</span>
      </div>
     </div>
-    <button onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }}
-     className={`p-2 rounded-xl shrink-0 transition-all active:scale-90 ${lead.botActive ? 'bg-accent text-content shadow-lg shadow-accent/25' : 'bg-slate-100 text-content-muted dark:bg-surface-raised'}`}>
-     <Bot size={14} className={lead.botActive ? 'animate-pulse' : ''} />
-    </button>
-   </div>
-   
-   {lead.tags && lead.tags.length > 0 && (
-    <div className="flex gap-2 flex-wrap mb-4">
-     {lead.tags.map((tag: string, i: number) => (
-      <span key={i} className={`text-xs font-bold px-2 py-0.5 rounded-lg border ${getTagColor(tag)}`}>{tag}</span>
-     ))}
-    </div>
-   )}
-   
-   <div className="space-y-4">
-    <div className={`flex items-center justify-between pt-4 border-t ${dc ? 'border-edge' : 'border-edge'}`}>
-     <div className="flex items-center gap-3 flex-1 min-w-0">
-      <div className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-xs font-bold relative ${sc.bg} ${sc.text}`} title="Scoring generado por IA">
-       {lead.score || '0'}%
-       <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-surface dark:bg-surface-raised rounded-full flex items-center justify-center shadow-sm">
-         <BrainCircuit size={10} className="text-accent" />
-       </div>
-      </div>
-      <div className="flex flex-col min-w-0 flex-1">
-       <span className={`text-xs font-bold truncate ${dc ? 'text-content-secondary' : 'text-content-secondary'}`}>{lead.project || 'Sin proyecto'}</span>
-       <span className="text-xs font-medium text-content-muted truncate">{lead.source || 'Orgánico'}</span>
-      </div>
-     </div>
-    </div>
-    <div className={`flex items-center justify-between pt-3 border-t ${dc ? 'border-edge' : 'border-edge'}`} onClick={e => e.stopPropagation()}>
-     <div className="flex gap-1">
-      <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}><Phone size={14} /></a>
-      <button title="Chat" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}><MessageSquare size={14} /></button>
-     </div>
-     <div className="flex gap-1">
-      <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-content-muted hover:text-content hover:bg-surface-raised' : 'text-content-muted hover:text-content-secondary hover:bg-slate-100'}`}><Edit size={14} /></button>
-      <button title="Eliminar" onClick={() => onDelete(lead.id)} className="p-2 rounded-lg transition-all active:scale-90 text-rose-400 hover:bg-rose-50"><Trash2 size={14} /></button>
+    
+    <div className="flex flex-col items-end shrink-0">
+     <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${sc.bg} ${sc.text}`} title="IA Scoring Predictivo">
+       <BrainCircuit size={12} />
+       <span className="text-[11px] font-black">{lead.score || '0'}%</span>
      </div>
     </div>
    </div>
+   
+   {/* Tags y Proyecto */}
+   <div className="flex flex-col gap-2">
+    <div className="flex items-center gap-2">
+     <Tag size={12} className="text-content-muted shrink-0" />
+     <span className={`text-xs font-bold truncate ${dc ? 'text-content-secondary' : 'text-content-secondary'}`}>
+      {lead.project || 'Sin proyecto específico'}
+     </span>
+    </div>
+    {lead.tags && lead.tags.length > 0 && (
+     <div className="flex gap-1.5 flex-wrap">
+      {lead.tags.slice(0,3).map((tag: string, i: number) => (
+       <span key={i} className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${getTagColor(tag)}`}>{tag}</span>
+      ))}
+     </div>
+    )}
+   </div>
+   
+   {/* Botones de Acción */}
+   <div className={`flex items-center justify-between pt-3 border-t ${dc ? 'border-edge' : 'border-edge'}`} onClick={e => e.stopPropagation()}>
+    <div className="flex gap-1.5">
+     <a title="Llamar al lead" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20' : 'bg-emerald-50 text-emerald-500 hover:bg-emerald-100'}`}>
+      <Phone size={14} />
+     </a>
+     <button title="Ir a Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20' : 'bg-blue-50 text-blue-500 hover:bg-blue-100'}`}>
+      <MessageSquare size={14} />
+     </button>
+     <button title={lead.botActive ? "Desactivar Bot" : "Activar Bot IA"} onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }} className={`p-2 rounded-xl transition-all active:scale-90 ${lead.botActive ? 'bg-accent/20 text-accent hover:bg-accent/30' : (dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-slate-100 text-content-muted hover:text-content-secondary')}`}>
+      <Bot size={14} />
+     </button>
+    </div>
+    <div className="flex gap-1.5">
+     <button title="Editar Lead" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}>
+      <Edit size={14} />
+     </button>
+     { (user?.role === 'propietario' || user?.role === 'administrador') && (
+      <button title="Eliminar Lead" onClick={() => onDelete(lead.id)} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'text-content-muted hover:text-rose-400 hover:bg-rose-500/10' : 'text-content-muted hover:text-rose-500 hover:bg-rose-50'}`}>
+       <Trash2 size={14} />
+      </button>
+     )}
+    </div>
+   </div>
+
   </div>
  );
 };
@@ -508,7 +534,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
  const [taskDate, setTaskDate] = useState(() => new Date().toISOString().split('T')[0]);
  const [taskTime, setTaskTime] = useState('12:00');
  const { showToast } = useToast();
- const { token } = useAuth();
+ const { token, user } = useAuth();
 
  const [tasks, setTasks] = useState<any[]>([]);
 
@@ -705,7 +731,9 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
             </div>
            </div>
           </div>
-          <button onClick={() => deleteTask(task.id)} className="p-2 text-content-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100 shrink-0 ml-2"><Trash2 size={14} /></button>
+          { (user?.role === 'propietario' || user?.role === 'administrador') && (
+           <button onClick={() => deleteTask(task.id)} className="p-2 text-content-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100 shrink-0 ml-2"><Trash2 size={14} /></button>
+          )}
          </div>
         ))}
        </div>
@@ -742,9 +770,11 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
             <span className={`text-[12px] font-bold ${dc ? 'text-content-secondary' : 'text-content'}`}>{note.author}</span>
              <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-content-muted">{note.time}</span>
-              <button onClick={() => deleteNote(note.id)} className="p-1 text-content-muted hover:text-rose-500 rounded-lg transition-all">
-               <Trash2 size={12} />
-              </button>
+              { (user?.role === 'propietario' || user?.role === 'administrador') && (
+               <button onClick={() => deleteNote(note.id)} className="p-1 text-content-muted hover:text-rose-500 rounded-lg transition-all">
+                <Trash2 size={12} />
+               </button>
+              )}
              </div>
             </div>
             <p className="body-text">{note.text}</p>
@@ -819,7 +849,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
 const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAlarm }: any) => {
  const dc = isDarkMode;
  const { showToast, showConfirm } = useToast();
- const { token } = useAuth();
+ const { token, user } = useAuth();
  const [citas, setCitas] = useState<any[]>([]);
  const [showForm, setShowForm] = useState(false);
  const today = new Date().toISOString().split('T')[0];
@@ -944,7 +974,9 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
         <span className="flex items-center gap-1.5"><Clock size={12}/> {c.time}</span>
        </div>
       </div>
-      <button onClick={() => delCita(c.id)} className="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><Trash2 size={16}/></button>
+      { (user?.role === 'propietario' || user?.role === 'administrador') && (
+       <button onClick={() => delCita(c.id)} className="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><Trash2 size={16}/></button>
+      )}
      </div>
     ))}
    </div>

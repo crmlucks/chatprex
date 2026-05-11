@@ -1,7 +1,10 @@
 import express from 'express';
 import pool from './db';
+import { authMiddleware, requireRole } from './authMiddleware';
 
 const router = express.Router();
+
+router.use(authMiddleware);
 
 // --- TASKS ---
 router.get('/tasks', async (req, res) => {
@@ -49,7 +52,7 @@ router.put('/tasks/:id', async (req, res) => {
   }
 });
 
-router.delete('/tasks/:id', async (req, res) => {
+router.delete('/tasks/:id', requireRole('propietario', 'administrador'), async (req, res) => {
   try {
     await pool.query('DELETE FROM tasks WHERE id = $1', [req.params.id]);
     res.json({ success: true });
@@ -89,7 +92,7 @@ router.post('/notes', async (req, res) => {
   }
 });
 
-router.delete('/notes/:id', async (req, res) => {
+router.delete('/notes/:id', requireRole('propietario', 'administrador'), async (req, res) => {
   try {
     await pool.query('DELETE FROM notes WHERE id = $1', [req.params.id]);
     res.json({ success: true });
@@ -242,7 +245,7 @@ router.put('/finances/clients/:id', async (req, res) => {
   }
 });
 
-router.delete('/finances/clients/:id', async (req, res) => {
+router.delete('/finances/clients/:id', requireRole('propietario', 'administrador'), async (req, res) => {
   try {
     await pool.query('DELETE FROM finances_clients WHERE id = $1', [req.params.id]);
     res.json({ success: true });
@@ -299,7 +302,7 @@ router.put('/finances/transactions/:id', async (req, res) => {
   }
 });
 
-router.delete('/finances/transactions/:id', async (req, res) => {
+router.delete('/finances/transactions/:id', requireRole('propietario', 'administrador'), async (req, res) => {
   try {
     await pool.query('DELETE FROM transactions WHERE id = $1', [req.params.id]);
     res.json({ success: true });
@@ -338,7 +341,7 @@ router.put('/projects/:id', async (req, res) => {
     res.status(500).json({ error: 'Database error' }); 
   }
 });
-router.delete('/projects/:id', async (req, res) => {
+router.delete('/projects/:id', requireRole('propietario', 'administrador'), async (req, res) => {
   try {
     await pool.query('DELETE FROM projects WHERE id = $1', [req.params.id]);
     res.json({ success: true });
@@ -366,7 +369,7 @@ router.put('/pipeline/:id', async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) { res.status(500).json({ error: 'Database error' }); }
 });
-router.delete('/pipeline/:id', async (req, res) => {
+router.delete('/pipeline/:id', requireRole('propietario', 'administrador'), async (req, res) => {
   try {
     await pool.query('DELETE FROM pipeline_stages WHERE id = $1', [req.params.id]);
     res.json({ success: true });
@@ -406,7 +409,7 @@ router.put('/sources/:id', async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) { res.status(500).json({ error: 'Database error' }); }
 });
-router.delete('/sources/:id', async (req, res) => {
+router.delete('/sources/:id', requireRole('propietario', 'administrador'), async (req, res) => {
   try {
     await pool.query('DELETE FROM lead_sources WHERE id = $1', [req.params.id]);
     res.json({ success: true });

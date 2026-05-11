@@ -104,6 +104,9 @@ export async function initDatabase() {
         location      VARCHAR(255) NOT NULL,
         area          VARCHAR(50) DEFAULT '',
         rooms         VARCHAR(20) DEFAULT '',
+        bathrooms     VARCHAR(20) DEFAULT '',
+        parking       VARCHAR(20) DEFAULT '',
+        floor         VARCHAR(20) DEFAULT '',
         details       TEXT DEFAULT '',
         status        VARCHAR(50) DEFAULT 'Disponible',
         image         TEXT DEFAULT '',
@@ -113,6 +116,11 @@ export async function initDatabase() {
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+    try {
+      await client.query('ALTER TABLE properties ADD COLUMN IF NOT EXISTS bathrooms VARCHAR(20) DEFAULT \'\';');
+      await client.query('ALTER TABLE properties ADD COLUMN IF NOT EXISTS parking VARCHAR(20) DEFAULT \'\';');
+      await client.query('ALTER TABLE properties ADD COLUMN IF NOT EXISTS floor VARCHAR(20) DEFAULT \'\';');
+    } catch(e) {}
     // Crear tabla evolution_messages
     await client.query(`
       CREATE TABLE IF NOT EXISTS evolution_messages (

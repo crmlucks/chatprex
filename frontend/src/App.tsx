@@ -72,8 +72,7 @@ function AuthenticatedApp() {
   * - usuario: solo ve Dashboard, Conversaciones, Leads, Calendario, Tareas
   */
  const renderContent = () => {
-  // Módulos que el 'usuario' NO puede ver
-  const restrictedTabs = ['Administración', 'Configuración', 'Automatización', 'Conexión WP', 'Constructor Bots', 'Usuarios'];
+  const restrictedTabs = ['Administración', 'Configuración', 'Automatización', 'Conexión WP', 'Constructor Bots', 'Usuarios', 'Campañas'];
 
   if (user.role === 'usuario' && restrictedTabs.includes(activeTab)) {
    return (
