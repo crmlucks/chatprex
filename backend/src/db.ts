@@ -236,25 +236,57 @@ export async function initDatabase() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS finances_clients (
         id            SERIAL PRIMARY KEY,
+        doc           TEXT,
         name          VARCHAR(150) NOT NULL,
-        email         VARCHAR(150),
         phone         VARCHAR(50),
+        email         VARCHAR(150),
+        civil_status  VARCHAR(50) DEFAULT 'Soltero',
+        spouse_doc    TEXT,
+        spouse_name   TEXT,
+        spouse_phone  TEXT,
+        address       TEXT,
+        district      TEXT,
+        province      TEXT,
+        department    TEXT,
+        notes         TEXT,
+        property_id   INTEGER,
+        agent_id      INTEGER,
         status        VARCHAR(50) DEFAULT 'activo',
         created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    // Añadir columnas faltantes si la tabla ya existía
+    const clientCols = [
+      'doc', 'civil_status', 'spouse_doc', 'spouse_name', 'spouse_phone', 
+      'address', 'district', 'province', 'department', 'notes', 
+      'property_id', 'agent_id'
+    ];
+    for (const col of clientCols) {
+      try {
+        await client.query(`ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS ${col} TEXT;`);
+      } catch(e) {}
+    }
 
     // Crear tabla transactions (para Finanzas)
     await client.query(`
       CREATE TABLE IF NOT EXISTS transactions (
         id            SERIAL PRIMARY KEY,
         client_id     INTEGER REFERENCES finances_clients(id),
+        description   TEXT,
         type          VARCHAR(50) NOT NULL,
         amount        DECIMAL(15,2) NOT NULL,
+        currency      VARCHAR(10) DEFAULT 'local',
         status        VARCHAR(50) DEFAULT 'completado',
         date          TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    // Añadir columnas faltantes en transactions
+    try {
+      await client.query('ALTER TABLE transactions ADD COLUMN IF NOT EXISTS description TEXT;');
+      await client.query('ALTER TABLE transactions ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT \'local\';');
+    } catch(e) {}
 
     // Crear tabla projects
     await client.query(`
