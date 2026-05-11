@@ -659,10 +659,16 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
          <select value={taskPriority} onChange={e=>setTaskPriority(e.target.value)} className={`text-xs font-bold px-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-edge text-content-muted' : 'border-edge text-content-secondary shadow-sm'}`}>
           <option>Alta</option><option>Media</option><option>Baja</option>
          </select>
-         <input type="date" value={taskDate} onChange={e=>setTaskDate(e.target.value)} className={`text-xs font-bold px-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-edge text-content-muted' : 'border-edge text-content-secondary shadow-sm'}`} />
-         <input type="time" value={taskTime} onChange={e=>setTaskTime(e.target.value)} className={`text-xs font-bold px-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-edge text-content-muted' : 'border-edge text-content-secondary shadow-sm'}`} />
+         <div className="relative group">
+           <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-accent pointer-events-none" />
+           <input type="date" value={taskDate} onChange={e=>setTaskDate(e.target.value)} className={`text-xs font-bold pl-9 pr-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-edge text-content-muted' : 'border-edge text-content-secondary shadow-sm'}`} />
+         </div>
+         <div className="relative group">
+           <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-sky-400 pointer-events-none" />
+           <input type="time" value={taskTime} onChange={e=>setTaskTime(e.target.value)} className={`text-xs font-bold pl-9 pr-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-edge text-content-muted' : 'border-edge text-content-secondary shadow-sm'}`} />
+         </div>
         </div>
-        <div className="flex justify-end pt-4 border-t border-edge/5 dark:border-edge">
+        <div className="flex justify-end pt-2">
          <button onClick={addTask} className="btn-primary flex items-center gap-2">
           <Plus size={16} /> Agregar tarea
          </button>
@@ -708,7 +714,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
          placeholder="Escribe tus observaciones aquí..."
          className={`w-full text-sm font-medium bg-transparent border-none focus:outline-none resize-none min-h-[100px] ${dc ? 'text-content placeholder-slate-600' : 'text-content-secondary placeholder-slate-400'}`}
         />
-        <div className="flex justify-end items-center mt-4 border-t border-edge/5 pt-4">
+        <div className="flex justify-end items-center mt-2 pt-2">
          <button onClick={addNote} className="btn-primary flex items-center gap-2">
           <Send size={16} /> Guardar nota
          </button>
@@ -892,11 +898,17 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
        </div>
        <div className="space-y-2">
         <label className="small-text font-bold text-content-muted ml-1">Fecha</label>
-        <input type="date" value={nDate} onChange={e=>setNDate(e.target.value)} className={`w-full p-3 rounded-xl text-xs font-bold outline-none border ${dc ? 'bg-surface-raised border-edge text-content-secondary' : 'bg-surface border-edge text-content-secondary '}`}/>
+        <div className="relative">
+          <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-accent pointer-events-none" />
+          <input type="date" value={nDate} onChange={e=>setNDate(e.target.value)} className={`w-full pl-9 pr-3 py-3 rounded-xl text-xs font-bold outline-none border ${dc ? 'bg-surface-raised border-edge text-content-secondary' : 'bg-surface border-edge text-content-secondary '}`}/>
+        </div>
        </div>
        <div className="space-y-2">
         <label className="small-text font-bold text-content-muted ml-1">Hora</label>
-        <input type="time" value={nTime} onChange={e=>setNTime(e.target.value)} className={`w-full p-3 rounded-xl text-xs font-bold outline-none border ${dc ? 'bg-surface-raised border-edge text-content-secondary' : 'bg-surface border-edge text-content-secondary '}`}/>
+        <div className="relative">
+          <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-sky-400 pointer-events-none" />
+          <input type="time" value={nTime} onChange={e=>setNTime(e.target.value)} className={`w-full pl-9 pr-3 py-3 rounded-xl text-xs font-bold outline-none border ${dc ? 'bg-surface-raised border-edge text-content-secondary' : 'bg-surface border-edge text-content-secondary '}`}/>
+        </div>
        </div>
        <div className="flex items-end">
         <button onClick={addCita} className="w-full bg-accent text-content p-3 rounded-xl text-xs font-bold hover:bg-accent-dark shadow-lg shadow-accent/20 transition-all active:scale-95">Confirmar cita</button>
