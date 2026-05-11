@@ -186,8 +186,33 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <tbody className={`divide-y ${dc ? 'divide-edge' : 'divide-slate-100'}`}>
           {pipeline.length === 0 ? (
            <tr><td colSpan={3} className="px-6 py-10 text-center text-xs font-bold text-content-muted uppercase">No hay etapas definidas</td></tr>
-          ) : pipeline.map((p: any) => (
-           <tr key={p.id} className="group hover:bg-surface-inset transition-colors">
+          ) : pipeline.map((p: any, index: number) => (
+           <tr 
+              key={p.id} 
+              draggable 
+              onDragStart={(e) => e.dataTransfer.setData('index', index.toString())}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={async (e) => {
+                e.preventDefault();
+                const fromIdx = parseInt(e.dataTransfer.getData('index'));
+                const toIdx = index;
+                if (fromIdx === toIdx) return;
+                const newOrder = [...pipeline];
+                const [moved] = newOrder.splice(fromIdx, 1);
+                newOrder.splice(toIdx, 0, moved);
+                setPipeline(newOrder);
+                // Save new order to backend
+                try {
+                  const stagesToSave = newOrder.map((s, i) => ({ id: s.id, order: i + 1 }));
+                  await fetch(`${API_URL}/api/data/pipeline/reorder`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ stages: stagesToSave })
+                  });
+                } catch (err) { console.error('Error saving order', err); }
+              }}
+              className="group hover:bg-surface-inset transition-colors cursor-move"
+            >
             <td className="px-6 py-4">
              <div className="flex items-center gap-3">
               <div className="w-4 h-4 rounded-full border border-edge shrink-0" style={{ backgroundColor: p.color }}></div>

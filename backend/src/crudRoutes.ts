@@ -373,6 +373,18 @@ router.delete('/pipeline/:id', async (req, res) => {
   } catch (error) { res.status(500).json({ error: 'Database error' }); }
 });
 
+router.put('/pipeline/reorder', async (req, res) => {
+  const { stages } = req.body; // Array of {id, order}
+  try {
+    const queries = stages.map((s: any) => pool.query('UPDATE pipeline_stages SET "order"=$1 WHERE id=$2', [s.order, s.id]));
+    await Promise.all(queries);
+    res.json({ success: true });
+  } catch (error) { 
+    console.error(error);
+    res.status(500).json({ error: 'Database error' }); 
+  }
+});
+
 // --- ADMIN: SOURCES ---
 router.get('/sources', async (req, res) => {
   try {

@@ -72,7 +72,7 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
     .then(r => r.json())
     .then(data => {
      if(Array.isArray(data) && data.length > 0) {
-      setPipelineStages(data.map((d: any) => d.name));
+      setPipelineStages(data.filter((d: any) => d.visible !== false).map((d: any) => d.name));
      }
     })
     .catch(console.error);
