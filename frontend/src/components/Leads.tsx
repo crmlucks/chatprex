@@ -536,7 +536,10 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
  };
 
  const addTask = async () => {
-  if(!newTask.trim()) return;
+  if(!newTask.trim()) {
+    showToast('Ingresa una descripción para la tarea', 'info');
+    return;
+  }
   try {
    const res = await fetch(`${API_URL}/api/data/tasks`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -545,6 +548,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
    const saved = await res.json();
    setTasks([{ id: saved.id, text: newTask, type: taskType, priority: taskPriority, status: 'pendiente', date: `${taskDate} ${taskTime}`, dueDate: taskDate, dueTime: taskTime }, ...tasks]);
    setNewTask('');
+   showToast('Tarea agregada con éxito', 'success');
   } catch { showToast('Error al crear tarea', 'error'); }
  };
 
@@ -569,7 +573,10 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
  }, [lead?.id]);
 
  const addNote = async () => {
-  if(!newNote.trim()) return;
+  if(!newNote.trim()) {
+    showToast('Escribe el contenido de la nota', 'info');
+    return;
+  }
   try {
    const res = await fetch(`${API_URL}/api/data/notes`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
