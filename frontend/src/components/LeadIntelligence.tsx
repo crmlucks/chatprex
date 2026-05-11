@@ -104,11 +104,13 @@ const KPI = ({ icon, label, value, color, dc }: any) => {
   fuchsia: 'from-fuchsia-500/10 to-transparent text-fuchsia-500 border-fuchsia-500/20'
  };
 
+ const bgIcon = React.cloneElement(icon, { size: 90, strokeWidth: 1 });
+
  return (
   <div className={`relative p-3.5 rounded-2xl border bg-gradient-to-br overflow-hidden transition-all hover:scale-[1.02] active:scale-95 cursor-default ${colorMap[color]} ${dc ? 'bg-surface-raised' : 'bg-white'}`}>
-   {/* Background Image/Icon */}
-   <div className={`absolute -right-4 -bottom-4 opacity-10 transform -rotate-12 scale-150 text-${color}-500`}>
-    {icon}
+   {/* Large background icon */}
+   <div className={`absolute -right-4 -bottom-4 opacity-[0.05] dark:opacity-[0.08] transform -rotate-12 pointer-events-none`}>
+    {bgIcon}
    </div>
    
    <div className="relative z-10">
