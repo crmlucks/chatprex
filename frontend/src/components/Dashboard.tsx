@@ -282,9 +282,6 @@ const StatCard = ({ label, value, trend, icon, iconColor, bgSoft, glowColor }: a
  const bgIcon = React.cloneElement(icon, { size: 110, strokeWidth: 1.5 });
  return (
   <div className={`card p-5 group transition-all duration-300 hover:-translate-y-1 ${bgSoft} border-transparent relative overflow-hidden`}>
-   {/* Subtle dots pattern */}
-   <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, currentColor 1px, transparent 1px)', backgroundSize: '8px 8px' }}></div>
-   
    {/* Large background icon */}
    <div className={`absolute -bottom-6 -right-6 opacity-[0.04] dark:opacity-[0.06] ${iconColor} pointer-events-none transform -rotate-12 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6`}>
      {bgIcon}
