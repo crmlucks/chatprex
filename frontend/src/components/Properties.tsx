@@ -275,6 +275,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
             <th className="px-5 py-4 hidden lg:table-cell">Ubicación</th>
             <th className="px-5 py-4 hidden xl:table-cell">Detalles</th>
             <th className="px-5 py-4 text-right">Acciones</th>
+           </tr>
           </thead>
           <tbody className={`divide-y ${isDarkMode ? 'divide-edge' : 'divide-slate-100'}`}>
            {filteredProperties.map(p => {
