@@ -351,9 +351,9 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
         <td className="px-6 py-4">
          <div className="flex items-center gap-2">
           <div className={`w-12 h-1.5 rounded-full overflow-hidden ${dc ? 'bg-surface-raised' : 'bg-slate-100 '}`}>
-           <div className={`${sc.bar} h-full rounded-full transition-all duration-700`} style={{ width: `${lead.score}%` }}></div>
+           <div className={`${sc.bar} h-full rounded-full transition-all duration-700`} style={{ width: `${String(lead.score || '0').replace('%', '')}%` }}></div>
           </div>
-          <span className={`text-[11px] font-black flex items-center gap-1 ${sc.text}`}>{lead.score}%</span>
+          <span className={`text-[11px] font-black flex items-center gap-1 ${sc.text}`}>{String(lead.score || '0').replace('%', '')}%</span>
          </div>
         </td>
         <td className="px-6 py-4">
@@ -474,7 +474,7 @@ const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isD
     <div className="flex flex-col items-end shrink-0">
      <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${sc.bg} ${sc.text}`} title="IA Scoring Predictivo">
        <BrainCircuit size={12} />
-       <span className="text-[11px] font-black">{lead.score || '0'}%</span>
+       <span className="text-[11px] font-black">{String(lead.score || '0').replace('%', '')}%</span>
      </div>
     </div>
    </div>

@@ -219,8 +219,19 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={16} />
           <input type="text" placeholder="Buscar por documento, nombre o celular..." className="input-field pl-10" />
         </div>
-        <button onClick={() => { if(showClientForm) setEditingClient(null); setShowClientForm(!showClientForm); }} className="btn-primary">
-          <UserPlus size={16} /> {showClientForm ? 'Cancelar' : 'Nuevo cliente'}
+        <button 
+          onClick={() => { 
+            if(showClientForm && !editingClient) {
+              setShowClientForm(false); 
+            } else {
+              setEditingClient(null);
+              setClientForm({ doc: '', name: '', phone: '', email: '', civilStatus: 'Soltero', spouseDoc: '', spouseName: '', spousePhone: '', address: '', district: '', province: '', department: '', notes: '', property: '', agent: '' });
+              setShowClientForm(true);
+            }
+          }} 
+          className="btn-primary"
+        >
+          <UserPlus size={16} /> {showClientForm && !editingClient ? 'Cancelar' : 'Nuevo cliente'}
         </button>
        </div>
 

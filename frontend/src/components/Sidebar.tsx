@@ -67,16 +67,6 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
 
         <div className={`p-3 border-t border-edge shrink-0 flex flex-col gap-0.5`}>
           
-          {canSee('propietario', 'administrador') && (
-            <NavItem 
-              onClick={() => setActiveTab('Usuarios')} 
-              icon={<UserCog size={18} />} 
-              label={isCollapsed ? "Usuarios" : "Gestión de usuarios"} 
-              active={activeTab === 'Usuarios'} 
-              collapsed={isCollapsed} 
-            />
-          )}
-
           {canSee('propietario', 'administrador') && !isCollapsed && (
             <NavGroup 
               icon={<Workflow size={18} />} 
@@ -91,14 +81,15 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
             </NavGroup>
           )}
 
-          {canSee('propietario') && !isCollapsed && (
+          {canSee('propietario', 'administrador') && !isCollapsed && (
             <NavGroup 
               icon={<Settings size={18} />} 
               label="Ajustes" 
               isOpen={openGroup === 'ajustes'} 
               onToggle={() => toggleGroup('ajustes')}
-              active={['Configuración', 'Administración'].includes(activeTab)}
+              active={['Configuración', 'Administración', 'Usuarios'].includes(activeTab)}
             >
+              <SubNavItem onClick={() => setActiveTab('Usuarios')} label="Gestión de usuarios" active={activeTab === 'Usuarios'} />
               <SubNavItem onClick={() => setActiveTab('Administración')} label="Administración" active={activeTab === 'Administración'} />
               <SubNavItem onClick={() => setActiveTab('Configuración')} label="Configuración" active={activeTab === 'Configuración'} />
             </NavGroup>

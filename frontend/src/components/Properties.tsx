@@ -275,67 +275,71 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
             <th className="px-5 py-4 hidden lg:table-cell">Ubicación</th>
             <th className="px-5 py-4 hidden xl:table-cell">Detalles</th>
             <th className="px-5 py-4 text-right">Acciones</th>
-          </tr>
-         </thead>
-         <tbody className={`divide-y ${isDarkMode ? 'divide-edge' : 'divide-slate-100'}`}>
-          {filteredProperties.map(p => {
-           const isBuilding = !['terreno','deposito'].includes(p.type?.toLowerCase() || '');
-           return (
-           <tr key={p.id} className="hover:bg-surface-inset transition-colors group">
-             <td className="px-5 py-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg overflow-hidden border border-edge shrink-0 bg-surface-inset">
-                 {p.avatar ? <img src={p.avatar} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-content-muted"><Home size={16} /></div>}
+          </thead>
+          <tbody className={`divide-y ${isDarkMode ? 'divide-edge' : 'divide-slate-100'}`}>
+           {filteredProperties.map(p => {
+            const isBuilding = !['terreno','deposito'].includes(p.type?.toLowerCase() || '');
+            return (
+             <tr key={p.id} className="hover:bg-surface-inset transition-colors group">
+               <td className="px-5 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden border border-edge shrink-0 bg-surface-inset">
+                   {p.avatar ? <img src={p.avatar} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-content-muted"><Home size={16} /></div>}
+                  </div>
+                  <div className="min-w-0">
+                   <div className="font-bold text-sm text-content truncate max-w-[180px]">{p.name}</div>
+                   <div className="text-[11px] font-medium text-content-muted mt-0.5 capitalize">{p.type}</div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                 <div className="font-bold text-sm text-content truncate max-w-[180px]">{p.name}</div>
-                 <div className="text-[11px] font-medium text-content-muted mt-0.5 capitalize">{p.type}</div>
+               </td>
+               <td className="px-5 py-3">
+                <span className="text-xs font-bold text-accent">{p.project || '—'}</span>
+               </td>
+               <td className="px-5 py-3">
+                <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg capitalize ${p.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-500' : p.status === 'reservado' ? 'bg-amber-500/10 text-amber-500' : 'bg-rose-500/10 text-rose-500'}`}>{p.status}</span>
+               </td>
+               <td className="px-5 py-3 text-right">
+                <div className="text-xs font-black text-content">{p.currency} {Number(p.price).toLocaleString()}</div>
+               </td>
+               <td className="px-5 py-3 text-right">
+                <span className="text-xs font-bold text-content-muted">{p.area ? `${p.area} m²` : '—'}</span>
+               </td>
+               <td className="px-5 py-3 hidden lg:table-cell">
+                <div className="flex items-center gap-1.5 max-w-[200px]">
+                 <MapPin size={12} className="shrink-0 text-accent/60" />
+                 <span className="text-xs text-content-muted truncate">{p.location || '—'}</span>
                 </div>
-              </div>
-             </td>
-             <td className="px-5 py-3">
-              <span className="text-xs font-bold text-accent">{p.project || '—'}</span>
-             </td>
-             <td className="px-5 py-3">
-              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg capitalize ${p.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-500' : p.status === 'reservado' ? 'bg-amber-500/10 text-amber-500' : 'bg-rose-500/10 text-rose-500'}`}>{p.status}</span>
-             </td>
-             <td className="px-5 py-3 text-right">
-              <div className="text-xs font-black text-content">{p.currency} {Number(p.price).toLocaleString()}</div>
-             </td>
-             <td className="px-5 py-3 text-right">
-              <span className="text-xs font-bold text-content-muted">{p.area ? `${p.area} m²` : '—'}</span>
-             </td>
-             <td className="px-5 py-3 hidden lg:table-cell">
-              <div className="flex items-center gap-1.5 max-w-[200px]">
-               <MapPin size={12} className="shrink-0 text-accent/60" />
-               <span className="text-xs text-content-muted truncate">{p.location || '—'}</span>
-              </div>
-             </td>
-             <td className="px-5 py-3 hidden xl:table-cell">
-              {isBuilding ? (
-               <div className="flex gap-1.5 flex-wrap">
-                {p.rooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500">{p.rooms} hab</span>}
-                {p.bathrooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-500">{p.bathrooms} baños</span>}
-                {p.parking && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-500">{p.parking} est.</span>}
-                {p.floor && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500">P{p.floor}</span>}
-               </div>
-              ) : (
-               <span className="text-[10px] text-content-muted italic">N/A</span>
-              )}
-             </td>
-             <td className="px-5 py-3 text-right">
-              <div className="flex justify-end gap-1">
-                <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || []}); setShowModal(true); }} className={`p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
-                { (user?.role === 'propietario' || user?.role === 'administrador') && (
-                  <button onClick={() => deleteProperty(p.id)} className="p-2 rounded-lg text-rose-400 hover:text-rose-500 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
-                )}
-              </div>
-             </td>
-           </tr>
-          );})}
-          {filteredProperties.length === 0 && (
-           <tr><td colSpan={8} className="px-5 py-12 text-center text-content-muted text-sm font-bold">Sin propiedades registradas</td></tr>
-          )}
+               </td>
+               <td className="px-5 py-3 hidden xl:table-cell">
+                <div className="flex flex-col gap-1.5">
+                 {isBuilding && (
+                  <div className="flex gap-1.5 flex-wrap">
+                   {p.rooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500">{p.rooms} hab</span>}
+                   {p.bathrooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-500">{p.bathrooms} baños</span>}
+                   {p.parking && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-500">{p.parking} est.</span>}
+                   {p.floor && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500">P{p.floor}</span>}
+                  </div>
+                 )}
+                 {(p.details || p.notes) && (
+                   <p className="text-[10px] text-content-muted italic line-clamp-2 max-w-[200px]" title={p.details || p.notes}>"{p.details || p.notes}"</p>
+                 )}
+                </div>
+               </td>
+               <td className="px-5 py-3 text-right">
+                <div className="flex justify-end gap-1">
+                  <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || []}); setShowModal(true); }} className={`p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
+                  {(user?.role === 'propietario' || user?.role === 'administrador') && (
+                    <button onClick={() => deleteProperty(p.id)} className="p-2 rounded-lg text-rose-400 hover:text-rose-50 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
+                  )}
+                </div>
+               </td>
+             </tr>
+            );
+           })}
+           {filteredProperties.length === 0 && (
+            <tr><td colSpan={8} className="px-5 py-12 text-center text-content-muted text-sm font-bold">Sin propiedades registradas</td></tr>
+           )}
+
          </tbody>
        </table>
       </div>
