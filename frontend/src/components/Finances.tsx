@@ -21,16 +21,16 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
   if (!token) return;
   const headers = { Authorization: `Bearer ${token}` };
   fetch(`${API_URL}/api/data/finances/transactions`, { headers })
-   .then(r => r.json()).then(data => setTransactions(data.map((t: any) => ({
+   .then(r => r.json()).then(data => { if (Array.isArray(data)) setTransactions(data.map((t: any) => ({
     id: t.id, date: t.date?.split('T')[0] || '', client: t.client_name || '', concept: t.description,
     property: '', type: t.type, amount: Number(t.amount), currency: t.currency || 'local'
-   })))).catch(() => {});
+   }))); }).catch(() => {});
   fetch(`${API_URL}/api/data/finances/clients`, { headers })
-   .then(r => r.json()).then(setClients).catch(() => {});
+   .then(r => r.json()).then(data => { if (Array.isArray(data)) setClients(data); }).catch(() => {});
   fetch(`${API_URL}/api/properties`, { headers })
-   .then(r => r.json()).then(setProperties).catch(() => {});
+   .then(r => r.json()).then(data => { if (Array.isArray(data)) setProperties(data); }).catch(() => {});
   fetch(`${API_URL}/api/users`, { headers })
-   .then(r => r.json()).then(setAgents).catch(() => {});
+   .then(r => r.json()).then(data => { if (Array.isArray(data)) setAgents(data); }).catch(() => {});
  }, [token]);
 
  const [showClientForm, setShowClientForm] = useState(false);
@@ -274,14 +274,14 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
             <label className="label-text mb-1 block">Propiedad de Interés / Venta</label>
             <select value={clientForm.property} onChange={e => setClientForm({...clientForm, property: e.target.value})} className="input-field text-xs py-2">
              <option value="">Seleccionar propiedad...</option>
-             {properties.map(p => <option key={p.id} value={p.id}>{p.name} - {p.project}</option>)}
+             {(properties || []).map(p => p ? <option key={p.id} value={p.id}>{p.name} - {p.project}</option> : null)}
             </select>
            </div>
            <div>
             <label className="label-text mb-1 block">Agente a cargo</label>
             <select value={clientForm.agent} onChange={e => setClientForm({...clientForm, agent: e.target.value})} className="input-field text-xs py-2">
              <option value="">Seleccionar agente...</option>
-             {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+             {(agents || []).map(a => a ? <option key={a.id} value={a.id}>{a.name}</option> : null)}
             </select>
            </div>
           </div>
