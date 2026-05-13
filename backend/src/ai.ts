@@ -12,7 +12,7 @@ async function getAIConfig(phone: string) {
     const leadRes = await pool.query('SELECT bot_id FROM leads WHERE phone = $1', [phone]);
     const botId = leadRes.rowCount > 0 && leadRes.rows[0].bot_id ? leadRes.rows[0].bot_id : 1;
     
-    const res = await pool.query('SELECT name, provider, model, api_key, prompt, knowledge, human_handoff FROM ai_config WHERE id = $1', [botId]);
+    const res = await pool.query('SELECT name, provider, model, api_key, prompt, knowledge, human_handoff, activation_keywords FROM ai_config WHERE id = $1', [botId]);
     if (res.rowCount > 0) {
       return { ...res.rows[0], botId };
     }
@@ -55,15 +55,27 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
   let propertiesText = "";
   try {
     const botName = config?.name || 'Bot Principal';
+    const keywords = (config?.activation_keywords || '').split(',').map((k: string) => k.trim().toLowerCase()).filter(Boolean);
     
     let query = "SELECT name, project, type, price, currency, location, rooms, area, details FROM properties WHERE status = 'Disponible'";
     let params: any[] = [];
     
-    // Si el bot tiene un nombre específico de proyecto, filtramos el inventario
+    // Si el bot no se llama 'Bot Principal', filtramos
     if (botName !== 'Bot Principal' && botName !== 'Nuevo Bot') {
-      query += " AND (project ILIKE $1 OR name ILIKE $1)";
+      const conditions = ["project ILIKE $1", "name ILIKE $1"];
       params.push(`%${botName}%`);
+      
+      let paramIndex = 2;
+      for (const kw of keywords) {
+        conditions.push(`project ILIKE $${paramIndex}`);
+        conditions.push(`name ILIKE $${paramIndex}`);
+        params.push(`%${kw}%`);
+        paramIndex++;
+      }
+      
+      query += ` AND (${conditions.join(' OR ')})`;
     }
+
     query += " LIMIT 20";
 
     const props = await pool.query(query, params);
