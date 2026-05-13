@@ -161,7 +161,7 @@ function AuthenticatedApp() {
     userName={user.name}
     onLogout={logout}
    />
-   <main className="flex-1 flex flex-col relative h-full overflow-hidden">
+   <main className="flex-1 min-w-0 flex flex-col relative h-full overflow-hidden">
     {renderContent()}
    </main>
    <AlarmSystem items={alarms} />

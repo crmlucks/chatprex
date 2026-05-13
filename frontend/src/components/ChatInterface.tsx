@@ -373,7 +373,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const dc = isDarkMode;
 
  return (
-  <div className={`flex flex-1 h-[calc(100vh-4rem)] md:h-full overflow-hidden transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
+  <div className={`flex flex-1 w-full min-w-0 h-[calc(100vh-4rem)] md:h-full overflow-hidden transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
    
    {/* 1. Sidebar: Chat List */}
    <div className={`${activeChat ? 'hidden lg:flex' : 'flex'} w-full md:w-[340px] lg:w-[400px] shrink-0 border-r flex-col z-20 h-full transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
@@ -432,7 +432,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    </div>
 
    {/* 2. Main Area: Conversation */}
-   <div className={`${activeChat ? 'flex' : 'hidden md:flex'} flex-1 flex-col relative h-full transition-colors ${dc ? 'bg-[#0f0f0f]' : 'bg-[#f0f2f5]'}`}>
+   <div className={`${activeChat ? 'flex' : 'hidden md:flex'} flex-1 w-full min-w-0 flex-col relative h-full transition-colors ${dc ? 'bg-[#0f0f0f]' : 'bg-[#f0f2f5]'}`}>
     {activeChatData ? (
      <>
       {/* Header */}
@@ -554,14 +554,14 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
            </button>
          </div>
        )}
-       <div className={`flex items-center gap-3 p-2 rounded-2xl border transition-all ${dc ? 'bg-surface-raised border-edge focus-within:border-accent/50' : 'bg-surface-inset border-edge focus-within:border-accent/50 focus-within:bg-surface focus-within:shadow-none'}`}>
+       <div className={`flex items-center gap-1.5 md:gap-3 p-1.5 md:p-2 rounded-2xl border transition-all ${dc ? 'bg-surface-raised border-edge focus-within:border-accent/50' : 'bg-surface-inset border-edge focus-within:border-accent/50 focus-within:bg-surface focus-within:shadow-none'}`}>
         <div className="flex items-center gap-1 pl-1">
-         <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-3 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-content bg-amber-500 shadow-lg' : (dc ? 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10' : 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10')}`}>
-          <Zap size={22} />
+         <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-content bg-amber-500 shadow-lg' : (dc ? 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10' : 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10')}`}>
+          <Zap size={20} />
          </button>
          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-         <button onClick={() => fileInputRef.current?.click()} className={`p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-accent hover:bg-accent/10' : 'text-content-muted hover:text-accent hover:bg-accent/10'}`}>
-          <Paperclip size={22} />
+         <button onClick={() => fileInputRef.current?.click()} className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-accent hover:bg-accent/10' : 'text-content-muted hover:text-accent hover:bg-accent/10'}`}>
+          <Paperclip size={20} />
          </button>
         </div>
         <textarea 
@@ -570,12 +570,12 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          onChange={(e) => setInputText(e.target.value)}
          onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
          placeholder="Escribe un mensaje..."
-         className={`flex-1 bg-transparent py-3 px-1 text-sm font-medium focus:outline-none resize-none max-h-32 custom-scrollbar ${dc ? 'text-content placeholder-slate-600' : 'text-content placeholder-slate-400'}`}
+         className={`flex-1 w-full min-w-0 bg-transparent py-2 md:py-3 px-1 md:px-2 text-sm font-medium focus:outline-none resize-none max-h-32 custom-scrollbar ${dc ? 'text-content placeholder-slate-600' : 'text-content placeholder-slate-400'}`}
         />
-        <div className="flex items-center gap-2 pr-1">
-          <button className={`p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-emerald-500 hover:bg-emerald-500/10' : 'text-content-muted hover:text-emerald-500 hover:bg-emerald-500/10'}`}><Smile size={22} /></button>
-          <button onClick={handleSendMessage} className="bg-accent text-content p-4 rounded-2xl transition-all active:scale-90 hover:bg-accent-dark shadow-sm shadow-accent/30 flex items-center justify-center">
-           <Send size={20} />
+        <div className="flex items-center gap-1 md:gap-2 pr-1">
+          <button className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-emerald-500 hover:bg-emerald-500/10' : 'text-content-muted hover:text-emerald-500 hover:bg-emerald-500/10'}`}><Smile size={20} /></button>
+          <button onClick={handleSendMessage} className="bg-accent text-content p-3 md:p-4 rounded-2xl transition-all active:scale-90 hover:bg-accent-dark shadow-sm shadow-accent/30 flex items-center justify-center">
+           <Send size={18} />
           </button>
         </div>
        </div>
@@ -729,7 +729,7 @@ const ChatItem = ({ name, message, time, unread, active, status, onClick, isDark
   <div onClick={onClick} className={`flex items-center gap-3 md:gap-4 p-3 md:p-4 cursor-pointer rounded-2xl transition-all active:scale-[0.98] relative group ${active ? (dc ? 'bg-accent/10 ' : 'bg-accent/5') : (dc ? 'hover:bg-surface-raised/50' : 'hover:bg-surface-inset')}`}>
    {active && <div className="absolute left-0 top-3 bottom-3 md:top-4 md:bottom-4 w-1 bg-accent rounded-r-full"></div>}
    <div className="relative shrink-0">
-    <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-white'}`} />
+    <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-10 h-10 md:w-14 md:h-14 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-white'}`} />
     {unread > 0 && <div className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-rose-500 rounded-full border-2 text-content text-[10px] md:text-xs font-semibold flex items-center justify-center shadow-lg animate-bounce border-white dark:border-slate-900">{unread}</div>}
    </div>
    <div className="flex-1 min-w-0">
