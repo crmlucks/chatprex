@@ -37,6 +37,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [activeChat, setActiveChat] = useState<string | null>(null);
  const [inputText, setInputText] = useState('');
  const [chats, setChats] = useState<{ [id: string]: Chat }>({});
+ const activeChatRef = useRef<string | null>(null);
  const [useN8n, setUseN8n] = useState(false);
  
  // Quick Replies
@@ -155,7 +156,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       ...existingChat,
       lastMessage: data.text,
       time: newMsg.time,
-      unread: activeChat === chatId ? 0 : existingChat.unread + 1,
+      unread: activeChatRef.current === chatId ? 0 : existingChat.unread + 1,
       messages: [...existingChat.messages, newMsg]
      }
     };
@@ -289,6 +290,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   setInputText('');
   setSelectedFile(null);
   setMediaBase64(null);
+  setShowQuickReplies(false);
  };
 
  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -299,6 +301,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
  const handleSelectChat = (id: string) => {
   setActiveChat(id);
+  activeChatRef.current = id;
   setChats(prev => ({
    ...prev,
    [id]: { ...prev[id], unread: 0 }
@@ -457,7 +460,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           <button 
            title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
            onClick={() => toggleBot(activeChatData.leadId)} 
-           className={`p-2 rounded-xl transition-all active:scale-90 flex items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : (dc ? 'hover:bg-surface-raised text-content-muted' : 'hover:bg-slate-100 text-content-muted')}`}
+           className={`p-2 rounded-xl transition-all active:scale-90 flex items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
           >
            <Bot size={18} className={activeChatData.botActive ? 'animate-pulse' : ''} />
           </button>
@@ -513,7 +516,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       {/* Input Area */}
       {/* Quick Replies Popup (triggered by /) */}
       {inputText.startsWith('/') && (
-        <div className={`absolute bottom-[100px] left-6 z-40 w-[calc(100%-3rem)] md:w-[340px] max-h-64 overflow-y-auto custom-scrollbar rounded-2xl shadow-2xl border animate-in slide-in-from-bottom-2 duration-200 ${dc ? 'bg-surface-raised border-edge' : 'bg-surface border-edge'}`}>
+        <div className={`absolute bottom-[100px] left-6 z-40 w-[calc(100%-3rem)] md:w-[410px] max-h-64 overflow-y-auto custom-scrollbar rounded-2xl shadow-2xl border animate-in slide-in-from-bottom-2 duration-200 ${dc ? 'bg-surface-raised border-edge' : 'bg-surface border-edge'}`}>
           <div className={`sticky top-0 p-3 border-b text-xs font-bold uppercase tracking-wider backdrop-blur-md z-10 ${dc ? 'border-edge bg-surface-raised/90 text-content-muted' : 'border-edge-light bg-surface/90 text-content-muted'}`}>Respuestas Rápidas</div>
           <div className="p-1">
             {quickReplies.filter(r => r.title.toLowerCase().includes(inputText.slice(1).toLowerCase())).map(reply => (
