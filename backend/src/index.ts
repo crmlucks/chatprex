@@ -73,49 +73,7 @@ app.get('/api/status', (req, res) => {
 io.on('connection', (socket) => {
   console.log(`[Socket] Cliente conectado: ${socket.id}`);
 
-  // Enviar mensaje de texto desde el CRM al WhatsApp
-  socket.on('send-message', async (data: { to: string; text: string; media?: string; fileName?: string }) => {
-    console.log(`[Socket] ═══ SEND-MESSAGE RECIBIDO ═══`);
-    console.log(`[Socket] To: ${data.to}`);
-    console.log(`[Socket] Text: ${data.text?.substring(0, 80)}`);
-    console.log(`[Socket] Media: ${data.media ? `SI (${data.media.substring(0, 30)}... ${data.media.length} chars)` : 'NO'}`);
-    console.log(`[Socket] FileName: ${data.fileName || '(ninguno)'}`);
-    
-    try {
-      const { sendEvolutionMessage, sendEvolutionMedia } = await import('./evolution');
-      
-      // Apagar el bot automáticamente cuando el humano interviene
-      try {
-        const { default: pool } = await import('./db');
-        const phone = data.to.split('@')[0];
-        await pool.query('UPDATE leads SET bot_active = false WHERE phone = $1', [phone]);
-        console.log(`[Bot] ⏸️ Bot desactivado para ${phone}`);
 
-        // Añadir el mensaje manual del humano al historial de la IA
-        const { appendMessageToHistory } = await import('./ai');
-        const remoteJid = data.to.includes('@') ? data.to : `${data.to}@s.whatsapp.net`;
-        if (data.text) {
-          appendMessageToHistory(remoteJid, 'assistant', data.text);
-        }
-      } catch (dbErr: any) {
-        console.error('[Bot] Error desactivando bot:', dbErr.message);
-      }
-
-      if (data.media) {
-        console.log(`[Socket] → Enviando MULTIMEDIA...`);
-        await sendEvolutionMedia(data.to, data.media, data.text, data.fileName);
-      } else if (data.text) {
-        console.log(`[Socket] → Enviando TEXTO...`);
-        await sendEvolutionMessage(data.to, data.text);
-      } else {
-        console.log(`[Socket] ⚠️ No hay texto ni media para enviar`);
-      }
-      console.log(`[Socket] ═══ SEND-MESSAGE COMPLETADO ═══`);
-    } catch (err: any) {
-      console.error('[Socket] ❌ Error enviando mensaje:', err.message);
-      socket.emit('send-error', { error: err.message });
-    }
-  });
 
   socket.on('disconnect', () => {
     console.log(`[Socket] Cliente desconectado: ${socket.id}`);

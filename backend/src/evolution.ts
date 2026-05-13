@@ -52,28 +52,63 @@ export const initEvolution = (io: Server) => {
 
     socket.on('send-message', async (data: { to: string; text: string; media?: string; mimeType?: string; fileName?: string }) => {
       try {
-        console.log(`[Evolution] Mensaje manual recibido desde UI para ${data.to}`);
+        console.log(`[Socket] ═══ SEND-MESSAGE RECIBIDO (Evolution) ═══`);
+        console.log(`[Socket] To: ${data.to}`);
+        console.log(`[Socket] Text: ${data.text?.substring(0, 80)}`);
+        console.log(`[Socket] Media: ${data.media ? `SI (${data.media.substring(0, 30)}... ${data.media.length} chars)` : 'NO'}`);
+        console.log(`[Socket] FileName: ${data.fileName || '(ninguno)'}`);
+        console.log(`[Socket] MimeType: ${data.mimeType || '(ninguno)'}`);
+
+        // 1. Apagar el bot automáticamente cuando el humano interviene
+        try {
+          const phone = data.to.split('@')[0].split(':')[0];
+          await pool.query('UPDATE leads SET bot_active = false WHERE phone = $1', [phone]);
+          console.log(`[Bot] ⏸️ Bot desactivado para ${phone}`);
+
+          // 2. Añadir el mensaje manual del humano al historial de la IA
+          const remoteJid = data.to.includes('@') ? data.to : `${data.to}@s.whatsapp.net`;
+          if (data.text) {
+            appendMessageToHistory(remoteJid, 'assistant', data.text);
+          }
+        } catch (dbErr: any) {
+          console.error('[Evolution] Error actualizando estado de bot:', dbErr.message);
+        }
+
+        // 3. Enviar a través de Evolution API
         if (data.media) {
+          console.log(`[Socket] → Enviando MULTIMEDIA...`);
           await sendEvolutionMedia(data.to, data.media, data.text, data.fileName);
-        } else {
+        } else if (data.text) {
+          console.log(`[Socket] → Enviando TEXTO...`);
           await sendEvolutionMessage(data.to, data.text);
         }
-        
-        // Guardar proactivamente en la base de datos para asegurar que no desaparezca al recargar
+
+        // 4. Guardar proactivamente en la base de datos (con media_url)
         try {
           const msgId = `manual-${Date.now()}`;
           const cleanTo = data.to.includes('@') ? data.to : `${data.to}@s.whatsapp.net`;
           await pool.query(
-            `INSERT INTO evolution_messages (id, chat_id, text, from_me, timestamp, media_type)
-             VALUES ($1, $2, $3, true, $4, $5)
+            `INSERT INTO evolution_messages (id, chat_id, text, from_me, timestamp, media_url, media_type)
+             VALUES ($1, $2, $3, true, $4, $5, $6)
              ON CONFLICT (id) DO NOTHING`,
-            [msgId, cleanTo, data.text, new Date().toISOString(), data.mimeType || null]
+            [
+              msgId, 
+              cleanTo, 
+              data.text || (data.media ? '[Archivo multimedia]' : ''), 
+              new Date().toISOString(), 
+              data.media || null, 
+              data.mimeType || null
+            ]
           );
+          console.log(`[Evolution] ✅ Mensaje guardado en BD con ID: ${msgId}`);
         } catch (dbErr: any) {
           console.error('[Evolution] Error guardando mensaje manual en BD:', dbErr.message);
         }
-      } catch (err) {
-        console.error('[Evolution] Error enviando mensaje manual:', err);
+        
+        console.log(`[Socket] ═══ SEND-MESSAGE COMPLETADO ═══`);
+      } catch (err: any) {
+        console.error('[Evolution] Error enviando mensaje manual:', err.message);
+        socket.emit('send-message-error', { error: err.message });
       }
     });
   });
@@ -394,100 +429,92 @@ export const sendEvolutionMessage = async (to: string, text: string) => {
 export const sendEvolutionMedia = async (to: string, mediaBase64: string, caption?: string, fileName?: string) => {
   const number = to.replace('@s.whatsapp.net', '').replace('@lid', '').split(':')[0];
 
-  // Determinar tipo de media del data URI
+  // Determinar tipo de media y mimetype del data URI
   const mimeMatch = mediaBase64.match(/^data:([^;]+);base64,/);
   const mimeType = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
   const pureBase64 = mediaBase64.replace(/^data:[^;]+;base64,/, '');
 
-  let endpoint = 'sendMedia';
-  let payload: any = {
+  let mediatype = 'document';
+  if (mimeType.startsWith('image/')) mediatype = 'image';
+  else if (mimeType.startsWith('video/')) mediatype = 'video';
+  else if (mimeType.startsWith('audio/')) mediatype = 'audio';
+
+  console.log(`[Evolution] Preparando envío de ${mediatype} (${mimeType}) a ${number}`);
+
+  // Intentar con formato Estándar V2 (Plano) - Es el más compatible actualmente
+  const v2Payload = {
     number,
-    options: { delay: 1200 },
-    mediaMessage: {
-      mediatype: 'document',
-      caption: caption || '',
-      media: pureBase64,
-      fileName: fileName || 'archivo',
-    },
+    mediatype: mediatype,
+    mimetype: mimeType,
+    caption: caption || '',
+    media: pureBase64,
+    fileName: fileName || (mediatype === 'image' ? 'imagen.jpg' : mediatype === 'video' ? 'video.mp4' : 'archivo'),
+    options: { delay: 1200 }
   };
 
-  if (mimeType.startsWith('image/')) {
-    payload.mediaMessage.mediatype = 'image';
-  } else if (mimeType.startsWith('video/')) {
-    payload.mediaMessage.mediatype = 'video';
-  } else if (mimeType.startsWith('audio/')) {
-    endpoint = 'sendWhatsAppAudio';
-    payload = {
-      number,
-      options: { delay: 1200 },
-      audioMessage: {
-        audio: pureBase64,
-      },
-    };
-  }
-
   try {
-    const res = await safeFetch(`${EVOLUTION_API_URL}/message/${endpoint}/${INSTANCE_NAME}`, {
+    console.log(`[Evolution] Intento 1: Formato V2 Plano...`);
+    const res = await safeFetch(`${EVOLUTION_API_URL}/message/sendMedia/${INSTANCE_NAME}`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify(payload),
+      body: JSON.stringify(v2Payload),
     });
+    
     const resText = await res.text();
-    if (!res.ok) {
-      console.error(`[Evolution] sendMedia falló (${res.status}): ${resText.substring(0, 400)}`);
-      
-      // Fallback: intentar con el formato plano de Evolution v2
-      if (endpoint === 'sendMedia') {
-        const fallbackPayload = {
-          number,
-          options: { delay: 1200 },
-          mediatype: payload.mediaMessage.mediatype,
-          mimetype: mimeType,
-          caption: caption || '',
-          media: pureBase64,
-          fileName: fileName || 'archivo',
-        };
-        const res2 = await safeFetch(`${EVOLUTION_API_URL}/message/sendMedia/${INSTANCE_NAME}`, {
-          method: 'POST',
-          headers: getHeaders(),
-          body: JSON.stringify(fallbackPayload),
-        });
-        const resText2 = await res2.text();
-        if (!res2.ok) {
-          console.error(`[Evolution] sendMedia fallback también falló (${res2.status}): ${resText2.substring(0, 300)}`);
-        } else {
-          console.log(`[Evolution] ✅ Media enviado a ${number} (fallback v2 plano)`);
-        }
-      }
-      
-      // Fallback 2: intentar con el formato completo data URI en Evolution v2 plano
-      if (endpoint === 'sendMedia' && !res.ok) {
-        const fallback2Payload = {
-          number,
-          options: { delay: 1200 },
-          mediatype: payload.mediaMessage.mediatype,
-          mimetype: mimeType,
-          caption: caption || '',
-          media: mediaBase64, // completo con data:
-          fileName: fileName || 'archivo',
-        };
-        const res3 = await safeFetch(`${EVOLUTION_API_URL}/message/sendMedia/${INSTANCE_NAME}`, {
-          method: 'POST',
-          headers: getHeaders(),
-          body: JSON.stringify(fallback2Payload),
-        });
-        const resText3 = await res3.text();
-        if (!res3.ok) {
-          console.error(`[Evolution] sendMedia fallback 2 también falló (${res3.status}): ${resText3.substring(0, 300)}`);
-        } else {
-          console.log(`[Evolution] ✅ Media enviado a ${number} (fallback 2 v2 plano con data URI)`);
-        }
-      }
-    } else {
-      console.log(`[Evolution] ✅ Media enviado a ${number} (${mimeType})`);
+    if (res.ok) {
+      console.log(`[Evolution] ✅ Media enviado exitosamente (V2)`);
+      return;
     }
+    console.error(`[Evolution] Intento 1 falló (${res.status}): ${resText.substring(0, 200)}`);
+
+    // Intento 2: Formato V1 / Legacy (mediaMessage)
+    const v1Payload = {
+      number,
+      options: { delay: 1200 },
+      mediaMessage: {
+        mediatype: mediatype,
+        caption: caption || '',
+        media: pureBase64,
+        fileName: v2Payload.fileName
+      }
+    };
+
+    console.log(`[Evolution] Intento 2: Formato V1 (mediaMessage)...`);
+    const res2 = await safeFetch(`${EVOLUTION_API_URL}/message/sendMedia/${INSTANCE_NAME}`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(v1Payload),
+    });
+
+    if (res2.ok) {
+      console.log(`[Evolution] ✅ Media enviado exitosamente (V1)`);
+      return;
+    }
+    const resText2 = await res2.text();
+    console.error(`[Evolution] Intento 2 falló (${res2.status}): ${resText2.substring(0, 200)}`);
+
+    // Intento 3: Si es audio, probar el endpoint específico
+    if (mediatype === 'audio') {
+      console.log(`[Evolution] Intento 3: Endpoint específico de audio...`);
+      const resAudio = await safeFetch(`${EVOLUTION_API_URL}/message/sendWhatsAppAudio/${INSTANCE_NAME}`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          number,
+          audio: pureBase64,
+          options: { delay: 1200 }
+        }),
+      });
+      if (resAudio.ok) {
+        console.log(`[Evolution] ✅ Audio enviado exitosamente (endpoint audio)`);
+        return;
+      }
+    }
+
+    throw new Error(`No se pudo enviar el archivo multimedia después de varios intentos.`);
   } catch (error: any) {
-    console.error('[Evolution] Error enviando media:', error.message);
+    console.error('[Evolution] Error crítico enviando multimedia:', error.message);
+    throw error;
   }
 };
 

@@ -265,7 +265,8 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    to: activeChat,
    text: inputText,
    media: mediaBase64,
-   fileName: selectedFile?.name
+   fileName: selectedFile?.name,
+   mimeType: selectedFile?.type
   });
 
   const newMsg: ChatMessage = {
