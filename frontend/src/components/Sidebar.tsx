@@ -57,6 +57,7 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
           <NavItem onClick={() => setActiveTab('Dashboard')} icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'Dashboard'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Inteligencia')} icon={<Zap size={18} />} label="Lead Intelligence" active={activeTab === 'Inteligencia'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Leads Pipeline')} icon={<Users size={18} />} label="Pipeline de leads" active={activeTab === 'Leads Pipeline'} collapsed={isCollapsed} />
+          <NavItem onClick={() => setActiveTab('Conversaciones')} icon={<MessageSquare size={18} />} label="Conversaciones" active={activeTab === 'Conversaciones'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Inventario')} icon={<Home size={18} />} label="Propiedades" active={activeTab === 'Inventario'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Calendario')} icon={<Calendar size={18} />} label="Agenda y tareas" active={activeTab === 'Calendario'} collapsed={isCollapsed} />
           <NavItem onClick={() => setActiveTab('Finanzas')} icon={<DollarSign size={18} />} label="Finanzas" active={activeTab === 'Finanzas'} collapsed={isCollapsed} />
