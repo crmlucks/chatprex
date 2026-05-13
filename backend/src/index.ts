@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
         console.error('[Bot] Error desactivando bot:', dbErr.message);
       }
 
-      if (data.media && data.media.startsWith('data:')) {
+      if (data.media) {
         console.log(`[Socket] → Enviando MULTIMEDIA...`);
         await sendEvolutionMedia(data.to, data.media, data.text, data.fileName);
       } else if (data.text) {

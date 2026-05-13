@@ -436,17 +436,16 @@ export const sendEvolutionMedia = async (to: string, mediaBase64: string, captio
     if (!res.ok) {
       console.error(`[Evolution] sendMedia falló (${res.status}): ${resText.substring(0, 400)}`);
       
-      // Fallback: intentar con formato alternativo (mediaUrl en vez de media base64)
+      // Fallback: intentar con el formato plano de Evolution v2
       if (endpoint === 'sendMedia') {
         const fallbackPayload = {
           number,
           options: { delay: 1200 },
-          mediaMessage: {
-            mediatype: payload.mediaMessage.mediatype,
-            caption: caption || '',
-            media: mediaBase64, // enviar el data URI completo original
-            fileName: fileName || 'archivo',
-          },
+          mediatype: payload.mediaMessage.mediatype,
+          mimetype: mimeType,
+          caption: caption || '',
+          media: pureBase64,
+          fileName: fileName || 'archivo',
         };
         const res2 = await safeFetch(`${EVOLUTION_API_URL}/message/sendMedia/${INSTANCE_NAME}`, {
           method: 'POST',
@@ -457,7 +456,31 @@ export const sendEvolutionMedia = async (to: string, mediaBase64: string, captio
         if (!res2.ok) {
           console.error(`[Evolution] sendMedia fallback también falló (${res2.status}): ${resText2.substring(0, 300)}`);
         } else {
-          console.log(`[Evolution] ✅ Media enviado a ${number} (fallback)`);
+          console.log(`[Evolution] ✅ Media enviado a ${number} (fallback v2 plano)`);
+        }
+      }
+      
+      // Fallback 2: intentar con el formato completo data URI en Evolution v2 plano
+      if (endpoint === 'sendMedia' && !res.ok) {
+        const fallback2Payload = {
+          number,
+          options: { delay: 1200 },
+          mediatype: payload.mediaMessage.mediatype,
+          mimetype: mimeType,
+          caption: caption || '',
+          media: mediaBase64, // completo con data:
+          fileName: fileName || 'archivo',
+        };
+        const res3 = await safeFetch(`${EVOLUTION_API_URL}/message/sendMedia/${INSTANCE_NAME}`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify(fallback2Payload),
+        });
+        const resText3 = await res3.text();
+        if (!res3.ok) {
+          console.error(`[Evolution] sendMedia fallback 2 también falló (${res3.status}): ${resText3.substring(0, 300)}`);
+        } else {
+          console.log(`[Evolution] ✅ Media enviado a ${number} (fallback 2 v2 plano con data URI)`);
         }
       }
     } else {
