@@ -82,7 +82,7 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
     const botName = config?.name || 'Bot Principal';
     const keywords = (config?.activation_keywords || '').split(',').map((k: string) => k.trim().toLowerCase()).filter(Boolean);
     
-    let query = "SELECT name, project, type, price, currency, location, rooms, area, details FROM properties WHERE status = 'Disponible'";
+    let query = "SELECT name, project, type, price, currency, location, rooms, area, details FROM properties WHERE status ILIKE 'disponible'";
     let params: any[] = [];
     
     // Si el bot no se llama 'Bot Principal', filtramos
