@@ -180,7 +180,7 @@ const FollowUpItem = ({ item, color, dc }: any) => {
       <button onClick={() => setShowStrategy(!showStrategy)} title="Ver Estrategia IA" className={`p-2 rounded-lg transition-all active:scale-90 ${showStrategy ? 'bg-accent/20 text-accent' : 'hover:bg-accent/10 text-accent/70'}`}>
        <BrainCircuit size={14} className={showStrategy ? 'animate-pulse' : ''} />
       </button>
-      <a href={`tel:${item.phone}`} title="Llamar" className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-90"><Phone size={14}/></a>
+      <a href={`https://wa.me/${item.phone}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-90"><Phone size={14}/></a>
       <button title="Conversación" className="p-2 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-all active:scale-90"><MessageSquare size={14}/></button>
      </div>
     </div>
@@ -347,7 +347,7 @@ const ScoringTab = ({ data, dc }: any) => {
          <p className="text-xs font-bold text-content truncate uppercase tracking-tight">{lead.name}</p>
          <p className="text-[9px] text-content-muted font-bold uppercase tracking-tighter">{lead.status} · Contacto: {daysAgo === '?' ? '—' : `${daysAgo}d`} </p>
         </div>
-        <a href={`tel:${lead.phone}`} className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-90"><Phone size={14}/></a>
+        <a href={`https://wa.me/${lead.phone}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-90"><Phone size={14}/></a>
        </div>
       );
      })}

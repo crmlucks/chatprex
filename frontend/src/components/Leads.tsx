@@ -379,7 +379,7 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
         </td>
         <td className="px-3 py-2 md:px-6 md:py-4 text-right">
          <div className="inline-flex items-center gap-0.5">
-          <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}>
+          <a title="Llamar / Abrir en WhatsApp" href={`https://wa.me/${lead.phone}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}>
            <Phone size={14} />
           </a>
           <button title="Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}>
