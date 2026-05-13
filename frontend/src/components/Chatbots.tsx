@@ -121,7 +121,8 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
  useEffect(() => {
   const socket = io(SOCKET_URL, {
-   auth: { token }
+   auth: { token },
+   transports: ['websocket']
   });
   socketRef.current = socket;
 

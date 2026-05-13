@@ -46,7 +46,7 @@ function AuthenticatedApp() {
  const [alarms, setAlarms] = useState<AlarmItem[]>([]);
  React.useEffect(() => {
   const fetchAlarms = async () => {
-   const token = localStorage.getItem('token');
+   const token = localStorage.getItem('chatprex_token');
    if (!token) return;
    try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';

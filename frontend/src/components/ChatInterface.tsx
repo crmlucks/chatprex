@@ -94,7 +94,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     method: 'PATCH',
     headers: {
      'Content-Type': 'application/json',
-     Authorization: `Bearer ${localStorage.getItem('token')}`
+     Authorization: `Bearer ${localStorage.getItem('chatprex_token')}`
     },
     body: JSON.stringify({ botActive: !chat.botActive })
    });
@@ -118,7 +118,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  useEffect(() => {
   const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
   console.log(`[Socket] Conectando a ${socketUrl}...`);
-  const newSocket = io(socketUrl);
+  const newSocket = io(socketUrl, { transports: ['websocket'] });
   setSocket(newSocket);
 
   newSocket.on('connect', () => {
@@ -172,7 +172,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  useEffect(() => {
   const fetchChats = async () => {
    try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('chatprex_token');
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     const res = await fetch(`${API_URL}/api/webhook/evolution/chats`, {
      headers: { Authorization: `Bearer ${token}` }
@@ -206,7 +206,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
   const fetchHistory = async () => {
    try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('chatprex_token');
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     const res = await fetch(`${API_URL}/api/webhook/evolution/messages/${activeChat}`, {
      headers: { Authorization: `Bearer ${token}` }
