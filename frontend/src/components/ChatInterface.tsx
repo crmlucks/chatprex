@@ -472,7 +472,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           <button onClick={() => toggleN8nMode(true)} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${useN8n ? 'bg-accent text-content shadow-lg' : 'text-content-muted hover:text-content-muted'}`}>Bot n8n</button>
         </div>
         <div className="w-px h-6 mx-2 bg-slate-200 dark:bg-surface-raised hidden sm:block"></div>
-        <a href={`tel:+${activeChatData.id.split('@')[0]}`} className="p-2.5 rounded-xl text-accent transition-all active:scale-90 hover:bg-accent/10 flex items-center justify-center">
+        <a href={`https://wa.me/${activeChatData.id.split('@')[0]}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className="p-2.5 rounded-xl text-accent transition-all active:scale-90 hover:bg-accent/10 flex items-center justify-center">
          <Phone size={18} />
         </a>
         <button className={`p-2.5 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised text-content-muted' : 'hover:bg-slate-100 text-content-muted'}`}><MoreVertical size={18} /></button>
