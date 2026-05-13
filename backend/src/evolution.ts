@@ -406,7 +406,7 @@ export const sendEvolutionMedia = async (to: string, mediaBase64: string, captio
     mediaMessage: {
       mediatype: 'document',
       caption: caption || '',
-      media: `data:${mimeType};base64,${pureBase64}`,
+      media: pureBase64,
       fileName: fileName || 'archivo',
     },
   };
@@ -421,7 +421,7 @@ export const sendEvolutionMedia = async (to: string, mediaBase64: string, captio
       number,
       options: { delay: 1200 },
       audioMessage: {
-        audio: `data:${mimeType};base64,${pureBase64}`,
+        audio: pureBase64,
       },
     };
   }

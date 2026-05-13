@@ -541,6 +541,24 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         </div>
       )}
       <div className={`p-6 border-t z-30 relative transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge shadow-[0_-4px_12px_rgba(0,0,0,0.02)]'}`}>
+       {selectedFile && mediaBase64 && (
+         <div className="mb-3 relative inline-block animate-in fade-in slide-in-from-bottom-2 duration-200">
+           {selectedFile.type.startsWith('image/') ? (
+             <img src={mediaBase64} alt="Preview" className="h-20 w-auto rounded-xl border border-edge shadow-sm object-cover" />
+           ) : (
+             <div className="h-20 w-24 bg-surface-inset rounded-xl border border-edge flex flex-col items-center justify-center gap-1">
+               <Paperclip size={24} className="text-content-muted" />
+               <span className="text-[9px] truncate max-w-full px-2 text-content-muted">{selectedFile.name}</span>
+             </div>
+           )}
+           <button 
+            onClick={() => { setSelectedFile(null); setMediaBase64(null); }}
+            className="absolute -top-2 -right-2 p-1 bg-surface border border-edge rounded-full text-rose-500 hover:text-white hover:bg-rose-500 shadow-md transition-colors"
+           >
+             <X size={12} />
+           </button>
+         </div>
+       )}
        <div className={`flex items-center gap-3 p-2 rounded-2xl border transition-all ${dc ? 'bg-surface-raised border-edge focus-within:border-accent/50' : 'bg-surface-inset border-edge focus-within:border-accent/50 focus-within:bg-surface focus-within:shadow-none'}`}>
         <div className="flex items-center gap-1 pl-1">
          <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-3 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-content bg-amber-500 shadow-lg' : (dc ? 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10' : 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10')}`}>
@@ -592,7 +610,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    </div>
 
    {/* 3. Right Sidebar: Quick Replies */}
-   <div className={`${showQuickReplies ? 'flex' : 'hidden'} absolute right-0 top-0 bottom-0 w-72 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 shadow-2xl ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
+   <div className={`${showQuickReplies ? 'flex' : 'hidden'} absolute right-0 top-0 bottom-0 w-96 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 shadow-2xl ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
     <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge-light'}`}>
      <div className="flex items-center gap-3 text-amber-500">
        <Zap size={20} fill="currentColor" />
