@@ -345,7 +345,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   <div className={`flex flex-1 h-[calc(100vh-4rem)] md:h-full overflow-hidden transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
    
    {/* 1. Sidebar: Chat List */}
-   <div className={`${activeChat ? 'hidden lg:flex' : 'flex'} w-full md:w-80 lg:w-96 border-r flex-col z-20 h-full transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
+   <div className={`${activeChat ? 'hidden lg:flex' : 'flex'} w-full md:w-[340px] lg:w-[400px] shrink-0 border-r flex-col z-20 h-full transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
     <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge-light'}`}>
      <div className="flex items-center gap-3">
       <h2 className="h3">Mensajes</h2>
@@ -472,7 +472,33 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       )}
 
       {/* Input Area */}
-      <div className={`p-6 border-t z-30 transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge shadow-[0_-4px_12px_rgba(0,0,0,0.02)]'}`}>
+      {/* Quick Replies Popup (triggered by /) */}
+      {inputText.startsWith('/') && (
+        <div className={`absolute bottom-[100px] left-6 z-40 w-[calc(100%-3rem)] md:w-[340px] max-h-64 overflow-y-auto custom-scrollbar rounded-2xl shadow-2xl border animate-in slide-in-from-bottom-2 duration-200 ${dc ? 'bg-surface-raised border-edge' : 'bg-surface border-edge'}`}>
+          <div className={`sticky top-0 p-3 border-b text-xs font-bold uppercase tracking-wider backdrop-blur-md z-10 ${dc ? 'border-edge bg-surface-raised/90 text-content-muted' : 'border-edge-light bg-surface/90 text-content-muted'}`}>Respuestas Rápidas</div>
+          <div className="p-1">
+            {quickReplies.filter(r => r.title.toLowerCase().includes(inputText.slice(1).toLowerCase())).map(reply => (
+              <div 
+                key={reply.id} 
+                className={`p-3 rounded-xl mb-1 cursor-pointer transition-all hover:bg-accent/10 ${dc ? 'border-edge' : 'border-edge-light'}`}
+                onClick={() => handleSelectQuickReply(reply)}
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <p className={`text-sm font-bold truncate ${dc ? 'text-content' : 'text-content'}`}>{reply.title}</p>
+                  {reply.media && <Paperclip size={12} className="text-accent shrink-0" />}
+                </div>
+                <p className="text-xs text-content-muted truncate">{reply.text}</p>
+              </div>
+            ))}
+            {quickReplies.filter(r => r.title.toLowerCase().includes(inputText.slice(1).toLowerCase())).length === 0 && (
+              <div className="p-6 text-center text-xs text-content-muted">
+                No hay respuestas guardadas que coincidan.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      <div className={`p-6 border-t z-30 relative transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge shadow-[0_-4px_12px_rgba(0,0,0,0.02)]'}`}>
        <div className={`flex items-center gap-3 p-2 rounded-2xl border transition-all ${dc ? 'bg-surface-raised border-edge focus-within:border-accent/50' : 'bg-surface-inset border-edge focus-within:border-accent/50 focus-within:bg-surface focus-within:shadow-none'}`}>
         <div className="flex items-center gap-1 pl-1">
          <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-3 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-content bg-amber-500 shadow-lg' : (dc ? 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10' : 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10')}`}>
