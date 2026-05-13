@@ -436,17 +436,17 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     {activeChatData ? (
      <>
       {/* Header */}
-      <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b z-30 transition-colors ${dc ? 'bg-surface/90 border-edge' : 'bg-surface border-edge'}`}>
-       <div className="flex items-center gap-4 overflow-hidden">
-        <button onClick={() => setActiveChat(null)} className={`lg:hidden p-2 -ml-2 rounded-full transition-colors ${dc ? 'text-content-muted hover:bg-surface-raised' : 'text-content-secondary hover:bg-slate-100'}`}>
+      <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 sm:px-6 border-b z-30 transition-colors ${dc ? 'bg-surface/90 border-edge' : 'bg-surface border-edge'}`}>
+       <div className="flex items-center gap-3 sm:gap-4 overflow-hidden min-w-0">
+        <button onClick={() => setActiveChat(null)} className={`lg:hidden p-2 -ml-2 rounded-full transition-colors shrink-0 ${dc ? 'text-content-muted hover:bg-surface-raised' : 'text-content-secondary hover:bg-slate-100'}`}>
          <ArrowLeft size={20} />
         </button>
-        <div className="relative group cursor-pointer">
+        <div className="relative group cursor-pointer shrink-0">
          <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-10 h-10 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-edge'}`} />
          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-[#1E1E1E] rounded-full"></div>
         </div>
-        <div className="flex items-center gap-2 overflow-hidden">
-         <div className="truncate">
+        <div className="flex items-center gap-2 overflow-hidden min-w-0">
+         <div className="truncate min-w-0">
           <h3 className={`text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>
            {activeChatData.name}
           </h3>
@@ -610,15 +610,20 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    </div>
 
    {/* 3. Right Sidebar: Quick Replies */}
-   <div className={`${showQuickReplies ? 'flex' : 'hidden'} absolute md:relative right-0 top-0 bottom-0 w-[85%] sm:w-80 md:w-96 shrink-0 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 shadow-2xl md:shadow-none ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
-    <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge-light'}`}>
-     <div className="flex items-center gap-3 text-amber-500">
-       <Zap size={20} fill="currentColor" />
-       <h2 className="h3">Respuestas</h2>
+   <div className={`${showQuickReplies ? 'flex' : 'hidden'} absolute inset-0 w-full md:relative md:inset-auto md:w-[380px] lg:w-[420px] shrink-0 border-l flex-col h-full z-50 transition-all animate-in slide-in-from-right duration-300 shadow-2xl md:shadow-none ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
+    <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 sm:px-6 border-b transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge-light'}`}>
+     <div className="flex items-center gap-3">
+       <button onClick={() => setShowQuickReplies(false)} className="md:hidden p-2 -ml-2 rounded-xl text-content-muted hover:bg-surface-raised transition-colors shrink-0">
+         <ArrowLeft size={20} />
+       </button>
+       <div className="flex items-center gap-2 text-amber-500 shrink-0">
+         <Zap size={20} fill="currentColor" />
+         <h2 className="h3">Respuestas</h2>
+       </div>
      </div>
      <button 
       onClick={() => { setReplyForm({}); setShowReplyForm(true); }}
-      className="w-10 h-10 rounded-2xl bg-accent text-content flex items-center justify-center hover:bg-accent-dark transition-all active:scale-90 shadow-lg shadow-accent/20"
+      className="w-10 h-10 shrink-0 rounded-2xl bg-accent text-content flex items-center justify-center hover:bg-accent-dark transition-all active:scale-90 shadow-lg shadow-accent/20"
      >
       <Plus size={20} />
      </button>
