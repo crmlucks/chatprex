@@ -34,7 +34,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
  }, [token]);
 
  const [showClientForm, setShowClientForm] = useState(false);
- const [clientForm, setClientForm] = useState({ doc: '', name: '', phone: '', email: '', civilStatus: 'Soltero', spouseDoc: '', spouseName: '', spousePhone: '', address: '', district: '', province: '', department: '', notes: '', property: '', agent: '' });
+ const [clientForm, setClientForm] = useState({ doc: '', name: '', phone: '', email: '', civilStatus: 'Soltero', spouseDoc: '', spouseName: '', spousePhone: '', address: '', city: '', notes: '', property: '', agent: '' });
 
  const filteredTransactions = useMemo(() => transactions.filter(t => { const d = new Date(t.date); return d.getMonth() === monthFilter && d.getFullYear() === yearFilter; }), [transactions, monthFilter, yearFilter]);
 
@@ -82,7 +82,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
         }
         setShowClientForm(false);
         setEditingClient(null);
-        setClientForm({ doc: '', name: '', phone: '', email: '', civilStatus: 'Soltero', spouseDoc: '', spouseName: '', spousePhone: '', address: '', district: '', province: '', department: '', notes: '', property: '', agent: '' });
+        setClientForm({ doc: '', name: '', phone: '', email: '', civilStatus: 'Soltero', spouseDoc: '', spouseName: '', spousePhone: '', address: '', city: '', notes: '', property: '', agent: '' });
       }
     } catch (err) { console.error(err); }
   };
@@ -99,9 +99,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
       spouseName: client.spouse_name || client.spouseName || '',
       spousePhone: client.spouse_phone || client.spousePhone || '',
       address: client.address || '',
-      district: client.district || '',
-      province: client.province || '',
-      department: client.department || '',
+      city: client.city || client.district || '',
       notes: client.notes || '',
       property: client.property_id || client.property || '',
       agent: client.agent_id || client.agent || ''
@@ -247,9 +245,10 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
           <div className="md:col-span-2"><label className="label-text mb-1 block">Nombre completo</label><input type="text" required value={clientForm.name} onChange={e => setClientForm({...clientForm, name: e.target.value})} className="input-field text-xs py-2" placeholder="Nombres y Apellidos"/></div>
           <div><label className="label-text mb-1 block">Estado Civil</label><select value={clientForm.civilStatus} onChange={e => setClientForm({...clientForm, civilStatus: e.target.value})} className="input-field text-xs py-2"><option value="Soltero">Soltero/a</option><option value="Casado">Casado/a</option><option value="Divorciado">Divorciado/a</option></select></div>
 
-          {/* Fila 2: Contacto */}
+          {/* Fila 2: Contacto y Ciudad */}
           <div><label className="label-text mb-1 block">Teléfono</label><input type="text" value={clientForm.phone} onChange={e => setClientForm({...clientForm, phone: e.target.value})} className="input-field text-xs py-2" placeholder="+51..."/></div>
-          <div className="md:col-span-3"><label className="label-text mb-1 block">Email</label><input type="email" value={clientForm.email} onChange={e => setClientForm({...clientForm, email: e.target.value})} className="input-field text-xs py-2" placeholder="correo@ejemplo.com"/></div>
+          <div className="md:col-span-2"><label className="label-text mb-1 block">Email</label><input type="email" value={clientForm.email} onChange={e => setClientForm({...clientForm, email: e.target.value})} className="input-field text-xs py-2" placeholder="correo@ejemplo.com"/></div>
+          <div><label className="label-text mb-1 block">Ciudad</label><input type="text" value={clientForm.city} onChange={e => setClientForm({...clientForm, city: e.target.value})} className="input-field text-xs py-2" /></div>
 
           {/* Fila 3: Cónyuge (Condicional) */}
           {clientForm.civilStatus === 'Casado' && (
@@ -261,17 +260,11 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
            </div>
           )}
 
-          {/* Fila 4: Ubicación */}
+          {/* Fila 4: Gestión, Venta y Domicilio */}
           <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4 mt-1">
            <div className="md:col-span-2"><label className="label-text mb-1 block">Domicilio</label><input type="text" value={clientForm.address} onChange={e => setClientForm({...clientForm, address: e.target.value})} className="input-field text-xs py-2" placeholder="Av. / Calle..." /></div>
-           <div><label className="label-text mb-1 block">Departamento</label><input type="text" value={clientForm.department} onChange={e => setClientForm({...clientForm, department: e.target.value})} className="input-field text-xs py-2" /></div>
-           <div><label className="label-text mb-1 block">Distrito</label><input type="text" value={clientForm.district} onChange={e => setClientForm({...clientForm, district: e.target.value})} className="input-field text-xs py-2" /></div>
-          </div>
-
-          {/* Fila 5: Gestión y Venta */}
-          <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pt-3 border-t border-edge border-dashed">
            <div>
-            <label className="label-text mb-1 block">Propiedad de Interés / Venta</label>
+            <label className="label-text mb-1 block">Propiedad de Interés</label>
             <select value={clientForm.property} onChange={e => setClientForm({...clientForm, property: e.target.value})} className="input-field text-xs py-2">
              <option value="">Seleccionar propiedad...</option>
              {(properties || []).map(p => p ? <option key={p.id} value={p.id}>{p.name} - {p.project}</option> : null)}
