@@ -306,6 +306,7 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
 
 const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, onGoChat }: any) => {
  const dc = isDarkMode;
+ const { user } = useAuth();
  if (!leads || leads.length === 0) return (
   <div className={`card-premium p-16 text-center flex flex-col items-center justify-center ${dc ? 'text-content-muted' : 'text-content-muted'}`}>
    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${dc ? 'bg-surface-raised/50' : 'bg-surface-inset'}`}>
