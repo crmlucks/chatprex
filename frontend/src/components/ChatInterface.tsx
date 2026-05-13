@@ -732,20 +732,20 @@ const ChatItem = ({ name, message, time, unread, active, status, onClick, isDark
  };
 
  return (
-  <div onClick={onClick} className={`flex items-center gap-4 p-4 cursor-pointer rounded-2xl transition-all active:scale-[0.98] relative group ${active ? (dc ? 'bg-accent/10 ' : 'bg-accent/5') : (dc ? 'hover:bg-surface-raised/50' : 'hover:bg-surface-inset')}`}>
-   {active && <div className="absolute left-0 top-4 bottom-4 w-1 bg-accent rounded-r-full"></div>}
+  <div onClick={onClick} className={`flex items-center gap-3 md:gap-4 p-3 md:p-4 cursor-pointer rounded-2xl transition-all active:scale-[0.98] relative group ${active ? (dc ? 'bg-accent/10 ' : 'bg-accent/5') : (dc ? 'hover:bg-surface-raised/50' : 'hover:bg-surface-inset')}`}>
+   {active && <div className="absolute left-0 top-3 bottom-3 md:top-4 md:bottom-4 w-1 bg-accent rounded-r-full"></div>}
    <div className="relative shrink-0">
-    <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-14 h-14 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-white'}`} />
-    {unread > 0 && <div className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-rose-500 rounded-full border-2 text-content text-xs font-semibold flex items-center justify-center shadow-lg animate-bounce border-white dark:border-slate-900">{unread}</div>}
+    <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-white'}`} />
+    {unread > 0 && <div className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-rose-500 rounded-full border-2 text-content text-[10px] md:text-xs font-semibold flex items-center justify-center shadow-lg animate-bounce border-white dark:border-slate-900">{unread}</div>}
    </div>
    <div className="flex-1 min-w-0">
     <div className="flex justify-between items-center mb-1">
-     <h4 className={`text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>{name}</h4>
-     <span className={`text-xs whitespace-nowrap font-bold uppercase tracking-tight ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{time}</span>
+     <h4 className={`text-xs md:text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>{name}</h4>
+     <span className={`text-[10px] md:text-xs whitespace-nowrap font-bold uppercase tracking-tight ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{time}</span>
     </div>
-    <p className={`text-xs truncate mb-2 font-medium ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{message}</p>
+    <p className={`text-[10px] md:text-xs truncate mb-1.5 md:mb-2 font-medium ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{message}</p>
     <div className="flex items-center">
-     <span className={`text-xs font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm ${getStatusStyle(status || '')}`}>
+     <span className={`text-[9px] md:text-xs font-bold px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg uppercase tracking-wider shadow-sm ${getStatusStyle(status || '')}`}>
       {status || 'Sin estado'}
      </span>
     </div>

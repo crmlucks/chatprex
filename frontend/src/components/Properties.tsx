@@ -265,53 +265,53 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
     {viewMode === 'list' && (
       <div className="card-premium overflow-hidden overflow-x-auto">
        <table className="w-full text-left">
-         <thead>
-          <tr className={`text-[11px] font-bold text-content-muted uppercase tracking-wider border-b ${isDarkMode ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
-            <th className="px-5 py-4">Propiedad</th>
-            <th className="px-5 py-4">Proyecto</th>
-            <th className="px-5 py-4">Estado</th>
-            <th className="px-5 py-4 text-right">Precio</th>
-            <th className="px-5 py-4 text-right">Área</th>
-            <th className="px-5 py-4 hidden lg:table-cell">Ubicación</th>
-            <th className="px-5 py-4 hidden xl:table-cell">Detalles</th>
-            <th className="px-5 py-4 text-right">Acciones</th>
-           </tr>
+          <thead>
+           <tr className={`text-[9px] md:text-[11px] font-bold text-content-muted uppercase tracking-wider border-b ${isDarkMode ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
+             <th className="px-3 py-2 md:px-5 md:py-4">Propiedad</th>
+             <th className="px-3 py-2 md:px-5 md:py-4">Proyecto</th>
+             <th className="px-3 py-2 md:px-5 md:py-4">Estado</th>
+             <th className="px-3 py-2 md:px-5 md:py-4 text-right">Precio</th>
+             <th className="px-3 py-2 md:px-5 md:py-4 text-right">Área</th>
+             <th className="px-3 py-2 md:px-5 md:py-4 hidden lg:table-cell">Ubicación</th>
+             <th className="px-3 py-2 md:px-5 md:py-4 hidden xl:table-cell">Detalles</th>
+             <th className="px-3 py-2 md:px-5 md:py-4 text-right">Acciones</th>
+            </tr>
           </thead>
           <tbody className={`divide-y ${isDarkMode ? 'divide-edge' : 'divide-slate-100'}`}>
            {filteredProperties.map(p => {
             const isBuilding = !['terreno','deposito'].includes(p.type?.toLowerCase() || '');
             return (
              <tr key={p.id} className="hover:bg-surface-inset transition-colors group">
-               <td className="px-5 py-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg overflow-hidden border border-edge shrink-0 bg-surface-inset">
+               <td className="px-3 py-2 md:px-5 md:py-3">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg overflow-hidden border border-edge shrink-0 bg-surface-inset">
                    {p.avatar ? <img src={p.avatar} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-content-muted"><Home size={16} /></div>}
                   </div>
                   <div className="min-w-0">
-                   <div className="font-bold text-sm text-content truncate max-w-[180px]">{p.name}</div>
-                   <div className="text-[11px] font-medium text-content-muted mt-0.5 capitalize">{p.type}</div>
+                   <div className="font-bold text-xs md:text-sm text-content truncate max-w-[120px] md:max-w-[180px]">{p.name}</div>
+                   <div className="text-[9px] md:text-[11px] font-medium text-content-muted mt-0.5 capitalize">{p.type}</div>
                   </div>
                 </div>
                </td>
-               <td className="px-5 py-3">
-                <span className="text-xs font-bold text-accent">{p.project || '—'}</span>
+               <td className="px-3 py-2 md:px-5 md:py-3">
+                <span className="text-[10px] md:text-xs font-bold text-accent">{p.project || '—'}</span>
                </td>
-               <td className="px-5 py-3">
-                <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg capitalize ${p.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-500' : p.status === 'reservado' ? 'bg-amber-500/10 text-amber-500' : 'bg-rose-500/10 text-rose-500'}`}>{p.status}</span>
+               <td className="px-3 py-2 md:px-5 md:py-3">
+                <span className={`text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg capitalize ${p.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-500' : p.status === 'reservado' ? 'bg-amber-500/10 text-amber-500' : 'bg-rose-500/10 text-rose-500'}`}>{p.status}</span>
                </td>
-               <td className="px-5 py-3 text-right">
-                <div className="text-xs font-black text-content">{p.currency} {Number(p.price).toLocaleString()}</div>
+               <td className="px-3 py-2 md:px-5 md:py-3 text-right">
+                <div className="text-[10px] md:text-xs font-black text-content">{p.currency} {Number(p.price).toLocaleString()}</div>
                </td>
-               <td className="px-5 py-3 text-right">
-                <span className="text-xs font-bold text-content-muted">{p.area ? `${p.area} m²` : '—'}</span>
+               <td className="px-3 py-2 md:px-5 md:py-3 text-right">
+                <span className="text-[10px] md:text-xs font-bold text-content-muted">{p.area ? `${p.area} m²` : '—'}</span>
                </td>
-               <td className="px-5 py-3 hidden lg:table-cell">
+               <td className="px-3 py-2 md:px-5 md:py-3 hidden lg:table-cell">
                 <div className="flex items-center gap-1.5 max-w-[200px]">
                  <MapPin size={12} className="shrink-0 text-accent/60" />
-                 <span className="text-xs text-content-muted truncate">{p.location || '—'}</span>
+                 <span className="text-[10px] md:text-xs text-content-muted truncate">{p.location || '—'}</span>
                 </div>
                </td>
-               <td className="px-5 py-3 hidden xl:table-cell">
+               <td className="px-3 py-2 md:px-5 md:py-3 hidden xl:table-cell">
                 <div className="flex flex-col gap-1.5">
                  {isBuilding && (
                   <div className="flex gap-1.5 flex-wrap">
@@ -326,11 +326,11 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                  )}
                 </div>
                </td>
-               <td className="px-5 py-3 text-right">
+               <td className="px-3 py-2 md:px-5 md:py-3 text-right">
                 <div className="flex justify-end gap-1">
-                  <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || []}); setShowModal(true); }} className={`p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
+                  <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || []}); setShowModal(true); }} className={`p-1.5 md:p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
                   {(user?.role === 'propietario' || user?.role === 'administrador') && (
-                    <button onClick={() => deleteProperty(p.id)} className="p-2 rounded-lg text-rose-400 hover:text-rose-50 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
+                    <button onClick={() => deleteProperty(p.id)} className="p-1.5 md:p-2 rounded-lg text-rose-400 hover:text-rose-50 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
                   )}
                 </div>
                </td>

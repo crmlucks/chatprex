@@ -320,14 +320,14 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
   <div className="card-premium overflow-hidden overflow-x-auto">
     <table className="w-full text-left">
      <thead>
-      <tr className={`text-[11px] font-bold text-content-muted border-b uppercase tracking-wider ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
-       <th className="px-6 py-4">Lead / Contacto</th>
-       <th className="px-6 py-4">Estado</th>
-       <th className="px-6 py-4">Scoring IA</th>
-       <th className="px-6 py-4">Proyecto</th>
-       <th className="px-6 py-4">Asesor</th>
-       <th className="px-6 py-4">Tags</th>
-       <th className="px-6 py-4 text-right">Acciones</th>
+      <tr className={`text-[9px] md:text-[11px] font-bold text-content-muted border-b uppercase tracking-wider ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
+       <th className="px-3 py-2 md:px-6 md:py-4">Lead / Contacto</th>
+       <th className="px-3 py-2 md:px-6 md:py-4">Estado</th>
+       <th className="px-3 py-2 md:px-6 md:py-4">Scoring IA</th>
+       <th className="px-3 py-2 md:px-6 md:py-4">Proyecto</th>
+       <th className="px-3 py-2 md:px-6 md:py-4">Asesor</th>
+       <th className="px-3 py-2 md:px-6 md:py-4">Tags</th>
+       <th className="px-3 py-2 md:px-6 md:py-4 text-right">Acciones</th>
       </tr>
      </thead>
      <tbody className={`divide-y ${dc ? 'divide-edge' : 'divide-slate-100'}`}>
@@ -335,49 +335,49 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
        const sc = getScoreColor(lead.score);
        return (
        <tr key={lead.id} className={`group hover:bg-surface-inset transition-colors`}>
-        <td className="px-6 py-4 cursor-pointer" onClick={() => onSelect(lead)}>
-         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${dc ? 'bg-surface-raised text-accent' : 'bg-accent/10 text-accent shadow-sm'}`}>
+        <td className="px-3 py-2 md:px-6 md:py-4 cursor-pointer" onClick={() => onSelect(lead)}>
+         <div className="flex items-center gap-2 md:gap-3">
+          <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center font-bold text-[10px] md:text-xs shrink-0 ${dc ? 'bg-surface-raised text-accent' : 'bg-accent/10 text-accent shadow-sm'}`}>
            {lead.name?.charAt(0).toUpperCase() || 'L'}
           </div>
           <div className="min-w-0">
-           <div className={`text-sm font-bold ${dc ? 'text-content' : 'text-content'} truncate max-w-[150px]`}>{lead.name}</div>
-           <div className="text-xs font-semibold text-content-muted">{lead.phone}</div>
+           <div className={`text-xs md:text-sm font-bold ${dc ? 'text-content' : 'text-content'} truncate max-w-[120px] md:max-w-[150px]`}>{lead.name}</div>
+           <div className="text-[10px] md:text-xs font-semibold text-content-muted">{lead.phone}</div>
           </div>
          </div>
         </td>
-        <td className="px-6 py-4">
-         <span className={`text-[10px] px-2.5 py-1 rounded-lg font-bold uppercase tracking-tight ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
+        <td className="px-3 py-2 md:px-6 md:py-4">
+         <span className={`text-[9px] md:text-[10px] px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-lg font-bold uppercase tracking-tight ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
         </td>
-        <td className="px-6 py-4">
-         <div className="flex items-center gap-2">
-          <div className={`w-12 h-1.5 rounded-full overflow-hidden ${dc ? 'bg-surface-raised' : 'bg-slate-100 '}`}>
+        <td className="px-3 py-2 md:px-6 md:py-4">
+         <div className="flex items-center gap-1 md:gap-2">
+          <div className={`w-8 md:w-12 h-1.5 rounded-full overflow-hidden ${dc ? 'bg-surface-raised' : 'bg-slate-100 '}`}>
            <div className={`${sc.bar} h-full rounded-full transition-all duration-700`} style={{ width: `${String(lead.score || '0').replace('%', '')}%` }}></div>
           </div>
-          <span className={`text-[11px] font-black flex items-center gap-1 ${sc.text}`}>{String(lead.score || '0').replace('%', '')}%</span>
+          <span className={`text-[9px] md:text-[11px] font-black flex items-center gap-1 ${sc.text}`}>{String(lead.score || '0').replace('%', '')}%</span>
          </div>
         </td>
-        <td className="px-6 py-4">
-         <span className="text-xs font-bold text-accent truncate max-w-[120px] block">{lead.project || '—'}</span>
+        <td className="px-3 py-2 md:px-6 md:py-4">
+         <span className="text-[10px] md:text-xs font-bold text-accent truncate max-w-[100px] md:max-w-[120px] block">{lead.project || '—'}</span>
         </td>
-        <td className="px-6 py-4">
-         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-500 uppercase shrink-0">
+        <td className="px-3 py-2 md:px-6 md:py-4">
+         <div className="flex items-center gap-1 md:gap-2">
+          <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-slate-200 flex items-center justify-center text-[8px] md:text-[9px] font-bold text-slate-500 uppercase shrink-0">
            {lead.advisor_name?.charAt(0) || 'U'}
           </div>
-          <span className="text-xs font-semibold text-content-muted truncate max-w-[100px]">{lead.advisor_name || 'Sin asignar'}</span>
+          <span className="text-[10px] md:text-xs font-semibold text-content-muted truncate max-w-[80px] md:max-w-[100px]">{lead.advisor_name || 'Sin asignar'}</span>
          </div>
         </td>
-        <td className="px-6 py-4">
-         <div className="flex gap-1 flex-wrap max-w-[120px]">
+        <td className="px-3 py-2 md:px-6 md:py-4">
+         <div className="flex gap-1 flex-wrap max-w-[100px] md:max-w-[120px]">
           {lead.tags && lead.tags.length > 0 ? (
            lead.tags.slice(0, 2).map((t: string, i: number) => (
-            <span key={i} className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${getTagColor(t)}`}>{t}</span>
+            <span key={i} className={`text-[8px] md:text-[9px] font-bold px-1 py-0.5 md:px-1.5 md:py-0.5 rounded border ${getTagColor(t)}`}>{t}</span>
            ))
-          ) : <span className="text-[10px] text-content-muted italic">Sin tags</span>}
+          ) : <span className="text-[9px] md:text-[10px] text-content-muted italic">Sin tags</span>}
          </div>
         </td>
-        <td className="px-6 py-4 text-right">
+        <td className="px-3 py-2 md:px-6 md:py-4 text-right">
          <div className="inline-flex items-center gap-0.5">
           <a title="Llamar" href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-emerald-500 hover:bg-emerald-50'}`}>
            <Phone size={14} />
