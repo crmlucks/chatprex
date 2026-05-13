@@ -115,7 +115,7 @@ const Dashboard = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     </div>
 
     {/* KPIs */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
      <StatCard label="Leads totales" value={stats.leads} trend={stats.leadsNew > 0 ? `+${stats.leadsNew}` : ''} icon={<Users size={20} strokeWidth={2.5} />} iconColor="text-blue-500" bgSoft="bg-blue-500/5" glowColor="bg-blue-500" />
      <StatCard label="Propiedades" value={stats.properties} trend="" icon={<Building2 size={20} strokeWidth={2.5} />} iconColor="text-indigo-500" bgSoft="bg-indigo-500/5" glowColor="bg-indigo-500" />
      <StatCard label="Efectividad" value={stats.tasks > 0 ? `${Math.round((stats.tasksDone / stats.tasks) * 100)}%` : '0%'} trend={stats.tasksDone > 0 ? `${stats.tasksDone}/${stats.tasks}` : ''} icon={<ListTodo size={20} strokeWidth={2.5} />} iconColor="text-amber-500" bgSoft="bg-amber-500/5" glowColor="bg-amber-500" />
@@ -281,7 +281,7 @@ const StatCard = ({ label, value, trend, icon, iconColor, bgSoft, glowColor }: a
  const iconBg = bgSoft.replace('/5', '/10');
  const bgIcon = React.cloneElement(icon, { size: 110, strokeWidth: 1.5 });
  return (
-  <div className={`card p-5 group transition-all duration-300 hover:-translate-y-1 ${bgSoft} border-transparent relative overflow-hidden`}>
+  <div className={`card p-4 sm:p-5 group transition-all duration-300 hover:-translate-y-1 ${bgSoft} border-transparent relative overflow-hidden`}>
    {/* Large background icon */}
    <div className={`absolute -bottom-6 -right-6 opacity-[0.04] dark:opacity-[0.06] ${iconColor} pointer-events-none transform -rotate-12 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6`}>
      {bgIcon}
@@ -290,20 +290,20 @@ const StatCard = ({ label, value, trend, icon, iconColor, bgSoft, glowColor }: a
    {/* Soft glow in corner */}
    <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-3xl opacity-20 dark:opacity-30 ${glowColor} pointer-events-none`}></div>
    
-   <div className="relative z-10">
-    <div className="flex justify-between items-start mb-4">
-     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg} ${iconColor} shadow-inner border border-white/5`}>
-      {icon}
-     </div>
-     {trend && (
-      <div className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20">
-        <ArrowUpRight size={14} strokeWidth={2.5} /> {trend}
+    <div className="relative z-10">
+     <div className="flex justify-between items-start mb-3 sm:mb-4">
+      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center ${iconBg} ${iconColor} shadow-inner border border-white/5`}>
+       {React.cloneElement(icon, { size: 18 })}
       </div>
-     )}
+      {trend && (
+       <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs font-bold border border-emerald-500/20">
+         <ArrowUpRight size={12} strokeWidth={2.5} /> {trend}
+       </div>
+      )}
+     </div>
+     <p className="text-[9px] sm:text-[11px] font-bold text-content-muted uppercase tracking-wider mb-0.5 truncate">{label}</p>
+     <h2 className="text-2xl sm:text-3xl font-black text-content tracking-tight">{value}</h2>
     </div>
-    <p className="text-[11px] font-bold text-content-muted uppercase tracking-wider mb-0.5">{label}</p>
-    <h2 className="text-3xl font-black text-content tracking-tight">{value}</h2>
-   </div>
   </div>
  );
 };

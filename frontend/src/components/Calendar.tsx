@@ -10,6 +10,7 @@ type Priority = 'alta' | 'media' | 'baja';
 interface CalEvent {
  id: number; title: string; type: EventType; date: string; time: string;
  client: string; status: EventStatus; priority: Priority; lead_id?: number; notes?: string;
+ advisor_name?: string;
 }
 
 const typeConfig: Record<string, { icon: any; color: string; bg: string; border: string }> = {
@@ -71,7 +72,8 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
      status: (t.status || 'pendiente') as EventStatus,
      priority: (t.description?.toLowerCase() === 'alta' ? 'alta' : t.description?.toLowerCase() === 'baja' ? 'baja' : 'media') as Priority,
      lead_id: t.lead_id,
-     notes: t.description || ''
+     notes: t.description || '',
+     advisor_name: t.advisor_name || ''
     })));
     setLoading(false);
    })
@@ -101,6 +103,14 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
  const save = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!form.title) return;
+
+  // Validate date is not in the past
+  const selectedDateTime = new Date(`${form.date}T${form.time}`);
+  if (selectedDateTime < new Date()) {
+    showToast('No puedes programar eventos en el pasado', 'error');
+    return;
+  }
+
   try {
    if (editing) {
     await fetch(`${API_URL}/api/data/tasks/${editing.id}`, {
@@ -138,6 +148,7 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
 
  const del = async () => {
   if (!editing) return;
+  if (!window.confirm('¿Estás seguro de que deseas eliminar este evento permanentemente?')) return;
   try {
    await fetch(`${API_URL}/api/data/tasks/${editing.id}`, {
     method: 'DELETE',
@@ -300,7 +311,9 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
                       </div>
                       <h4 className="text-sm font-bold text-content">{ev.title}</h4>
                       <p className="text-[11px] font-bold text-content-muted uppercase tracking-tight flex items-center gap-1 mt-1">
-                        <User size={12} className="text-accent" /> {ev.client || 'Sin cliente'} • {ev.date}
+                        <User size={12} className="text-accent" /> {ev.client || 'Sin cliente'} 
+                        {ev.advisor_name && <span className="text-emerald-500">• Asesor: {ev.advisor_name}</span>}
+                        • {ev.date}
                       </p>
                     </div>
                   </div>
@@ -355,7 +368,7 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
            <label className={label}>Fecha</label>
            <div className="relative">
             <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 pointer-events-none" size={14} />
-            <input required type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className={`${input} pl-9`} />
+            <input required type="date" min={todayStr} value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className={`${input} pl-9`} />
            </div>
          </div>
          <div className="relative">

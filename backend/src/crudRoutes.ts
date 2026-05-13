@@ -10,7 +10,13 @@ router.use(authMiddleware);
 router.get('/tasks', async (req, res) => {
   try {
     const { lead_id, type } = req.query;
-    let query = 'SELECT t.*, l.name as lead_name FROM tasks t LEFT JOIN leads l ON t.lead_id = l.id WHERE 1=1';
+    let query = `
+      SELECT t.*, l.name as lead_name, u.name as advisor_name 
+      FROM tasks t 
+      LEFT JOIN leads l ON t.lead_id = l.id 
+      LEFT JOIN users u ON l.advisor_id = u.id 
+      WHERE 1=1
+    `;
     let params: any[] = [];
     if (lead_id) { params.push(lead_id); query += ` AND t.lead_id = $${params.length}`; }
     if (type) { params.push(type); query += ` AND t.type = $${params.length}`; }
