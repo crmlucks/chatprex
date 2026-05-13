@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, MessageSquare, Calendar, Settings, PieChart, Home, DollarSign, Shield, Zap, Bot, Smartphone, Workflow, Moon, Sun, ChevronRight, ChevronLeft, LogOut, UserCog, PanelLeftClose, PanelLeftOpen, LayoutGrid } from 'lucide-react';
+import { LayoutDashboard, Users, MessageSquare, Calendar, Settings, PieChart, Home, DollarSign, Shield, Zap, Bot, Smartphone, Workflow, Moon, Sun, ChevronRight, ChevronLeft, LogOut, UserCog, PanelLeftClose, PanelLeftOpen, LayoutGrid, Menu, X } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -13,6 +13,7 @@ interface SidebarProps {
 
 const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole = 'usuario', userName = '', onLogout }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const [openGroup, setOpenGroup] = React.useState<string | null>(null);
 
   const canSee = (...roles: string[]) => roles.includes(userRole);
@@ -24,8 +25,29 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
 
   return (
     <>
-      {/* Sidebar Desktop */}
-      <aside className={`hidden md:flex relative flex-col h-screen z-[100] transition-all duration-300 ${isCollapsed ? 'w-[72px]' : 'w-64'} bg-surface border-r border-edge`}>
+      {/* Top Navigation Mobile */}
+      <header className="md:hidden flex items-center justify-between h-14 px-4 border-b border-edge bg-surface shrink-0 z-[90]">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setIsMobileOpen(true)} className="p-1.5 -ml-1.5 rounded-lg text-content-muted hover:text-content hover:bg-surface-inset transition-colors">
+            <Menu size={20} />
+          </button>
+          <span className="text-sm font-bold text-content">{activeTab}</span>
+        </div>
+        <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+          <Bot className="text-white" size={16} />
+        </div>
+      </header>
+
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[100] md:hidden animate-in fade-in duration-200"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Desktop & Mobile Drawer */}
+      <aside className={`fixed md:relative inset-y-0 left-0 z-[110] transform transition-transform duration-300 md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} ${isCollapsed ? 'w-[72px]' : 'w-64'} flex flex-col h-screen bg-surface border-r border-edge`}>
         
         {/* Collapse Toggle */}
         <button
@@ -51,18 +73,23 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
               </div>
             )}
           </div>
+          {isMobileOpen && (
+            <button onClick={() => setIsMobileOpen(false)} className="md:hidden p-1.5 rounded-lg text-content-muted hover:text-content hover:bg-surface-inset ml-2">
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         <nav className={`flex-1 py-3 flex flex-col gap-0.5 overflow-x-hidden overflow-y-auto ${isCollapsed ? 'px-2' : 'px-3'}`}>
-          <NavItem onClick={() => setActiveTab('Dashboard')} icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'Dashboard'} collapsed={isCollapsed} />
-          <NavItem onClick={() => setActiveTab('Inteligencia')} icon={<Zap size={18} />} label="Lead Intelligence" active={activeTab === 'Inteligencia'} collapsed={isCollapsed} />
-          <NavItem onClick={() => setActiveTab('Leads Pipeline')} icon={<Users size={18} />} label="Pipeline de leads" active={activeTab === 'Leads Pipeline'} collapsed={isCollapsed} />
-          <NavItem onClick={() => setActiveTab('Conversaciones')} icon={<MessageSquare size={18} />} label="Conversaciones" active={activeTab === 'Conversaciones'} collapsed={isCollapsed} />
-          <NavItem onClick={() => setActiveTab('Inventario')} icon={<Home size={18} />} label="Propiedades" active={activeTab === 'Inventario'} collapsed={isCollapsed} />
-          <NavItem onClick={() => setActiveTab('Calendario')} icon={<Calendar size={18} />} label="Agenda y tareas" active={activeTab === 'Calendario'} collapsed={isCollapsed} />
-          <NavItem onClick={() => setActiveTab('Finanzas')} icon={<DollarSign size={18} />} label="Finanzas" active={activeTab === 'Finanzas'} collapsed={isCollapsed} />
+          <NavItem onClick={() => { setActiveTab('Dashboard'); setIsMobileOpen(false); }} icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'Dashboard'} collapsed={isCollapsed} />
+          <NavItem onClick={() => { setActiveTab('Inteligencia'); setIsMobileOpen(false); }} icon={<Zap size={18} />} label="Lead Intelligence" active={activeTab === 'Inteligencia'} collapsed={isCollapsed} />
+          <NavItem onClick={() => { setActiveTab('Leads Pipeline'); setIsMobileOpen(false); }} icon={<Users size={18} />} label="Pipeline de leads" active={activeTab === 'Leads Pipeline'} collapsed={isCollapsed} />
+          <NavItem onClick={() => { setActiveTab('Conversaciones'); setIsMobileOpen(false); }} icon={<MessageSquare size={18} />} label="Conversaciones" active={activeTab === 'Conversaciones'} collapsed={isCollapsed} />
+          <NavItem onClick={() => { setActiveTab('Inventario'); setIsMobileOpen(false); }} icon={<Home size={18} />} label="Propiedades" active={activeTab === 'Inventario'} collapsed={isCollapsed} />
+          <NavItem onClick={() => { setActiveTab('Calendario'); setIsMobileOpen(false); }} icon={<Calendar size={18} />} label="Agenda y tareas" active={activeTab === 'Calendario'} collapsed={isCollapsed} />
+          <NavItem onClick={() => { setActiveTab('Finanzas'); setIsMobileOpen(false); }} icon={<DollarSign size={18} />} label="Finanzas" active={activeTab === 'Finanzas'} collapsed={isCollapsed} />
           {canSee('propietario', 'administrador') && (
-            <NavItem onClick={() => setActiveTab('Campañas')} icon={<PieChart size={18} />} label="Campañas" active={activeTab === 'Campañas'} collapsed={isCollapsed} />
+            <NavItem onClick={() => { setActiveTab('Campañas'); setIsMobileOpen(false); }} icon={<PieChart size={18} />} label="Campañas" active={activeTab === 'Campañas'} collapsed={isCollapsed} />
           )}
         </nav>
 
@@ -76,9 +103,9 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
               onToggle={() => toggleGroup('integraciones')}
               active={['Conexión WP', 'Constructor Bots', 'Automatización'].includes(activeTab)}
             >
-              <SubNavItem onClick={() => setActiveTab('Conexión WP')} label="Conexión Whatsapp" active={activeTab === 'Conexión WP'} />
-              <SubNavItem onClick={() => setActiveTab('Constructor Bots')} label="Entrenamiento IA" active={activeTab === 'Constructor Bots'} />
-              <SubNavItem onClick={() => setActiveTab('Automatización')} label="Automatización" active={activeTab === 'Automatización'} />
+              <SubNavItem onClick={() => { setActiveTab('Conexión WP'); setIsMobileOpen(false); }} label="Conexión Whatsapp" active={activeTab === 'Conexión WP'} />
+              <SubNavItem onClick={() => { setActiveTab('Constructor Bots'); setIsMobileOpen(false); }} label="Entrenamiento IA" active={activeTab === 'Constructor Bots'} />
+              <SubNavItem onClick={() => { setActiveTab('Automatización'); setIsMobileOpen(false); }} label="Automatización" active={activeTab === 'Automatización'} />
             </NavGroup>
           )}
 
@@ -90,9 +117,9 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
               onToggle={() => toggleGroup('ajustes')}
               active={['Configuración', 'Administración', 'Usuarios'].includes(activeTab)}
             >
-              <SubNavItem onClick={() => setActiveTab('Usuarios')} label="Gestión de usuarios" active={activeTab === 'Usuarios'} />
-              <SubNavItem onClick={() => setActiveTab('Administración')} label="Administración" active={activeTab === 'Administración'} />
-              <SubNavItem onClick={() => setActiveTab('Configuración')} label="Configuración" active={activeTab === 'Configuración'} />
+              <SubNavItem onClick={() => { setActiveTab('Usuarios'); setIsMobileOpen(false); }} label="Gestión de usuarios" active={activeTab === 'Usuarios'} />
+              <SubNavItem onClick={() => { setActiveTab('Administración'); setIsMobileOpen(false); }} label="Administración" active={activeTab === 'Administración'} />
+              <SubNavItem onClick={() => { setActiveTab('Configuración'); setIsMobileOpen(false); }} label="Configuración" active={activeTab === 'Configuración'} />
             </NavGroup>
           )}
 
@@ -130,15 +157,6 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
           )}
         </div>
       </aside>
-
-      {/* Bottom Navigation Mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-edge flex justify-around items-center h-16 px-2 z-[100] bg-surface">
-        <MobileNavItem onClick={() => setActiveTab('Dashboard')} icon={<LayoutDashboard size={18} />} label="Inicio" active={activeTab === 'Dashboard'} />
-        <MobileNavItem onClick={() => setActiveTab('Leads Pipeline')} icon={<Users size={18} />} label="Leads" active={activeTab === 'Leads Pipeline'} />
-        <MobileNavItem onClick={() => setActiveTab('Conversaciones')} icon={<MessageSquare size={18} />} label="Chats" active={activeTab === 'Conversaciones'} />
-        <MobileNavItem onClick={() => setActiveTab('Inventario')} icon={<Home size={18} />} label="Prop" active={activeTab === 'Inventario'} />
-        <MobileNavItem onClick={() => setActiveTab('Calendario')} icon={<Calendar size={18} />} label="Citas" active={activeTab === 'Calendario'} />
-      </nav>
     </>
   );
 };
