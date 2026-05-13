@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import express from 'express';
-import { generateAIResponse } from './ai';
+import { generateAIResponse, appendMessageToHistory } from './ai';
 import { transcribeAudio } from './voiceBot';
 import pool from './db';
 

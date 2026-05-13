@@ -17,10 +17,35 @@ async function getAIConfig(phone: string) {
       return { ...res.rows[0], botId };
     }
   } catch (e) {
-    console.error('Error leyendo config IA:', e);
+    console.error('[OpenAI/AI] Error general:', e);
   }
   return null;
 }
+
+/**
+ * Agrega un mensaje al historial en memoria de la IA.
+ * Útil para que la IA tenga contexto de los mensajes manuales que envió el humano
+ * o los mensajes que envió el lead mientras el bot estaba apagado.
+ */
+export const appendMessageToHistory = (fromJid: string, role: 'user' | 'assistant', content: string) => {
+  if (!conversationHistory[fromJid]) {
+    conversationHistory[fromJid] = [];
+  }
+  conversationHistory[fromJid].push({ role, content });
+  
+  // Mantener el límite de 10 mensajes
+  if (conversationHistory[fromJid].length > 11) {
+    const hasSystem = conversationHistory[fromJid][0]?.role === 'system';
+    if (hasSystem) {
+      conversationHistory[fromJid] = [
+        conversationHistory[fromJid][0],
+        ...conversationHistory[fromJid].slice(-10)
+      ];
+    } else {
+      conversationHistory[fromJid] = conversationHistory[fromJid].slice(-10);
+    }
+  }
+};
 
 /**
  * Genera respuesta usando el proveedor configurado

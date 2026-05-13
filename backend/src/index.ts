@@ -90,6 +90,13 @@ io.on('connection', (socket) => {
         const phone = data.to.split('@')[0];
         await pool.query('UPDATE leads SET bot_active = false WHERE phone = $1', [phone]);
         console.log(`[Bot] ⏸️ Bot desactivado para ${phone}`);
+
+        // Añadir el mensaje manual del humano al historial de la IA
+        const { appendMessageToHistory } = await import('./ai');
+        const remoteJid = data.to.includes('@') ? data.to : `${data.to}@s.whatsapp.net`;
+        if (data.text) {
+          appendMessageToHistory(remoteJid, 'assistant', data.text);
+        }
       } catch (dbErr: any) {
         console.error('[Bot] Error desactivando bot:', dbErr.message);
       }
