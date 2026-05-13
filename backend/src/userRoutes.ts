@@ -15,7 +15,7 @@ userRouter.use(authMiddleware);
 userRouter.get('/', requireRole('propietario', 'administrador'), async (req, res) => {
   try {
     const { search, role, status } = req.query;
-    let query = 'SELECT id, name, email, phone, role, status, avatar, created_at, updated_at FROM users WHERE 1=1';
+    let query = 'SELECT id, name, email, phone, role, status, avatar, auto_assign, created_at, updated_at FROM users WHERE 1=1';
     const params: any[] = [];
     let paramIndex = 1;
 
@@ -51,7 +51,7 @@ userRouter.get('/', requireRole('propietario', 'administrador'), async (req, res
 userRouter.get('/:id', requireRole('propietario', 'administrador'), async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, name, email, phone, role, status, avatar, created_at, updated_at FROM users WHERE id = $1',
+      'SELECT id, name, email, phone, role, status, avatar, auto_assign, created_at, updated_at FROM users WHERE id = $1',
       [req.params.id]
     );
     if (result.rows.length === 0) {
@@ -69,7 +69,7 @@ userRouter.get('/:id', requireRole('propietario', 'administrador'), async (req, 
  * Crea un nuevo usuario. Solo propietario y administrador.
  */
 userRouter.post('/', requireRole('propietario', 'administrador'), async (req, res) => {
-  const { name, email, password, phone, role, avatar } = req.body;
+  const { name, email, password, phone, role, avatar, auto_assign } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Nombre, email y contraseña son requeridos' });
@@ -87,9 +87,9 @@ userRouter.post('/', requireRole('propietario', 'administrador'), async (req, re
   try {
     const hashedPassword = await bcrypt.hash(password, 12);
     const result = await pool.query(
-      `INSERT INTO users (name, email, password, phone, role, avatar, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 'activo') RETURNING id, name, email, phone, role, status, avatar, created_at`,
-      [name.trim(), email.toLowerCase().trim(), hashedPassword, phone || '', role || 'usuario', avatar || '']
+      `INSERT INTO users (name, email, password, phone, role, avatar, status, auto_assign)
+       VALUES ($1, $2, $3, $4, $5, $6, 'activo', $7) RETURNING id, name, email, phone, role, status, avatar, auto_assign, created_at`,
+      [name.trim(), email.toLowerCase().trim(), hashedPassword, phone || '', role || 'usuario', avatar || '', auto_assign || false]
     );
     res.status(201).json({ user: result.rows[0], message: 'Usuario creado exitosamente' });
   } catch (err: any) {
@@ -107,7 +107,7 @@ userRouter.post('/', requireRole('propietario', 'administrador'), async (req, re
  */
 userRouter.put('/:id', requireRole('propietario', 'administrador'), async (req, res) => {
   const targetId = parseInt(req.params.id, 10);
-  const { name, email, phone, role, status, avatar } = req.body;
+  const { name, email, phone, role, status, avatar, auto_assign } = req.body;
 
   try {
     // Obtener el usuario objetivo
@@ -141,10 +141,11 @@ userRouter.put('/:id', requireRole('propietario', 'administrador'), async (req, 
          role = COALESCE($4, role),
          status = COALESCE($5, status),
          avatar = COALESCE($6, avatar),
+         auto_assign = COALESCE($7, auto_assign),
          updated_at = NOW()
-       WHERE id = $7
-       RETURNING id, name, email, phone, role, status, avatar, created_at, updated_at`,
-      [name, email?.toLowerCase()?.trim(), phone, role, status, avatar, targetId]
+       WHERE id = $8
+       RETURNING id, name, email, phone, role, status, avatar, auto_assign, created_at, updated_at`,
+      [name, email?.toLowerCase()?.trim(), phone, role, status, avatar, auto_assign, targetId]
     );
 
     res.json({ user: result.rows[0], message: 'Usuario actualizado' });

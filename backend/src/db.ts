@@ -404,6 +404,10 @@ export async function initDatabase() {
         ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS property_id INTEGER;
         ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS agent_id INTEGER;
 
+        -- Nuevos campos para Auto-asignación de Leads
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS auto_assign BOOLEAN DEFAULT false;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS last_assigned_at TIMESTAMPTZ DEFAULT '1970-01-01 00:00:00Z';
+
         -- Nuevos campos para Transacciones
         ALTER TABLE transactions ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';
         ALTER TABLE transactions ADD COLUMN IF NOT EXISTS concept TEXT DEFAULT '';

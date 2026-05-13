@@ -772,13 +772,29 @@ const handleWebhookEvent = async (req: any, res: any) => {
           console.log(`[Evolution] Buscando lead con phone: ${phone}`);
           const existRes = await pool.query('SELECT id, bot_active, bot_id FROM leads WHERE phone = $1', [phone]);
           if (existRes.rowCount === 0) {
-            // Nuevo lead: Bot inactivo por defecto, a menos que el mensaje contenga una palabra clave
-            isBotActive = containsKeyword;
+            // Nuevo lead: Bot activo por defecto
+            isBotActive = true;
+
+            let assignedAdvisorId = null;
+            try {
+              const advisorRes = await pool.query(`
+                SELECT id FROM users 
+                WHERE status = 'activo' AND auto_assign = true 
+                ORDER BY last_assigned_at ASC NULLS FIRST LIMIT 1
+              `);
+              if (advisorRes.rowCount > 0) {
+                assignedAdvisorId = advisorRes.rows[0].id;
+                await pool.query('UPDATE users SET last_assigned_at = NOW() WHERE id = $1', [assignedAdvisorId]);
+              }
+            } catch (err) {
+              console.error('[Evolution] Error en auto asignación:', err);
+            }
+
             await pool.query(
-              `INSERT INTO leads (name, phone, score, status, bot_active, bot_id) VALUES ($1, $2, '50%', 'Nuevo', $3, $4)`,
-              [pushName, phone, isBotActive, matchedBotId]
+              `INSERT INTO leads (name, phone, score, status, bot_active, bot_id, advisor_id) VALUES ($1, $2, '50%', 'Nuevo', $3, $4, $5)`,
+              [pushName, phone, isBotActive, matchedBotId, assignedAdvisorId]
             );
-            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) - Bot Activo: ${isBotActive} (Bot ID: ${matchedBotId})`);
+            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) - Bot Activo: ${isBotActive} (Bot ID: ${matchedBotId}) - Asesor Asignado: ${assignedAdvisorId}`);
             ioInstance.emit('new-lead', { name: pushName, phone });
           } else {
             isBotActive = existRes.rows[0].bot_active;
@@ -990,6 +1006,8 @@ evolutionRouter.get('/chats', async (req, res) => {
       SELECT 
         m.chat_id as id,
         COALESCE(l.name, SPLIT_PART(m.chat_id, '@', 1)) as name,
+        COALESCE(l.bot_active, false) as bot_active,
+        l.id as lead_id,
         m.text as last_message,
         m.timestamp as time
       FROM (
@@ -1005,6 +1023,8 @@ evolutionRouter.get('/chats', async (req, res) => {
     const chats = result.rows.map(row => ({
       id: row.id,
       name: row.name,
+      botActive: row.bot_active,
+      leadId: row.lead_id,
       lastMessage: row.last_message || '[Media]',
       time: new Date(row.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       timestamp: row.time,

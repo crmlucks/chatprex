@@ -17,7 +17,7 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [editingUser, setEditingUser] = useState<User | null>(null);
  const [showPasswordModal, setShowPasswordModal] = useState<number | null>(null);
  const [newPassword, setNewPassword] = useState('');
- const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false });
+ const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false, auto_assign: false });
  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +55,7 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    if (!res.ok) throw new Error(data.error);
    setSuccess('Usuario creado exitosamente');
    setShowModal(false);
-   setFormData({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false });
+   setFormData({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false, auto_assign: false });
    fetchUsers();
    setTimeout(() => setSuccess(''), 3000);
   } catch (err: any) { setError(err.message); }
@@ -66,7 +66,7 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   if (!editingUser) return;
   setError('');
   try {
-   const body: any = { name: formData.name, email: formData.email, phone: formData.phone, role: formData.role, status: formData.status, avatar: formData.avatar, canAccessIntegrations: formData.canAccessIntegrations };
+   const body: any = { name: formData.name, email: formData.email, phone: formData.phone, role: formData.role, status: formData.status, avatar: formData.avatar, canAccessIntegrations: formData.canAccessIntegrations, auto_assign: formData.auto_assign };
    const res = await fetch(`${API_URL}/api/users/${editingUser.id}`, { method: 'PUT', headers, body: JSON.stringify(body) });
    const data = await res.json();
    if (!res.ok) throw new Error(data.error);
@@ -92,14 +92,14 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
  const openCreateModal = () => {
   setEditingUser(null);
-  setFormData({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false });
+  setFormData({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false, auto_assign: false });
   setError('');
   setShowModal(true);
  };
 
  const openEditModal = (u: User) => {
   setEditingUser(u);
-  setFormData({ name: u.name, email: u.email, password: '', phone: u.phone, role: u.role, status: u.status || 'activo', avatar: u.avatar || '', canAccessIntegrations: (u as any).canAccessIntegrations || false });
+  setFormData({ name: u.name, email: u.email, password: '', phone: u.phone, role: u.role, status: u.status || 'activo', avatar: u.avatar || '', canAccessIntegrations: (u as any).canAccessIntegrations || false, auto_assign: (u as any).auto_assign || false });
   setError('');
   setShowModal(true);
  };
@@ -261,12 +261,19 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
          </div>
          
-         <div className="flex-1">
+         <div className="flex-1 space-y-2">
           <label className="flex items-center gap-3 p-3 rounded-xl border border-edge bg-surface cursor-pointer hover:bg-surface-inset transition-all">
            <input type="checkbox" checked={formData.canAccessIntegrations} onChange={e => setFormData({...formData, canAccessIntegrations: e.target.checked})} className="w-4 h-4 rounded text-accent focus:ring-0 bg-surface-inset border-edge" />
            <div>
             <span className="text-[11px] font-bold text-content block uppercase tracking-tight">Acceso a Integraciones</span>
             <span className="text-[9px] text-content-muted font-bold uppercase opacity-70">WhatsApp, IA y Webhooks</span>
+           </div>
+          </label>
+          <label className="flex items-center gap-3 p-3 rounded-xl border border-edge bg-surface cursor-pointer hover:bg-surface-inset transition-all">
+           <input type="checkbox" checked={formData.auto_assign} onChange={e => setFormData({...formData, auto_assign: e.target.checked})} className="w-4 h-4 rounded text-emerald-500 focus:ring-0 bg-surface-inset border-edge" />
+           <div>
+            <span className="text-[11px] font-bold text-content block uppercase tracking-tight">Asignación Automática</span>
+            <span className="text-[9px] text-content-muted font-bold uppercase opacity-70">Recibe leads aleatoriamente</span>
            </div>
           </label>
          </div>

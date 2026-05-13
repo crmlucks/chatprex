@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MoreVertical, Phone, Video, Paperclip, Send, Smile, Filter, CheckCircle2, ArrowLeft, Zap, Plus, Edit2, Trash2, X, MessageSquare } from 'lucide-react';
+import { Search, MoreVertical, Phone, Video, Paperclip, Send, Smile, Filter, CheckCircle2, ArrowLeft, Zap, Plus, Edit2, Trash2, X, MessageSquare, Bot } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 
 interface ChatMessage {
@@ -23,6 +23,8 @@ interface QuickReply {
 interface Chat {
  id: string; // WhatsApp JID (ej. 521XXXXXXXXXX@s.whatsapp.net)
  name: string;
+ botActive?: boolean;
+ leadId?: number;
  lastMessage: string;
  time: string;
  unread: number;
@@ -77,6 +79,32 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    });
   } catch (err) {
    console.error(err);
+  }
+ };
+
+ const toggleBot = async (leadId: number | undefined) => {
+  if (!leadId) return;
+  const chatArr = Object.values(chats);
+  const chat = chatArr.find((c: any) => c.leadId === leadId);
+  if (!chat) return;
+
+  try {
+   const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/leads/${leadId}/bot`, {
+    method: 'PATCH',
+    headers: {
+     'Content-Type': 'application/json',
+     Authorization: `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify({ botActive: !chat.botActive })
+   });
+   if (res.ok) {
+    setChats(prev => ({
+     ...prev,
+     [chat.id]: { ...prev[chat.id], botActive: !chat.botActive }
+    }));
+   }
+  } catch (err) {
+   console.error('Error toggling bot', err);
   }
  };
 
@@ -414,15 +442,26 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-10 h-10 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-edge'}`} />
          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-[#1E1E1E] rounded-full"></div>
         </div>
-        <div className="truncate">
-         <h3 className={`text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>
-          {activeChatData.name}
-         </h3>
-         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-emerald-500 uppercase tracking-normal">En línea</span>
-          <span className="text-content-muted text-xs">•</span>
-          <span className="text-content-muted text-xs truncate">{activeChatData.id.split('@')[0]}</span>
+        <div className="flex items-center gap-2 overflow-hidden">
+         <div className="truncate">
+          <h3 className={`text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>
+           {activeChatData.name}
+          </h3>
+          <div className="flex items-center gap-2">
+           <span className="text-xs font-bold text-emerald-500 uppercase tracking-normal">En línea</span>
+           <span className="text-content-muted text-xs">•</span>
+           <span className="text-content-muted text-xs truncate">{activeChatData.id.split('@')[0]}</span>
+          </div>
          </div>
+         {activeChatData.leadId && (
+          <button 
+           title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
+           onClick={() => toggleBot(activeChatData.leadId)} 
+           className={`p-2 rounded-xl transition-all active:scale-90 flex items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : (dc ? 'hover:bg-surface-raised text-content-muted' : 'hover:bg-slate-100 text-content-muted')}`}
+          >
+           <Bot size={18} className={activeChatData.botActive ? 'animate-pulse' : ''} />
+          </button>
+         )}
         </div>
        </div>
        

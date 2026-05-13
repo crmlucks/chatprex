@@ -384,7 +384,7 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
           <button title="Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-blue-500 hover:bg-blue-50'}`}>
            <MessageSquare size={14} />
           </button>
-          <button title={lead.botActive ? "Desactivar Bot" : "Activar Bot IA"} onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }} className={`p-2 rounded-lg transition-all active:scale-90 ${lead.botActive ? 'text-accent hover:bg-accent/10' : (dc ? 'text-content-muted hover:text-content hover:bg-surface-raised' : 'text-content-muted hover:text-content-secondary hover:bg-slate-100')}`}>
+          <button title={lead.botActive ? "Desactivar Bot" : "Activar Bot IA"} onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }} className={`p-2 rounded-lg transition-all active:scale-90 ${lead.botActive ? 'text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20' : (dc ? 'text-content-muted hover:text-content hover:bg-surface-raised' : 'text-content-muted hover:text-content-secondary hover:bg-slate-100')}`}>
            <Bot size={14} className={lead.botActive ? 'animate-pulse' : ''} />
           </button>
           <button title="Editar" onClick={(e) => { e.stopPropagation(); onEdit(lead); }} className={`p-2 rounded-lg transition-all active:scale-90 ${dc ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}>
@@ -460,7 +460,7 @@ const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isD
      <div className="flex items-center gap-2 mb-1">
       <h4 className={`text-sm font-bold truncate group-hover:text-accent transition-colors ${dc ? 'text-content' : 'text-content'}`}>{lead.name}</h4>
       {lead.botActive && (
-        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent/20 text-accent" title="Bot Activo">
+        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-500" title="Bot Activo">
          <Bot size={12} className="animate-pulse" />
         </span>
       )}
@@ -505,7 +505,7 @@ const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isD
      <button title="Ir a Conversación" onClick={(e) => { e.stopPropagation(); onGoChat?.('Conversaciones'); }} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20' : 'bg-blue-50 text-blue-500 hover:bg-blue-100'}`}>
       <MessageSquare size={14} />
      </button>
-     <button title={lead.botActive ? "Desactivar Bot" : "Activar Bot IA"} onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }} className={`p-2 rounded-xl transition-all active:scale-90 ${lead.botActive ? 'bg-accent/20 text-accent hover:bg-accent/30' : (dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-slate-100 text-content-muted hover:text-content-secondary')}`}>
+     <button title={lead.botActive ? "Desactivar Bot" : "Activar Bot IA"} onClick={(e) => { e.stopPropagation(); onToggleBot(lead.id); }} className={`p-2 rounded-xl transition-all active:scale-90 ${lead.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : (dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-slate-100 text-content-muted hover:text-content-secondary')}`}>
       <Bot size={14} />
      </button>
     </div>

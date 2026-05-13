@@ -56,7 +56,7 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
   try {
     const botName = config?.name || 'Bot Principal';
     
-    let query = "SELECT name, project, type, price, currency, location, rooms, area FROM properties WHERE status = 'Disponible'";
+    let query = "SELECT name, project, type, price, currency, location, rooms, area, details FROM properties WHERE status = 'Disponible'";
     let params: any[] = [];
     
     // Si el bot tiene un nombre específico de proyecto, filtramos el inventario
@@ -69,7 +69,7 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
     const props = await pool.query(query, params);
     if (props.rowCount > 0) {
       propertiesText = props.rows.map(p => 
-        `- ${p.name} (${p.type}${p.project ? ` en ${p.project}` : ''}): Precio ${p.price} ${p.currency}, Ubicación: ${p.location}, Cuartos: ${p.rooms}, Área: ${p.area}`
+        `- ${p.name} (${p.type}${p.project ? ` en ${p.project}` : ''}): Precio ${p.price} ${p.currency}, Ubicación: ${p.location}, Cuartos: ${p.rooms}, Área: ${p.area}. Detalles: ${p.details}`
       ).join('\n');
     }
   } catch (e) {
