@@ -610,7 +610,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    </div>
 
    {/* 3. Right Sidebar: Quick Replies */}
-   <div className={`${showQuickReplies ? 'flex' : 'hidden'} absolute right-0 top-0 bottom-0 w-96 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 shadow-2xl ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
+   <div className={`${showQuickReplies ? 'flex' : 'hidden'} absolute md:relative right-0 top-0 bottom-0 w-[85%] sm:w-80 md:w-96 shrink-0 border-l flex-col h-full z-40 transition-all animate-in slide-in-from-right duration-300 shadow-2xl md:shadow-none ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
     <div className={`h-16 flex-shrink-0 flex items-center justify-between px-6 border-b transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge-light'}`}>
      <div className="flex items-center gap-3 text-amber-500">
        <Zap size={20} fill="currentColor" />
