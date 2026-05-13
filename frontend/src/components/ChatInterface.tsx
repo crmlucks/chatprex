@@ -485,16 +485,17 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
        </div>
       </div>
 
-      {/* Messages Area */}
-      <div className={`flex-1 overflow-y-auto p-6 flex flex-col gap-4 custom-scrollbar transition-all ${dc ? 'bg-[#0f0f0f]' : 'bg-[#efeae2]'}`}
+      <div className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar transition-all ${dc ? 'bg-[#0f0f0f]' : 'bg-[#efeae2]'}`}
          style={!dc ? { backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")', backgroundSize: '400px', opacity: 0.8 } : {}}>
-       <div className="flex justify-center mb-6">
-        <span className={`px-4 py-1 rounded-full text-xs font-bold uppercase tracking-normal shadow-sm ${dc ? 'bg-surface-raised/80 text-content-muted' : 'bg-surface/80 text-content-muted'}`}>Hoy</span>
+       <div className="p-4 md:p-6 flex flex-col gap-4 min-h-full">
+        <div className="flex justify-center mb-2">
+         <span className={`px-4 py-1 rounded-full text-xs font-bold uppercase tracking-normal shadow-sm ${dc ? 'bg-surface-raised/80 text-content-muted' : 'bg-surface/80 text-content-muted'}`}>Hoy</span>
+        </div>
+        {activeChatData.messages.map(msg => (
+         <Message key={msg.id} type={msg.fromMe ? 'out' : 'in'} text={msg.text} time={msg.time} media={msg.media} mimeType={msg.mimeType} isDarkMode={dc} />
+        ))}
+        <div ref={messagesEndRef} />
        </div>
-       {activeChatData.messages.map(msg => (
-        <Message key={msg.id} type={msg.fromMe ? 'out' : 'in'} text={msg.text} time={msg.time} media={msg.media} mimeType={msg.mimeType} isDarkMode={dc} />
-       ))}
-       <div ref={messagesEndRef} />
       </div>
 
       {/* File Preview */}
@@ -773,7 +774,7 @@ const Message = ({ type, text, time, media, mimeType, isDarkMode }: any) => {
        <Paperclip size={18} /> Archivo adjunto
       </a>
     )}
-    {text && <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap break-words">{text}</p>}
+    {text && <p className={`text-sm font-medium leading-relaxed whitespace-pre-wrap break-words ${isOut ? 'text-white' : (dc ? 'text-content' : 'text-slate-800')}`}>{text}</p>}
     <div className={`flex items-center gap-1.5 mt-2 justify-end transition-opacity opacity-70 group-hover:opacity-100 ${isOut ? 'text-white/90' : (dc ? 'text-content-muted' : 'text-slate-500')}`}>
      <span className="text-xs font-bold tracking-normal">{time}</span>
      {isOut && <CheckCircle2 size={12} className="text-white/90" />}
