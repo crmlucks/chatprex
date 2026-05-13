@@ -220,22 +220,22 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
        <h1 className="h1">Leads</h1>
       </div>
      </div>
-     <div className={`hidden md:flex p-1 rounded-xl ${dc ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
-      <button onClick={() => setViewMode('kanban')} className={`p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><KanbanSquare size={16} /></button>
-      <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={16} /></button>
-     </div>
     </div>
     
-    <div className="flex items-center justify-between gap-3 w-full md:w-auto">
-     <div className="relative w-1/2 md:w-64 shrink-0">
+    <div className="flex items-center justify-between gap-1.5 md:gap-3 w-full md:w-auto">
+     <div className="relative flex-1 min-w-0 md:w-64">
        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
-       <input type="text" placeholder="Buscar lead..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-9 pr-4 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-full ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
+       <input type="text" placeholder="Buscar lead..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-9 pr-4 py-2 md:py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-full ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
      </div>
-     <div className="flex items-center gap-2 ml-auto shrink-0">
-      <button onClick={() => setShowFilters(!showFilters)} className={`p-2.5 rounded-xl border transition-colors ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
+     <div className="flex items-center gap-1 md:gap-2 shrink-0">
+      <div className={`flex p-1 rounded-xl shrink-0 ${dc ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
+       <button onClick={() => setViewMode('kanban')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><KanbanSquare size={14} className="md:w-4 md:h-4" /></button>
+       <button onClick={() => setViewMode('list')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'list' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={14} className="md:w-4 md:h-4" /></button>
+      </div>
+      <button onClick={() => setShowFilters(!showFilters)} className={`p-2 md:p-2.5 rounded-xl border transition-colors shrink-0 ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
        <Filter size={16} />
       </button>
-      <button onClick={() => setShowNewLead(true)} className="btn-primary flex items-center justify-center shrink-0 w-11 h-11 md:w-auto md:h-auto md:px-4 md:py-2.5 gap-2">
+      <button onClick={() => setShowNewLead(true)} className="btn-primary flex items-center justify-center shrink-0 w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2.5 gap-2">
        <Plus size={16} /> <span className="hidden md:inline">Nuevo lead</span>
       </button>
      </div>
@@ -243,13 +243,6 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
    </div>
 
    <div className="flex-1 overflow-x-auto p-4 md:p-8 h-full custom-scrollbar">
-    
-    <div className="md:hidden flex justify-end mb-4">
-     <div className={`flex p-1 rounded-xl ${dc ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
-      <button onClick={() => setViewMode('kanban')} className={`p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (dc ? 'bg-accent text-content shadow-sm' : 'bg-surface text-content shadow-sm') : 'text-content-muted'}`}><KanbanSquare size={16} /></button>
-      <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (dc ? 'bg-accent text-content shadow-sm' : 'bg-surface text-content shadow-sm') : 'text-content-muted'}`}><LayoutList size={16} /></button>
-     </div>
-    </div>
 
     {showFilters && (
      <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl border border-edge bg-surface mb-6 animate-in fade-in slide-in-from-top-2 duration-200">

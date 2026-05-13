@@ -127,26 +127,24 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
          <p className="body-text mt-0.5 hidden md:block">Gestión de inventario inmobiliario</p>
         </div>
       </div>
-      
-      {/* View Toggle - moved to header like in Leads */}
-      <div className={`hidden md:flex p-1 rounded-xl ${isDarkMode ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
-       <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutGrid size={16} /></button>
-       <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={16} /></button>
       </div>
-     </div>
 
      {/* Right side: Search, Filters, Add Button */}
-     <div className="flex items-center justify-between gap-3 w-full md:w-auto">
-      <div className="relative w-1/2 md:w-64 shrink-0">
+     <div className="flex items-center justify-between gap-1.5 md:gap-3 w-full md:w-auto">
+      <div className="relative flex-1 min-w-0 md:w-64">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
-        <input type="text" placeholder="Buscar propiedad..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-9 pr-4 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-full ${isDarkMode ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
+        <input type="text" placeholder="Buscar propiedad..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-9 pr-4 py-2 md:py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-full ${isDarkMode ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
       </div>
       
-      <div className="flex items-center gap-2 ml-auto shrink-0">
-       <button onClick={() => setShowFilters(!showFilters)} className={`p-2.5 rounded-xl border transition-colors ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
+      <div className="flex items-center gap-1 md:gap-2 shrink-0">
+       <div className={`flex p-1 rounded-xl shrink-0 ${isDarkMode ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
+        <button onClick={() => setViewMode('grid')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'grid' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutGrid size={14} className="md:w-4 md:h-4" /></button>
+        <button onClick={() => setViewMode('list')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={14} className="md:w-4 md:h-4" /></button>
+       </div>
+       <button onClick={() => setShowFilters(!showFilters)} className={`p-2 md:p-2.5 rounded-xl border transition-colors shrink-0 ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
         <Filter size={16} />
        </button>
-       <button onClick={() => { resetForm(); setShowModal(true); }} className="btn-primary flex items-center justify-center shrink-0 w-11 h-11 md:w-auto md:h-auto md:px-4 md:py-2.5 gap-2">
+       <button onClick={() => { resetForm(); setShowModal(true); }} className="btn-primary flex items-center justify-center shrink-0 w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2.5 gap-2">
         <Plus size={16} />
         <span className="hidden md:inline">Agregar propiedad</span>
        </button>
@@ -156,15 +154,6 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
     {/* Main Content Area */}
     <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-     
-     {/* Mobile View Toggle */}
-     <div className="md:hidden flex justify-end mb-4">
-      <div className={`flex p-1 rounded-xl ${isDarkMode ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
-       <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? (isDarkMode ? 'bg-accent text-content shadow-sm' : 'bg-surface text-content shadow-sm') : 'text-content-muted'}`}><LayoutGrid size={16} /></button>
-       <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-accent text-content shadow-sm' : 'bg-surface text-content shadow-sm') : 'text-content-muted'}`}><LayoutList size={16} /></button>
-      </div>
-     </div>
-      
       {/* Filters Row */}
       {showFilters && (
         <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl border border-edge bg-surface mb-6 animate-in fade-in slide-in-from-top-2 duration-200">
