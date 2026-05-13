@@ -42,6 +42,47 @@ function AuthenticatedApp() {
   }
  }, [isDarkMode]);
 
+ // Fetch pending tasks for alarms globally
+ const [alarms, setAlarms] = useState<AlarmItem[]>([]);
+ React.useEffect(() => {
+  const fetchAlarms = async () => {
+   const token = localStorage.getItem('token');
+   if (!token) return;
+   try {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const res = await fetch(`${API_URL}/api/data/tasks`, {
+     headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (Array.isArray(data)) {
+     const pendingAlarms = data
+      .filter((t: any) => t.status !== 'completada' && t.status !== 'cancelada')
+      .map((t: any) => {
+       const dateObj = t.due_date ? new Date(t.due_date) : new Date();
+       return {
+        id: t.id.toString(),
+        title: t.title || 'Recordatorio pendiente',
+        type: (t.type?.toLowerCase() === 'cita' ? 'cita' : 'tarea') as 'cita' | 'tarea',
+        subtype: t.type,
+        dueDate: dateObj.toISOString().split('T')[0],
+        dueTime: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+        leadName: t.lead_name || '',
+        priority: t.description || 'media'
+       };
+      });
+     setAlarms(pendingAlarms);
+    }
+   } catch (err) {
+    console.error('Error fetching alarms', err);
+   }
+  };
+  
+  fetchAlarms();
+  const intervalId = setInterval(fetchAlarms, 60000); // Check every minute
+  return () => clearInterval(intervalId);
+ }, []);
+
  // Pantalla de carga
  if (loading) {
   return (
@@ -123,7 +164,7 @@ function AuthenticatedApp() {
    <main className="flex-1 flex flex-col relative h-full overflow-hidden">
     {renderContent()}
    </main>
-   <AlarmSystem items={[]} />
+   <AlarmSystem items={alarms} />
   </div>
  );
 }
