@@ -146,15 +146,7 @@ const Login = () => {
          <><LogIn size={18} /> Entrar al sistema</>
         )}
        </button>
-       
-       <button
-        type="button"
-        onClick={demoLogin}
-        className="w-full py-3 rounded-lg bg-zinc-800 text-zinc-300 font-semibold text-sm hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2"
-       >
-        <Eye size={18} /> Acceso Demo (Modo Diseño)
-       </button>
-      </div>
+       </div>
      </form>
     </div>
 
