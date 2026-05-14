@@ -227,14 +227,13 @@ whatsappRouter.post('/', async (req, res) => {
                       }
                     }
                   }
-                  }
                 }
+              }
             }
           }
         }
       }
     }
-  }
 
   // Respondemos 200 para que Meta no reintente el envío
   res.sendStatus(200);
