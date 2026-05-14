@@ -199,7 +199,7 @@ whatsappRouter.post('/', async (req, res) => {
                     // Guardar respuestas de IA en la BD
                     for (let i = 0; i < messagesToSend.length; i++) {
                       if (messagesToSend[i].trim().length > 0) {
-                        const botMsgId = \`ai-\${msg.id}-\${i}\`;
+                        const botMsgId = `ai-${msg.id}-${i}`;
                         const botText = messagesToSend[i].trim();
                         
                         ioInstance.emit('whatsapp-message', {
@@ -213,7 +213,7 @@ whatsappRouter.post('/', async (req, res) => {
                         
                         try {
                           await pool.query(
-                            \`INSERT INTO evolution_messages (id, chat_id, text, from_me) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING\`,
+                            `INSERT INTO evolution_messages (id, chat_id, text, from_me) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING`,
                             [botMsgId, from, botText, true]
                           );
                         } catch (e) {}
