@@ -3,6 +3,7 @@ import { Search, Plus, Filter, MessageSquare, Phone, LayoutList, KanbanSquare, B
 import { useToast } from './Toast';
 import AlarmSystem, { AlarmItem } from './AlarmSystem';
 import { useAuth } from '../context/AuthContext';
+import { usePipeline } from '../hooks/usePipeline';
 
 const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
 
@@ -22,16 +23,7 @@ const getTagColor = (tag: string) => {
  return 'bg-blue-100 text-blue-700 border-blue-200';
 };
 
-const getStatusBadgeColor = (status: string) => {
- switch (status) {
-  case 'Nuevo': return 'bg-accent/10 text-accent border border-accent/20';
-  case 'Contactado': return 'bg-blue-50 text-blue-600 border border-blue-200';
-  case 'Cita': return 'bg-amber-50 text-amber-600 border border-amber-200';
-  case 'Negociación': return 'bg-purple-50 text-purple-600 border border-purple-200';
-  case 'Cerrado': return 'bg-emerald-50 text-emerald-600 border border-emerald-200';
-  default: return 'bg-slate-100 text-content-secondary border border-edge';
- }
-};
+
 
 const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTab?: (tab: string) => void }) => {
  const [viewMode, setViewMode] = useState<'kanban'|'list'>(() => {
@@ -63,19 +55,11 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
   }
  };
 
- const [pipelineStages, setPipelineStages] = useState<string[]>(['Nuevo', 'Contactado', 'Cita', 'Negociación', 'Cerrado']);
+ const pipelineHelpers = usePipeline();
 
  useEffect(() => {
   if (token) {
    fetchLeads();
-   fetch(`${API_URL}/api/data/pipeline`, { headers: { Authorization: `Bearer ${token}` } })
-    .then(r => r.json())
-    .then(data => {
-     if(Array.isArray(data) && data.length > 0) {
-      setPipelineStages(data.filter((d: any) => d.visible !== false).map((d: any) => d.name));
-     }
-    })
-    .catch(console.error);
   }
  }, [token]);
 
@@ -249,10 +233,12 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
       <div className="flex items-center gap-2 text-content-muted text-sm font-semibold mr-2 uppercase tracking-wider">
         <Filter size={14} /> Filtros:
       </div>
-      <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="input-field w-auto text-sm py-2 min-w-[160px] bg-surface-inset">
-        <option value="todos">Todos los estados</option>
-        {pipelineStages.map(s => <option key={s} value={s}>{s}</option>)}
-      </select>
+      <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={`px-4 py-2.5 rounded-xl border text-xs font-bold outline-none transition-all ${dc ? 'bg-surface border-edge text-content focus:border-accent' : 'bg-white border-edge focus:border-accent shadow-sm'}`}>
+        <option value="todos">Todas las etapas</option>
+        {pipelineHelpers.stages.map(stage => (
+         <option key={stage.id} value={stage.name}>{stage.name}</option>
+        ))}
+       </select>
       <select value={filterTag} onChange={e => setFilterTag(e.target.value)} className="input-field w-auto text-sm py-2 min-w-[160px] bg-surface-inset">
         <option value="todos">Todos los tags</option>
         <option value="caliente">Caliente</option>
@@ -269,35 +255,45 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
     )}
 
     {viewMode === 'kanban' ? (
-     <div className="flex gap-8 h-full min-w-max pb-8">
-      {pipelineStages.map(status => (
+     <div className="flex gap-4 md:gap-6 h-full pb-6 items-start">
+      {pipelineHelpers.stages.filter(s => s.visible !== false).map(stage => (
        <PipelineColumn 
-        key={status} 
-        status={status} 
-        leads={filteredLeads.filter(l => l.status === status)} 
-        onDrop={handleDropLead} 
-        onToggleBot={toggleBot} 
+        key={stage.id} 
+        status={stage.name} 
+        leads={filteredLeads.filter(l => l.status === stage.name)}
+        onDrop={handleDropLead}
+        onToggleBot={toggleBot}
         onSelect={setSelectedLead}
         onEdit={setLeadToEdit}
         onDelete={deleteLead}
-        onGoChat={setActiveTab}
+        onGoChat={(tab) => setActiveTab?.(tab)}
         isDarkMode={dc}
+        pipelineHelpers={pipelineHelpers}
        />
       ))}
      </div>
     ) : (
-     <ListView leads={filteredLeads} onSelect={setSelectedLead} onEdit={setLeadToEdit} isDarkMode={dc} onToggleBot={toggleBot} onDelete={deleteLead} onGoChat={setActiveTab} />
+     <LeadList 
+        leads={filteredLeads} 
+        onSelect={setSelectedLead} 
+        onEdit={setLeadToEdit} 
+        onDelete={deleteLead} 
+        onToggleBot={toggleBot} 
+        onGoChat={(tab) => setActiveTab?.(tab)}
+        isDarkMode={dc}
+        pipelineHelpers={pipelineHelpers}
+       />
     )}
    </div>
 
    {selectedLead && <LeadModal lead={selectedLead} isDarkMode={dc} onClose={() => setSelectedLead(null)} registerAlarm={registerAlarmItem} unregisterAlarm={unregisterAlarmItem} />}
-   {showNewLead && <NewLeadModal isDarkMode={dc} onClose={() => setShowNewLead(false)} onSave={addLead} pipelineStages={pipelineStages} />}
-   {leadToEdit && <NewLeadModal editLead={leadToEdit} isDarkMode={dc} onClose={() => setLeadToEdit(null)} onSave={updateLead} pipelineStages={pipelineStages} />}
+   {showNewLead && <NewLeadModal isDarkMode={dc} onClose={() => setShowNewLead(false)} onSave={addLead} pipelineStages={pipelineHelpers.stages.map((s: any) => s.name)} />}
+   {leadToEdit && <NewLeadModal editLead={leadToEdit} isDarkMode={dc} onClose={() => setLeadToEdit(null)} onSave={updateLead} pipelineStages={pipelineHelpers.stages.map((s: any) => s.name)} />}
   </div>
  );
 };
 
-const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, onGoChat }: any) => {
+const LeadList = ({ leads, onSelect, onEdit, onDelete, onToggleBot, onGoChat, isDarkMode, pipelineHelpers }: any) => {
  const dc = isDarkMode;
  const { user } = useAuth();
  if (!leads || leads.length === 0) return (
@@ -340,7 +336,7 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
          </div>
         </td>
         <td className="px-3 py-2 md:px-6 md:py-4">
-         <span className={`text-[9px] md:text-[10px] px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-lg font-bold uppercase tracking-tight ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
+          <span className={`text-[9px] md:text-[10px] px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-lg font-bold uppercase tracking-tight`} style={pipelineHelpers.getStatusBadgeStyle(lead.status)}>{lead.status}</span>
         </td>
         <td className="px-3 py-2 md:px-6 md:py-4">
          <div className="flex items-center gap-1 md:gap-2">
@@ -399,28 +395,17 @@ const ListView = ({ leads, onSelect, onEdit, isDarkMode, onToggleBot, onDelete, 
  );
 };
 
-const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode }: any) => {
+const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode, pipelineHelpers }: any) => {
  const dc = isDarkMode;
  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
  const handleDrop = (e: React.DragEvent) => { e.preventDefault(); onDrop(e.dataTransfer.getData('leadId'), status); };
  
- const getStatusColor = (st: string) => {
-  switch (st) {
-   case 'Nuevo': return dc ? 'text-blue-400' : 'text-blue-600';
-   case 'Contactado': return dc ? 'text-amber-400' : 'text-amber-600';
-   case 'Cita': return dc ? 'text-purple-400' : 'text-purple-600';
-   case 'Negociación': return dc ? 'text-emerald-400' : 'text-emerald-600';
-   case 'Cerrado': return dc ? 'text-content-muted' : 'text-content-secondary';
-   default: return 'text-accent';
-  }
- };
-
  return (
   <div onDragOver={handleDragOver} onDrop={handleDrop} className="flex flex-col w-80 shrink-0">
    <div className="flex items-center justify-between mb-6 px-2">
     <div className="flex items-center gap-3">
-     <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(status).replace('text', 'bg')}`} />
-     <h3 className={`text-xs font-bold ${getStatusColor(status)}`}>{status}</h3>
+     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: pipelineHelpers.getStageColor(status) }} />
+     <h3 className="text-xs font-bold" style={{ color: pipelineHelpers.getStageColor(status) }}>{status}</h3>
      <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${dc ? 'bg-surface-raised text-content-muted' : 'bg-slate-100 text-content-muted'}`}>{leads.length}</span>
     </div>
    </div>
@@ -432,14 +417,14 @@ const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onEdit, 
      </div>
     )}
     {leads.map((lead: any) => (
-     <LeadCard key={lead.id} lead={lead} onToggleBot={onToggleBot} onSelect={onSelect} onEdit={onEdit} onDelete={onDelete} onGoChat={onGoChat} isDarkMode={dc} />
+     <LeadCard key={lead.id} lead={lead} onToggleBot={onToggleBot} onSelect={onSelect} onEdit={onEdit} onDelete={onDelete} onGoChat={onGoChat} isDarkMode={dc} pipelineHelpers={pipelineHelpers} />
     ))}
    </div>
   </div>
  );
 };
 
-const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode }: any) => {
+const LeadCard = ({ lead, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode, pipelineHelpers }: any) => {
  const dc = isDarkMode;
  const { user } = useAuth();
  const handleDragStart = (e: React.DragEvent) => { e.dataTransfer.setData('leadId', lead.id); };
@@ -529,6 +514,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
  const [taskTime, setTaskTime] = useState('12:00');
  const { showToast } = useToast();
  const { token, user } = useAuth();
+ const pipelineHelpers = usePipeline();
 
  const [tasks, setTasks] = useState<any[]>([]);
 
@@ -644,7 +630,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
       <div>
        <div className="flex items-center gap-3">
         <h2 className="h2">{lead.name}</h2>
-        <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${getStatusBadgeColor(lead.status)}`}>{lead.status}</span>
+        <span className="px-2.5 py-1 rounded-lg text-xs font-bold" style={pipelineHelpers.getStatusBadgeStyle(lead.status)}>{lead.status}</span>
        </div>
        <p className="small-text mt-0.5">{lead.phone} • {lead.email || 'Sin email'}</p>
       </div>
@@ -980,6 +966,7 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
 
 const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }: any) => {
  const dc = isDarkMode;
+ const pipelineHelpers = usePipeline();
  const [formData, setFormData] = useState(editLead || { 
   name: '', phone: '', email: '', project: '', status: 'Nuevo', 
   score: '50', source: '', advisor_id: '', currency: 'USD', 
@@ -1043,9 +1030,11 @@ const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }:
       <p className="text-[9px] font-bold uppercase tracking-wider text-accent">Clasificación y Asignación</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
        <div>
-        <label className={labelCls}>Estado (Etapa del Pipeline)</label>
-        <select value={formData.status} onChange={e=>setFormData({...formData, status: e.target.value})} className={inputCls}>
-         {pipelineStages.map((s:string) => <option key={s} value={s}>{s}</option>)}
+        <label className="text-[10px] font-bold text-content-muted mb-1 block ml-1 uppercase tracking-tight">Etapa</label>
+        <select value={formData.status || 'Nuevo'} onChange={e => setFormData({...formData, status: e.target.value})} className="input-field py-2 text-sm">
+         {pipelineHelpers.stages.map((stage: any) => (
+          <option key={stage.id} value={stage.name}>{stage.name}</option>
+         ))}
         </select>
        </div>
        <div>

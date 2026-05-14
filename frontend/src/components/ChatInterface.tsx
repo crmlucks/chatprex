@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, MoreVertical, Phone, Video, Paperclip, Send, Smile, Filter, CheckCircle2, ArrowLeft, Zap, Plus, Edit2, Trash2, X, MessageSquare, Bot } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
+import { usePipeline } from '../hooks/usePipeline';
 
 interface ChatMessage {
  id: string;
@@ -39,6 +40,11 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [chats, setChats] = useState<{ [id: string]: Chat }>({});
  const activeChatRef = useRef<string | null>(null);
  const [useN8n, setUseN8n] = useState(false);
+ const pipelineHelpers = usePipeline();
+ 
+ const [chatSearch, setChatSearch] = useState('');
+ const [showChatFilters, setShowChatFilters] = useState(false);
+ const [chatFilterStatus, setChatFilterStatus] = useState('todos');
  
  // Quick Replies
  const [showQuickReplies, setShowQuickReplies] = useState(false);
@@ -106,6 +112,33 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    }
   } catch (err) {
    console.error('Error toggling bot', err);
+  }
+ };
+
+ const handleChangeStatus = async (leadId: number, newStatus: string) => {
+  if (!leadId) return;
+  const chatArr = Object.values(chats);
+  const chat = chatArr.find((c: any) => c.leadId === leadId);
+  if (!chat) return;
+
+  try {
+   const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
+   const res = await fetch(`${API_URL}/api/leads/${leadId}/status`, {
+    method: 'PATCH',
+    headers: {
+     'Content-Type': 'application/json',
+     Authorization: `Bearer ${localStorage.getItem('chatprex_token')}`
+    },
+    body: JSON.stringify({ status: newStatus })
+   });
+   if (res.ok) {
+    setChats(prev => ({
+     ...prev,
+     [chat.id]: { ...prev[chat.id], status: newStatus }
+    }));
+   }
+  } catch (err) {
+   console.error('Error changing status', err);
   }
  };
 
@@ -370,7 +403,13 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  };
 
  const activeChatData = activeChat ? chats[activeChat] : null;
- const chatList = Object.values(chats).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+ const chatList = Object.values(chats)
+  .filter(c => {
+   const matchSearch = c.name.toLowerCase().includes(chatSearch.toLowerCase()) || (c.lastMessage && c.lastMessage.toLowerCase().includes(chatSearch.toLowerCase()));
+   const matchStatus = chatFilterStatus === 'todos' || c.status === chatFilterStatus;
+   return matchSearch && matchStatus;
+  })
+  .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
  const dc = isDarkMode;
 
  return (
@@ -387,7 +426,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       </div>
      </div>
      <div className={`flex gap-1 ${dc ? 'text-content-muted' : 'text-content-muted'}`}>
-      <button className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised' : 'hover:bg-slate-100'}`}><Filter size={18} /></button>
+      <button onClick={() => setShowChatFilters(!showChatFilters)} className={`p-2 rounded-xl transition-all active:scale-90 ${showChatFilters ? 'bg-accent text-content' : (dc ? 'hover:bg-surface-raised' : 'hover:bg-slate-100')}`}><Filter size={18} /></button>
       <button className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised' : 'hover:bg-slate-100'}`}><Plus size={18} /></button>
      </div>
     </div>
@@ -397,10 +436,26 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       <Search className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${dc ? 'text-content-muted group-focus-within:text-accent' : 'text-content-muted group-focus-within:text-accent'}`} size={16} />
       <input 
        type="text" 
+       value={chatSearch}
+       onChange={(e) => setChatSearch(e.target.value)}
        placeholder="Buscar conversación..." 
        className={`w-full pl-11 pr-4 py-3 border rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-accent/10 transition-all ${dc ? 'bg-surface-raised border-edge text-content placeholder-slate-600 focus:border-accent' : 'bg-surface-inset border-edge text-content placeholder-slate-400 focus:border-accent focus:bg-surface'}`}
       />
      </div>
+     {showChatFilters && (
+      <div className="mt-2 animate-in slide-in-from-top-2 duration-200">
+       <select 
+        value={chatFilterStatus}
+        onChange={(e) => setChatFilterStatus(e.target.value)}
+        className={`w-full px-3 py-2 border rounded-xl text-xs font-bold outline-none transition-all ${dc ? 'bg-surface-raised border-edge text-content' : 'bg-white border-edge text-content shadow-sm'}`}
+       >
+        <option value="todos">Todas las etapas</option>
+        {pipelineHelpers.stages.map(stage => (
+         <option key={stage.id} value={stage.name}>{stage.name}</option>
+        ))}
+       </select>
+      </div>
+     )}
     </div>
 
     <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-transparent p-2 space-y-1">
@@ -425,6 +480,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         active={activeChat === chat.id} 
         status={chat.status} 
         isDarkMode={dc}
+        pipelineHelpers={pipelineHelpers}
         onClick={() => handleSelectChat(chat.id)} 
        />
       ))
@@ -456,13 +512,27 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           </div>
          </div>
          {activeChatData.leadId && (
-          <button 
-           title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
-           onClick={() => toggleBot(activeChatData.leadId)} 
-           className={`p-2 rounded-xl transition-all active:scale-90 flex items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
-          >
-           <Bot size={18} className={activeChatData.botActive ? 'animate-pulse' : ''} />
-          </button>
+          <div className="flex items-center gap-2">
+           <select
+            value={activeChatData.status || 'Nuevo'}
+            onChange={(e) => handleChangeStatus(activeChatData.leadId!, e.target.value)}
+            className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm border-none outline-none cursor-pointer appearance-none text-center"
+            style={pipelineHelpers.getStatusBadgeStyle(activeChatData.status || 'Nuevo')}
+           >
+            {pipelineHelpers.stages.map(stage => (
+             <option key={stage.id} value={stage.name} className={`${dc ? 'bg-[#1E1E1E] text-white' : 'bg-white text-black'}`}>
+              {stage.name}
+             </option>
+            ))}
+           </select>
+           <button 
+            title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
+            onClick={() => toggleBot(activeChatData.leadId)} 
+            className={`p-1.5 rounded-xl transition-all active:scale-90 flex items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
+           >
+            <Bot size={16} className={activeChatData.botActive ? 'animate-pulse' : ''} />
+           </button>
+          </div>
          )}
         </div>
        </div>
@@ -713,18 +783,8 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  );
 };
 
-const ChatItem = ({ name, message, time, unread, active, status, onClick, isDarkMode }: any) => {
+const ChatItem = ({ name, message, time, unread, active, status, onClick, isDarkMode, pipelineHelpers }: any) => {
  const dc = isDarkMode;
- const getStatusStyle = (s: string) => {
-  const st = s.toLowerCase();
-  if (st.includes('nuevo')) return dc ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-700';
-  if (st.includes('contactado')) return dc ? 'bg-sky-500/10 text-sky-400' : 'bg-sky-50 text-sky-700';
-  if (st.includes('cita')) return dc ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-50 text-amber-700';
-  if (st.includes('negociaci')) return dc ? 'bg-purple-500/10 text-purple-400' : 'bg-purple-50 text-purple-700';
-  if (st.includes('ganado') || st.includes('cierre')) return dc ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-700';
-  if (st.includes('perdido')) return dc ? 'bg-rose-500/10 text-rose-400' : 'bg-rose-50 text-rose-700';
-  return dc ? 'bg-surface-raised text-content-muted' : 'bg-slate-100 text-content-secondary';
- };
 
  return (
   <div onClick={onClick} className={`flex items-center gap-3 md:gap-4 p-3 md:p-4 cursor-pointer rounded-2xl transition-all active:scale-[0.98] relative group ${active ? (dc ? 'bg-accent/10 ' : 'bg-accent/5') : (dc ? 'hover:bg-surface-raised/50' : 'hover:bg-surface-inset')}`}>
@@ -740,7 +800,7 @@ const ChatItem = ({ name, message, time, unread, active, status, onClick, isDark
     </div>
     <p className={`text-[10px] md:text-xs truncate mb-1.5 md:mb-2 font-medium ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{message}</p>
     <div className="flex items-center">
-     <span className={`text-[9px] md:text-xs font-bold px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg uppercase tracking-wider shadow-sm ${getStatusStyle(status || '')}`}>
+     <span className={`text-[9px] md:text-xs font-bold px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg uppercase tracking-wider shadow-sm`} style={pipelineHelpers.getStatusBadgeStyle(status || 'Nuevo')}>
       {status || 'Sin estado'}
      </span>
     </div>

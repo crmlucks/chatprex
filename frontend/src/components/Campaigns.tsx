@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Play, Pause, AlertCircle, Settings, Users, MessageSquare, Megaphone, Plus, Trash2, Send, Paperclip, X, Bot, Shield, CheckCircle2, Clock, Search, BarChart3, Upload, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePipeline } from '../hooks/usePipeline';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
  const { token } = useAuth();
+ const pipelineHelpers = usePipeline();
  const [campaigns, setCampaigns] = useState<any[]>([]);
  const [showModal, setShowModal] = useState(false);
  const [activeTab, setActiveTab] = useState('mensaje');
@@ -429,10 +431,9 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
                className={`${inputClass} w-full font-bold`}
               >
                <option value="todos">Todos los leads registrados</option>
-               <option value="nuevo">Leads Nuevos (sin contactar)</option>
-               <option value="interesado">Contactos Interesados</option>
-               <option value="Cerrado">Cierres Ganados</option>
-               <option value="cumpleaños">Cumpleaños Hoy</option>
+               {pipelineHelpers.stages.map(stage => (
+                <option key={stage.id} value={stage.name}>Etapa: {stage.name}</option>
+               ))}
               </select>
              </div>
              

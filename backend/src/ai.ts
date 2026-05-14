@@ -118,10 +118,11 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
   systemPrompt += `\n\n--- FECHA Y HORA ACTUAL ---
 La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Lima' })}. Usa esto como referencia para agendar citas.
 
---- REGLA ESTRICTA DE VERACIDAD ---
-ESTÁ ESTRICTAMENTE PROHIBIDO INVENTAR propiedades, precios, amenidades o características. 
-DEBES basar tus respuestas ÚNICAMENTE en la "Base de Conocimiento" y en el "Inventario Disponible". 
-Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indicar que no tienes esa información a la mano y que un asesor humano lo confirmará a la brevedad. NO ASUMAS NADA.`;
+--- REGLAS DE SISTEMA ---
+1. ESTÁ ESTRICTAMENTE PROHIBIDO INVENTAR propiedades, precios, amenidades o características.
+2. DEBES basar tus respuestas ÚNICAMENTE en la "Base de Conocimiento" y en el "Inventario Disponible".
+3. Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indicar que no tienes esa información a la mano y que un asesor humano lo confirmará a la brevedad. NO ASUMAS NADA.
+4. Si aún no sabes el nombre del cliente, intenta preguntárselo sutilmente en algún punto de la conversación. Si el cliente te proporciona su nombre, DEBES ejecutar la función "actualizar_nombre" para registrarlo en el CRM.`;
 
   // Agregar base de conocimiento al system prompt
   if (knowledge) {
@@ -229,6 +230,20 @@ Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indi
             properties: {}
           }
         }
+      },
+      {
+        type: "function",
+        function: {
+          name: "actualizar_nombre",
+          description: "Actualiza el nombre del cliente en la base de datos CRM si el usuario te lo proporciona en el chat.",
+          parameters: {
+            type: "object",
+            properties: {
+              nuevo_nombre: { type: "string", description: "El nombre que el usuario proporcionó (ej. Fausto Meza)" }
+            },
+            required: ["nuevo_nombre"]
+          }
+        }
       }
     ];
 
@@ -283,6 +298,13 @@ Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indi
             } else {
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "No se encontró ninguna cita pendiente para cancelar." } as any);
             }
+          }
+          else if (functionName === 'actualizar_nombre') {
+            await pool.query(
+              "UPDATE leads SET name = $1 WHERE id = $2",
+              [args.nuevo_nombre, leadId]
+            );
+            conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Nombre del lead actualizado exitosamente a ${args.nuevo_nombre} en la base de datos CRM.` } as any);
           }
         } catch (e: any) {
           conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Error del sistema al ejecutar la función: ${e.message}` } as any);
