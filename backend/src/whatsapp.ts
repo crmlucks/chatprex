@@ -227,8 +227,8 @@ whatsappRouter.post('/', async (req, res) => {
                       }
                     }
                   }
+                  }
                 }
-              }
             }
           }
         }
