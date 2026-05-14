@@ -166,8 +166,12 @@ whatsappRouter.post('/', async (req, res) => {
 
               // --- 3. RESPUESTA DE IA O FLUJO ---
               if (isBotActive) {
+                  let aiReply: string | null = null;
+                  if (globalUseN8n) {
+                    aiReply = await sendToN8N(from, text);
+                  }
                   if (!aiReply) {
-                    aiReply = await generateAIResponse(from, transcription);
+                    aiReply = await generateAIResponse(from, text);
                   }
                   
                   if (aiReply) {
@@ -192,8 +196,6 @@ whatsappRouter.post('/', async (req, res) => {
                       } else if (parts.length > 1) {
                         messagesToSend = parts;
                       }
-                    }
-
                     }
 
                     // Guardar respuestas de IA en la BD
