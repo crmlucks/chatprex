@@ -18,6 +18,7 @@ import { aiConfigRouter } from './aiRoutes';
 import crudRouter from './crudRoutes';
 import { campaignRouter } from './campaignRoutes';
 import { analyticsRouter } from './analyticsRoutes';
+import { voiceRouter, setupVoiceWebSockets } from './twilioVoice';
 
 const app = express();
 const server = http.createServer(app);
@@ -49,6 +50,9 @@ app.use('/api/analytics', analyticsRouter);
 app.use('/api/webhook/meta', whatsappRouter);
 app.use('/api/webhook/evolution', evolutionRouter);
 app.use('/api/ai-mode', aiModeRouter);
+
+// ─── Rutas de Voz (Twilio) ───
+app.use('/api/webhook/twilio', voiceRouter);
 
 // ─── Meta Conversion API ───
 app.post('/api/meta/conversion', async (req, res) => {
@@ -92,4 +96,7 @@ server.listen(PORT, async () => {
   // Inicializar WhatsApp y Evolution
   initWhatsApp(io);
   initEvolution(io);
+  
+  // Inicializar WebSockets para Twilio Voice API
+  setupVoiceWebSockets(server);
 });

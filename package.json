@@ -1,6 +1,11 @@
 {
   "dependencies": {
     "node-fetch": "^3.3.2",
-    "openai": "^6.36.0"
+    "openai": "^6.36.0",
+    "twilio": "^6.0.2",
+    "ws": "^8.20.1"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1"
   }
 }
