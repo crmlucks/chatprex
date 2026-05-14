@@ -1,8 +1,9 @@
 import { Server } from 'socket.io';
 import express from 'express';
 import { handleVoiceMessage } from './voiceBot';
-import { generateAIResponse } from './ai';
+import { generateAIResponse, appendMessageToHistory } from './ai';
 import { sendToN8N } from './n8nIntegration';
+import pool from './db';
 
 // Router que expondrá los endpoints de webhook de WhatsApp Cloud API
 const whatsappRouter = express.Router();
@@ -93,26 +94,78 @@ whatsappRouter.post('/', async (req, res) => {
           if (messages && Array.isArray(messages)) {
             for (const msg of messages) {
               const from = msg.from;
-              const text = msg.text?.body || '[Multimedia]';
+              // Extraemos el nombre de contacto provisto por Meta si existe
+              const pushName = value.contacts && value.contacts[0] ? value.contacts[0].profile.name : from;
+              let text = msg.text?.body || '[Multimedia]';
+              let mediaUrl = undefined;
+              let mimeType = undefined;
+              
               // Detect audio (voice) messages
               if (msg.type === 'audio' && msg.audio?.id) {
                 // Transcribe the voice message
                 const transcription = await handleVoiceMessage(msg.audio.id, msg.audio.mime_type);
                 if (transcription) {
-                  // Emit the transcribed text as a message from the user
-                  ioInstance.emit('whatsapp-message', {
-                    id: msg.id,
-                    from,
-                    name: from,
-                    text: transcription,
-                    fromMe: false,
-                    timestamp: new Date().toISOString(),
-                  });
-                  // Generate AI response based on transcription
-                  let aiReply: string | null = null;
-                  if (globalUseN8n) {
-                    aiReply = await sendToN8N(from, transcription);
-                  }
+                  text = transcription;
+                  mimeType = msg.audio.mime_type;
+                }
+              }
+
+              const msgTimestamp = msg.timestamp ? new Date(Number(msg.timestamp) * 1000).toISOString() : new Date().toISOString();
+
+              // Emitir al frontend para UI en tiempo real
+              ioInstance.emit('whatsapp-message', {
+                id: msg.id,
+                from,
+                name: pushName,
+                text,
+                fromMe: false,
+                timestamp: msgTimestamp,
+              });
+
+              // --- 1. GUARDAR EL MENSAJE EN LA BASE DE DATOS ---
+              try {
+                await pool.query(
+                  `INSERT INTO evolution_messages (id, chat_id, text, from_me, timestamp, media_url, media_type)
+                   VALUES ($1, $2, $3, $4, $5, $6, $7)
+                   ON CONFLICT (id) DO NOTHING`,
+                  [msg.id, from, text, false, msgTimestamp, mediaUrl || null, mimeType || null]
+                );
+              } catch (dbErr: any) {
+                console.error('[Meta] Error guardando mensaje en BD:', dbErr.message);
+              }
+
+              // --- 2. AUTO-REGISTRO DE LEADS Y ESTADO DEL BOT ---
+              let isBotActive = false;
+              let matchedBotId = 1;
+              const phone = from;
+              
+              try {
+                const existRes = await pool.query('SELECT id, bot_active FROM leads WHERE phone = $1', [phone]);
+                if (existRes.rowCount === 0) {
+                  isBotActive = true;
+                  let assignedAdvisorId = null;
+                  try {
+                    const advisorRes = await pool.query(`SELECT id FROM users WHERE status = 'activo' AND auto_assign = true ORDER BY last_assigned_at ASC NULLS FIRST LIMIT 1`);
+                    if (advisorRes.rowCount > 0) {
+                      assignedAdvisorId = advisorRes.rows[0].id;
+                      await pool.query('UPDATE users SET last_assigned_at = NOW() WHERE id = $1', [assignedAdvisorId]);
+                    }
+                  } catch (err) {}
+                  
+                  await pool.query(
+                    `INSERT INTO leads (name, phone, score, status, bot_active, bot_id, advisor_id, provider) VALUES ($1, $2, '50%', 'Nuevo', $3, $4, $5, 'meta')`,
+                    [pushName, phone, isBotActive, matchedBotId, assignedAdvisorId]
+                  );
+                  ioInstance.emit('new-lead', { name: pushName, phone });
+                } else {
+                  isBotActive = existRes.rows[0].bot_active;
+                }
+              } catch (err: any) {
+                console.error('[Meta] Error manejando lead:', err.message);
+              }
+
+              // --- 3. RESPUESTA DE IA O FLUJO ---
+              if (isBotActive) {
                   if (!aiReply) {
                     aiReply = await generateAIResponse(from, transcription);
                   }
@@ -141,80 +194,34 @@ whatsappRouter.post('/', async (req, res) => {
                       }
                     }
 
+                    }
+
+                    // Guardar respuestas de IA en la BD
                     for (let i = 0; i < messagesToSend.length; i++) {
                       if (messagesToSend[i].trim().length > 0) {
+                        const botMsgId = \`ai-\${msg.id}-\${i}\`;
+                        const botText = messagesToSend[i].trim();
+                        
                         ioInstance.emit('whatsapp-message', {
-                          id: `ai-${msg.id}-${i}`,
+                          id: botMsgId,
                           from: 'bot',
                           name: 'ChatPrex Bot' + (globalUseN8n ? ' (n8n)' : ''),
-                          text: messagesToSend[i].trim(),
+                          text: botText,
                           fromMe: true,
                           timestamp: new Date().toISOString(),
                         });
-                        await sendWhatsAppMessage(from, messagesToSend[i].trim());
+                        
+                        try {
+                          await pool.query(
+                            \`INSERT INTO evolution_messages (id, chat_id, text, from_me) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING\`,
+                            [botMsgId, from, botText, true]
+                          );
+                        } catch (e) {}
+                        
+                        await sendWhatsAppMessage(from, botText);
                         if (i < messagesToSend.length - 1) {
                           await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
                         }
-                      }
-                    }
-                  }
-                  continue; // Skip normal handling for this audio message
-                }
-              }
-              ioInstance.emit('whatsapp-message', {
-                id: msg.id,
-                from,
-                name: from,
-                text,
-                fromMe: false,
-                timestamp: new Date().toISOString(),
-              });
-              
-              if (msg.type === 'text') {
-                let aiReply: string | null = null;
-                if (globalUseN8n) {
-                  aiReply = await sendToN8N(from, text);
-                }
-                if (!aiReply) {
-                  aiReply = await generateAIResponse(from, text);
-                }
-                if (aiReply) {
-                  let messagesToSend = [aiReply];
-                  if (aiReply.length > 250) {
-                    let parts = aiReply.split(/\\r?\\n+/).filter(p => p.trim().length > 0);
-                    if (parts.length === 1) {
-                      const sentenceRegex = /([^.?!]+[.?!]+)/g;
-                      const matches = aiReply.match(sentenceRegex);
-                      if (matches && matches.length > 1) {
-                        parts = matches.map(s => s.trim());
-                      } else {
-                        const mid = Math.floor(aiReply.length / 2);
-                        const spaceIdx = aiReply.indexOf(' ', mid);
-                        if (spaceIdx > 0) {
-                          parts = [aiReply.slice(0, spaceIdx).trim(), aiReply.slice(spaceIdx).trim()];
-                        }
-                      }
-                    }
-                    if (parts.length > 3) {
-                      messagesToSend = [parts[0], parts.slice(1, parts.length - 1).join(' '), parts[parts.length - 1]];
-                    } else if (parts.length > 1) {
-                      messagesToSend = parts;
-                    }
-                  }
-
-                  for (let i = 0; i < messagesToSend.length; i++) {
-                    if (messagesToSend[i].trim().length > 0) {
-                      ioInstance.emit('whatsapp-message', {
-                        id: `ai-${msg.id}-${i}`,
-                        from: 'bot',
-                        name: 'ChatPrex Bot' + (globalUseN8n ? ' (n8n)' : ''),
-                        text: messagesToSend[i].trim(),
-                        fromMe: true,
-                        timestamp: new Date().toISOString(),
-                      });
-                      await sendWhatsAppMessage(from, messagesToSend[i].trim());
-                      if (i < messagesToSend.length - 1) {
-                        await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
                       }
                     }
                   }

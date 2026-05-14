@@ -88,6 +88,7 @@ export async function initDatabase() {
     // Añadir columnas si no existen por actualizaciones pasadas
     try {
       await client.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS birth_date VARCHAR(20) DEFAULT \'\';');
+      await client.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS provider VARCHAR(50) DEFAULT \'evolution\';');
     } catch(e) {}
 
 
