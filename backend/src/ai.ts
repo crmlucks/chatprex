@@ -122,7 +122,8 @@ La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Li
 1. ESTÁ ESTRICTAMENTE PROHIBIDO INVENTAR propiedades, precios, amenidades o características.
 2. DEBES basar tus respuestas ÚNICAMENTE en la "Base de Conocimiento" y en el "Inventario Disponible".
 3. Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indicar que no tienes esa información a la mano y que un asesor humano lo confirmará a la brevedad. NO ASUMAS NADA.
-4. Si aún no sabes el nombre del cliente, intenta preguntárselo sutilmente en algún punto de la conversación. Si el cliente te proporciona su nombre, DEBES ejecutar la función "actualizar_nombre" para registrarlo en el CRM.`;
+4. Si aún no sabes el nombre del cliente, intenta preguntárselo sutilmente en algún punto de la conversación. Si el cliente te proporciona su nombre, DEBES ejecutar la función "actualizar_nombre" para registrarlo en el CRM.
+5. Si el cliente menciona su presupuesto, proyecto de interés o detalles de lo que busca (ej. casa de campo, frente al parque, servicios básicos), DEBES ejecutar la función "registrar_perfil_lead" para guardar automáticamente su perfil.`;
 
   // Agregar base de conocimiento al system prompt
   if (knowledge) {
@@ -244,6 +245,21 @@ La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Li
             required: ["nuevo_nombre"]
           }
         }
+      },
+      {
+        type: "function",
+        function: {
+          name: "registrar_perfil_lead",
+          description: "Registra o actualiza el perfil del cliente (proyecto de interés, presupuesto, y detalles de lo que busca) en el CRM de forma automática.",
+          parameters: {
+            type: "object",
+            properties: {
+              proyecto_interes: { type: "string", description: "Nombre del proyecto por el que preguntó o mostró interés." },
+              presupuesto: { type: "string", description: "Presupuesto mencionado por el cliente (ej. '$80,000', '150 mil', 'bajo')." },
+              detalles_interes: { type: "string", description: "Características específicas que busca (ej. casa de campo, frente al parque, servicios básicos, etc)." }
+            }
+          }
+        }
       }
     ];
 
@@ -305,6 +321,28 @@ La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Li
               [args.nuevo_nombre, leadId]
             );
             conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Nombre del lead actualizado exitosamente a ${args.nuevo_nombre} en la base de datos CRM.` } as any);
+          }
+          else if (functionName === 'registrar_perfil_lead') {
+            const currentRes = await pool.query("SELECT project, budget, interest FROM leads WHERE id = $1", [leadId]);
+            if (currentRes.rowCount > 0) {
+              const current = currentRes.rows[0];
+              const p_project = args.proyecto_interes || current.project;
+              const p_budget = args.presupuesto || current.budget;
+              
+              let p_interest = current.interest || '';
+              if (args.detalles_interes) {
+                // Si ya hay intereses previos, los concatenamos de forma ordenada
+                p_interest = p_interest ? p_interest + " | " + args.detalles_interes : args.detalles_interes;
+              }
+              
+              await pool.query(
+                "UPDATE leads SET project = $1, budget = $2, interest = $3 WHERE id = $4",
+                [p_project, p_budget, p_interest, leadId]
+              );
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Perfil del cliente (proyecto, presupuesto e intereses) actualizado exitosamente en el CRM." } as any);
+            } else {
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Error: No se pudo actualizar el perfil porque el lead no existe." } as any);
+            }
           }
         } catch (e: any) {
           conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Error del sistema al ejecutar la función: ${e.message}` } as any);

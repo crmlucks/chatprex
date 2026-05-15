@@ -804,7 +804,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
       for (const bot of allBots) {
         const keywordsStr = bot.activation_keywords || 'info,precio,quiero,asesor,comprar';
         const keywords = keywordsStr.split(',').map((k: string) => k.trim().toLowerCase()).filter((k: string) => k.length > 0);
-        if (keywords.length === 0 || keywords.some((kw: string) => textLower.includes(kw))) {
+        if (keywords.length > 0 && keywords.some((kw: string) => textLower.includes(kw))) {
           matchedBotId = bot.id;
           containsKeyword = true;
           // Actualizamos aiConfig para que use la configuración de este bot específico para este mensaje
@@ -822,8 +822,8 @@ const handleWebhookEvent = async (req: any, res: any) => {
           console.log(`[Evolution] Buscando lead con phone: ${phone}`);
           const existRes = await pool.query('SELECT id, bot_active, bot_id FROM leads WHERE phone = $1', [phone]);
           if (existRes.rowCount === 0) {
-            // Nuevo lead: Bot activo por defecto
-            isBotActive = true;
+            // Nuevo lead: Solo activar bot si el mensaje contiene una palabra clave de activación
+            isBotActive = containsKeyword;
 
             let assignedAdvisorId = null;
             try {
@@ -844,7 +844,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
               `INSERT INTO leads (name, phone, score, status, bot_active, bot_id, advisor_id) VALUES ($1, $2, '50%', 'Nuevo', $3, $4, $5)`,
               [pushName, phone, isBotActive, matchedBotId, assignedAdvisorId]
             );
-            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) - Bot Activo: ${isBotActive} (Bot ID: ${matchedBotId}) - Asesor Asignado: ${assignedAdvisorId}`);
+            console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) - Bot: ${isBotActive ? 'ACTIVO (keyword match)' : 'INACTIVO (sin keyword)'} - Bot ID: ${matchedBotId}`);
             ioInstance.emit('new-lead', { name: pushName, phone });
           } else {
             isBotActive = existRes.rows[0].bot_active;

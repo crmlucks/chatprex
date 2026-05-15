@@ -134,15 +134,44 @@ whatsappRouter.post('/', async (req, res) => {
                 console.error('[Meta] Error guardando mensaje en BD:', dbErr.message);
               }
 
-              // --- 2. AUTO-REGISTRO DE LEADS Y ESTADO DEL BOT ---
-              let isBotActive = false;
+              // --- 2. OBTENER CONFIGURACIÓN DE BOTS Y PALABRAS CLAVE ---
+              let allBots: any[] = [];
+              let defaultKeywords = 'info,precio,quiero,asesor,comprar';
+              try {
+                const configRes = await pool.query('SELECT id, activation_keywords FROM ai_config ORDER BY id ASC');
+                if (configRes.rowCount > 0) {
+                  allBots = configRes.rows;
+                  defaultKeywords = configRes.rows[0].activation_keywords || defaultKeywords;
+                }
+              } catch (err) {
+                console.error('[Meta] Error obteniendo config de IA:', err);
+              }
+
+              // Verificar si el mensaje contiene una palabra clave de activación
+              const textLower = text.toLowerCase();
               let matchedBotId = 1;
+              let containsKeyword = false;
+
+              for (const bot of allBots) {
+                const keywordsStr = bot.activation_keywords || defaultKeywords;
+                const keywords = keywordsStr.split(',').map((k: string) => k.trim().toLowerCase()).filter((k: string) => k.length > 0);
+                if (keywords.length > 0 && keywords.some((kw: string) => textLower.includes(kw))) {
+                  matchedBotId = bot.id;
+                  containsKeyword = true;
+                  break;
+                }
+              }
+
+              // --- 3. AUTO-REGISTRO DE LEADS Y ESTADO DEL BOT ---
+              let isBotActive = false;
               const phone = from;
               
               try {
-                const existRes = await pool.query('SELECT id, bot_active FROM leads WHERE phone = $1', [phone]);
+                const existRes = await pool.query('SELECT id, bot_active, bot_id FROM leads WHERE phone = $1', [phone]);
                 if (existRes.rowCount === 0) {
-                  isBotActive = true;
+                  // ═══ LEAD NUEVO ═══
+                  // Solo activar el bot si el primer mensaje contiene una palabra clave
+                  isBotActive = containsKeyword;
                   let assignedAdvisorId = null;
                   try {
                     const advisorRes = await pool.query(`SELECT id FROM users WHERE status = 'activo' AND auto_assign = true ORDER BY last_assigned_at ASC NULLS FIRST LIMIT 1`);
@@ -156,15 +185,26 @@ whatsappRouter.post('/', async (req, res) => {
                     `INSERT INTO leads (name, phone, score, status, bot_active, bot_id, advisor_id, provider) VALUES ($1, $2, '50%', 'Nuevo', $3, $4, $5, 'meta')`,
                     [pushName, phone, isBotActive, matchedBotId, assignedAdvisorId]
                   );
+                  console.log(`[Meta] ✅ Lead registrado: ${pushName} (${phone}) - Bot: ${isBotActive ? 'ACTIVO (keyword match)' : 'INACTIVO (sin keyword)'} - Bot ID: ${matchedBotId}`);
                   ioInstance.emit('new-lead', { name: pushName, phone });
                 } else {
+                  // ═══ LEAD EXISTENTE ═══
                   isBotActive = existRes.rows[0].bot_active;
+                  
+                  // Si el bot estaba apagado pero el mensaje contiene una palabra clave → despertar
+                  if (!isBotActive && containsKeyword) {
+                    isBotActive = true;
+                    await pool.query('UPDATE leads SET bot_active = true, bot_id = $1 WHERE phone = $2', [matchedBotId, phone]);
+                    console.log(`[Meta] 🤖 Bot DESPERTADO por palabra clave para: ${phone} (Bot ID: ${matchedBotId})`);
+                  } else if (!isBotActive) {
+                    console.log(`[Meta] ⏸️ Bot apagado para ${phone}, mensaje sin palabra clave. Ignorando.`);
+                  }
                 }
               } catch (err: any) {
                 console.error('[Meta] Error manejando lead:', err.message);
               }
 
-              // --- 3. RESPUESTA DE IA O FLUJO ---
+              // --- 4. RESPUESTA DE IA O FLUJO (solo si bot activo) ---
               if (isBotActive) {
                   let aiReply: string | null = null;
                   if (globalUseN8n) {

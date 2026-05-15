@@ -169,43 +169,86 @@ const Dashboard = ({ isDarkMode }: { isDarkMode?: boolean }) => {
        </div>
       )}
 
-      {/* List */}
-      <div className="flex-1 overflow-y-auto max-h-[500px] p-4 space-y-2">
+      {/* List — compact 2-row card layout */}
+      <div className="flex-1 lg:overflow-y-auto lg:max-h-[600px] p-3 space-y-1.5">
        {filteredTasks.length === 0 ? (
-        <div className="text-center py-16 flex flex-col items-center">
-         <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 bg-surface-inset">
-           <ListTodo size={28} className="text-content-muted" />
+        <div className="text-center py-14 flex flex-col items-center">
+         <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 bg-surface-inset">
+           <ListTodo size={24} className="text-content-muted" />
          </div>
-         <p className="text-sm font-medium text-content-muted">Sin tareas programadas</p>
+         <p className="text-xs font-medium text-content-muted">Sin tareas programadas</p>
         </div>
        ) : filteredTasks.map(t => {
         const isDone = t.status === 'completada';
         const dueDate = t.due_date ? new Date(t.due_date) : null;
         const isOverdue = dueDate && dueDate < now && !isDone;
         const TIcon = { Llamada: Phone, Visita: MapPin, Email: MessageSquare, WhatsApp: MessageSquare }[t.type || 'Llamada'] || Phone;
-        
+        const advisorInitial = t.advisor_name ? t.advisor_name.charAt(0).toUpperCase() : '';
+        const descText = t.description || '';
+
         return (
-         <div key={t.id} className={`group p-4 rounded-xl border border-edge flex items-center gap-4 transition-colors hover:bg-surface-inset ${isDone ? 'opacity-50' : ''}`}>
-          <button onClick={() => toggleTask(t.id)} className={`shrink-0 transition-colors ${isDone ? 'text-emerald-500' : 'text-content-muted hover:text-accent'}`}>
-           {isDone ? <CheckCircle2 size={20} /> : <Circle size={20} />}
-          </button>
-          <div className="flex-1 min-w-0">
-           <p className={`text-sm font-medium truncate ${isDone ? 'line-through text-content-muted' : 'text-content'}`}>{t.title}</p>
-           <div className="flex items-center gap-3 mt-1">
-            <div className="flex items-center gap-1.5 text-xs text-content-muted">
-              <TIcon size={12} className="text-accent" />
-              <span>{t.type || 'Tarea'}</span>
+         <div key={t.id} className={`group p-3 rounded-lg border border-edge transition-colors hover:bg-surface-inset ${isDone ? 'opacity-50' : ''}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+           
+           {/* Col 1: Checkbox & Titulo/Detalle */}
+           <div className="flex items-start gap-3 flex-1 min-w-0">
+            <button onClick={() => toggleTask(t.id)} className={`mt-0.5 shrink-0 transition-colors ${isDone ? 'text-emerald-500' : 'text-content-muted hover:text-accent'}`}>
+             {isDone ? <CheckCircle2 size={16} /> : <Circle size={16} />}
+            </button>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <p className={`text-[13px] font-semibold truncate ${isDone ? 'line-through text-content-muted' : 'text-content'}`}>{t.title}</p>
+                {t.lead_name && (
+                 <span className="shrink-0 text-[10px] font-medium text-accent bg-accent/10 px-1.5 py-0.5 rounded truncate max-w-[100px]">{t.lead_name}</span>
+                )}
+              </div>
+              {descText && (
+               <p className="text-[11px] text-content-secondary truncate w-full" title={descText}>{descText}</p>
+              )}
             </div>
-            {dueDate && (
-             <div className={`flex items-center gap-1.5 text-xs ${isOverdue ? 'text-red-500' : 'text-content-muted'}`}>
-               <Clock size={12} />
-               <span>{dueDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} • {dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-             </div>
-            )}
            </div>
-          </div>
-          <div className="shrink-0">
-            <span className={`text-xs font-medium px-2 py-1 rounded-md ${t.description === 'Alta' ? 'bg-red-500/10 text-red-500' : 'bg-accent/10 text-accent'}`}>{t.description || 'Normal'}</span>
+
+           {/* Contenedor de metadata (Tipo, Fecha, Asesor) */}
+           <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 ml-7 sm:ml-0 shrink-0">
+             {/* Col 2: Tipo */}
+             <div className="flex items-center gap-1.5 sm:w-20 shrink-0">
+              <TIcon size={14} className="text-accent" />
+              <span className="text-[12px] font-medium text-content-muted capitalize">{t.type || 'Tarea'}</span>
+             </div>
+
+             {/* Col 3: Fecha */}
+             <div className={`flex items-center gap-1.5 sm:w-32 shrink-0 ${isOverdue ? 'text-red-500' : 'text-content-muted'}`}>
+              <Clock size={14} />
+              {dueDate ? (
+                <div className="text-[11px] font-medium leading-tight">
+                  <div>{dueDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}</div>
+                  <div className="opacity-80">{dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+              ) : (
+                <span className="text-[11px] font-medium">Sin fecha</span>
+              )}
+             </div>
+
+             {/* Col 4: Asesor */}
+             <div className="flex items-center gap-2 sm:w-32 shrink-0 sm:border-l sm:border-edge sm:pl-4">
+              {advisorInitial ? (
+               <>
+                <div className="shrink-0 w-6 h-6 rounded-full bg-accent/15 text-accent flex items-center justify-center text-[10px] font-bold border border-accent/20" title={t.advisor_name}>
+                 {advisorInitial}
+                </div>
+                <span className="text-[11px] font-medium text-content-muted truncate">{t.advisor_name}</span>
+               </>
+              ) : (
+               <>
+                <div className="shrink-0 w-6 h-6 rounded-full bg-surface-inset text-content-muted flex items-center justify-center text-[10px] border border-edge">
+                 —
+                </div>
+                <span className="text-[11px] font-medium text-content-muted">Sin asignar</span>
+               </>
+              )}
+             </div>
+           </div>
+
           </div>
          </div>
         );
