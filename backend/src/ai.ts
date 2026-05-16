@@ -123,7 +123,8 @@ La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Li
 2. DEBES basar tus respuestas ÚNICAMENTE en la "Base de Conocimiento" y en el "Inventario Disponible".
 3. Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indicar que no tienes esa información a la mano y que un asesor humano lo confirmará a la brevedad. NO ASUMAS NADA.
 4. Si aún no sabes el nombre del cliente, intenta preguntárselo sutilmente en algún punto de la conversación. Si el cliente te proporciona su nombre, DEBES ejecutar la función "actualizar_nombre" para registrarlo en el CRM.
-5. Si el cliente menciona su presupuesto, proyecto de interés o detalles de lo que busca (ej. casa de campo, frente al parque, servicios básicos), DEBES ejecutar la función "registrar_perfil_lead" para guardar automáticamente su perfil.`;
+5. Si el cliente menciona su presupuesto, proyecto de interés o detalles de lo que busca (ej. casa de campo, frente al parque, servicios básicos), DEBES ejecutar la función "registrar_perfil_lead" para guardar automáticamente su perfil.
+6. Si el cliente pide fotos, imágenes o un video del proyecto, DEBES ejecutar la función "solicitar_multimedia_proyecto". Cuando la herramienta te devuelva la etiqueta [MEDIA:...], DEBES incluir ESA ETIQUETA EXACTA al final de tu respuesta.`;
 
   // Agregar base de conocimiento al system prompt
   if (knowledge) {
@@ -260,6 +261,20 @@ La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Li
             }
           }
         }
+      },
+      {
+        type: "function",
+        function: {
+          name: "solicitar_multimedia_proyecto",
+          description: "Busca y obtiene las URLs de las fotos o videos del proyecto para enviárselas al cliente.",
+          parameters: {
+            type: "object",
+            properties: {
+              proyecto: { type: "string", description: "Nombre del proyecto del que se piden fotos (ej. 'Alquimia', 'Praderas')." }
+            },
+            required: ["proyecto"]
+          }
+        }
       }
     ];
 
@@ -342,6 +357,25 @@ La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Li
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Perfil del cliente (proyecto, presupuesto e intereses) actualizado exitosamente en el CRM." } as any);
             } else {
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Error: No se pudo actualizar el perfil porque el lead no existe." } as any);
+            }
+          }
+          else if (functionName === 'solicitar_multimedia_proyecto') {
+            const propRes = await pool.query("SELECT image, images FROM properties WHERE project ILIKE $1 OR name ILIKE $1 LIMIT 1", [`%${args.proyecto}%`]);
+            if (propRes.rowCount > 0) {
+              const p = propRes.rows[0];
+              let urls = [];
+              if (p.image) urls.push(p.image);
+              if (p.images && Array.isArray(p.images)) {
+                urls.push(...p.images);
+              }
+              urls = urls.filter((u: string) => u && u.startsWith('http')).slice(0, 4);
+              if (urls.length > 0) {
+                conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Encontré ${urls.length} imágenes. DEBES incluir EXACTAMENTE esta etiqueta al final de tu respuesta al cliente: [MEDIA:${urls.join('|')}]` } as any);
+              } else {
+                conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "No hay fotos registradas para este proyecto en la base de datos." } as any);
+              }
+            } else {
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "No se encontró ningún proyecto con ese nombre." } as any);
             }
           }
         } catch (e: any) {

@@ -215,19 +215,28 @@ whatsappRouter.post('/', async (req, res) => {
                   }
                   
                   if (aiReply) {
-                    let messagesToSend = [aiReply];
-                    if (aiReply.length > 250) {
-                      let parts = aiReply.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+                    let mediaUrlsToSend: string[] = [];
+                    let finalAiReply = aiReply;
+                    
+                    const mediaMatch = finalAiReply.match(/\[MEDIA:([^\]]+)\]/);
+                    if (mediaMatch) {
+                      mediaUrlsToSend = mediaMatch[1].split('|').map(u => u.trim()).filter(u => u.startsWith('http'));
+                      finalAiReply = finalAiReply.replace(mediaMatch[0], '').trim();
+                    }
+
+                    let messagesToSend = [finalAiReply];
+                    if (finalAiReply.length > 250) {
+                      let parts = finalAiReply.split(/\n\s*\n/).filter(p => p.trim().length > 0);
                       if (parts.length === 1) {
                         const sentenceRegex = /([^.?!]+[.?!]+)/g;
-                        const matches = aiReply.match(sentenceRegex);
+                        const matches = finalAiReply.match(sentenceRegex);
                         if (matches && matches.length > 1) {
                           parts = matches.map(s => s.trim());
                         } else {
-                          const mid = Math.floor(aiReply.length / 2);
-                          const spaceIdx = aiReply.indexOf(' ', mid);
+                          const mid = Math.floor(finalAiReply.length / 2);
+                          const spaceIdx = finalAiReply.indexOf(' ', mid);
                           if (spaceIdx > 0) {
-                            parts = [aiReply.slice(0, spaceIdx).trim(), aiReply.slice(spaceIdx).trim()];
+                            parts = [finalAiReply.slice(0, spaceIdx).trim(), finalAiReply.slice(spaceIdx).trim()];
                           }
                         }
                       }
@@ -238,7 +247,23 @@ whatsappRouter.post('/', async (req, res) => {
                       }
                     }
 
-                    // Guardar respuestas de IA en la BD
+                    // Enviar fotos/videos primero
+                    for (const url of mediaUrlsToSend) {
+                      await sendWhatsAppMessage(from, '', url);
+                      await new Promise(r => setTimeout(r, 1500));
+                      
+                      ioInstance.emit('whatsapp-message', {
+                        id: `ai-media-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                        from: 'bot',
+                        name: 'ChatPrex Bot',
+                        text: '[Archivo Multimedia Enviado]',
+                        media: url,
+                        fromMe: true,
+                        timestamp: new Date().toISOString(),
+                      });
+                    }
+
+                    // Guardar respuestas de IA en la BD y enviar
                     for (let i = 0; i < messagesToSend.length; i++) {
                       if (messagesToSend[i].trim().length > 0) {
                         const botMsgId = `ai-${msg.id}-${i}`;

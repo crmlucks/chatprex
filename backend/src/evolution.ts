@@ -429,10 +429,21 @@ export const sendEvolutionMessage = async (to: string, text: string) => {
 export const sendEvolutionMedia = async (to: string, mediaBase64: string, caption?: string, fileName?: string) => {
   const number = to.replace('@s.whatsapp.net', '').replace('@lid', '').split(':')[0];
 
-  // Determinar tipo de media y mimetype del data URI
-  const mimeMatch = mediaBase64.match(/^data:([^;]+);base64,/);
-  const mimeType = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
-  const pureBase64 = mediaBase64.replace(/^data:[^;]+;base64,/, '');
+  // Determinar tipo de media y mimetype del data URI o URL
+  let mimeType = 'application/octet-stream';
+  let pureMedia = mediaBase64;
+  let isUrl = mediaBase64.startsWith('http');
+
+  if (isUrl) {
+    const ext = mediaBase64.split('.').pop()?.toLowerCase() || '';
+    if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) mimeType = 'image/jpeg';
+    else if (['mp4', 'mov'].includes(ext)) mimeType = 'video/mp4';
+    else mimeType = 'image/jpeg'; // fallback para URLs de Cloudinary/S3 sin extensión clara
+  } else {
+    const mimeMatch = mediaBase64.match(/^data:([^;]+);base64,/);
+    mimeType = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+    pureMedia = mediaBase64.replace(/^data:[^;]+;base64,/, '');
+  }
 
   let mediatype = 'document';
   if (mimeType.startsWith('image/')) mediatype = 'image';
@@ -447,7 +458,7 @@ export const sendEvolutionMedia = async (to: string, mediaBase64: string, captio
     mediatype: mediatype,
     mimetype: mimeType,
     caption: caption || '',
-    media: pureBase64,
+    media: pureMedia,
     fileName: fileName || (mediatype === 'image' ? 'imagen.jpg' : mediatype === 'video' ? 'video.mp4' : 'archivo'),
     options: { delay: 1200 }
   };
@@ -474,7 +485,7 @@ export const sendEvolutionMedia = async (to: string, mediaBase64: string, captio
       mediaMessage: {
         mediatype: mediatype,
         caption: caption || '',
-        media: pureBase64,
+        media: pureMedia,
         fileName: v2Payload.fileName
       }
     };
@@ -895,23 +906,33 @@ const handleWebhookEvent = async (req: any, res: any) => {
               console.log(`[Evolution] 🤖 Generando respuesta IA para ${remoteJid} (texto combinado)`);
               const aiReply = await generateAIResponse(remoteJid, combinedText);
               if (aiReply) {
-                let messagesToSend = [aiReply];
-                if (aiConfig.humanized_split !== false && aiReply.length > 250) {
+                let mediaUrlsToSend: string[] = [];
+                let finalAiReply = aiReply;
+                
+                // Extraer etiquetas [MEDIA:url1|url2]
+                const mediaMatch = finalAiReply.match(/\[MEDIA:([^\]]+)\]/);
+                if (mediaMatch) {
+                  mediaUrlsToSend = mediaMatch[1].split('|').map(u => u.trim()).filter(u => u.startsWith('http'));
+                  finalAiReply = finalAiReply.replace(mediaMatch[0], '').trim();
+                }
+
+                let messagesToSend = [finalAiReply];
+                if (aiConfig.humanized_split !== false && finalAiReply.length > 250) {
                   // Separar por párrafos reales (doble salto de línea) para no romper listas numeradas
-                  let parts = aiReply.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+                  let parts = finalAiReply.split(/\n\s*\n/).filter(p => p.trim().length > 0);
                   
                   // Si es un solo párrafo grande, separar por oraciones de forma más flexible
                   if (parts.length === 1) {
                     const sentenceRegex = /([^.?!]+[.?!]+)/g;
-                    const matches = aiReply.match(sentenceRegex);
+                    const matches = finalAiReply.match(sentenceRegex);
                     if (matches && matches.length > 1) {
                       parts = matches.map(s => s.trim());
                     } else {
                       // Fallback extremo si no hay puntuación: cortar a la mitad
-                      const mid = Math.floor(aiReply.length / 2);
-                      const spaceIdx = aiReply.indexOf(' ', mid);
+                      const mid = Math.floor(finalAiReply.length / 2);
+                      const spaceIdx = finalAiReply.indexOf(' ', mid);
                       if (spaceIdx > 0) {
-                        parts = [aiReply.slice(0, spaceIdx).trim(), aiReply.slice(spaceIdx).trim()];
+                        parts = [finalAiReply.slice(0, spaceIdx).trim(), finalAiReply.slice(spaceIdx).trim()];
                       }
                     }
                   }
@@ -925,6 +946,23 @@ const handleWebhookEvent = async (req: any, res: any) => {
                   } else if (parts.length > 1) {
                     messagesToSend = parts;
                   }
+                }
+
+                // Enviar fotos/videos primero
+                for (const url of mediaUrlsToSend) {
+                  await sendEvolutionMedia(remoteJid, url, '');
+                  await new Promise(r => setTimeout(r, 1500));
+                  
+                  // Emitir y guardar que se envió un archivo multimedia
+                  ioInstance.emit('whatsapp-message', {
+                    id: `ai-media-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    from: remoteJid,
+                    name: 'ChatPrex Bot',
+                    text: '[Archivo Multimedia Enviado]',
+                    media: url,
+                    fromMe: true,
+                    timestamp: new Date().toISOString(),
+                  });
                 }
 
                 for (let i = 0; i < messagesToSend.length; i++) {
