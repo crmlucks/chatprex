@@ -113,6 +113,20 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
     console.error("[AI] Error al cargar propiedades:", e);
   }
 
+  // Obtener información del asesor asignado al lead
+  let advisorText = "Aún no hay un asesor específico asignado. Un miembro del equipo se comunicará.";
+  try {
+    const phone = fromJid.split('@')[0].split(':')[0];
+    const advRes = await pool.query(`
+      SELECT u.name, u.phone FROM leads l 
+      LEFT JOIN users u ON l.advisor_id = u.id 
+      WHERE l.phone = $1
+    `, [phone]);
+    if (advRes.rowCount > 0 && advRes.rows[0].name) {
+      advisorText = `Nombre: ${advRes.rows[0].name}. Teléfono: ${advRes.rows[0].phone || 'No disponible'}.`;
+    }
+  } catch (e) {}
+
   // Agregar regla estricta anti-alucinación y Fecha Actual
   const now = new Date();
   systemPrompt += `\n\n--- FECHA Y HORA ACTUAL ---
@@ -124,7 +138,12 @@ La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Li
 3. Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indicar que no tienes esa información a la mano y que un asesor humano lo confirmará a la brevedad. NO ASUMAS NADA.
 4. Si aún no sabes el nombre del cliente, intenta preguntárselo sutilmente en algún punto de la conversación. Si el cliente te proporciona su nombre, DEBES ejecutar la función "actualizar_nombre" para registrarlo en el CRM.
 5. Si el cliente menciona su presupuesto, proyecto de interés o detalles de lo que busca (ej. casa de campo, frente al parque, servicios básicos), DEBES ejecutar la función "registrar_perfil_lead" para guardar automáticamente su perfil.
-6. Si el cliente pide fotos, imágenes o un video del proyecto, DEBES ejecutar la función "solicitar_multimedia_proyecto". Cuando la herramienta te devuelva la etiqueta [MEDIA:...], DEBES incluir ESA ETIQUETA EXACTA al final de tu respuesta.`;
+6. Si el cliente pide fotos, imágenes o un video del proyecto, DEBES ejecutar la función "solicitar_multimedia_proyecto". Cuando la herramienta te devuelva la etiqueta [MEDIA:...], DEBES incluir ESA ETIQUETA EXACTA al final de tu respuesta.
+
+--- DATOS REALES DE TU ASESOR ASIGNADO ---
+ATENCIÓN IA: Cuando el prompt principal o el cliente te pida derivarlo con su asesor, o tu prompt diga "[Nombre]", DEBES REEMPLAZARLO OBLIGATORIAMENTE por este nombre real:
+${advisorText}
+---`;
 
   // Agregar base de conocimiento al system prompt
   if (knowledge) {
@@ -255,9 +274,9 @@ La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Li
           parameters: {
             type: "object",
             properties: {
-              proyecto_interes: { type: "string", description: "Nombre del proyecto por el que preguntó o mostró interés." },
-              presupuesto: { type: "string", description: "Presupuesto mencionado por el cliente (ej. '$80,000', '150 mil', 'bajo')." },
-              detalles_interes: { type: "string", description: "Características específicas que busca (ej. casa de campo, frente al parque, servicios básicos, etc)." }
+              proyecto_interes: { type: "string", description: "Nombre del proyecto por el que preguntó o mostró interés (Identifícalo de la conversación)." },
+              presupuesto: { type: "string", description: "Presupuesto del cliente. Si elige un lote de la lista de alternativas, DEBES ASUMIR como presupuesto el precio exacto de ese lote elegido." },
+              detalles_interes: { type: "string", description: "Características específicas que busca (ej. casa de campo, frente al parque, servicios básicos, esquina, etc)." }
             }
           }
         }
