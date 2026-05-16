@@ -115,6 +115,7 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
 
   // Obtener información del asesor asignado al lead
   let advisorText = "Aún no hay un asesor específico asignado. Un miembro del equipo se comunicará.";
+  let advisorName = "su asesor";
   try {
     const phone = fromJid.split('@')[0].split(':')[0];
     const advRes = await pool.query(`
@@ -123,9 +124,14 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
       WHERE l.phone = $1
     `, [phone]);
     if (advRes.rowCount > 0 && advRes.rows[0].name) {
+      advisorName = advRes.rows[0].name;
       advisorText = `Nombre: ${advRes.rows[0].name}. Teléfono: ${advRes.rows[0].phone || 'No disponible'}.`;
     }
   } catch (e) {}
+
+  // Forzar el reemplazo de [Nombre] en el prompt del usuario por el nombre real del asesor
+  systemPrompt = systemPrompt.replace(/\[Nombre\]/gi, advisorName);
+
 
   // Agregar regla estricta anti-alucinación y Fecha Actual
   const now = new Date();
@@ -136,7 +142,7 @@ La fecha y hora actual es: ${now.toLocaleString('es-PE', { timeZone: 'America/Li
 1. ESTÁ ESTRICTAMENTE PROHIBIDO INVENTAR propiedades, precios, amenidades o características.
 2. DEBES basar tus respuestas ÚNICAMENTE en la "Base de Conocimiento" y en el "Inventario Disponible".
 3. Si el cliente pregunta algo que no está en los datos proporcionados, DEBES indicar que no tienes esa información a la mano y que un asesor humano lo confirmará a la brevedad. NO ASUMAS NADA.
-4. Si aún no sabes el nombre del cliente, intenta preguntárselo sutilmente en algún punto de la conversación. Si el cliente te proporciona su nombre, DEBES ejecutar la función "actualizar_nombre" para registrarlo en el CRM.
+4. USO DEL NOMBRE: Si sabes el nombre del cliente, dirígete a él usando SOLO SU PRIMER NOMBRE para generar cercanía (ej. Si se llama "Juan Pérez", dile "Juan"). Si aún no lo sabes, intenta preguntárselo sutilmente. Si te lo da, ejecuta "actualizar_nombre".
 5. Si el cliente menciona su presupuesto, proyecto de interés o detalles de lo que busca (ej. casa de campo, frente al parque, servicios básicos), DEBES ejecutar la función "registrar_perfil_lead" para guardar automáticamente su perfil.
 6. Si el cliente pide fotos, imágenes o un video del proyecto, DEBES ejecutar la función "solicitar_multimedia_proyecto". Cuando la herramienta te devuelva la etiqueta [MEDIA:...], DEBES incluir ESA ETIQUETA EXACTA al final de tu respuesta.
 

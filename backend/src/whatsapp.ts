@@ -240,8 +240,13 @@ whatsappRouter.post('/', async (req, res) => {
                           }
                         }
                       }
-                      if (parts.length > 3) {
-                        messagesToSend = [parts[0], parts.slice(1, parts.length - 1).join('\n\n'), parts[parts.length - 1]];
+                      if (parts.length > 4) {
+                        messagesToSend = [
+                          parts[0], 
+                          parts.slice(1, parts.length - 2).join('\n\n'), 
+                          parts[parts.length - 2], 
+                          parts[parts.length - 1]
+                        ];
                       } else if (parts.length > 1) {
                         messagesToSend = parts;
                       }
@@ -287,7 +292,7 @@ whatsappRouter.post('/', async (req, res) => {
                         
                         await sendWhatsAppMessage(from, botText);
                         if (i < messagesToSend.length - 1) {
-                          await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
+                          await new Promise(r => setTimeout(r, 5000));
                         }
                       }
                     }

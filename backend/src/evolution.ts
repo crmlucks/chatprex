@@ -937,10 +937,11 @@ const handleWebhookEvent = async (req: any, res: any) => {
                     }
                   }
                   
-                  if (parts.length > 3) {
+                  if (parts.length > 4) {
                     messagesToSend = [
                       parts[0],
-                      parts.slice(1, parts.length - 1).join('\n\n'), // Preservar saltos de línea al agrupar
+                      parts.slice(1, parts.length - 2).join('\n\n'),
+                      parts[parts.length - 2],
                       parts[parts.length - 1]
                     ];
                   } else if (parts.length > 1) {
@@ -991,7 +992,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
                     } catch (e) {}
 
                     if (i < messagesToSend.length - 1) {
-                      await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
+                      await new Promise(r => setTimeout(r, 5000));
                     }
                   }
                 }
