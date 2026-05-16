@@ -896,9 +896,9 @@ const handleWebhookEvent = async (req: any, res: any) => {
               const aiReply = await generateAIResponse(remoteJid, combinedText);
               if (aiReply) {
                 let messagesToSend = [aiReply];
-                if (aiReply.length > 250) {
-                  // Separar por párrafos
-                  let parts = aiReply.split(/\\r?\\n+/).filter(p => p.trim().length > 0);
+                if (aiConfig.humanized_split !== false && aiReply.length > 250) {
+                  // Separar por párrafos reales (doble salto de línea) para no romper listas numeradas
+                  let parts = aiReply.split(/\n\s*\n/).filter(p => p.trim().length > 0);
                   
                   // Si es un solo párrafo grande, separar por oraciones de forma más flexible
                   if (parts.length === 1) {
@@ -919,7 +919,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
                   if (parts.length > 3) {
                     messagesToSend = [
                       parts[0],
-                      parts.slice(1, parts.length - 1).join(' '),
+                      parts.slice(1, parts.length - 1).join('\n\n'), // Preservar saltos de línea al agrupar
                       parts[parts.length - 1]
                     ];
                   } else if (parts.length > 1) {

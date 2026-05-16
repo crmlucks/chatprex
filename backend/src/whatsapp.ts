@@ -217,7 +217,7 @@ whatsappRouter.post('/', async (req, res) => {
                   if (aiReply) {
                     let messagesToSend = [aiReply];
                     if (aiReply.length > 250) {
-                      let parts = aiReply.split(/\\r?\\n+/).filter(p => p.trim().length > 0);
+                      let parts = aiReply.split(/\n\s*\n/).filter(p => p.trim().length > 0);
                       if (parts.length === 1) {
                         const sentenceRegex = /([^.?!]+[.?!]+)/g;
                         const matches = aiReply.match(sentenceRegex);
@@ -232,7 +232,7 @@ whatsappRouter.post('/', async (req, res) => {
                         }
                       }
                       if (parts.length > 3) {
-                        messagesToSend = [parts[0], parts.slice(1, parts.length - 1).join(' '), parts[parts.length - 1]];
+                        messagesToSend = [parts[0], parts.slice(1, parts.length - 1).join('\n\n'), parts[parts.length - 1]];
                       } else if (parts.length > 1) {
                         messagesToSend = parts;
                       }
