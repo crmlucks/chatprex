@@ -374,7 +374,7 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                <ImageIcon size={18} className="text-content-muted" />
                <span className="text-[8px] font-bold text-content-muted">Agregar</span>
              </div>
-           ))}
+           )}
           </div>
           <input type="file" ref={projectImgRef} multiple accept="image/*" className="hidden" onChange={handleProjectImageUpload} />
           <p className="text-[9px] text-content-muted mt-2">Estas fotos se enviarán por WhatsApp cuando un lead pida imágenes del proyecto (ideal para terrenos).</p>
