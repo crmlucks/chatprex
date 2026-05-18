@@ -322,11 +322,11 @@ router.get('/projects', async (req, res) => {
   } catch (error) { res.status(500).json({ error: 'Database error' }); }
 });
 router.post('/projects', async (req, res) => {
-  const { name, developer, contact, phone, email, address, currency, status, notes } = req.body;
+  const { name, developer, contact, phone, email, address, currency, status, notes, images } = req.body;
   try {
     const result = await pool.query(
-      'INSERT INTO projects (name, developer, contact, phone, email, address, currency, status, notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *', 
-      [name, developer, contact, phone, email, address, currency || 'PEN', status || 'Activo', notes]
+      'INSERT INTO projects (name, developer, contact, phone, email, address, currency, status, notes, images) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *', 
+      [name, developer, contact, phone, email, address, currency || 'PEN', status || 'Activo', notes, JSON.stringify(images || [])]
     );
     res.json(result.rows[0]);
   } catch (error) { 
@@ -335,11 +335,11 @@ router.post('/projects', async (req, res) => {
   }
 });
 router.put('/projects/:id', async (req, res) => {
-  const { name, developer, contact, phone, email, address, currency, status, notes } = req.body;
+  const { name, developer, contact, phone, email, address, currency, status, notes, images } = req.body;
   try {
     const result = await pool.query(
-      'UPDATE projects SET name=$1, developer=$2, contact=$3, phone=$4, email=$5, address=$6, currency=$7, status=$8, notes=$9 WHERE id=$10 RETURNING *', 
-      [name, developer, contact, phone, email, address, currency, status, notes, req.params.id]
+      'UPDATE projects SET name=$1, developer=$2, contact=$3, phone=$4, email=$5, address=$6, currency=$7, status=$8, notes=$9, images=$10 WHERE id=$11 RETURNING *', 
+      [name, developer, contact, phone, email, address, currency, status, notes, JSON.stringify(images || []), req.params.id]
     );
     res.json(result.rows[0]);
   } catch (error) { 

@@ -304,9 +304,13 @@ export async function initDatabase() {
         name          VARCHAR(150) NOT NULL,
         code          VARCHAR(50),
         status        VARCHAR(50) DEFAULT 'Activo',
+        images        JSONB DEFAULT '[]'::jsonb,
         created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+    try {
+      await client.query("ALTER TABLE projects ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;");
+    } catch(e) {}
 
     // Crear tabla pipeline_stages
     await client.query(`

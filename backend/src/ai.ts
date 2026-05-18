@@ -385,22 +385,36 @@ ${advisorText}
             }
           }
           else if (functionName === 'solicitar_multimedia_proyecto') {
-            const propRes = await pool.query("SELECT image, images FROM properties WHERE project ILIKE $1 OR name ILIKE $1 LIMIT 1", [`%${args.proyecto}%`]);
-            if (propRes.rowCount > 0) {
-              const p = propRes.rows[0];
-              let urls = [];
-              if (p.image) urls.push(p.image);
-              if (p.images && Array.isArray(p.images)) {
-                urls.push(...p.images);
+            let urls: string[] = [];
+            
+            // 1. Primero buscar imágenes del PROYECTO (tabla projects) — ideal para terrenos
+            const projRes = await pool.query("SELECT images FROM projects WHERE name ILIKE $1 LIMIT 1", [`%${args.proyecto}%`]);
+            if (projRes.rowCount > 0 && projRes.rows[0].images) {
+              const projImages = projRes.rows[0].images;
+              if (Array.isArray(projImages)) {
+                urls.push(...projImages.filter((u: string) => u && u.startsWith('http')));
               }
-              urls = urls.filter((u: string) => u && u.startsWith('http')).slice(0, 4);
-              if (urls.length > 0) {
-                conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Encontré ${urls.length} imágenes. DEBES incluir EXACTAMENTE esta etiqueta al final de tu respuesta al cliente: [MEDIA:${urls.join('|')}]` } as any);
-              } else {
-                conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "No hay fotos registradas para este proyecto en la base de datos." } as any);
+            }
+            
+            // 2. Si no hay fotos del proyecto, buscar en el inventario de PROPIEDADES (casas, depas, oficinas)
+            if (urls.length === 0) {
+              const propRes = await pool.query("SELECT image, images FROM properties WHERE project ILIKE $1 OR name ILIKE $1 LIMIT 4", [`%${args.proyecto}%`]);
+              if (propRes.rowCount > 0) {
+                for (const p of propRes.rows) {
+                  if (p.image && p.image.startsWith('http')) urls.push(p.image);
+                  if (p.images && Array.isArray(p.images)) {
+                    urls.push(...p.images.filter((u: string) => u && u.startsWith('http')));
+                  }
+                }
               }
+            }
+            
+            urls = [...new Set(urls)].slice(0, 4); // Eliminar duplicados, máximo 4
+            
+            if (urls.length > 0) {
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Encontré ${urls.length} imágenes. DEBES incluir EXACTAMENTE esta etiqueta al final de tu respuesta al cliente: [MEDIA:${urls.join('|')}]` } as any);
             } else {
-              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "No se encontró ningún proyecto con ese nombre." } as any);
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "No hay fotos registradas para este proyecto en la base de datos." } as any);
             }
           }
         } catch (e: any) {

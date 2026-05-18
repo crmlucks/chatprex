@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X, Link, Settings, Database, Filter, Target, Users } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X, Link, Settings, Database, Filter, Target, Users, Image as ImageIcon, Upload, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -13,6 +13,21 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [sources, setSources] = useState<any[]>([]);
  const [formData, setFormData] = useState<any>({});
  const [saving, setSaving] = useState(false);
+ const projectImgRef = useRef<HTMLInputElement>(null);
+
+ const handleProjectImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => setFormData((prev: any) => ({
+        ...prev, 
+        images: [...(prev.images || []), reader.result as string].slice(0, 4)
+      }));
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
 
  useEffect(() => {
   loadData();
@@ -38,7 +53,7 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    if (item) {
     setFormData(item);
    } else {
-    if (type === 'proyecto') setFormData({ name: '', developer: '', contact: '', phone: '', email: '', address: '', currency: 'PEN', status: 'Activo', notes: '' });
+    if (type === 'proyecto') setFormData({ name: '', developer: '', contact: '', phone: '', email: '', address: '', currency: 'PEN', status: 'Activo', notes: '', images: [] });
     else if (type === 'etapa') setFormData({ name: '', color: '#1649FF', visible: true });
     else if (type === 'fuente') setFormData({ name: '', icon: 'Globe', visible: true });
    }
@@ -140,10 +155,15 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
            <tr key={p.id} className="group hover:bg-surface-inset transition-colors">
             <td className="px-6 py-4">
              <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${dc ? 'bg-surface-raised text-content-muted' : 'bg-slate-100 text-content-muted'}`}>
-               <Database size={16} />
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${dc ? 'bg-surface-raised text-content-muted' : 'bg-slate-100 text-content-muted'}`}>
+               {p.images && p.images.length > 0 ? <img src={p.images[0]} className="w-full h-full object-cover" alt="" /> : <Database size={16} />}
               </div>
-              <span className="text-sm font-bold text-content">{p.name}</span>
+              <div className="flex flex-col">
+               <span className="text-sm font-bold text-content">{p.name}</span>
+               {p.images && p.images.length > 0 && (
+                 <span className="text-[9px] font-bold text-accent flex items-center gap-1"><ImageIcon size={9} /> {p.images.length} foto{p.images.length > 1 ? 's' : ''}</span>
+               )}
+              </div>
              </div>
             </td>
             <td className="px-6 py-4">
@@ -159,7 +179,7 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
             </td>
             <td className="px-6 py-4 text-right">
              <div className="flex justify-end gap-1">
-              <button onClick={() => openModal('proyecto', p)} className="p-2 rounded-lg hover:bg-surface-raised text-accent transition-all active:scale-90"><Edit2 size={14} /></button>
+              <button onClick={() => openModal('proyecto', {...p, images: p.images || []})} className="p-2 rounded-lg hover:bg-surface-raised text-accent transition-all active:scale-90"><Edit2 size={14} /></button>
               <button onClick={() => handleDelete('proyecto', p.id)} className="p-2 rounded-lg hover:bg-surface-raised text-red-500 transition-all active:scale-90"><Trash2 size={14} /></button>
              </div>
             </td>
@@ -336,6 +356,28 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <div className="md:col-span-2">
           <label className={label}>Notas</label>
           <textarea value={formData.notes || ''} onChange={e => setFormData({...formData, notes: e.target.value})} className={`${input} h-14 resize-none`} placeholder="Información adicional..."></textarea>
+         </div>
+
+         {/* Galería de Imágenes del Proyecto (hasta 4) */}
+         <div className="md:col-span-2 pt-4 border-t border-edge">
+          <label className={label}>Fotos del proyecto (máx. 4) — El chatbot las enviará automáticamente</label>
+          <div className="flex flex-wrap gap-3 mt-2">
+           {(formData.images || []).map((img: string, i: number) => (
+             <div key={i} className="w-20 h-20 rounded-xl overflow-hidden relative border border-edge group">
+               <img src={img} className="w-full h-full object-cover" alt={`Foto ${i+1}`} />
+               <button type="button" onClick={() => setFormData((prev: any) => ({...prev, images: prev.images.filter((_: string, idx: number) => idx !== i)}))} className="absolute top-1 right-1 p-0.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X size={10} /></button>
+               <div className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] text-center font-bold py-0.5">{i+1}/4</div>
+             </div>
+           ))}
+           {(formData.images || []).length < 4 && (
+             <div onClick={() => projectImgRef.current?.click()} className="w-20 h-20 rounded-xl border-2 border-dashed border-edge flex flex-col items-center justify-center cursor-pointer hover:border-accent/50 transition-colors gap-1">
+               <ImageIcon size={18} className="text-content-muted" />
+               <span className="text-[8px] font-bold text-content-muted">Agregar</span>
+             </div>
+           ))}
+          </div>
+          <input type="file" ref={projectImgRef} multiple accept="image/*" className="hidden" onChange={handleProjectImageUpload} />
+          <p className="text-[9px] text-content-muted mt-2">Estas fotos se enviarán por WhatsApp cuando un lead pida imágenes del proyecto (ideal para terrenos).</p>
          </div>
         </div>
        )}
