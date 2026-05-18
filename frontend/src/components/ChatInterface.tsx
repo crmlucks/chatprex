@@ -648,15 +648,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          </div>
        )}
        <div className={`flex items-center gap-1.5 md:gap-3 p-1.5 md:p-2 rounded-2xl border transition-all ${dc ? 'bg-surface-raised border-edge focus-within:border-accent/50' : 'bg-surface-inset border-edge focus-within:border-accent/50 focus-within:bg-surface focus-within:shadow-none'}`}>
-        <div className="         <div className="flex items-center gap-1 pl-1">
-          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-          <button onClick={() => fileInputRef.current?.click()} className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-accent hover:bg-accent/10' : 'text-content-muted hover:text-accent hover:bg-accent/10'}`}>
-           <Paperclip size={20} />
-          </button>
-         </div>">
-         <button onClick={() =>           <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} /> className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-content bg-amber-500 shadow-lg' : (dc ? 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10' : 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10')}`}>
-           
-         </button>
+        <div className="flex items-center gap-1 pl-1">
          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
          <button onClick={() => fileInputRef.current?.click()} className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-accent hover:bg-accent/10' : 'text-content-muted hover:text-accent hover:bg-accent/10'}`}>
           <Paperclip size={20} />
