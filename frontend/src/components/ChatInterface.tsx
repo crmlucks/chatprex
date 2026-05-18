@@ -343,21 +343,42 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  };
 
  const handleSelectQuickReply = (reply: QuickReply) => {
+  if (!activeChat || !socket) return;
   let parsedText = reply.text;
   if (activeChatData) {
    parsedText = parsedText.replace(/{{nombre}}/g, activeChatData.name);
    parsedText = parsedText.replace(/{{proyecto}}/g, 'Proyecto');
   }
   
-  setInputText(parsedText);
-  if (reply.media) {
-   setMediaBase64(reply.media);
-   if (reply.mimeType) {
-    const fakeFile = new File([new Blob()], reply.fileName || 'archivo_adjunto', { type: reply.mimeType });
-    setSelectedFile(fakeFile);
+  // Enviar inmediatamente con multimedia si tiene
+  socket.emit('send-message', {
+   to: activeChat,
+   text: parsedText,
+   media: reply.media || undefined,
+   fileName: reply.fileName || undefined,
+   mimeType: reply.mimeType || undefined
+  });
+
+  const newMsg: ChatMessage = {
+   id: Date.now().toString(),
+   fromMe: true,
+   text: parsedText,
+   media: reply.media || undefined,
+   mimeType: reply.mimeType,
+   time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+
+  setChats((prev) => ({
+   ...prev,
+   [activeChat]: {
+    ...prev[activeChat],
+    lastMessage: parsedText || '[Archivo multimedia]',
+    time: newMsg.time,
+    messages: [...prev[activeChat].messages, newMsg]
    }
-  }
-  setShowQuickReplies(false);
+  }));
+
+  setInputText('');
  };
 
  const handleSaveReplyForm = () => {
@@ -426,6 +447,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       </div>
      </div>
      <div className={`flex gap-1 ${dc ? 'text-content-muted' : 'text-content-muted'}`}>
+      <button onClick={() => { setShowQuickReplies(!showQuickReplies); setActiveChat(null); }} title="Respuestas rápidas" className={`p-2 rounded-xl transition-all active:scale-90 ${showQuickReplies ? 'bg-amber-500 text-white' : (dc ? 'hover:bg-surface-raised' : 'hover:bg-slate-100')}`}><Zap size={18} /></button>
       <button onClick={() => setShowChatFilters(!showChatFilters)} className={`p-2 rounded-xl transition-all active:scale-90 ${showChatFilters ? 'bg-accent text-content' : (dc ? 'hover:bg-surface-raised' : 'hover:bg-slate-100')}`}><Filter size={18} /></button>
       <button className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised' : 'hover:bg-slate-100'}`}><Plus size={18} /></button>
      </div>
@@ -626,9 +648,14 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          </div>
        )}
        <div className={`flex items-center gap-1.5 md:gap-3 p-1.5 md:p-2 rounded-2xl border transition-all ${dc ? 'bg-surface-raised border-edge focus-within:border-accent/50' : 'bg-surface-inset border-edge focus-within:border-accent/50 focus-within:bg-surface focus-within:shadow-none'}`}>
-        <div className="flex items-center gap-1 pl-1">
-         <button onClick={() => setShowQuickReplies(!showQuickReplies)} className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-content bg-amber-500 shadow-lg' : (dc ? 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10' : 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10')}`}>
-          <Zap size={20} />
+        <div className="         <div className="flex items-center gap-1 pl-1">
+          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
+          <button onClick={() => fileInputRef.current?.click()} className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-accent hover:bg-accent/10' : 'text-content-muted hover:text-accent hover:bg-accent/10'}`}>
+           <Paperclip size={20} />
+          </button>
+         </div>">
+         <button onClick={() =>           <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} /> className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${showQuickReplies ? 'text-content bg-amber-500 shadow-lg' : (dc ? 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10' : 'text-content-muted hover:text-amber-500 hover:bg-amber-500/10')}`}>
+           
          </button>
          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
          <button onClick={() => fileInputRef.current?.click()} className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-accent hover:bg-accent/10' : 'text-content-muted hover:text-accent hover:bg-accent/10'}`}>
@@ -676,109 +703,6 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    </div>
 
    {/* 3. Right Sidebar: Quick Replies */}
-   <div className={`${showQuickReplies ? 'flex' : 'hidden'} absolute inset-0 w-full md:relative md:inset-auto md:w-[380px] lg:w-[420px] shrink-0 border-l flex-col h-full z-50 transition-all animate-in slide-in-from-right duration-300 shadow-2xl md:shadow-none ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
-    <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 sm:px-6 border-b transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge-light'}`}>
-     <div className="flex items-center gap-3">
-       <button onClick={() => setShowQuickReplies(false)} className="md:hidden p-2 -ml-2 rounded-xl text-content-muted hover:bg-surface-raised transition-colors shrink-0">
-         <ArrowLeft size={20} />
-       </button>
-       <div className="flex items-center gap-2 text-amber-500 shrink-0">
-         <Zap size={20} fill="currentColor" />
-         <h2 className="h3">Respuestas</h2>
-       </div>
-     </div>
-     <button 
-      onClick={() => { setReplyForm({}); setShowReplyForm(true); }}
-      className="w-10 h-10 shrink-0 rounded-2xl bg-accent text-content flex items-center justify-center hover:bg-accent-dark transition-all active:scale-90 shadow-lg shadow-accent/20"
-     >
-      <Plus size={20} />
-     </button>
-    </div>
-
-    {showReplyForm ? (
-     <div className="flex-1 flex flex-col p-8 overflow-y-auto custom-scrollbar space-y-8 animate-in fade-in duration-300">
-      <div className="space-y-3">
-       <label className="label-text ml-1">Título de la respuesta</label>
-       <input 
-        type="text" 
-        placeholder="Ej: Bienvenida general" 
-        className={`w-full p-4 text-sm font-bold rounded-2xl border focus:ring-4 focus:ring-accent/10 outline-none transition-all ${dc ? 'bg-surface-raised border-edge text-content' : 'bg-surface-inset border-edge text-content '}`} 
-        value={replyForm.title || ''} 
-        onChange={e => setReplyForm({...replyForm, title: e.target.value})} 
-       />
-      </div>
-      <div className="space-y-3">
-       <label className="label-text ml-1">Contenido del mensaje</label>
-       <textarea 
-        rows={8} 
-        placeholder="Escribe el mensaje aquí..." 
-        className={`w-full p-6 text-sm font-medium rounded-xl border focus:ring-4 focus:ring-accent/10 outline-none transition-all resize-none leading-relaxed ${dc ? 'bg-surface-raised border-edge text-content-secondary' : 'bg-surface-inset border-edge text-content-secondary '}`} 
-        value={replyForm.text || ''} 
-        onChange={e => setReplyForm({...replyForm, text: e.target.value})} 
-       />
-       <p className="body-text text-xs italic">Usa {"{{nombre}}"} para personalizar automáticamente.</p>
-      </div>
-      
-      <div className="space-y-3">
-       <label className="label-text ml-1">Archivo adjunto</label>
-       <label className={`flex items-center gap-4 p-5 rounded-xl border-2 border-dashed cursor-pointer transition-all hover:bg-accent/5 ${dc ? 'border-edge bg-surface-raised/50 hover:border-accent/50' : 'border-edge bg-surface-inset hover:border-accent/30'}`}>
-        <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center"><Paperclip size={20} /></div>
-        <div className="flex-1 overflow-hidden">
-          <p className={`text-xs font-bold truncate ${dc ? 'text-content' : 'text-content'}`}>{replyForm.fileName || 'Seleccionar archivo'}</p>
-          <p className="text-xs text-content-muted font-medium">Imagen, PDF o video</p>
-        </div>
-        <input type="file" className="hidden" onChange={handleReplyFileChange} />
-       </label>
-      </div>
-
-      <div className="pt-6 flex gap-4 mt-auto">
-       <button onClick={() => setShowReplyForm(false)} className={`flex-1 py-4 text-xs rounded-2xl font-bold transition-all active:scale-95 ${dc ? 'bg-surface-raised text-content-muted hover:bg-slate-700' : 'bg-slate-100 text-content-secondary hover:bg-slate-200 shadow-sm'}`}>Cancelar</button>
-       <button onClick={handleSaveReplyForm} className="flex-1 py-4 text-xs rounded-2xl font-bold bg-accent text-content hover:bg-accent-dark transition-all active:scale-95 shadow-sm shadow-accent/20">Guardar</button>
-      </div>
-     </div>
-    ) : (
-     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="p-5 border-b transition-colors bg-surface-inset/50 dark:bg-surface-raised/30">
-        <div className="relative group">
-         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-content-muted group-focus-within:text-accent transition-colors" size={14} />
-         <input type="text" placeholder="Buscar respuesta..." className={`w-full pl-10 pr-4 py-3 text-xs font-bold border rounded-2xl outline-none transition-all ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent focus:bg-surface shadow-sm'}`} />
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
-       {quickReplies.length === 0 ? (
-        <div className="text-center py-12 opacity-20 space-y-3">
-          <Zap size={40} className="mx-auto" />
-          <p className="text-xs font-bold uppercase tracking-normal">Sin respuestas</p>
-        </div>
-       ) : (
-        quickReplies.map(reply => (
-         <div key={reply.id} className={`relative p-3 rounded-lg border transition-all cursor-pointer group ${dc ? 'bg-[#252525] border-edge hover:border-accent/50' : 'bg-surface border-edge-light hover:border-accent/30 shadow-sm hover:shadow-lg'}`}>
-          <div className="flex justify-between items-start mb-3">
-           <div onClick={() => handleSelectQuickReply(reply)} className="flex-1">
-            <h4 className={`text-sm font-bold mb-1 group-hover:text-accent transition-colors tracking-tight ${dc ? 'text-content' : 'text-content'}`}>{reply.title}</h4>
-           </div>
-           <div className="flex gap-1">
-            <button onClick={(e) => { e.stopPropagation(); setReplyForm(reply); setShowReplyForm(true); }} className={`p-2 rounded-xl transition-all ${dc ? 'hover:bg-slate-700 text-content-muted hover:text-content' : 'hover:bg-slate-100 text-content-muted hover:text-accent'}`}><Edit2 size={14} /></button>
-            <button onClick={(e) => { e.stopPropagation(); handleDeleteReply(reply.id); }} className="p-2 rounded-xl hover:bg-rose-500/10 text-rose-500 transition-all"><Trash2 size={14} /></button>
-           </div>
-          </div>
-          <p onClick={() => handleSelectQuickReply(reply)} className={`body-text text-xs line-clamp-3 leading-relaxed ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{reply.text}</p>
-          {reply.fileName && (
-           <div className="mt-4 flex items-center gap-3 p-3 rounded-2xl bg-accent/5 border border-accent/10 text-xs font-bold text-accent shadow-sm">
-            <Paperclip size={12} /> <span className="truncate">{reply.fileName}</span>
-           </div>
-          )}
-         </div>
-        ))
-       )}
-      </div>
-      <div className={`p-8 border-t text-center transition-colors ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset'}`}>
-        <p className="text-xs font-bold uppercase tracking-normal text-accent mb-2">Tip ChatPrex</p>
-        <p className="body-text text-xs italic">Usa el botón de rayo <span className="font-bold">/</span> para acceder rápido a tus plantillas guardadas.</p>
-      </div>
-     </div>
-    )}
-   </div>
   </div>
  );
 };
