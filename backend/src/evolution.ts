@@ -677,6 +677,12 @@ const handleWebhookEvent = async (req: any, res: any) => {
       const fromMe = msg.key.fromMe === true;
       const remoteJid = msg.key.remoteJid;
       const id = msg.key.id;
+
+      // Restringir entrada de grupos de WhatsApp y estados (broadcast)
+      if (remoteJid && (remoteJid.includes('@g.us') || remoteJid.includes('@broadcast') || remoteJid === 'status@broadcast')) {
+        return res.sendStatus(200);
+      }
+
       const pushName = msg.pushName || remoteJid?.split('@')[0] || 'Desconocido';
       const messageContent = msg.message || {};
 
@@ -1105,7 +1111,7 @@ evolutionRouter.get('/chats', async (req, res) => {
         FROM evolution_messages
       ) m
       LEFT JOIN leads l ON l.phone = SPLIT_PART(m.chat_id, '@', 1)
-      WHERE m.rn = 1
+      WHERE m.rn = 1 AND m.chat_id NOT LIKE '%@g.us' AND m.chat_id NOT LIKE '%@broadcast'
       ORDER BY m.timestamp DESC
     `);
 

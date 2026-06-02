@@ -225,11 +225,12 @@ ${advisorText}
           parameters: {
             type: "object",
             properties: {
-              title: { type: "string", description: "Asunto de la cita (ej. Visita al proyecto X)" },
+              title: { type: "string", description: "Asunto de la cita (ej. Visita al proyecto X o Llamada telefónica)" },
               date_iso: { type: "string", description: "Fecha y hora en formato ISO 8601 (ej. 2026-05-12T10:00:00-05:00)" },
-              description: { type: "string", description: "Notas adicionales sobre la visita" }
+              description: { type: "string", description: "Notas adicionales sobre la visita o llamada" },
+              tipo: { type: "string", enum: ["visita", "llamada", "reunión", "seguimiento", "cita", "tarea"], description: "El tipo de actividad a agendar según lo conversado" }
             },
-            required: ["title", "date_iso"]
+            required: ["title", "date_iso", "tipo"]
           }
         }
       },
@@ -328,8 +329,8 @@ ${advisorText}
           
           if (functionName === 'agendar_cita') {
             await pool.query(
-              "INSERT INTO tasks (title, description, type, status, due_date, lead_id) VALUES ($1, $2, 'cita', 'pendiente', $3, $4)",
-              [args.title, args.description || '', args.date_iso, leadId]
+              "INSERT INTO tasks (title, description, type, status, due_date, lead_id) VALUES ($1, $2, $3, 'pendiente', $4, $5)",
+              [args.title, args.description || '', args.tipo || 'cita', args.date_iso, leadId]
             );
             conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Cita agendada exitosamente en la base de datos." } as any);
           } 
