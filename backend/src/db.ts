@@ -31,8 +31,9 @@ pool.on('error', (err) => {
  * Se ejecuta al arrancar el servidor.
  */
 export async function initDatabase() {
-  const client = await pool.connect();
+  let client;
   try {
+    client = await pool.connect();
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id            SERIAL PRIMARY KEY,
@@ -431,7 +432,7 @@ export async function initDatabase() {
   } catch (err) {
     console.error('❌ Error inicializando la base de datos:', err);
   } finally {
-    client.release();
+    if (client) client.release();
   }
 }
 
