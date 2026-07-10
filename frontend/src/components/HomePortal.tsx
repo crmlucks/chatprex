@@ -511,7 +511,7 @@ export default function HomePortal({
       <div className="pt-8 max-w-4xl mx-auto w-full">
         
         {/* Vista Desktop: Barra tipo Cápsula / Airbnb */}
-        <div className="hidden md:flex bg-surface/90 dark:bg-zinc-900/90 border border-accent rounded-full shadow-2xl items-center p-2.5 backdrop-blur-md w-full select-none">
+        <div className="hidden md:flex bg-surface dark:bg-zinc-900/90 border border-accent rounded-full shadow-2xl items-center p-2.5 backdrop-blur-md w-full select-none">
           
           {/* 1. Ubicación (Ciudad, Distrito, Región, Proyecto) */}
           <div className="flex-[1.8] hover:bg-surface-inset dark:hover:bg-zinc-800/40 rounded-full px-6 py-2.5 transition-colors cursor-pointer group text-left">
@@ -521,7 +521,7 @@ export default function HomePortal({
               placeholder="Ciudad, distrito o región..." 
               value={searchLocation}
               onChange={(e) => setSearchLocation(e.target.value)}
-              className="w-full bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-content placeholder-content-muted/60 p-0 focus:outline-none"
+              className="w-full bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-content placeholder-content-muted p-0 focus:outline-none"
             />
           </div>
 
@@ -589,7 +589,7 @@ export default function HomePortal({
                 placeholder="Min" 
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                className="w-14 bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-content placeholder-content-muted/60 p-0 focus:outline-none"
+                className="w-14 bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-content placeholder-content-muted p-0 focus:outline-none"
               />
               <span className="text-content-muted text-xs">-</span>
               <input 
@@ -597,7 +597,7 @@ export default function HomePortal({
                 placeholder="Max" 
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-14 bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-content placeholder-content-muted/60 p-0 focus:outline-none"
+                className="w-14 bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-content placeholder-content-muted p-0 focus:outline-none"
               />
             </div>
           </div>
