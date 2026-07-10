@@ -455,6 +455,16 @@ export async function initDatabase() {
         ALTER TABLE transactions ADD COLUMN IF NOT EXISTS concept TEXT DEFAULT '';
         ALTER TABLE transactions ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'local';
         ALTER TABLE transactions ADD COLUMN IF NOT EXISTS property_id INTEGER;
+
+        -- Nuevos campos para Configuración de Portal
+        ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS phone VARCHAR(50) DEFAULT '';
+        ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS email VARCHAR(150) DEFAULT '';
+        ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS address VARCHAR(255) DEFAULT '';
+        ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Activo';
+        ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS facebook_url VARCHAR(255) DEFAULT '';
+        ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS instagram_url VARCHAR(255) DEFAULT '';
+        ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS linkedin_url VARCHAR(255) DEFAULT '';
+        ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS youtube_url VARCHAR(255) DEFAULT '';
       END $$;
     `);
     

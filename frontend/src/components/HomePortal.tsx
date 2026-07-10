@@ -499,6 +499,48 @@ export default function HomePortal({
     );
   };
 
+  if (portalSettings?.status === 'Mantenimiento' && !isLoggedIn) {
+    return (
+      <div className={`min-h-screen font-sans flex flex-col items-center justify-center p-6 transition-all ${isDarkMode ? 'dark bg-zinc-950 text-white' : 'bg-slate-50 text-zinc-900'}`}>
+        <div className={`card max-w-md p-8 text-center space-y-6 shadow-2xl border border-edge/60 backdrop-blur-md rounded-2xl animate-in zoom-in-95 duration-300 ${isDarkMode ? 'bg-[#252525] border-edge' : 'bg-white border-slate-200'}`}>
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto animate-bounce">
+            <Lock size={32} />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-black tracking-tight text-accent">Portal en Mantenimiento</h2>
+            <p className="text-xs text-content-secondary leading-relaxed font-semibold">
+              Estamos actualizando nuestro catálogo para ofrecerte la mejor experiencia. Volveremos muy pronto con nuevos proyectos y desarrollos exclusivos.
+            </p>
+          </div>
+          
+          {portalSettings.phone && (
+            <div className="pt-4 border-t border-edge/60">
+              <p className="text-[10px] text-content-muted font-bold uppercase tracking-wider mb-2">Contacto Inmediato</p>
+              <button 
+                onClick={() => {
+                  const phone = portalSettings.phone.replace(/[^0-9]/g, '');
+                  window.open(`https://wa.me/${phone}?text=Hola,%20quisiera%20información%20sobre%20sus%20propiedades`, '_blank');
+                }}
+                className="w-full btn-primary h-10 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-500/10 border-none cursor-pointer"
+              >
+                <Send size={14} className="rotate-45" /> Escríbenos por WhatsApp
+              </button>
+            </div>
+          )}
+
+          <div className="pt-2">
+            <button 
+              onClick={onLoginClick}
+              className="text-xs font-semibold text-content-muted hover:text-accent transition-colors bg-transparent border-none cursor-pointer flex items-center gap-1.5 mx-auto"
+            >
+              <LogIn size={12} /> Acceso Administrativo
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen font-sans flex flex-col transition-all bg-surface-base text-content ${isDarkMode ? 'dark' : ''}`}>
       
@@ -1226,9 +1268,11 @@ export default function HomePortal({
           <div className="space-y-3">
             <h4 className="font-extrabold text-content text-xs uppercase tracking-wider">Contacto</h4>
             <ul className="space-y-2 text-xs">
-              <li className="flex items-center gap-2"><Phone size={12} className="text-accent" /> +51 900 000 000</li>
-              <li className="flex items-center gap-2"><Mail size={12} className="text-accent" /> ventas@chatprex.com</li>
-              <li className="flex items-center gap-2"><Globe size={12} className="text-accent" /> www.chatprex.com</li>
+              <li className="flex items-center gap-2"><Phone size={12} className="text-accent" /> {portalSettings?.phone || '+51 900 000 000'}</li>
+              <li className="flex items-center gap-2"><Mail size={12} className="text-accent" /> {portalSettings?.email || 'ventas@chatprex.com'}</li>
+              {portalSettings?.address && (
+                <li className="flex items-center gap-2"><MapPin size={12} className="text-accent" /> {portalSettings.address}</li>
+              )}
             </ul>
           </div>
 
@@ -1240,7 +1284,7 @@ export default function HomePortal({
             {/* Botones Redes Sociales */}
             <div className="flex gap-2.5">
               <a 
-                href="https://facebook.com" 
+                href={portalSettings?.facebook_url || "https://facebook.com"} 
                 target="_blank" 
                 rel="noreferrer" 
                 className="w-9 h-9 rounded-xl border border-edge hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all text-content-secondary"
@@ -1249,7 +1293,7 @@ export default function HomePortal({
                 <Facebook size={16} />
               </a>
               <a 
-                href="https://instagram.com" 
+                href={portalSettings?.instagram_url || "https://instagram.com"} 
                 target="_blank" 
                 rel="noreferrer" 
                 className="w-9 h-9 rounded-xl border border-edge hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all text-content-secondary"
@@ -1258,7 +1302,7 @@ export default function HomePortal({
                 <Instagram size={16} />
               </a>
               <a 
-                href="https://linkedin.com" 
+                href={portalSettings?.linkedin_url || "https://linkedin.com"} 
                 target="_blank" 
                 rel="noreferrer" 
                 className="w-9 h-9 rounded-xl border border-edge hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all text-content-secondary"
@@ -1267,7 +1311,7 @@ export default function HomePortal({
                 <Linkedin size={16} />
               </a>
               <a 
-                href="https://youtube.com" 
+                href={portalSettings?.youtube_url || "https://youtube.com"} 
                 target="_blank" 
                 rel="noreferrer" 
                 className="w-9 h-9 rounded-xl border border-edge hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all text-content-secondary"
@@ -1276,7 +1320,7 @@ export default function HomePortal({
                 <Youtube size={16} />
               </a>
               <a 
-                href="https://wa.me/51900000000" 
+                href={portalSettings?.phone ? `https://wa.me/${portalSettings.phone.replace(/[^0-9]/g, '')}` : "https://wa.me/51900000000"} 
                 target="_blank" 
                 rel="noreferrer" 
                 className="w-9 h-9 rounded-xl border border-edge hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:scale-105 flex items-center justify-center transition-all text-content-secondary"

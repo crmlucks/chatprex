@@ -45,7 +45,15 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
     banner_image_3,
     about_title,
     about_description,
-    about_image
+    about_image,
+    phone,
+    email,
+    address,
+    status,
+    facebook_url,
+    instagram_url,
+    linkedin_url,
+    youtube_url
   } = req.body;
 
   try {
@@ -59,8 +67,10 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
         `INSERT INTO portal_settings (
           id, logo_day, logo_night, hero_title, hero_subtitle, 
           banner_image_1, banner_image_2, banner_image_3, 
-          about_title, about_description, about_image
-        ) VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          about_title, about_description, about_image,
+          phone, email, address, status,
+          facebook_url, instagram_url, linkedin_url, youtube_url
+        ) VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
         RETURNING *`,
         [
           logo_day || '', logo_night || '', 
@@ -69,7 +79,9 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
           banner_image_1 || '', banner_image_2 || '', banner_image_3 || '',
           about_title || 'Redefiniendo el sector inmobiliario con innovación y pasión',
           about_description || 'En ChatPrex, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces.',
-          about_image || ''
+          about_image || '',
+          phone || '', email || '', address || '', status || 'Activo',
+          facebook_url || '', instagram_url || '', linkedin_url || '', youtube_url || ''
         ]
       );
     } else {
@@ -79,12 +91,16 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
          SET logo_day = $1, logo_night = $2, hero_title = $3, hero_subtitle = $4,
              banner_image_1 = $5, banner_image_2 = $6, banner_image_3 = $7,
              about_title = $8, about_description = $9, about_image = $10,
+             phone = $11, email = $12, address = $13, status = $14,
+             facebook_url = $15, instagram_url = $16, linkedin_url = $17, youtube_url = $18,
              updated_at = NOW()
          WHERE id = 1 RETURNING *`,
         [
           logo_day, logo_night, hero_title, hero_subtitle,
           banner_image_1, banner_image_2, banner_image_3,
-          about_title, about_description, about_image
+          about_title, about_description, about_image,
+          phone, email, address, status,
+          facebook_url, instagram_url, linkedin_url, youtube_url
         ]
       );
     }

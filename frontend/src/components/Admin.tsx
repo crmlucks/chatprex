@@ -26,7 +26,15 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
   banner_image_3: '',
   about_title: '',
   about_description: '',
-  about_image: ''
+  about_image: '',
+  phone: '',
+  email: '',
+  address: '',
+  status: 'Activo',
+  facebook_url: '',
+  instagram_url: '',
+  linkedin_url: '',
+  youtube_url: ''
  });
  const [savingPortal, setSavingPortal] = useState(false);
  const [saveSuccess, setSaveSuccess] = useState(false);
@@ -125,7 +133,15 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
         banner_image_3: data.banner_image_3 || '',
         about_title: data.about_title || '',
         about_description: data.about_description || '',
-        about_image: data.about_image || ''
+        about_image: data.about_image || '',
+        phone: data.phone || '',
+        email: data.email || '',
+        address: data.address || '',
+        status: data.status || 'Activo',
+        facebook_url: data.facebook_url || '',
+        instagram_url: data.instagram_url || '',
+        linkedin_url: data.linkedin_url || '',
+        youtube_url: data.youtube_url || ''
       });
     }
    }
@@ -596,6 +612,52 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                    )}
                  </div>
                  <input type="file" ref={aboutImgRef} accept="image/*" className="hidden" onChange={handlePortalImageUpload('about_image')} />
+               </div>
+             </div>
+           </div>
+
+           {/* SECCIÓN 4: INFORMACIÓN DE CONTACTO, REDES Y ESTADO */}
+           <div className="card p-4 md:p-6 space-y-4">
+             <div className="border-b border-edge pb-2">
+               <h3 className="text-sm font-black uppercase text-content tracking-wider">Sección 4: Información de Contacto, Redes y Estado</h3>
+               <p className="text-[10px] text-content-muted mt-1">Configura el teléfono, correo, dirección, redes sociales y estado del portal público.</p>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div>
+                 <label className={label}>WhatsApp / Teléfono de Ventas</label>
+                 <input type="text" value={portalSettings.phone || ''} onChange={e => setPortalSettings({...portalSettings, phone: e.target.value})} className={input} placeholder="Ej. +51 900 000 000" />
+               </div>
+               <div>
+                 <label className={label}>Correo Electrónico de Ventas</label>
+                 <input type="email" value={portalSettings.email || ''} onChange={e => setPortalSettings({...portalSettings, email: e.target.value})} className={input} placeholder="Ej. ventas@chatprex.com" />
+               </div>
+               <div>
+                 <label className={label}>Dirección Física</label>
+                 <input type="text" value={portalSettings.address || ''} onChange={e => setPortalSettings({...portalSettings, address: e.target.value})} className={input} placeholder="Ej. Av. Larco 123, Miraflores..." />
+               </div>
+               <div>
+                 <label className={label}>Estado del Portal</label>
+                 <select value={portalSettings.status || 'Activo'} onChange={e => setPortalSettings({...portalSettings, status: e.target.value})} className={input}>
+                   <option value="Activo">Activo (Visible al público)</option>
+                   <option value="Mantenimiento">Mantenimiento (Mensaje temporal)</option>
+                 </select>
+               </div>
+               <div>
+                 <label className={label}>Facebook URL</label>
+                 <input type="text" value={portalSettings.facebook_url || ''} onChange={e => setPortalSettings({...portalSettings, facebook_url: e.target.value})} className={input} placeholder="https://facebook.com/tu-pagina" />
+               </div>
+               <div>
+                 <label className={label}>Instagram URL</label>
+                 <input type="text" value={portalSettings.instagram_url || ''} onChange={e => setPortalSettings({...portalSettings, instagram_url: e.target.value})} className={input} placeholder="https://instagram.com/tu-usuario" />
+               </div>
+               <div>
+                 <label className={label}>LinkedIn URL</label>
+                 <input type="text" value={portalSettings.linkedin_url || ''} onChange={e => setPortalSettings({...portalSettings, linkedin_url: e.target.value})} className={input} placeholder="https://linkedin.com/company/tu-empresa" />
+               </div>
+               <div>
+                 <label className={label}>YouTube URL</label>
+                 <input type="text" value={portalSettings.youtube_url || ''} onChange={e => setPortalSettings({...portalSettings, youtube_url: e.target.value})} className={input} placeholder="https://youtube.com/c/tu-canal" />
                </div>
              </div>
            </div>
