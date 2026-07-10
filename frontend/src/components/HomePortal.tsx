@@ -534,27 +534,27 @@ export default function HomePortal({
         <nav className="hidden md:flex items-center gap-8">
           <button 
             onClick={() => { setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className={`text-sm font-semibold transition-colors bg-transparent border-none cursor-pointer ${viewMode === 'portal' ? 'text-accent' : 'text-content-secondary hover:text-accent'}`}
+            className={`text-sm font-semibold transition-colors bg-transparent border-none cursor-pointer ${viewMode === 'portal' ? 'text-accent hover:text-emerald-600 dark:hover:text-emerald-400' : 'text-content hover:text-emerald-600 dark:hover:text-emerald-400'}`}
           >
             Inicio
           </button>
           <button 
             onClick={() => { setViewMode('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className={`text-sm font-semibold transition-colors bg-transparent border-none cursor-pointer ${viewMode === 'catalog' ? 'text-accent' : 'text-content-secondary hover:text-accent'}`}
+            className={`text-sm font-semibold transition-colors bg-transparent border-none cursor-pointer ${viewMode === 'catalog' ? 'text-accent hover:text-emerald-600 dark:hover:text-emerald-400' : 'text-content hover:text-emerald-600 dark:hover:text-emerald-400'}`}
           >
             Propiedades
           </button>
           <a 
             href="#quienes-somos" 
             onClick={() => setViewMode('portal')}
-            className="text-sm font-semibold text-content-secondary hover:text-accent transition-colors"
+            className="text-sm font-semibold text-content hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
           >
             Quiénes Somos
           </a>
           <a 
             href="#contacto" 
             onClick={() => setViewMode('portal')}
-            className="text-sm font-semibold text-content-secondary hover:text-accent transition-colors"
+            className="text-sm font-semibold text-content hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
           >
             Contacto
           </a>
@@ -623,27 +623,27 @@ export default function HomePortal({
           <div className="md:hidden absolute top-full left-0 right-0 bg-surface border-b border-edge shadow-2xl py-3 px-4 flex flex-col gap-1 animate-in slide-in-from-top-5 duration-200 z-50 text-left">
             <button 
               onClick={() => { setIsMobileMenuOpen(false); setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`text-left text-sm font-semibold transition-colors px-3.5 py-2.5 rounded-xl block border-none bg-transparent cursor-pointer ${viewMode === 'portal' ? 'text-accent bg-accent/5' : 'text-content hover:text-accent hover:bg-surface-inset'}`}
+              className={`text-left text-sm font-semibold transition-colors px-3.5 py-2.5 rounded-xl block border-none bg-transparent cursor-pointer w-full ${viewMode === 'portal' ? 'text-accent bg-accent/5 hover:text-emerald-600' : 'text-content hover:text-emerald-600 hover:bg-surface-inset'}`}
             >
               Inicio
             </button>
             <button 
               onClick={() => { setIsMobileMenuOpen(false); setViewMode('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`text-left text-sm font-semibold transition-colors px-3.5 py-2.5 rounded-xl block border-none bg-transparent cursor-pointer ${viewMode === 'catalog' ? 'text-accent bg-accent/5' : 'text-content hover:text-accent hover:bg-surface-inset'}`}
+              className={`text-left text-sm font-semibold transition-colors px-3.5 py-2.5 rounded-xl block border-none bg-transparent cursor-pointer w-full ${viewMode === 'catalog' ? 'text-accent bg-accent/5 hover:text-emerald-600' : 'text-content hover:text-emerald-600 hover:bg-surface-inset'}`}
             >
               Propiedades
             </button>
             <a 
               href="#quienes-somos" 
               onClick={() => { setIsMobileMenuOpen(false); setViewMode('portal'); }}
-              className="text-sm font-semibold text-content-secondary hover:text-accent hover:bg-surface-inset transition-colors px-3.5 py-2.5 rounded-xl block"
+              className="text-sm font-semibold text-content hover:text-emerald-600 hover:bg-surface-inset transition-colors px-3.5 py-2.5 rounded-xl block"
             >
               Quiénes Somos
             </a>
             <a 
               href="#contacto" 
               onClick={() => { setIsMobileMenuOpen(false); setViewMode('portal'); }}
-              className="text-sm font-semibold text-content-secondary hover:text-accent hover:bg-surface-inset transition-colors px-3.5 py-2.5 rounded-xl block"
+              className="text-sm font-semibold text-content hover:text-emerald-600 hover:bg-surface-inset transition-colors px-3.5 py-2.5 rounded-xl block"
             >
               Contacto
             </a>
