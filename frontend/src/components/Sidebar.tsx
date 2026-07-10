@@ -1,4 +1,6 @@
+import React from 'react';
 import { LayoutDashboard, Users, MessageSquare, Calendar, Settings, PieChart, Home, DollarSign, Shield, Zap, Bot, Smartphone, Workflow, Moon, Sun, ChevronRight, ChevronLeft, LogOut, UserCog, PanelLeftClose, PanelLeftOpen, LayoutGrid, Menu, X, Globe } from 'lucide-react';
+
 
 interface SidebarProps {
   activeTab: string;
