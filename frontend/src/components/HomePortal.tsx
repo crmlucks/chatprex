@@ -511,7 +511,7 @@ export default function HomePortal({
       <div className="pt-8 max-w-4xl mx-auto w-full">
         
         {/* Vista Desktop: Barra tipo Cápsula / Airbnb */}
-        <div className="hidden md:flex bg-surface dark:bg-zinc-900/90 border border-accent rounded-full shadow-2xl items-center p-2.5 backdrop-blur-md w-full select-none">
+        <div className="hidden md:flex bg-white dark:bg-zinc-900 border border-accent rounded-full shadow-2xl items-center p-2.5 w-full select-none">
           
           {/* 1. Ubicación (Ciudad, Distrito, Región, Proyecto) */}
           <div className="flex-[1.8] hover:bg-surface-inset dark:hover:bg-zinc-800/40 rounded-full px-6 py-2.5 transition-colors cursor-pointer group text-left">
