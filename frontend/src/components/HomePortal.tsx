@@ -968,7 +968,11 @@ export default function HomePortal({
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                             />
                             <div className="absolute top-3.5 left-3.5">
-                              <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-lg bg-emerald-500/25 text-emerald-500 border border-emerald-500/30 backdrop-blur-sm">
+                              <span className={`text-[10px] font-black tracking-widest uppercase px-2.5 py-1.5 rounded-lg shadow-md border-none text-white ${
+                                p.status?.toLowerCase() === 'disponible' ? 'bg-emerald-600' :
+                                p.status?.toLowerCase() === 'reservado' ? 'bg-amber-600' :
+                                'bg-rose-600'
+                              }`}>
                                 {p.status}
                               </span>
                             </div>
@@ -1282,7 +1286,11 @@ export default function HomePortal({
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                           />
                           <div className="absolute top-3.5 left-3.5">
-                            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-lg bg-emerald-500/25 text-emerald-500 border border-emerald-500/30 backdrop-blur-sm">
+                            <span className={`text-[10px] font-black tracking-widest uppercase px-2.5 py-1.5 rounded-lg shadow-md border-none text-white ${
+                              p.status?.toLowerCase() === 'disponible' ? 'bg-emerald-600' :
+                              p.status?.toLowerCase() === 'reservado' ? 'bg-amber-600' :
+                              'bg-rose-600'
+                            }`}>
                               {p.status}
                             </span>
                           </div>

@@ -572,7 +572,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                  </div>
                  <div>
                    <label className={label}>Descripción Institucional</label>
-                   <textarea required value={portalSettings.about_description || ''} onChange={e => setPortalSettings({...portalSettings, about_description: e.target.value})} className={`${input} h-32 resize-none py-2`} placeholder="En nuestra empresa combinamos..."></textarea>
+                   <textarea required value={portalSettings.about_description || ''} onChange={e => setPortalSettings({...portalSettings, about_description: e.target.value})} className={`${input} min-h-[160px] resize-y py-2`} placeholder="En nuestra empresa combinamos..."></textarea>
                  </div>
                </div>
 
