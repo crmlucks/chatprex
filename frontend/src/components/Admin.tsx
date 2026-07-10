@@ -15,6 +15,8 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
  const [saving, setSaving] = useState(false);
  const projectImgRef = useRef<HTMLInputElement>(null);
 
+  const [portalProperties, setPortalProperties] = useState<any[]>([]);
+
  // Portal Settings state
  const [portalSettings, setPortalSettings] = useState<any>({
   logo_day: '',
@@ -120,33 +122,61 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
     const res = await fetch(`${API_URL}/api/data/sources`, { headers });
     if(res.ok) setSources(await res.json());
    } else if (tab === 'portal') {
-    const res = await fetch(`${API_URL}/api/portal-settings`, { headers });
-    if(res.ok) {
-      const data = await res.json();
-      setPortalSettings({
-        logo_day: data.logo_day || '',
-        logo_night: data.logo_night || '',
-        hero_title: data.hero_title || '',
-        hero_subtitle: data.hero_subtitle || '',
-        banner_image_1: data.banner_image_1 || '',
-        banner_image_2: data.banner_image_2 || '',
-        banner_image_3: data.banner_image_3 || '',
-        about_title: data.about_title || '',
-        about_description: data.about_description || '',
-        about_image: data.about_image || '',
-        phone: data.phone || '',
-        email: data.email || '',
-        address: data.address || '',
-        status: data.status || 'Activo',
-        facebook_url: data.facebook_url || '',
-        instagram_url: data.instagram_url || '',
-        linkedin_url: data.linkedin_url || '',
-        youtube_url: data.youtube_url || ''
-      });
+     const res = await fetch(`${API_URL}/api/portal-settings`, { headers });
+     if(res.ok) {
+       const data = await res.json();
+       setPortalSettings({
+         logo_day: data.logo_day || '',
+         logo_night: data.logo_night || '',
+         hero_title: data.hero_title || '',
+         hero_subtitle: data.hero_subtitle || '',
+         banner_image_1: data.banner_image_1 || '',
+         banner_image_2: data.banner_image_2 || '',
+         banner_image_3: data.banner_image_3 || '',
+         about_title: data.about_title || '',
+         about_description: data.about_description || '',
+         about_image: data.about_image || '',
+         phone: data.phone || '',
+         email: data.email || '',
+         address: data.address || '',
+         status: data.status || 'Activo',
+         facebook_url: data.facebook_url || '',
+         instagram_url: data.instagram_url || '',
+         linkedin_url: data.linkedin_url || '',
+         youtube_url: data.youtube_url || ''
+       });
+     }
+     const propRes = await fetch(`${API_URL}/api/properties`, { headers });
+     if (propRes.ok) {
+       setPortalProperties(await propRes.json());
+     }
     }
-   }
-  } catch (err) {}
- };
+   } catch (err) {}
+  };
+
+  const handleTogglePropertySetting = async (property: any, field: 'featured' | 'visible', value: boolean) => {
+    try {
+      const updatedProperty = {
+        ...property,
+        [field]: value
+      };
+      
+      const res = await fetch(`${API_URL}/api/properties/${property.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedProperty)
+      });
+      
+      if (res.ok) {
+        setPortalProperties(prev => prev.map(p => p.id === property.id ? { ...p, [field]: value } : p));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
  const openModal = (type: string, item: any = null) => {
    if (item) {
@@ -659,6 +689,86 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                  <label className={label}>YouTube URL</label>
                  <input type="text" value={portalSettings.youtube_url || ''} onChange={e => setPortalSettings({...portalSettings, youtube_url: e.target.value})} className={input} placeholder="https://youtube.com/c/tu-canal" />
                </div>
+             </div>
+           </div>
+
+           {/* SECCIÓN 5: GESTIÓN DE PROPIEDADES EN EL PORTAL */}
+           <div className="card p-4 md:p-6 space-y-4">
+             <div className="border-b border-edge pb-2">
+               <h3 className="text-sm font-black uppercase text-content tracking-wider">Sección 5: Propiedades en el Portal Público</h3>
+               <p className="text-[10px] text-content-muted mt-1">
+                 Gestiona rápidamente qué propiedades se muestran en el portal y cuáles se marcan como destacadas (máximo 8 recomendadas).
+               </p>
+             </div>
+
+             <div className="overflow-x-auto rounded-xl border border-edge">
+               <table className="w-full text-left border-collapse text-xs">
+                 <thead>
+                   <tr className={`text-[10px] font-bold text-content-muted border-b uppercase tracking-wider ${dc ? 'bg-surface-raised border-edge' : 'bg-surface-inset border-edge'}`}>
+                     <th className="px-4 py-3">Inmueble</th>
+                     <th className="px-4 py-3">Precio</th>
+                     <th className="px-4 py-3">Estado</th>
+                     <th className="px-4 py-3 text-center">Destacada</th>
+                     <th className="px-4 py-3 text-center">Visible en Web</th>
+                   </tr>
+                 </thead>
+                 <tbody className={`divide-y ${dc ? 'divide-edge' : 'divide-slate-100'}`}>
+                   {portalProperties.length === 0 ? (
+                     <tr>
+                       <td colSpan={5} className="px-4 py-8 text-center text-content-muted font-bold uppercase">
+                         No hay propiedades registradas
+                       </td>
+                     </tr>
+                   ) : (
+                     portalProperties.map((p: any) => {
+                       const imgUrl = (Array.isArray(p.images) && p.images[0]) || (typeof p.images === 'string' && JSON.parse(p.images)?.[0]) || p.avatar || p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=150&q=80';
+                       return (
+                         <tr key={p.id} className="hover:bg-surface-inset transition-colors">
+                           <td className="px-4 py-3">
+                             <div className="flex items-center gap-3">
+                               <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-edge">
+                                 <img src={imgUrl} className="w-full h-full object-cover" alt="" />
+                               </div>
+                               <div className="flex flex-col min-w-0">
+                                 <span className="font-bold text-content truncate max-w-[200px]">{p.name}</span>
+                                 <span className="text-[9px] text-accent font-semibold">{p.project || 'Proyecto Independiente'}</span>
+                               </div>
+                             </div>
+                           </td>
+                           <td className="px-4 py-3 font-semibold text-content-secondary">
+                             {p.currency} {Number(p.price).toLocaleString()}
+                           </td>
+                           <td className="px-4 py-3">
+                             <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-tight ${
+                               p.status?.toLowerCase() === 'disponible' ? 'bg-emerald-500/10 text-emerald-500' :
+                               p.status?.toLowerCase() === 'reservado' ? 'bg-amber-500/10 text-amber-500' :
+                               'bg-rose-500/10 text-rose-500'
+                             }`}>
+                               {p.status}
+                             </span>
+                           </td>
+                           <td className="px-4 py-3 text-center">
+                             <input 
+                               type="checkbox" 
+                               checked={p.featured || false} 
+                               onChange={e => handleTogglePropertySetting(p, 'featured', e.target.checked)} 
+                               className="w-4 h-4 rounded border-edge text-accent focus:ring-0 cursor-pointer"
+                             />
+                           </td>
+                           <td className="px-4 py-3 text-center">
+                             <input 
+                               type="checkbox" 
+                               checked={p.visible !== false} 
+                               onChange={e => handleTogglePropertySetting(p, 'visible', e.target.checked)} 
+                               className="w-4 h-4 rounded border-edge text-accent focus:ring-0 cursor-pointer"
+                             />
+                           </td>
+                         </tr>
+                       );
+                     })
+                   )}
+                 </tbody>
+               </table>
              </div>
            </div>
 
