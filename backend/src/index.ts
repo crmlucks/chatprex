@@ -19,6 +19,7 @@ import crudRouter from './crudRoutes';
 import { campaignRouter } from './campaignRoutes';
 import { analyticsRouter } from './analyticsRoutes';
 import { voiceRouter, setupVoiceWebSockets } from './twilioVoice';
+import { portalSettingsRouter } from './portalSettingsRoutes';
 
 const app = express();
 const server = http.createServer(app);
@@ -46,6 +47,7 @@ app.use('/api/ai-config', aiConfigRouter);
 app.use('/api/data', crudRouter);
 app.use('/api/campaigns', campaignRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/portal-settings', portalSettingsRouter);
 
 // ─── Rutas de WhatsApp ───
 app.use('/api/webhook/meta', whatsappRouter);

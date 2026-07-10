@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
+const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean; defaultTab?: string }) => {
  const { token } = useAuth();
- const [tab, setTab] = useState('proyectos');
+ const [tab, setTab] = useState(defaultTab);
  const [modalType, setModalType] = useState<string | null>(null);
  const [projects, setProjects] = useState<any[]>([]);
  const [pipeline, setPipeline] = useState<any[]>([]);
@@ -14,6 +14,34 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [formData, setFormData] = useState<any>({});
  const [saving, setSaving] = useState(false);
  const projectImgRef = useRef<HTMLInputElement>(null);
+
+ // Portal Settings state
+ const [portalSettings, setPortalSettings] = useState<any>({
+  logo_day: '',
+  logo_night: '',
+  hero_title: '',
+  hero_subtitle: '',
+  banner_image_1: '',
+  banner_image_2: '',
+  banner_image_3: '',
+  about_title: '',
+  about_description: '',
+  about_image: ''
+ });
+ const [savingPortal, setSavingPortal] = useState(false);
+ const [saveSuccess, setSaveSuccess] = useState(false);
+
+ // File input refs for portal uploads
+ const logoDayRef = useRef<HTMLInputElement>(null);
+ const logoNightRef = useRef<HTMLInputElement>(null);
+ const banner1Ref = useRef<HTMLInputElement>(null);
+ const banner2Ref = useRef<HTMLInputElement>(null);
+ const banner3Ref = useRef<HTMLInputElement>(null);
+ const aboutImgRef = useRef<HTMLInputElement>(null);
+
+ useEffect(() => {
+   setTab(defaultTab);
+ }, [defaultTab]);
 
  const handleProjectImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -27,6 +55,44 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       reader.readAsDataURL(file);
     });
     e.target.value = '';
+  };
+
+  const handlePortalImageUpload = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPortalSettings((prev: any) => ({
+        ...prev,
+        [key]: reader.result as string
+      }));
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleSavePortal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingPortal(true);
+    setSaveSuccess(false);
+    try {
+      const res = await fetch(`${API_URL}/api/portal-settings`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(portalSettings)
+      });
+      if (res.ok) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingPortal(false);
+    }
   };
 
  useEffect(() => {
@@ -45,6 +111,23 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    } else if (tab === 'fuentes') {
     const res = await fetch(`${API_URL}/api/data/sources`, { headers });
     if(res.ok) setSources(await res.json());
+   } else if (tab === 'portal') {
+    const res = await fetch(`${API_URL}/api/portal-settings`, { headers });
+    if(res.ok) {
+      const data = await res.json();
+      setPortalSettings({
+        logo_day: data.logo_day || '',
+        logo_night: data.logo_night || '',
+        hero_title: data.hero_title || '',
+        hero_subtitle: data.hero_subtitle || '',
+        banner_image_1: data.banner_image_1 || '',
+        banner_image_2: data.banner_image_2 || '',
+        banner_image_3: data.banner_image_3 || '',
+        about_title: data.about_title || '',
+        about_description: data.about_description || '',
+        about_image: data.about_image || ''
+      });
+    }
    }
   } catch (err) {}
  };
@@ -129,6 +212,7 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       <MenuBtn active={tab === 'proyectos'} onClick={() => setTab('proyectos')} icon={<Layers size={18} />} label="Proyectos y desarrollos" dc={dc} />
       <MenuBtn active={tab === 'pipeline'} onClick={() => setTab('pipeline')} icon={<Target size={18} />} label="Etapas del pipeline" dc={dc} />
       <MenuBtn active={tab === 'fuentes'} onClick={() => setTab('fuentes')} icon={<Globe size={18} />} label="Fuentes de origen" dc={dc} />
+      <MenuBtn active={tab === 'portal'} onClick={() => setTab('portal')} icon={<Layout size={18} />} label="Portal Web" dc={dc} />
      </div>
     </div>
 
@@ -301,7 +385,231 @@ const Admin = ({ isDarkMode }: { isDarkMode?: boolean }) => {
        </div>
       </div>
      )}
-    </div>
+     
+     {tab === 'portal' && (
+       <div className="space-y-6">
+         {/* CABECERA */}
+         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+           <div>
+            <h2 className="h2">Configuración del Portal Web</h2>
+            <p className="body-text text-sm mt-0.5">Personaliza el aspecto, banners e información sobre nosotros de tu portal inmobiliario.</p>
+           </div>
+         </div>
+
+         {saveSuccess && (
+           <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-2">
+             <Plus size={16} className="rotate-45" /> Configuración del portal guardada con éxito.
+           </div>
+         )}
+
+         <form onSubmit={handleSavePortal} className="space-y-6">
+           
+           {/* SECCIÓN 1: LOGOTIPO */}
+           <div className="card p-4 md:p-6 space-y-4">
+             <div className="border-b border-edge pb-2">
+               <h3 className="text-sm font-black uppercase text-content tracking-wider">Sección 1: Logotipos del Portal</h3>
+               <p className="text-[10px] text-content-muted mt-1">Carga los logotipos oficiales de tu empresa para modo día (fondo claro) y modo noche (fondo oscuro).</p>
+             </div>
+             
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               {/* LOGO DÍA */}
+               <div className="space-y-3">
+                 <label className={label}>Logo Modo Día (Recomendado: 180x45 px, PNG/SVG transparente)</label>
+                 <div className="flex items-center gap-4">
+                   <div className="w-48 h-16 rounded-xl border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                     {portalSettings.logo_day ? (
+                       <img src={portalSettings.logo_day} className="max-w-full max-h-full object-contain p-2" alt="Logo Día" />
+                     ) : (
+                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Logo Predeterminado</span>
+                     )}
+                   </div>
+                   <div className="flex flex-col gap-2">
+                     <button type="button" onClick={() => logoDayRef.current?.click()} className="px-3 py-1.5 rounded-lg bg-surface-raised border border-edge text-[10px] font-bold text-content hover:bg-surface-inset transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+                       <Upload size={12} /> Cargar Logo
+                     </button>
+                     {portalSettings.logo_day && (
+                       <button type="button" onClick={() => setPortalSettings((prev: any) => ({...prev, logo_day: ''}))} className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[10px] font-bold transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer border-none">
+                         <XCircle size={12} /> Eliminar
+                       </button>
+                     )}
+                   </div>
+                 </div>
+                 <input type="file" ref={logoDayRef} accept="image/*" className="hidden" onChange={handlePortalImageUpload('logo_day')} />
+               </div>
+
+               {/* LOGO NOCHE */}
+               <div className="space-y-3">
+                 <label className={label}>Logo Modo Noche (Recomendado: 180x45 px, PNG/SVG transparente)</label>
+                 <div className="flex items-center gap-4">
+                   <div className="w-48 h-16 rounded-xl border border-slate-800 bg-slate-950 flex items-center justify-center overflow-hidden shrink-0">
+                     {portalSettings.logo_night ? (
+                       <img src={portalSettings.logo_night} className="max-w-full max-h-full object-contain p-2" alt="Logo Noche" />
+                     ) : (
+                       <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tight">Logo Predeterminado</span>
+                     )}
+                   </div>
+                   <div className="flex flex-col gap-2">
+                     <button type="button" onClick={() => logoNightRef.current?.click()} className="px-3 py-1.5 rounded-lg bg-surface-raised border border-edge text-[10px] font-bold text-content hover:bg-surface-inset transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+                       <Upload size={12} /> Cargar Logo
+                     </button>
+                     {portalSettings.logo_night && (
+                       <button type="button" onClick={() => setPortalSettings((prev: any) => ({...prev, logo_night: ''}))} className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[10px] font-bold transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer border-none">
+                         <XCircle size={12} /> Eliminar
+                       </button>
+                     )}
+                   </div>
+                 </div>
+                 <input type="file" ref={logoNightRef} accept="image/*" className="hidden" onChange={handlePortalImageUpload('logo_night')} />
+               </div>
+             </div>
+           </div>
+
+           {/* SECCIÓN 2: BANNER Y TEXTO PRINCIPAL */}
+           <div className="card p-4 md:p-6 space-y-4">
+             <div className="border-b border-edge pb-2">
+               <h3 className="text-sm font-black uppercase text-content tracking-wider">Sección 2: Banner y Encabezado Hero</h3>
+               <p className="text-[10px] text-content-muted mt-1">Configura el título de presentación y el carrusel de 3 imágenes de fondo que cautivarán a tus clientes.</p>
+             </div>
+
+             <div className="space-y-4">
+               <div>
+                 <label className={label}>Título Principal (H1)</label>
+                 <input required type="text" value={portalSettings.hero_title || ''} onChange={e => setPortalSettings({...portalSettings, hero_title: e.target.value})} className={input} placeholder="Ej. Encuentra la propiedad perfecta..." />
+               </div>
+               <div>
+                 <label className={label}>Subtítulo Descriptivo</label>
+                 <textarea required value={portalSettings.hero_subtitle || ''} onChange={e => setPortalSettings({...portalSettings, hero_subtitle: e.target.value})} className={`${input} h-16 resize-none py-2`} placeholder="Explora las mejores casas y departamentos..."></textarea>
+               </div>
+
+               <div>
+                 <label className={label}>Carrusel de Imágenes (Subir 3 imágenes - Recomendado: 1920x800 px, JPG/WebP optimizado)</label>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                   {/* BANNER 1 */}
+                   <div className="border border-edge rounded-xl p-3 flex flex-col items-center gap-3 bg-surface-inset">
+                     <span className="text-[9px] font-bold text-content-muted uppercase">Banner 1</span>
+                     <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-900 border border-edge flex items-center justify-center shrink-0">
+                       {portalSettings.banner_image_1 ? (
+                         <img src={portalSettings.banner_image_1} className="w-full h-full object-cover" alt="Banner 1" />
+                       ) : (
+                         <span className="text-[9px] text-content-muted uppercase font-bold text-center p-2">Imagen por Defecto</span>
+                       )}
+                     </div>
+                     <div className="flex gap-2 w-full justify-center">
+                       <button type="button" onClick={() => banner1Ref.current?.click()} className="px-2 py-1 rounded bg-surface-raised border border-edge text-[8px] font-bold text-content hover:bg-surface-inset transition-all active:scale-95 flex items-center gap-1 cursor-pointer">
+                         <Upload size={10} /> Subir
+                       </button>
+                       {portalSettings.banner_image_1 && (
+                         <button type="button" onClick={() => setPortalSettings((prev: any) => ({...prev, banner_image_1: ''}))} className="px-2 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[8px] font-bold transition-all active:scale-95 flex items-center gap-1 cursor-pointer border-none">
+                           <X size={10} /> Quitar
+                         </button>
+                       )}
+                     </div>
+                     <input type="file" ref={banner1Ref} accept="image/*" className="hidden" onChange={handlePortalImageUpload('banner_image_1')} />
+                   </div>
+
+                   {/* BANNER 2 */}
+                   <div className="border border-edge rounded-xl p-3 flex flex-col items-center gap-3 bg-surface-inset">
+                     <span className="text-[9px] font-bold text-content-muted uppercase">Banner 2</span>
+                     <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-900 border border-edge flex items-center justify-center shrink-0">
+                       {portalSettings.banner_image_2 ? (
+                         <img src={portalSettings.banner_image_2} className="w-full h-full object-cover" alt="Banner 2" />
+                       ) : (
+                         <span className="text-[9px] text-content-muted uppercase font-bold text-center p-2">Imagen por Defecto</span>
+                       )}
+                     </div>
+                     <div className="flex gap-2 w-full justify-center">
+                       <button type="button" onClick={() => banner2Ref.current?.click()} className="px-2 py-1 rounded bg-surface-raised border border-edge text-[8px] font-bold text-content hover:bg-surface-inset transition-all active:scale-95 flex items-center gap-1 cursor-pointer">
+                         <Upload size={10} /> Subir
+                       </button>
+                       {portalSettings.banner_image_2 && (
+                         <button type="button" onClick={() => setPortalSettings((prev: any) => ({...prev, banner_image_2: ''}))} className="px-2 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[8px] font-bold transition-all active:scale-95 flex items-center gap-1 cursor-pointer border-none">
+                           <X size={10} /> Quitar
+                         </button>
+                       )}
+                     </div>
+                     <input type="file" ref={banner2Ref} accept="image/*" className="hidden" onChange={handlePortalImageUpload('banner_image_2')} />
+                   </div>
+
+                   {/* BANNER 3 */}
+                   <div className="border border-edge rounded-xl p-3 flex flex-col items-center gap-3 bg-surface-inset">
+                     <span className="text-[9px] font-bold text-content-muted uppercase">Banner 3</span>
+                     <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-900 border border-edge flex items-center justify-center shrink-0">
+                       {portalSettings.banner_image_3 ? (
+                         <img src={portalSettings.banner_image_3} className="w-full h-full object-cover" alt="Banner 3" />
+                       ) : (
+                         <span className="text-[9px] text-content-muted uppercase font-bold text-center p-2">Imagen por Defecto</span>
+                       )}
+                     </div>
+                     <div className="flex gap-2 w-full justify-center">
+                       <button type="button" onClick={() => banner3Ref.current?.click()} className="px-2 py-1 rounded bg-surface-raised border border-edge text-[8px] font-bold text-content hover:bg-surface-inset transition-all active:scale-95 flex items-center gap-1 cursor-pointer">
+                         <Upload size={10} /> Subir
+                       </button>
+                       {portalSettings.banner_image_3 && (
+                         <button type="button" onClick={() => setPortalSettings((prev: any) => ({...prev, banner_image_3: ''}))} className="px-2 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[8px] font-bold transition-all active:scale-95 flex items-center gap-1 cursor-pointer border-none">
+                           <X size={10} /> Quitar
+                         </button>
+                       )}
+                     </div>
+                     <input type="file" ref={banner3Ref} accept="image/*" className="hidden" onChange={handlePortalImageUpload('banner_image_3')} />
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+
+           {/* SECCIÓN 3: SOBRE NOSOTROS */}
+           <div className="card p-4 md:p-6 space-y-4">
+             <div className="border-b border-edge pb-2">
+               <h3 className="text-sm font-black uppercase text-content tracking-wider">Sección 3: Sección Sobre Nosotros ("Quiénes Somos")</h3>
+               <p className="text-[10px] text-content-muted mt-1">Configura la narrativa institucional y la imagen de presentación de la empresa.</p>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div className="md:col-span-2 space-y-4">
+                 <div>
+                   <label className={label}>Título de Sección ("Sobre Nosotros")</label>
+                   <input required type="text" value={portalSettings.about_title || ''} onChange={e => setPortalSettings({...portalSettings, about_title: e.target.value})} className={input} placeholder="Ej. Redefiniendo el sector inmobiliario..." />
+                 </div>
+                 <div>
+                   <label className={label}>Descripción Institucional</label>
+                   <textarea required value={portalSettings.about_description || ''} onChange={e => setPortalSettings({...portalSettings, about_description: e.target.value})} className={`${input} h-32 resize-none py-2`} placeholder="En nuestra empresa combinamos..."></textarea>
+                 </div>
+               </div>
+
+               <div className="space-y-3">
+                 <label className={label}>Imagen Descriptiva (Recomendado: 800x500 px, JPG/WebP)</label>
+                 <div className="w-full h-36 rounded-xl border border-edge overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center shrink-0">
+                   {portalSettings.about_image ? (
+                     <img src={portalSettings.about_image} className="w-full h-full object-cover" alt="Quiénes Somos" />
+                   ) : (
+                     <span className="text-[10px] text-content-muted uppercase font-bold text-center p-2">Imagen por Defecto</span>
+                   )}
+                 </div>
+                 <div className="flex gap-2 justify-center">
+                   <button type="button" onClick={() => aboutImgRef.current?.click()} className="px-3 py-1.5 rounded-lg bg-surface-raised border border-edge text-[10px] font-bold text-content hover:bg-surface-inset transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+                     <Upload size={12} /> Cargar Imagen
+                   </button>
+                   {portalSettings.about_image && (
+                     <button type="button" onClick={() => setPortalSettings((prev: any) => ({...prev, about_image: ''}))} className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[10px] font-bold transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer border-none">
+                       <XCircle size={12} /> Eliminar
+                     </button>
+                   )}
+                 </div>
+                 <input type="file" ref={aboutImgRef} accept="image/*" className="hidden" onChange={handlePortalImageUpload('about_image')} />
+               </div>
+             </div>
+           </div>
+
+           {/* BOTÓN GUARDAR */}
+           <div className="flex justify-end pt-4 border-t border-edge">
+             <button type="submit" disabled={savingPortal} className="btn-primary py-2.5 px-6 disabled:opacity-50 flex items-center gap-2 cursor-pointer border-none">
+               {savingPortal ? 'Guardando...' : 'Guardar Configuración'}
+             </button>
+           </div>
+         </form>
+       </div>
+      )}
+     </div>
    </div>
 
    {/* Modal Genérico Standardized */}

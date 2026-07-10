@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Login';
+import HomePortal from './components/HomePortal';
 import ChatInterface from './components/ChatInterface';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -26,6 +27,7 @@ import { Bot, Loader2 } from 'lucide-react';
 function AuthenticatedApp() {
  const { user, loading, logout, hasRole } = useAuth();
  const [activeTab, setActiveTab] = useState('Dashboard');
+ const [showLogin, setShowLogin] = useState(false);
  const [isDarkMode, setIsDarkMode] = useState(() => {
   const saved = localStorage.getItem('prexup_theme');
   if (saved) return saved === 'dark';
@@ -101,10 +103,34 @@ function AuthenticatedApp() {
   );
  }
 
- // Si no hay usuario, mostrar Login
- if (!user) {
-  return <Login />;
- }
+  // Si no hay usuario, mostrar el Portal o la pantalla de Login
+  if (!user) {
+   if (showLogin) {
+    return <Login onBack={() => setShowLogin(false)} />;
+   }
+   return (
+    <HomePortal
+     isDarkMode={isDarkMode}
+     setIsDarkMode={setIsDarkMode}
+     onLoginClick={() => setShowLogin(true)}
+     isLoggedIn={false}
+     onGoToDashboard={() => {}}
+    />
+   );
+  }
+
+  // Si está autenticado pero quiere ver el portal público en pantalla completa
+  if (activeTab === 'Ver Portal') {
+   return (
+    <HomePortal
+     isDarkMode={isDarkMode}
+     setIsDarkMode={setIsDarkMode}
+     onLoginClick={() => {}}
+     isLoggedIn={true}
+     onGoToDashboard={() => setActiveTab('Dashboard')}
+    />
+   );
+  }
 
  /**
   * Control de acceso por rol:
@@ -136,10 +162,10 @@ function AuthenticatedApp() {
    case 'Finanzas': return <Finances isDarkMode={isDarkMode} />;
    case 'Campañas': return <Campaigns isDarkMode={isDarkMode} />;
    case 'Inteligencia': return <LeadIntelligence isDarkMode={isDarkMode} />;
-   case 'Administración': return <Admin isDarkMode={isDarkMode} />;
+   case 'Administración': return <Admin isDarkMode={isDarkMode} defaultTab="proyectos" />;
    case 'Conexión WP': return <Chatbots isDarkMode={isDarkMode} />;
    case 'Constructor Bots': return <ChatbotBuilder isDarkMode={isDarkMode} />;
-   case 'Configuración': return <Admin isDarkMode={isDarkMode} />;
+   case 'Configuración': return <Admin isDarkMode={isDarkMode} defaultTab="portal" />;
    case 'Automatización': return <Automation isDarkMode={isDarkMode} />;
    case 'Usuarios': return <UserManagement isDarkMode={isDarkMode} />;
    default: return (

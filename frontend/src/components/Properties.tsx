@@ -50,7 +50,8 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
   id: null as number | null, name: '', project: '', type: 'departamento', 
   price: '', currency: 'USD', location: '', area: '', 
   rooms: '', bathrooms: '', parking: '', floor: '',
-  notes: '', status: 'disponible', avatar: '', images: [] as string[]
+  notes: '', status: 'disponible', avatar: '', images: [] as string[],
+  featured: false, visible: true
  });
 
  const handleSave = async (e: React.FormEvent) => {
@@ -82,7 +83,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
   } catch (err) { console.error(err); }
  };
 
- const resetForm = () => setFormData({ id: null, name: '', project: '', type: 'departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', bathrooms: '', parking: '', floor: '', notes: '', status: 'disponible', avatar: '', images: [] });
+ const resetForm = () => setFormData({ id: null, name: '', project: '', type: 'departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', bathrooms: '', parking: '', floor: '', notes: '', status: 'disponible', avatar: '', images: [], featured: false, visible: true });
 
  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isAvatar: boolean = false) => {
   const files = e.target.files;
@@ -211,7 +212,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
               )}
             </div>
            <div className="absolute bottom-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-             <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || []}); setShowModal(true); }} className="w-8 h-8 rounded-lg bg-surface/90 backdrop-blur text-content flex items-center justify-center hover:bg-accent hover:text-white transition-colors shadow-sm"><Edit2 size={14} /></button>
+             <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || [], featured: p.featured ?? false, visible: p.visible ?? true}); setShowModal(true); }} className="w-8 h-8 rounded-lg bg-surface/90 backdrop-blur text-content flex items-center justify-center hover:bg-accent hover:text-white transition-colors shadow-sm"><Edit2 size={14} /></button>
              { (user?.role === 'propietario' || user?.role === 'administrador') && (
                <button onClick={() => deleteProperty(p.id)} className="w-8 h-8 rounded-lg bg-rose-500/90 backdrop-blur text-white flex items-center justify-center hover:bg-rose-600 transition-colors shadow-sm"><Trash2 size={14} /></button>
              )}
@@ -317,7 +318,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                </td>
                <td className="px-3 py-2 md:px-5 md:py-3 text-right">
                 <div className="flex justify-end gap-1">
-                  <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || []}); setShowModal(true); }} className={`p-1.5 md:p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
+                  <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || [], featured: p.featured ?? false, visible: p.visible ?? true}); setShowModal(true); }} className={`p-1.5 md:p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
                   {(user?.role === 'propietario' || user?.role === 'administrador') && (
                     <button onClick={() => deleteProperty(p.id)} className="p-1.5 md:p-2 rounded-lg text-rose-400 hover:text-rose-50 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
                   )}
@@ -428,6 +429,32 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
               <label className="label-text mb-1.5 block">Notas internas</label>
               <textarea rows={3} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} placeholder="Detalles adicionales..." className={inputCls + " resize-none h-24"} />
             </div>
+
+            {/* OPCIONES DE PORTAL PÚBLICO */}
+            <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-edge bg-surface-inset dark:bg-surface-raised cursor-pointer select-none">
+                <input type="checkbox" checked={formData.featured || false} onChange={e => setFormData({...formData, featured: e.target.checked})} className="w-4 h-4 rounded border-edge text-accent focus:ring-0 cursor-pointer" />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-content">Propiedad Destacada</span>
+                  <span className="text-[9px] text-content-muted">Mostrar en el inicio del portal</span>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-edge bg-surface-inset dark:bg-surface-raised cursor-pointer select-none">
+                <input type="checkbox" checked={formData.visible !== false} onChange={e => setFormData({...formData, visible: e.target.checked})} className="w-4 h-4 rounded border-edge text-accent focus:ring-0 cursor-pointer" />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-content">Visible en la Web</span>
+                  <span className="text-[9px] text-content-muted">Mostrar en el portal público</span>
+                </div>
+              </label>
+            </div>
+
+            {/* ADVERTENCIA DE LÍMITE DE DESTACADAS */}
+            {formData.featured && properties.filter(p => p.featured && p.id !== formData.id).length >= 8 && (
+              <div className="sm:col-span-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold flex items-center gap-2">
+                <Info size={14} className="shrink-0" />
+                <span>Atención: Ya tienes {properties.filter(p => p.featured && p.id !== formData.id).length} propiedades destacadas en el portal. Se recomienda un máximo de 8 para una óptima visualización en la página principal.</span>
+              </div>
+            )}
            </div>
 
           {/* Images Section */}

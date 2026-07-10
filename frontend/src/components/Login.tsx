@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, LogIn, UserPlus, Bot, ShieldCheck, Loader2 } from 'lucide-react';
 
-const Login = () => {
+const Login = ({ onBack }: { onBack?: () => void }) => {
  const { login, setup, needsSetup, demoLogin } = useAuth();
  const [isSetup, setIsSetup] = useState(false);
  const [showPassword, setShowPassword] = useState(false);
@@ -146,7 +146,16 @@ const Login = () => {
          <><LogIn size={18} /> Entrar al sistema</>
         )}
        </button>
-       </div>
+       {onBack && (
+        <button
+         type="button"
+         onClick={onBack}
+         className="w-full py-2.5 rounded-lg bg-transparent border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-850 text-zinc-400 hover:text-content font-semibold text-xs transition-colors"
+        >
+         Volver al Portal Público
+        </button>
+       )}
+      </div>
      </form>
     </div>
 

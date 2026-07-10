@@ -114,6 +114,8 @@ export async function initDatabase() {
         image         TEXT DEFAULT '',
         avatar        TEXT DEFAULT '',
         images        JSONB DEFAULT '[]'::jsonb,
+        featured      BOOLEAN DEFAULT false,
+        visible       BOOLEAN DEFAULT true,
         created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
@@ -122,6 +124,8 @@ export async function initDatabase() {
       await client.query('ALTER TABLE properties ADD COLUMN IF NOT EXISTS bathrooms VARCHAR(20) DEFAULT \'\';');
       await client.query('ALTER TABLE properties ADD COLUMN IF NOT EXISTS parking VARCHAR(20) DEFAULT \'\';');
       await client.query('ALTER TABLE properties ADD COLUMN IF NOT EXISTS floor VARCHAR(20) DEFAULT \'\';');
+      await client.query('ALTER TABLE properties ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT false;');
+      await client.query('ALTER TABLE properties ADD COLUMN IF NOT EXISTS visible BOOLEAN DEFAULT true;');
     } catch(e) {}
     // Crear tabla evolution_messages
     await client.query(`
@@ -336,6 +340,24 @@ export async function initDatabase() {
       );
     `);
 
+    // Crear tabla portal_settings
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS portal_settings (
+        id                  SERIAL PRIMARY KEY,
+        logo_day            TEXT DEFAULT '',
+        logo_night          TEXT DEFAULT '',
+        hero_title          VARCHAR(255) DEFAULT 'Encuentra la propiedad perfecta para tu estilo de vida',
+        hero_subtitle       TEXT DEFAULT 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de ChatPrex.',
+        banner_image_1      TEXT DEFAULT '',
+        banner_image_2      TEXT DEFAULT '',
+        banner_image_3      TEXT DEFAULT '',
+        about_title         VARCHAR(255) DEFAULT 'Redefiniendo el sector inmobiliario con innovación y pasión',
+        about_description   TEXT DEFAULT 'En ChatPrex, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces. Nuestra misión es guiarte en el proceso de compra, venta o alquiler de propiedades de forma transparente, rápida y eficiente, asegurándote decisiones rentables y seguras.',
+        about_image         TEXT DEFAULT '',
+        updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
     // Inicializar datos por defecto si están vacías
     const pipelineCount = await client.query('SELECT COUNT(*) FROM pipeline_stages');
     if (parseInt(pipelineCount.rows[0].count) === 0) {
@@ -362,7 +384,21 @@ export async function initDatabase() {
       `);
     }
 
-    console.log('[DB] Base de datos sincronizada correctamente (incluye proyectos, pipeline y fuentes)');
+    const portalConfigCount = await client.query('SELECT COUNT(*) FROM portal_settings');
+    if (parseInt(portalConfigCount.rows[0].count) === 0) {
+      await client.query(`
+        INSERT INTO portal_settings (
+          hero_title, hero_subtitle, about_title, about_description
+        ) VALUES (
+          'Encuentra la propiedad perfecta para tu estilo de vida',
+          'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de ChatPrex.',
+          'Redefiniendo el sector inmobiliario con innovación y pasión',
+          'En ChatPrex, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces. Nuestra misión es guiarte en el proceso de compra, venta o alquiler de propiedades de forma transparente, rápida y eficiente, asegurándote decisiones rentables y seguras.'
+        )
+      `);
+    }
+
+    console.log('[DB] Base de datos sincronizada correctamente (incluye proyectos, pipeline, fuentes y portal_settings)');
 
     // Add new columns if they don't exist (for existing installs)
     await client.query(`

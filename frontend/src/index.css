@@ -140,7 +140,7 @@
   .card {
     background-color: var(--surface);
     border: 1px solid var(--edge);
-    border-radius: 0.75rem;
+    border-radius: 1.25rem;
   }
 
   /* ═══════════════════════════════════════════════
@@ -149,7 +149,7 @@
   .input-field {
     width: 100%;
     padding: 0.625rem 0.875rem;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     border: 1px solid var(--edge);
     background-color: var(--surface);
     color: var(--content);
@@ -175,7 +175,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     background-color: var(--accent);
     color: #ffffff;
     font-size: 0.875rem;
@@ -197,7 +197,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     background-color: var(--surface-inset);
     color: var(--content-secondary);
     font-size: 0.875rem;
@@ -215,7 +215,7 @@
   .card-premium {
     background-color: var(--surface);
     border: 1px solid var(--edge);
-    border-radius: 0.75rem;
+    border-radius: 1.25rem;
   }
 }
 

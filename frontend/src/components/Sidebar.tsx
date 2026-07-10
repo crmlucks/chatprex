@@ -1,5 +1,4 @@
-import React from 'react';
-import { LayoutDashboard, Users, MessageSquare, Calendar, Settings, PieChart, Home, DollarSign, Shield, Zap, Bot, Smartphone, Workflow, Moon, Sun, ChevronRight, ChevronLeft, LogOut, UserCog, PanelLeftClose, PanelLeftOpen, LayoutGrid, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, MessageSquare, Calendar, Settings, PieChart, Home, DollarSign, Shield, Zap, Bot, Smartphone, Workflow, Moon, Sun, ChevronRight, ChevronLeft, LogOut, UserCog, PanelLeftClose, PanelLeftOpen, LayoutGrid, Menu, X, Globe } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -81,6 +80,7 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
         </div>
 
         <nav className={`flex-1 py-3 flex flex-col gap-0.5 overflow-x-hidden overflow-y-auto ${isCollapsed ? 'px-2' : 'px-3'}`}>
+          <NavItem onClick={() => { setActiveTab('Ver Portal'); setIsMobileOpen(false); }} icon={<Globe size={18} />} label="Ver Portal Público" active={activeTab === 'Ver Portal'} collapsed={isCollapsed} />
           <NavItem onClick={() => { setActiveTab('Dashboard'); setIsMobileOpen(false); }} icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'Dashboard'} collapsed={isCollapsed} />
           <NavItem onClick={() => { setActiveTab('Inteligencia'); setIsMobileOpen(false); }} icon={<Zap size={18} />} label="Lead Intelligence" active={activeTab === 'Inteligencia'} collapsed={isCollapsed} />
           <NavItem onClick={() => { setActiveTab('Leads Pipeline'); setIsMobileOpen(false); }} icon={<Users size={18} />} label="Pipeline de leads" active={activeTab === 'Leads Pipeline'} collapsed={isCollapsed} />
@@ -119,7 +119,7 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
             >
               <SubNavItem onClick={() => { setActiveTab('Usuarios'); setIsMobileOpen(false); }} label="Gestión de usuarios" active={activeTab === 'Usuarios'} />
               <SubNavItem onClick={() => { setActiveTab('Administración'); setIsMobileOpen(false); }} label="Administración" active={activeTab === 'Administración'} />
-              <SubNavItem onClick={() => { setActiveTab('Configuración'); setIsMobileOpen(false); }} label="Configuración" active={activeTab === 'Configuración'} />
+              <SubNavItem onClick={() => { setActiveTab('Configuración'); setIsMobileOpen(false); }} label="Configurar Portal" active={activeTab === 'Configuración'} />
             </NavGroup>
           )}
 
