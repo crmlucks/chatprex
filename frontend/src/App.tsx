@@ -103,33 +103,83 @@ function AuthenticatedApp() {
   );
  }
 
-  // Si no hay usuario, mostrar el Portal o la pantalla de Login
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+  const isAppSubdomain = hostname.startsWith('app.');
+
+  // Si no hay usuario, mostrar el Portal o la pantalla de Login según el dominio
   if (!user) {
-   if (showLogin) {
-    return <Login onBack={() => setShowLogin(false)} />;
-   }
-   return (
-    <HomePortal
-     isDarkMode={isDarkMode}
-     setIsDarkMode={setIsDarkMode}
-     onLoginClick={() => setShowLogin(true)}
-     isLoggedIn={false}
-     onGoToDashboard={() => {}}
-    />
-   );
+    if (isAppSubdomain) {
+      return (
+        <Login 
+          onBack={() => {
+            const targetHost = hostname.replace('app.', '');
+            window.location.href = window.location.protocol + '//' + targetHost + (window.location.port ? ':' + window.location.port : '');
+          }} 
+        />
+      );
+    }
+
+    if (showLogin) {
+      if (isLocalhost) {
+        return <Login onBack={() => setShowLogin(false)} />;
+      }
+      const targetHost = hostname.startsWith('www.') 
+        ? hostname.replace('www.', 'app.')
+        : 'app.' + hostname;
+      window.location.href = window.location.protocol + '//' + targetHost + (window.location.port ? ':' + window.location.port : '');
+      return null;
+    }
+
+    return (
+      <HomePortal
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+        onLoginClick={() => {
+          if (isLocalhost) {
+            setShowLogin(true);
+          } else {
+            const targetHost = hostname.startsWith('www.') 
+              ? hostname.replace('www.', 'app.')
+              : 'app.' + hostname;
+            window.location.href = window.location.protocol + '//' + targetHost + (window.location.port ? ':' + window.location.port : '');
+          }
+        }}
+        isLoggedIn={false}
+        onGoToDashboard={() => {}}
+      />
+    );
   }
 
-  // Si está autenticado pero quiere ver el portal público en pantalla completa
+  // Si está autenticado pero entra desde el dominio principal (chatprex.com)
+  if (!isAppSubdomain && !isLocalhost && activeTab !== 'Ver Portal') {
+    return (
+      <HomePortal
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+        onLoginClick={() => {}}
+        isLoggedIn={true}
+        onGoToDashboard={() => {
+          const targetHost = hostname.startsWith('www.') 
+            ? hostname.replace('www.', 'app.')
+            : 'app.' + hostname;
+          window.location.href = window.location.protocol + '//' + targetHost + (window.location.port ? ':' + window.location.port : '');
+        }}
+      />
+    );
+  }
+
+  // Si está autenticado pero quiere ver el portal público en pantalla completa desde el CRM
   if (activeTab === 'Ver Portal') {
-   return (
-    <HomePortal
-     isDarkMode={isDarkMode}
-     setIsDarkMode={setIsDarkMode}
-     onLoginClick={() => {}}
-     isLoggedIn={true}
-     onGoToDashboard={() => setActiveTab('Dashboard')}
-    />
-   );
+    return (
+      <HomePortal
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+        onLoginClick={() => {}}
+        isLoggedIn={true}
+        onGoToDashboard={() => setActiveTab('Dashboard')}
+      />
+    );
   }
 
  /**
