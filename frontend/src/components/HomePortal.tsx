@@ -755,7 +755,7 @@ export default function HomePortal({
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {featuredListToRender.slice(0, 8).map((p) => {
-                      const imgUrl = p.image || (Array.isArray(p.images) && p.images[0]) || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
+                      const imgUrl = (Array.isArray(p.images) && p.images[0]) || p.avatar || p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
                       
                       return (
                         <div 
@@ -1075,7 +1075,7 @@ export default function HomePortal({
               ) : filteredList.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {filteredList.map((p) => {
-                    const imgUrl = p.image || (Array.isArray(p.images) && p.images[0]) || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
+                    const imgUrl = (Array.isArray(p.images) && p.images[0]) || p.avatar || p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
                     
                     return (
                       <div 
