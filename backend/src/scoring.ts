@@ -109,7 +109,7 @@ export async function calculateLeadScore(leadId: number): Promise<{ score: numbe
     if (lead.budget_amount && parseFloat(lead.budget_amount) > 0) {
       const budget = parseFloat(lead.budget_amount);
       const propRes = await client.query(
-        `SELECT COUNT(*) as count FROM properties WHERE status = 'Disponible' AND CAST(REPLACE(REPLACE(price, ',', ''), '$', '') AS DECIMAL) BETWEEN $1 AND $2`,
+        `SELECT COUNT(*) as count FROM properties WHERE LOWER(status) = 'disponible' AND CAST(REPLACE(REPLACE(price, ',', ''), '$', '') AS DECIMAL) BETWEEN $1 AND $2`,
         [budget * 0.7, budget * 1.3]
       );
       const matchCount = parseInt(propRes.rows[0].count);

@@ -7,7 +7,7 @@ const propertyRouter = express.Router();
 // GET public properties (no auth required)
 propertyRouter.get('/public', async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM properties WHERE status = 'Disponible' AND visible = true ORDER BY created_at DESC");
+    const result = await pool.query("SELECT * FROM properties WHERE LOWER(status) = 'disponible' AND visible = true ORDER BY created_at DESC");
     res.json(result.rows);
   } catch (error) {
     console.error('Error fetching public properties', error);
