@@ -48,201 +48,9 @@ interface HomePortalProps {
   onGoToDashboard: () => void;
 }
 
-// 8 Propiedades Demo de Alta Calidad para garantizar una estética premium
-const DEMO_PROPERTIES: Property[] = [
-  {
-    id: 'demo-1',
-    name: 'Residencia Campestre La Molina',
-    project: 'Condominio El Haras',
-    developer: 'Inmobiliaria Prex',
-    type: 'casa',
-    price: 450000,
-    currency: 'USD',
-    location: 'La Molina, Lima',
-    area: 280,
-    rooms: 4,
-    bathrooms: 4.5,
-    parking: 2,
-    floor: '2 niveles',
-    details: 'Hermosa residencia campestre con amplias áreas verdes, piscina privada, acabados en mármol y madera de la más alta calidad, zona de parrilla y seguridad 24/7 en condominio cerrado.',
-    status: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80',
-    avatar: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80'
-    ]
-  },
-  {
-    id: 'demo-2',
-    name: 'Loft de Lujo Miraflores',
-    project: 'Edificio Larco 900',
-    developer: 'Constructora Horizon',
-    type: 'departamento',
-    price: 195000,
-    currency: 'USD',
-    location: 'Miraflores, Lima',
-    area: 85,
-    rooms: 1,
-    bathrooms: 1.5,
-    parking: 1,
-    floor: 'Piso 12',
-    details: 'Espectacular departamento estilo loft industrial con techos de doble altura, ventanas de piso a techo con vista panorámica a la ciudad, cocina equipada con encimera de cuarzo y acceso a áreas comunes premium (piscina infinita, gimnasio y bar).',
-    status: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80',
-    avatar: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80'
-    ]
-  },
-  {
-    id: 'demo-3',
-    name: 'Terreno Residencial Exclusivo Asia',
-    project: 'Club Nautico Asia',
-    developer: 'Desarrollos del Sur',
-    type: 'terreno',
-    price: 135000,
-    currency: 'USD',
-    location: 'Asia, Cañete',
-    area: 320,
-    rooms: 0,
-    bathrooms: 0,
-    parking: 0,
-    floor: 'Terreno plano',
-    details: 'Lote residencial ideal para construir la casa de playa de tus sueños. Ubicado en primera fila del condominio con acceso directo a la playa, club house, canchas de tenis y piscina del club.',
-    status: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80',
-    avatar: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'
-    ]
-  },
-  {
-    id: 'demo-4',
-    name: 'Oficina Corporativa Prime San Isidro',
-    project: 'Torre Empresarial Siglo XXI',
-    developer: 'Prex Real Estate',
-    type: 'oficina',
-    price: 320000,
-    currency: 'USD',
-    location: 'San Isidro, Lima',
-    area: 160,
-    rooms: 0,
-    bathrooms: 2,
-    parking: 3,
-    floor: 'Piso 8',
-    details: 'Moderna oficina implementada con divisiones de vidrio templado, aire acondicionado central, luminarias LED y alfombra de alto tránsito. La torre cuenta con certificación LEED y áreas comunes como directorios y comedor.',
-    status: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
-    avatar: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=800&q=80'
-    ]
-  },
-  {
-    id: 'demo-5',
-    name: 'Estacionamiento Doble Lineal',
-    project: 'Sótano Larcomar',
-    developer: 'Inmobiliaria Prex',
-    type: 'cochera',
-    price: 24000,
-    currency: 'USD',
-    location: 'Miraflores, Lima',
-    area: 26,
-    rooms: 0,
-    bathrooms: 0,
-    parking: 2,
-    floor: 'Sótano 2',
-    details: 'Espacio de cochera lineal techada con portón eléctrico automático y seguridad 24 horas. Muy fácil maniobra y ubicación céntrica en el corazón comercial del distrito.',
-    status: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
-    avatar: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80'
-    ]
-  },
-  {
-    id: 'demo-6',
-    name: 'Penthouse Triplex Golf San Isidro',
-    project: 'Residencial Los Eucaliptos',
-    developer: 'Constructora Horizon',
-    type: 'departamento',
-    price: 750000,
-    currency: 'USD',
-    location: 'San Isidro, Lima',
-    area: 340,
-    rooms: 3,
-    bathrooms: 4,
-    parking: 3,
-    floor: 'Pisos 15-17',
-    details: 'Exclusivo penthouse triplex frente al Golf de San Isidro. Cuenta con terraza privada de 80m² con jacuzzi, sala comedor amplia con chimenea, cocina con isla central, acabados de importación europea y ascensor directo al departamento.',
-    status: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80',
-    avatar: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80'
-    ]
-  },
-  {
-    id: 'demo-7',
-    name: 'Casa de Playa de Lujo Asia',
-    project: 'Condominio Coral Reef',
-    developer: 'Desarrollos del Sur',
-    type: 'casa',
-    price: 385000,
-    currency: 'USD',
-    location: 'Asia, Cañete',
-    area: 250,
-    rooms: 5,
-    bathrooms: 5,
-    parking: 3,
-    floor: '3 niveles',
-    details: 'Moderna casa de playa completamente amoblada y equipada. Terraza con piscina propia y vista espectacular al mar. Cuenta con 5 dormitorios en suite, cuarto y baño de servicio, cochera y áreas comunes en el condominio de lujo.',
-    status: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&q=80',
-    avatar: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=800&q=80'
-    ]
-  },
-  {
-    id: 'demo-8',
-    name: 'Local Comercial en Esquina Larco',
-    project: 'Edificio Larco Centro',
-    developer: 'Inmobiliaria Prex',
-    type: 'local',
-    price: 520000,
-    currency: 'USD',
-    location: 'Miraflores, Lima',
-    area: 180,
-    rooms: 0,
-    bathrooms: 2,
-    parking: 1,
-    floor: 'Piso 1',
-    details: 'Excelente local comercial a pie de calle con alto flujo peatonal y vehicular en plena Av. Larco. Fachada de vidrio templado de 12 metros, doble altura en techos, ideal para bancos, franquicias gastronómicas, boutiques o showroom.',
-    status: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80',
-    avatar: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=800&q=80'
-    ]
-  }
-];
+const DEMO_PROPERTIES: Property[] = [];
 
-const HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80',
-  'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80',
-  'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=80'
-];
+const HERO_IMAGES: string[] = [];
 
 export default function HomePortal({ 
   isDarkMode, 
@@ -280,16 +88,18 @@ export default function HomePortal({
       ].filter(Boolean);
       if (customBanners.length > 0) return customBanners;
     }
-    return HERO_IMAGES;
+    return [];
   };
 
   // Rotador automático de banner cada 10 segundos
   useEffect(() => {
     const imagesList = getHeroImages();
-    const timer = setInterval(() => {
-      setCurrentHeroIndex((prev) => (prev + 1) % imagesList.length);
-    }, 10000);
-    return () => clearInterval(timer);
+    if (imagesList.length > 0) {
+      const timer = setInterval(() => {
+        setCurrentHeroIndex((prev) => (prev + 1) % imagesList.length);
+      }, 10000);
+      return () => clearInterval(timer);
+    }
   }, [portalSettings]);
 
   useEffect(() => {
@@ -299,27 +109,17 @@ export default function HomePortal({
         const res = await fetch(`${API_URL}/api/properties/public`);
         if (res.ok) {
           const data = await res.json();
-          // Combinar las propiedades de la DB con las de Demo para rellenar
-          // Las de la DB tienen prioridad
           const formattedDbData: Property[] = data.map((p: any) => ({
             ...p,
             images: typeof p.images === 'string' ? JSON.parse(p.images) : p.images || []
           }));
-          
-          let combined = [...formattedDbData];
-          if (combined.length < 8) {
-            // Completar hasta 8 usando los de demo
-            const needed = 8 - combined.length;
-            const extra = DEMO_PROPERTIES.slice(0, needed);
-            combined = [...combined, ...extra];
-          }
-          setProperties(combined);
+          setProperties(formattedDbData);
         } else {
-          setProperties(DEMO_PROPERTIES);
+          setProperties([]);
         }
       } catch (err) {
         console.error("Error al cargar propiedades públicas:", err);
-        setProperties(DEMO_PROPERTIES);
+        setProperties([]);
       } finally {
         setLoading(false);
       }
@@ -884,6 +684,9 @@ export default function HomePortal({
                     }}
                   />
                 ))}
+                {getHeroImages().length === 0 && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-zinc-950 to-slate-950" />
+                )}
                 {/* Scrim Overlay (Adjusted: 35% black in light mode, 60% black in dark mode to ensure maximum text contrast) */}
                 <div className="absolute inset-0 bg-black/35 dark:bg-black/60 transition-all duration-300" />
                 {/* Bottom edge fade-out (Only at the very bottom to blend cleanly with the next section) */}
@@ -1078,33 +881,35 @@ export default function HomePortal({
 
           {/* 4. QUIÉNES SOMOS */}
           <section id="quienes-somos" className="py-12 px-6 md:px-12 border-t border-edge bg-surface">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            <div className={`max-w-7xl mx-auto ${portalSettings?.about_image ? 'grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center' : 'max-w-3xl text-center'}`}>
               
               {/* Columna Izquierda: Imagen */}
-              <div className="relative">
-                <div className="absolute -top-4 -left-4 w-72 h-72 bg-accent/5 rounded-3xl blur-2xl pointer-events-none"></div>
-                <div className="rounded-2xl overflow-hidden shadow-2xl relative z-10 border border-edge">
-                  <img 
-                    src={portalSettings?.about_image || "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80"} 
-                    alt="Quiénes Somos" 
-                    className="w-full h-[400px] object-cover" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
-                    <p className="text-xs font-bold tracking-widest uppercase text-accent">Liderazgo Inmobiliario</p>
-                    <h3 className="text-xl font-bold">Líderes en conectar personas con sus hogares ideales</h3>
+              {portalSettings?.about_image && (
+                <div className="relative">
+                  <div className="absolute -top-4 -left-4 w-72 h-72 bg-accent/5 rounded-3xl blur-2xl pointer-events-none"></div>
+                  <div className="rounded-2xl overflow-hidden shadow-2xl relative z-10 border border-edge">
+                    <img 
+                      src={portalSettings.about_image} 
+                      alt="Quiénes Somos" 
+                      className="w-full h-[400px] object-cover" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-6 left-6 right-6 text-white space-y-1 text-left">
+                      <p className="text-xs font-bold tracking-widest uppercase text-accent">Liderazgo Inmobiliario</p>
+                      <h3 className="text-xl font-bold">Líderes en conectar personas con sus hogares ideales</h3>
+                    </div>
+                  </div>
+                  
+                  {/* Tarjeta flotante de experiencia */}
+                  <div className="absolute -bottom-6 -right-6 bg-accent text-white p-6 rounded-2xl shadow-xl z-20 flex flex-col items-center justify-center text-center w-36 h-36 border-4 border-surface">
+                    <span className="text-3xl font-black">15+</span>
+                    <span className="text-[10px] font-bold tracking-wider uppercase mt-1">Años de Trayectoria</span>
                   </div>
                 </div>
-                
-                {/* Tarjeta flotante de experiencia */}
-                <div className="absolute -bottom-6 -right-6 bg-accent text-white p-6 rounded-2xl shadow-xl z-20 flex flex-col items-center justify-center text-center w-36 h-36 border-4 border-surface">
-                  <span className="text-3xl font-black">15+</span>
-                  <span className="text-[10px] font-bold tracking-wider uppercase mt-1">Años de Trayectoria</span>
-                </div>
-              </div>
+              )}
 
               {/* Columna Derecha: Texto */}
-              <div className="space-y-8">
+              <div className={`space-y-8 ${portalSettings?.about_image ? 'text-left' : 'max-w-2xl mx-auto text-center'}`}>
                 <div className="space-y-3">
                   <span className="text-xs font-bold text-accent tracking-widest uppercase block">Nosotros</span>
                   <h2 className="text-3xl md:text-4xl font-black text-content tracking-tight">
@@ -1121,9 +926,9 @@ export default function HomePortal({
                 </p>
 
                 {/* Valores/Pilares */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
+                <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 ${portalSettings?.about_image ? 'text-left' : 'text-left'}`}>
                   
-                  <div className="flex gap-4 items-start">
+                  <div className="flex gap-4 items-start text-left">
                     <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 dark:bg-amber-500/25 shrink-0 flex items-center justify-center">
                       <Award size={18} />
                     </div>
@@ -1133,7 +938,7 @@ export default function HomePortal({
                     </div>
                   </div>
 
-                  <div className="flex gap-4 items-start">
+                  <div className="flex gap-4 items-start text-left">
                     <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 dark:bg-blue-500/25 shrink-0 flex items-center justify-center">
                       <Users size={18} />
                     </div>
@@ -1143,7 +948,7 @@ export default function HomePortal({
                     </div>
                   </div>
 
-                  <div className="flex gap-4 items-start">
+                  <div className="flex gap-4 items-start text-left">
                     <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 dark:bg-rose-500/25 shrink-0 flex items-center justify-center">
                       <Heart size={18} />
                     </div>
@@ -1153,7 +958,7 @@ export default function HomePortal({
                     </div>
                   </div>
 
-                  <div className="flex gap-4 items-start">
+                  <div className="flex gap-4 items-start text-left">
                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/25 shrink-0 flex items-center justify-center">
                       <ShieldCheck size={18} />
                     </div>
@@ -1166,7 +971,7 @@ export default function HomePortal({
                 </div>
 
                 {/* Metricas */}
-                <div className="flex gap-8 border-t border-edge pt-8">
+                <div className={`flex gap-8 border-t border-edge pt-8 ${portalSettings?.about_image ? 'justify-start' : 'justify-center'}`}>
                   <div>
                     <span className="text-2xl font-black text-accent block">1,200+</span>
                     <span className="text-xs font-bold text-content-secondary">Propiedades Vendidas</span>
