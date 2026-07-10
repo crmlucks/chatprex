@@ -484,6 +484,34 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
              <input type="file" ref={multipleFileInputRef} multiple className="hidden" onChange={e => handleImageUpload(e, false)} />
            </div>
           </div>
+
+          {/* GUÍA DE OPTIMIZACIÓN DE IMÁGENES Y CONFIGURACIÓN DEL PORTAL */}
+          <div className="mt-6 p-4 rounded-xl border border-edge bg-surface-inset dark:bg-surface-raised space-y-3">
+            <div className="flex items-center gap-2 text-accent">
+              <Info size={16} className="shrink-0" />
+              <h4 className="text-xs font-black uppercase tracking-wider">Guía de Configuración e Imágenes para el Portal</h4>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[11px] leading-relaxed">
+              <div className="space-y-1.5 text-left">
+                <p className="font-bold text-content">1. Configuración de Visualización:</p>
+                <ul className="list-disc pl-4 space-y-1 text-content-secondary font-medium">
+                  <li><strong>Visible en la Web:</strong> Activa esta opción para que el inmueble se liste en el catálogo público del portal.</li>
+                  <li><strong>Propiedad Destacada:</strong> Activa esta opción si deseas que se muestre en la página de inicio principal (carrusel inicial).</li>
+                </ul>
+              </div>
+
+              <div className="space-y-1.5 text-left">
+                <p className="font-bold text-content">2. Optimización de Archivos desde la PC:</p>
+                <ul className="list-disc pl-4 space-y-1 text-content-secondary font-medium">
+                  <li><strong>Formatos Soportados:</strong> Solo se permiten formatos <strong>JPG, JPEG, PNG y WebP</strong>.</li>
+                  <li><strong>Foto Principal:</strong> Recomendado tamaño de <strong>800 x 600 px (relación 4:3)</strong> o similar.</li>
+                  <li><strong>Galería:</strong> Recomendado tamaño de <strong>1200 x 800 px (relación 3:2)</strong>. Máximo 3 fotos.</li>
+                  <li><strong>Peso Máximo:</strong> Recomendado menos de <strong>1.5 MB por imagen</strong> para garantizar cargas veloces en la web.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Modal Footer */}
