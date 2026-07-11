@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, MapPin, Home, Building, Layers, Briefcase, Car, HelpCircle, 
-  Phone, Mail, Globe, Moon, Sun, ArrowRight, Eye, Send, 
+import {
+  Search, MapPin, Home, Building, Layers, Briefcase, Car, HelpCircle,
+  Phone, Mail, Globe, Moon, Sun, ArrowRight, Eye, Send,
   Facebook, Instagram, Linkedin, Youtube, ShieldCheck, Award, Heart, Users, ChevronDown, Check, LogIn, Menu, X, Lock
 } from 'lucide-react';
 
@@ -30,7 +30,7 @@ interface Property {
 }
 
 const TYPE_OPTIONS = [
-  { value: 'todos', label: 'Cualquier tipo' },
+  { value: 'todos', label: 'Todos' },
   { value: 'casa', label: 'Casa' },
   { value: 'departamento', label: 'Departamento' },
   { value: 'lotes', label: 'Lotes / Terreno' },
@@ -52,18 +52,18 @@ const DEMO_PROPERTIES: Property[] = [];
 
 const HERO_IMAGES: string[] = [];
 
-export default function HomePortal({ 
-  isDarkMode, 
-  setIsDarkMode, 
-  onLoginClick, 
-  isLoggedIn, 
-  onGoToDashboard 
+export default function HomePortal({
+  isDarkMode,
+  setIsDarkMode,
+  onLoginClick,
+  isLoggedIn,
+  onGoToDashboard
 }: HomePortalProps) {
-  
+
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [portalSettings, setPortalSettings] = useState<any>(null);
-  
+
   // Filtros de búsqueda
   const [searchLocation, setSearchLocation] = useState<string>('');
   const [filterType, setFilterType] = useState<string>('todos');
@@ -72,7 +72,7 @@ export default function HomePortal({
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [currentHeroIndex, setCurrentHeroIndex] = useState<number>(0);
-  
+
   // Propiedad seleccionada para el Modal
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
@@ -124,7 +124,7 @@ export default function HomePortal({
         setLoading(false);
       }
     };
-    
+
     const fetchPortalSettings = async () => {
       try {
         const res = await fetch(`${API_URL}/api/portal-settings/public`);
@@ -148,13 +148,13 @@ export default function HomePortal({
     return properties
       .filter((p) => {
         // Filtro de ubicación (Departamento, Región, Ciudad o Distrito)
-        const matchesLocation = !searchLocation || 
-          p.location.toLowerCase().includes(searchLocation.toLowerCase()) || 
-          (p.project && p.project.toLowerCase().includes(searchLocation.toLowerCase())) || 
+        const matchesLocation = !searchLocation ||
+          p.location.toLowerCase().includes(searchLocation.toLowerCase()) ||
+          (p.project && p.project.toLowerCase().includes(searchLocation.toLowerCase())) ||
           p.name.toLowerCase().includes(searchLocation.toLowerCase());
-        
+
         // Filtro de tipo
-        const matchesType = filterType === 'todos' || p.type.toLowerCase() === filterType.toLowerCase() || 
+        const matchesType = filterType === 'todos' || p.type.toLowerCase() === filterType.toLowerCase() ||
           (filterType === 'lotes' && p.type.toLowerCase() === 'terreno') ||
           (filterType === 'cocheras' && p.type.toLowerCase() === 'cochera') ||
           (filterType === 'oficinas' && p.type.toLowerCase() === 'oficina') ||
@@ -162,7 +162,7 @@ export default function HomePortal({
           (filterType === 'departamento' && p.type.toLowerCase() === 'departamentos');
 
         // Filtro de moneda
-        const matchesCurrency = filterCurrency === 'todos' || 
+        const matchesCurrency = filterCurrency === 'todos' ||
           p.currency.toLowerCase() === filterCurrency.toLowerCase();
 
         // Limpiar formato de precio (remueve comas y caracteres no numéricos)
@@ -301,7 +301,7 @@ export default function HomePortal({
       try {
         const parsed = JSON.parse(property.images);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {}
+      } catch (e) { }
     }
     return [property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'];
   };
@@ -309,16 +309,16 @@ export default function HomePortal({
   const renderFilterBar = () => {
     return (
       <div className="pt-8 max-w-4xl mx-auto w-full">
-        
+
         {/* Vista Desktop: Barra tipo Cápsula / Airbnb */}
         <div className="hidden md:flex bg-white dark:bg-zinc-900 border border-accent rounded-full shadow-2xl items-center p-2.5 w-full select-none">
-          
+
           {/* 1. Ubicación (Ciudad, Distrito, Región, Proyecto) */}
           <div className="flex-[1.8] hover:bg-surface-inset dark:hover:bg-zinc-800/40 rounded-full px-6 py-2.5 transition-colors cursor-pointer group text-left">
             <label className="text-[9px] font-black text-accent uppercase tracking-widest block mb-0.5">Ubicación</label>
-            <input 
-              type="text" 
-              placeholder="Ciudad, distrito o región..." 
+            <input
+              type="text"
+              placeholder="Ciudad, distrito o región..."
               value={searchLocation}
               onChange={(e) => setSearchLocation(e.target.value)}
               className="w-full bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-content placeholder-content-muted p-0 focus:outline-none"
@@ -328,7 +328,7 @@ export default function HomePortal({
           <div className="h-8 w-px bg-accent shrink-0" />
 
           {/* 2. Tipo */}
-          <div 
+          <div
             onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
             className="flex-1 hover:bg-surface-inset dark:hover:bg-zinc-800/40 rounded-full px-6 py-2.5 transition-colors cursor-pointer relative group text-left"
           >
@@ -344,7 +344,7 @@ export default function HomePortal({
               <>
                 {/* Backdrop transparente para cerrar al hacer click fuera */}
                 <div className="fixed inset-0 z-40 cursor-default" onClick={(e) => { e.stopPropagation(); setIsTypeDropdownOpen(false); }} />
-                
+
                 {/* Lista del Dropdown con bordes suavizados */}
                 <div className="absolute top-[105%] left-0 right-0 min-w-[200px] bg-surface dark:bg-zinc-900 border border-edge rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                   {TYPE_OPTIONS.map((opt) => (
@@ -384,17 +384,17 @@ export default function HomePortal({
                 <option value="COP" className="dark:bg-zinc-900">COP</option>
               </select>
               <span className="text-edge text-xs">|</span>
-              <input 
-                type="number" 
-                placeholder="Min" 
+              <input
+                type="number"
+                placeholder="Min"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 className="w-14 bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-content placeholder-content-muted p-0 focus:outline-none"
               />
               <span className="text-content-muted text-xs">-</span>
-              <input 
-                type="number" 
-                placeholder="Max" 
+              <input
+                type="number"
+                placeholder="Max"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 className="w-14 bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-content placeholder-content-muted p-0 focus:outline-none"
@@ -403,7 +403,7 @@ export default function HomePortal({
           </div>
 
           {/* 4. Botón Buscar (Círculo Azul de Marca) */}
-          <button 
+          <button
             onClick={() => {
               const el = document.getElementById('propiedades');
               el?.scrollIntoView({ behavior: 'smooth' });
@@ -419,9 +419,9 @@ export default function HomePortal({
         <div className="flex md:hidden flex-col gap-2.5 bg-surface dark:bg-zinc-900 border border-accent rounded-2xl p-3.5 shadow-2xl text-left max-w-sm mx-auto w-full">
           <div className="space-y-0.5">
             <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Ubicación</label>
-            <input 
-              type="text" 
-              placeholder="Ciudad, distrito o región..." 
+            <input
+              type="text"
+              placeholder="Ciudad, distrito o región..."
               value={searchLocation}
               onChange={(e) => setSearchLocation(e.target.value)}
               className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
@@ -431,7 +431,7 @@ export default function HomePortal({
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-0.5">
               <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Tipo</label>
-              <select 
+              <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
                 className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
@@ -449,7 +449,7 @@ export default function HomePortal({
 
             <div className="space-y-0.5">
               <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Moneda</label>
-              <select 
+              <select
                 value={filterCurrency}
                 onChange={(e) => setFilterCurrency(e.target.value)}
                 className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
@@ -466,16 +466,16 @@ export default function HomePortal({
           <div className="space-y-0.5">
             <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Precio (Min - Max)</label>
             <div className="grid grid-cols-2 gap-2.5">
-              <input 
-                type="number" 
-                placeholder="Min" 
+              <input
+                type="number"
+                placeholder="Min"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
               />
-              <input 
-                type="number" 
-                placeholder="Max" 
+              <input
+                type="number"
+                placeholder="Max"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
@@ -483,7 +483,7 @@ export default function HomePortal({
             </div>
           </div>
 
-          <button 
+          <button
             onClick={() => {
               const el = document.getElementById('propiedades');
               el?.scrollIntoView({ behavior: 'smooth' });
@@ -512,11 +512,11 @@ export default function HomePortal({
               Estamos actualizando nuestro catálogo para ofrecerte la mejor experiencia. Volveremos muy pronto con nuevos proyectos y desarrollos exclusivos.
             </p>
           </div>
-          
+
           {portalSettings.phone && (
             <div className="pt-4 border-t border-edge/60">
               <p className="text-[10px] text-content-muted font-bold uppercase tracking-wider mb-2">Contacto Inmediato</p>
-              <button 
+              <button
                 onClick={() => {
                   const phone = portalSettings.phone.replace(/[^0-9]/g, '');
                   window.open(`https://wa.me/${phone}?text=Hola,%20quisiera%20información%20sobre%20sus%20propiedades`, '_blank');
@@ -529,7 +529,7 @@ export default function HomePortal({
           )}
 
           <div className="pt-2">
-            <button 
+            <button
               onClick={onLoginClick}
               className="text-xs font-semibold text-content-muted hover:text-accent transition-colors bg-transparent border-none cursor-pointer flex items-center gap-1.5 mx-auto"
             >
@@ -543,7 +543,7 @@ export default function HomePortal({
 
   return (
     <div className={`min-h-screen font-sans flex flex-col transition-all bg-surface-base text-content ${isDarkMode ? 'dark' : ''}`}>
-      
+
       {/* 1. HEADER */}
       <header className="sticky top-0 z-50 w-full bg-surface/85 backdrop-blur-md border-b border-edge transition-all py-4 px-6 md:px-12 flex items-center justify-between">
         <div onClick={() => { setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-3 cursor-pointer">
@@ -571,30 +571,30 @@ export default function HomePortal({
             )
           )}
         </div>
-        
+
         {/* Enlaces de Navegación (Desktop only) */}
         <nav className="hidden md:flex items-center gap-8">
-          <button 
+          <button
             onClick={() => { setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             className={`text-sm font-semibold transition-colors bg-transparent border-none cursor-pointer ${viewMode === 'portal' ? 'text-accent hover:text-emerald-600 dark:hover:text-emerald-400' : 'text-content hover:text-emerald-600 dark:hover:text-emerald-400'}`}
           >
             Inicio
           </button>
-          <button 
+          <button
             onClick={() => { setViewMode('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             className={`text-sm font-semibold transition-colors bg-transparent border-none cursor-pointer ${viewMode === 'catalog' ? 'text-accent hover:text-emerald-600 dark:hover:text-emerald-400' : 'text-content hover:text-emerald-600 dark:hover:text-emerald-400'}`}
           >
             Propiedades
           </button>
-          <a 
-            href="#quienes-somos" 
+          <a
+            href="#quienes-somos"
             onClick={() => setViewMode('portal')}
             className="text-sm font-semibold text-content hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
           >
             Quiénes Somos
           </a>
-          <a 
-            href="#contacto" 
+          <a
+            href="#contacto"
             onClick={() => setViewMode('portal')}
             className="text-sm font-semibold text-content hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
           >
@@ -604,25 +604,25 @@ export default function HomePortal({
 
         {/* Botones de Cabecera (Desktop only) */}
         <div className="hidden md:flex items-center gap-4">
-          <button 
-            onClick={() => setIsDarkMode(!isDarkMode)} 
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
             className="p-2.5 rounded-xl border border-edge hover:bg-surface-inset text-content-secondary transition-colors cursor-pointer"
             title="Cambiar Tema"
           >
             {isDarkMode ? <Sun size={16} className="text-amber-500 animate-pulse" /> : <Moon size={16} />}
           </button>
-          
+
           {isLoggedIn ? (
-            <button 
-              onClick={onGoToDashboard} 
+            <button
+              onClick={onGoToDashboard}
               className="btn-primary p-2.5 rounded-xl flex items-center justify-center shadow-md shadow-accent/15 cursor-pointer border-none"
               title="Ir al Panel CRM"
             >
               <ArrowRight size={16} />
             </button>
           ) : (
-            <button 
-              onClick={onLoginClick} 
+            <button
+              onClick={onLoginClick}
               className="btn-secondary p-2.5 rounded-xl border border-edge flex items-center justify-center cursor-pointer"
               title="Acceso Interno"
             >
@@ -634,23 +634,23 @@ export default function HomePortal({
         {/* Botones de Cabecera y Hamburger (Mobile only) */}
         <div className="flex md:hidden items-center gap-2">
           {isLoggedIn ? (
-            <button 
-              onClick={onGoToDashboard} 
+            <button
+              onClick={onGoToDashboard}
               className="btn-primary p-2 rounded-lg flex items-center justify-center shadow-md shadow-accent/15 cursor-pointer border-none animate-in fade-in"
               title="Ir al Panel CRM"
             >
               <ArrowRight size={14} />
             </button>
           ) : (
-            <button 
-              onClick={onLoginClick} 
+            <button
+              onClick={onLoginClick}
               className="btn-secondary p-2 rounded-lg border border-edge flex items-center justify-center cursor-pointer animate-in fade-in"
               title="Acceso Interno"
             >
               <Lock size={14} />
             </button>
           )}
-          
+
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 rounded-lg border border-edge hover:bg-surface-inset text-content-secondary transition-colors cursor-pointer flex items-center justify-center"
@@ -663,40 +663,40 @@ export default function HomePortal({
         {/* Menú Móvil desplegable */}
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-surface border-b border-edge shadow-2xl py-3 px-4 flex flex-col gap-1 animate-in slide-in-from-top-5 duration-200 z-50 text-left">
-            <button 
+            <button
               onClick={() => { setIsMobileMenuOpen(false); setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               className={`text-left text-sm font-semibold transition-colors px-3.5 py-2.5 rounded-xl block border-none bg-transparent cursor-pointer w-full ${viewMode === 'portal' ? 'text-accent bg-accent/5 hover:text-emerald-600' : 'text-content hover:text-emerald-600 hover:bg-surface-inset'}`}
             >
               Inicio
             </button>
-            <button 
+            <button
               onClick={() => { setIsMobileMenuOpen(false); setViewMode('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               className={`text-left text-sm font-semibold transition-colors px-3.5 py-2.5 rounded-xl block border-none bg-transparent cursor-pointer w-full ${viewMode === 'catalog' ? 'text-accent bg-accent/5 hover:text-emerald-600' : 'text-content hover:text-emerald-600 hover:bg-surface-inset'}`}
             >
               Propiedades
             </button>
-            <a 
-              href="#quienes-somos" 
+            <a
+              href="#quienes-somos"
               onClick={() => { setIsMobileMenuOpen(false); setViewMode('portal'); }}
               className="text-sm font-semibold text-content hover:text-emerald-600 hover:bg-surface-inset transition-colors px-3.5 py-2.5 rounded-xl block"
             >
               Quiénes Somos
             </a>
-            <a 
-              href="#contacto" 
+            <a
+              href="#contacto"
               onClick={() => { setIsMobileMenuOpen(false); setViewMode('portal'); }}
               className="text-sm font-semibold text-content hover:text-emerald-600 hover:bg-surface-inset transition-colors px-3.5 py-2.5 rounded-xl block"
             >
               Contacto
             </a>
-            
+
             <div className="h-px bg-edge/40 my-1 mx-2" />
 
             {/* Opción de Modo Día y Noche dentro del Menú */}
             <div className="flex items-center justify-between px-3.5 py-2 rounded-xl hover:bg-surface-inset">
               <span className="text-sm font-semibold text-content-secondary">Tema: {isDarkMode ? 'Modo Noche' : 'Modo Día'}</span>
-              <button 
-                onClick={() => setIsDarkMode(!isDarkMode)} 
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
                 className="p-2 rounded-xl border border-edge hover:bg-surface-inset text-content-secondary transition-colors cursor-pointer"
                 title="Cambiar Tema"
               >
@@ -711,7 +711,7 @@ export default function HomePortal({
         <>
           {/* 2. HERO SECTION */}
           <section id="inicio" className="relative py-12 md:py-20 px-6 md:px-12 flex flex-col items-center text-center overflow-visible bg-surface-base">
-            
+
             {/* Contenedor de Fondo con Recorte (evita scrollbars por blur circles) */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
               {/* Background Images Slider (Rotating 3 property images every 10s) */}
@@ -739,23 +739,23 @@ export default function HomePortal({
               <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-accent/5 rounded-full blur-3xl"></div>
               <div className="absolute bottom-1/4 right-1/10 w-96 h-96 bg-accent-hover/5 rounded-full blur-3xl"></div>
             </div>
-            
+
             <div className="relative z-10 max-w-4xl mx-auto space-y-4">
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-extrabold uppercase tracking-wider mb-1 backdrop-blur-sm shadow-sm">
-                <Award size={12} /> Tu Hogar Ideal a un Clic
+                <Award size={12} /> Inversión segura
               </div>
-              <h1 
+              <h1
                 className="text-3xl md:text-[44px] font-black text-accent tracking-tight leading-tight max-w-3xl mx-auto"
-                style={{ 
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.9), 0 4px 16px rgba(0, 0, 0, 0.7)' 
+                style={{
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.9), 0 4px 16px rgba(0, 0, 0, 0.7)'
                 }}
               >
                 {portalSettings?.hero_title || 'Encuentra la propiedad perfecta para tu estilo de vida'}
               </h1>
-              <p 
+              <p
                 className="text-sm md:text-base text-white font-bold max-w-2xl mx-auto leading-relaxed"
-                style={{ 
-                  textShadow: '0 1px 3px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.5)' 
+                style={{
+                  textShadow: '0 1px 3px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.5)'
                 }}
               >
                 {portalSettings?.hero_subtitle || 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de ChatPrex.'}
@@ -769,16 +769,16 @@ export default function HomePortal({
           {/* 3. PROPIEDADES DESTACADAS */}
           <section id="propiedades" className="py-12 px-6 md:px-12 bg-surface-base">
             <div className="max-w-7xl mx-auto space-y-8">
-              
+
               {/* Cabecera Sección */}
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="space-y-1.5">
-                  <h2 className="text-2xl font-extrabold text-content tracking-tight">Propiedades y Proyectos Destacados</h2>
+                  <h2 className="text-2xl font-extrabold text-content tracking-tight">Oportunidades Destacadas</h2>
                   <p className="text-xs md:text-sm text-content-secondary max-w-lg">
-                    Nuestras mejores opciones seleccionadas a detalle para brindarte el máximo confort y retorno de inversión.
+                    Encuentra las mejores propiedades disponibles, evaluadas para ofrecerte una inversión más segura.
                   </p>
                 </div>
-                
+
                 {/* Indicador de Filtro Activo */}
                 {(searchLocation || filterType !== 'todos' || filterCurrency !== 'todos' || minPrice || maxPrice) && (
                   <div className="flex items-center gap-1.5 text-xs text-accent font-bold px-3 py-1.5 bg-accent/5 rounded-xl border border-accent/10">
@@ -798,30 +798,29 @@ export default function HomePortal({
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {featuredListToRender.slice(0, 8).map((p) => {
                       const imgUrl = (Array.isArray(p.images) && p.images[0]) || p.avatar || p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
-                      
+
                       return (
-                        <div 
-                          key={p.id} 
+                        <div
+                          key={p.id}
                           className="card group overflow-hidden flex flex-col h-full hover:shadow-xl hover:border-accent/30 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-surface"
                           onClick={() => { setSelectedProperty(p); setActiveImageIndex(0); }}
                         >
                           {/* Imagen de Portada */}
                           <div className="h-56 relative overflow-hidden shrink-0">
-                            <img 
-                              src={imgUrl} 
-                              alt={p.name} 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+                            <img
+                              src={imgUrl}
+                              alt={p.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                             />
                             <div className="absolute top-3.5 left-3.5">
-                              <span className={`text-[10px] font-black tracking-widest uppercase px-2.5 py-1.5 rounded-lg shadow-md border-none text-white ${
-                                p.status?.toLowerCase() === 'disponible' ? 'bg-emerald-600' :
+                              <span className={`text-[10px] font-black tracking-widest uppercase px-2.5 py-1.5 rounded-lg shadow-md border-none text-white ${p.status?.toLowerCase() === 'disponible' ? 'bg-emerald-600' :
                                 p.status?.toLowerCase() === 'reservado' ? 'bg-amber-600' :
-                                'bg-rose-600'
-                              }`}>
+                                  'bg-rose-600'
+                                }`}>
                                 {p.status}
                               </span>
                             </div>
-                            
+
                             {/* Tipo Icono flotante con color diferenciado */}
                             <div className={`absolute top-3.5 right-3.5 w-8 h-8 rounded-lg text-white backdrop-blur-sm flex items-center justify-center shadow-md ${getPropertyTypeStyles(p.type).solidBg}`}>
                               {getPropertyIcon(p.type)}
@@ -865,7 +864,7 @@ export default function HomePortal({
 
                   {filteredList.length > 8 && (
                     <div className="text-center pt-8">
-                      <button 
+                      <button
                         onClick={() => {
                           setViewMode('catalog');
                           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -893,16 +892,16 @@ export default function HomePortal({
           {/* SECCIÓN DE LLAMADO A LA ACCIÓN (PERSUASIÓN AL CATÁLOGO COMPLETO) - Premium Banner */}
           <section className="py-12 px-6 md:px-12 bg-surface-inset border-t border-b border-edge">
             <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 relative">
-              
+
               <div className="space-y-3 max-w-2xl text-left">
                 <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-extrabold uppercase tracking-wider">
-                  <Layers size={10} /> Catálogo Ampliado
+                  <Layers size={10} /> Más Opciones para Invertir
                 </div>
                 <h2 className="text-xl md:text-2xl font-extrabold text-content tracking-tight">
-                  Explora toda nuestra cartera de propiedades exclusivas
+                  Propiedades seleccionadas con respaldo profesional.
                 </h2>
                 <p className="text-xs md:text-sm text-content-secondary leading-relaxed">
-                  ¿No encuentras lo que buscas en la selección destacada? Contamos con un inventario completo de casas, departamentos, oficinas y terrenos listos para ti. Utiliza nuestros filtros avanzados para encontrar la opción perfecta según tu presupuesto y ubicación.
+                  Descubre nuestro catálogo completo de proyectos cuidadosamente evaluados para ayudarte a invertir con seguridad, transparencia y al precio justo.
                 </p>
               </div>
 
@@ -924,16 +923,16 @@ export default function HomePortal({
           {/* 4. QUIÉNES SOMOS */}
           <section id="quienes-somos" className="py-12 px-6 md:px-12 border-t border-edge bg-surface">
             <div className={`max-w-7xl mx-auto ${portalSettings?.about_image ? 'grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center' : 'max-w-3xl text-center'}`}>
-              
+
               {/* Columna Izquierda: Imagen */}
               {portalSettings?.about_image && (
                 <div className="relative">
                   <div className="absolute -top-4 -left-4 w-72 h-72 bg-accent/5 rounded-3xl blur-2xl pointer-events-none"></div>
                   <div className="rounded-2xl overflow-hidden shadow-2xl relative z-10 border border-edge">
-                    <img 
-                      src={portalSettings.about_image} 
-                      alt="Quiénes Somos" 
-                      className="w-full h-[400px] object-cover" 
+                    <img
+                      src={portalSettings.about_image}
+                      alt="Quiénes Somos"
+                      className="w-full h-[400px] object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white space-y-1 text-left">
@@ -941,10 +940,10 @@ export default function HomePortal({
                       <h3 className="text-xl font-bold">Líderes en conectar personas con sus hogares ideales</h3>
                     </div>
                   </div>
-                  
+
                   {/* Tarjeta flotante de experiencia */}
                   <div className="absolute -bottom-6 -right-6 bg-accent text-white p-6 rounded-2xl shadow-xl z-20 flex flex-col items-center justify-center text-center w-36 h-36 border-4 border-surface">
-                    <span className="text-3xl font-black">15+</span>
+                    <span className="text-3xl font-black">5+</span>
                     <span className="text-[10px] font-bold tracking-wider uppercase mt-1">Años de Trayectoria</span>
                   </div>
                 </div>
@@ -955,21 +954,21 @@ export default function HomePortal({
                 <div className="space-y-3">
                   <span className="text-xs font-bold text-accent tracking-widest uppercase block">Nosotros</span>
                   <h2 className="text-3xl md:text-4xl font-black text-content tracking-tight">
-                    {portalSettings?.about_title || 'Redefiniendo el sector inmobiliario con innovación y pasión'}
+                    {portalSettings?.about_title || 'Zentra Gestión Inmobiliaria'}
                   </h2>
                 </div>
-                
+
                 <p className="body-text text-content-secondary leading-relaxed whitespace-pre-line">
                   {portalSettings?.about_description || (
                     <>
-                      En <strong>ChatPrex</strong>, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces. Nuestra misión es guiarte en el proceso de compra, venta o alquiler de propiedades de forma transparente, rápida y eficiente, asegurándote decisiones rentables y seguras.
+                      En <strong>Zentra</strong>, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces. Nuestra misión es guiarte en el proceso de compra, venta o alquiler de propiedades de forma transparente, rápida y eficiente, asegurándote decisiones rentables y seguras.
                     </>
                   )}
                 </p>
 
                 {/* Valores/Pilares */}
                 <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 ${portalSettings?.about_image ? 'text-left' : 'text-left'}`}>
-                  
+
                   <div className="flex gap-4 items-start text-left">
                     <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 dark:bg-amber-500/25 shrink-0 flex items-center justify-center">
                       <Award size={18} />
@@ -1015,7 +1014,7 @@ export default function HomePortal({
                 {/* Metricas */}
                 <div className={`flex gap-8 border-t border-edge pt-8 ${portalSettings?.about_image ? 'justify-start' : 'justify-center'}`}>
                   <div>
-                    <span className="text-2xl font-black text-accent block">1,200+</span>
+                    <span className="text-2xl font-black text-accent block">120+</span>
                     <span className="text-xs font-bold text-content-secondary">Propiedades Vendidas</span>
                   </div>
                   <div className="w-px bg-edge h-10"></div>
@@ -1032,7 +1031,7 @@ export default function HomePortal({
           {/* 3.5. SECCIÓN DE LLAMADO A LA ACCIÓN (CONTACTAR POR WHATSAPP) - Compacto y Blended */}
           <section id="contacto" className="py-12 px-6 md:px-12 bg-surface border-t border-b border-edge">
             <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-6 relative">
-              
+
               <div className="space-y-3 flex flex-col items-center">
                 <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider">
                   <Send size={10} className="rotate-45" /> Contacto Inmediato
@@ -1041,7 +1040,7 @@ export default function HomePortal({
                   ¿Encontraste la propiedad ideal o tienes alguna pregunta?
                 </h2>
                 <p className="text-xs md:text-sm text-content-secondary leading-relaxed max-w-2xl">
-                  Nuestros asesores expertos, impulsados por la tecnología de inteligencia artificial de <strong>ChatPrex</strong>, están listos para asistirte. Escríbenos ahora mismo y recibe asesoramiento personalizado para concretar tu próxima inversión con las mejores condiciones del mercado.
+                  Nuestros asesores expertos, impulsados por la tecnología de inteligencia artificial de <strong>Zentra</strong>, están listos para asistirte. Escríbenos ahora mismo y recibe asesoramiento personalizado para concretar tu próxima inversión con las mejores condiciones del mercado.
                 </p>
               </div>
 
@@ -1071,7 +1070,7 @@ export default function HomePortal({
               <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-accent/5 rounded-full blur-3xl"></div>
               <div className="absolute bottom-1/4 right-1/10 w-96 h-96 bg-accent-hover/5 rounded-full blur-3xl"></div>
             </div>
-            
+
             <div className="relative z-10 max-w-4xl mx-auto space-y-4">
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-accent/10 border border-accent text-accent text-[10px] font-extrabold uppercase tracking-wider mb-1">
                 <Award size={12} /> Catálogo Completo
@@ -1082,7 +1081,7 @@ export default function HomePortal({
               <p className="text-sm md:text-base text-content-secondary font-semibold max-w-2xl mx-auto leading-relaxed font-sans">
                 Explora el inventario inmobiliario registrado en nuestra plataforma sin límites de visualización. Refina los resultados utilizando la barra de filtros.
               </p>
-              
+
               {renderFilterBar()}
             </div>
           </section>
@@ -1090,7 +1089,7 @@ export default function HomePortal({
           {/* GRILLA DEL CATÁLOGO COMPLETO */}
           <section id="propiedades" className="py-12 px-6 md:px-12 bg-surface-base">
             <div className="max-w-7xl mx-auto space-y-8">
-              
+
               {/* Cabecera del Catálogo */}
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-edge pb-4">
                 <div className="space-y-1.5 text-left">
@@ -1118,30 +1117,29 @@ export default function HomePortal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {filteredList.map((p) => {
                     const imgUrl = (Array.isArray(p.images) && p.images[0]) || p.avatar || p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
-                    
+
                     return (
-                      <div 
-                        key={p.id} 
+                      <div
+                        key={p.id}
                         className="card group overflow-hidden flex flex-col h-full hover:shadow-xl hover:border-accent/30 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-surface"
                         onClick={() => { setSelectedProperty(p); setActiveImageIndex(0); }}
                       >
                         {/* Imagen de Portada */}
                         <div className="h-56 relative overflow-hidden shrink-0">
-                          <img 
-                            src={imgUrl} 
-                            alt={p.name} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+                          <img
+                            src={imgUrl}
+                            alt={p.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                           />
                           <div className="absolute top-3.5 left-3.5">
-                            <span className={`text-[10px] font-black tracking-widest uppercase px-2.5 py-1.5 rounded-lg shadow-md border-none text-white ${
-                              p.status?.toLowerCase() === 'disponible' ? 'bg-emerald-600' :
+                            <span className={`text-[10px] font-black tracking-widest uppercase px-2.5 py-1.5 rounded-lg shadow-md border-none text-white ${p.status?.toLowerCase() === 'disponible' ? 'bg-emerald-600' :
                               p.status?.toLowerCase() === 'reservado' ? 'bg-amber-600' :
-                              'bg-rose-600'
-                            }`}>
+                                'bg-rose-600'
+                              }`}>
                               {p.status}
                             </span>
                           </div>
-                          
+
                           {/* Tipo Icono flotante */}
                           <div className={`absolute top-3.5 right-3.5 w-8 h-8 rounded-lg text-white backdrop-blur-sm flex items-center justify-center shadow-md ${getPropertyTypeStyles(p.type).solidBg}`}>
                             {getPropertyIcon(p.type)}
@@ -1198,10 +1196,10 @@ export default function HomePortal({
 
       {/* 5. FOOTER */}
       <footer className="mt-auto border-t border-edge bg-surface/50 transition-all pt-16 pb-8 px-6 md:px-12 text-sm text-content-secondary">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-          
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-10 mb-12">
+
           {/* Col 1: Marca */}
-          <div className="space-y-4">
+          <div className="space-y-4 col-span-1">
             <div className="flex items-center gap-3">
               {isDarkMode ? (
                 portalSettings?.logo_night ? (
@@ -1211,7 +1209,7 @@ export default function HomePortal({
                     <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
                       <Building size={16} />
                     </div>
-                    <span className="text-lg font-extrabold tracking-tight text-content">ChatPrex Portal</span>
+                    <span className="text-lg font-extrabold tracking-tight text-content">Zentra</span>
                   </>
                 )
               ) : (
@@ -1222,7 +1220,7 @@ export default function HomePortal({
                     <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
                       <Building size={16} />
                     </div>
-                    <span className="text-lg font-extrabold tracking-tight text-content">ChatPrex Portal</span>
+                    <span className="text-lg font-extrabold tracking-tight text-content">Zentra</span>
                   </>
                 )
               )}
@@ -1232,98 +1230,101 @@ export default function HomePortal({
             </p>
           </div>
 
-          {/* Col 2: Secciones */}
-          <div className="space-y-3">
-            <h4 className="font-extrabold text-content text-xs uppercase tracking-wider">Enlaces Rápidos</h4>
-            <ul className="space-y-2 text-xs list-none p-0 text-left">
-              <li>
-                <button 
-                  onClick={() => { setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  className="hover:text-accent transition-colors bg-transparent border-none p-0 cursor-pointer text-content-secondary text-xs font-semibold"
-                >
-                  Inicio
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => { setViewMode('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  className="hover:text-accent transition-colors bg-transparent border-none p-0 cursor-pointer text-content-secondary text-xs font-semibold"
-                >
-                  Catálogo Completo
-                </button>
-              </li>
-              <li>
-                <a 
-                  href="#quienes-somos" 
-                  onClick={() => setViewMode('portal')} 
-                  className="hover:text-accent transition-colors text-content-secondary font-semibold"
-                >
-                  Quiénes Somos
-                </a>
-              </li>
-            </ul>
-          </div>
+          {/* Sub-grid para Enlaces Rápidos y Contacto (2 columnas en móvil/tablet) */}
+          <div className="grid grid-cols-2 gap-10 col-span-1 lg:col-span-2">
+            {/* Col 2: Secciones */}
+            <div className="space-y-3">
+              <h4 className="font-extrabold text-content text-xs uppercase tracking-wider">Enlaces Rápidos</h4>
+              <ul className="space-y-2 text-xs list-none p-0 text-left">
+                <li>
+                  <button
+                    onClick={() => { setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="hover:text-accent transition-colors bg-transparent border-none p-0 cursor-pointer text-content-secondary text-xs font-semibold"
+                  >
+                    Inicio
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => { setViewMode('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="hover:text-accent transition-colors bg-transparent border-none p-0 cursor-pointer text-content-secondary text-xs font-semibold"
+                  >
+                    Catálogo Completo
+                  </button>
+                </li>
+                <li>
+                  <a
+                    href="#quienes-somos"
+                    onClick={() => setViewMode('portal')}
+                    className="hover:text-accent transition-colors text-content-secondary font-semibold"
+                  >
+                    Quiénes Somos
+                  </a>
+                </li>
+              </ul>
+            </div>
 
-          {/* Col 3: Contacto */}
-          <div className="space-y-3">
-            <h4 className="font-extrabold text-content text-xs uppercase tracking-wider">Contacto</h4>
-            <ul className="space-y-2 text-xs">
-              <li className="flex items-center gap-2"><Phone size={12} className="text-accent" /> {portalSettings?.phone || '+51 900 000 000'}</li>
-              <li className="flex items-center gap-2"><Mail size={12} className="text-accent" /> {portalSettings?.email || 'ventas@chatprex.com'}</li>
-              {portalSettings?.address && (
-                <li className="flex items-center gap-2"><MapPin size={12} className="text-accent" /> {portalSettings.address}</li>
-              )}
-            </ul>
+            {/* Col 3: Contacto */}
+            <div className="space-y-3">
+              <h4 className="font-extrabold text-content text-xs uppercase tracking-wider">Contacto</h4>
+              <ul className="space-y-2 text-xs">
+                <li className="flex items-center gap-2"><Phone size={12} className="text-accent" /> {portalSettings?.phone || '+51 900 000 000'}</li>
+                <li className="flex items-center gap-2"><Mail size={12} className="text-accent" /> {portalSettings?.email || 'ventas@chatprex.com'}</li>
+                {portalSettings?.address && (
+                  <li className="flex items-center gap-2"><MapPin size={12} className="text-accent" /> {portalSettings.address}</li>
+                )}
+              </ul>
+            </div>
           </div>
 
           {/* Col 4: Redes Sociales */}
-          <div className="space-y-4">
+          <div className="space-y-4 col-span-1">
             <h4 className="font-extrabold text-content text-xs uppercase tracking-wider">Síguenos en Redes</h4>
             <p className="text-xs text-content-muted">Mantente al tanto de nuestros nuevos lanzamientos y proyectos inmobiliarios.</p>
-            
+
             {/* Botones Redes Sociales */}
             <div className="flex gap-2.5">
-              <a 
-                href={portalSettings?.facebook_url || "https://facebook.com"} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="w-9 h-9 rounded-xl border border-edge hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all text-content-secondary"
+              <a
+                href={portalSettings?.facebook_url || "https://facebook.com"}
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
                 title="Facebook"
               >
                 <Facebook size={16} />
               </a>
-              <a 
-                href={portalSettings?.instagram_url || "https://instagram.com"} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="w-9 h-9 rounded-xl border border-edge hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all text-content-secondary"
+              <a
+                href={portalSettings?.instagram_url || "https://instagram.com"}
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
                 title="Instagram"
               >
                 <Instagram size={16} />
               </a>
-              <a 
-                href={portalSettings?.linkedin_url || "https://linkedin.com"} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="w-9 h-9 rounded-xl border border-edge hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all text-content-secondary"
+              <a
+                href={portalSettings?.linkedin_url || "https://linkedin.com"}
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
                 title="LinkedIn"
               >
                 <Linkedin size={16} />
               </a>
-              <a 
-                href={portalSettings?.youtube_url || "https://youtube.com"} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="w-9 h-9 rounded-xl border border-edge hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all text-content-secondary"
+              <a
+                href={portalSettings?.youtube_url || "https://youtube.com"}
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
                 title="YouTube"
               >
                 <Youtube size={16} />
               </a>
-              <a 
-                href={portalSettings?.phone ? `https://wa.me/${portalSettings.phone.replace(/[^0-9]/g, '')}` : "https://wa.me/51900000000"} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="w-9 h-9 rounded-xl border border-edge hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:scale-105 flex items-center justify-center transition-all text-content-secondary"
+              <a
+                href={portalSettings?.phone ? `https://wa.me/${portalSettings.phone.replace(/[^0-9]/g, '')}` : "https://wa.me/51900000000"}
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:scale-105 flex items-center justify-center transition-all"
                 title="WhatsApp Ventas"
               >
                 <Send size={16} />
@@ -1346,7 +1347,7 @@ export default function HomePortal({
       {/* 6. MODAL DE DETALLE DE PROPIEDAD */}
       {selectedProperty && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div 
+          <div
             className="w-full max-w-3xl rounded-2xl border border-edge bg-surface overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 max-h-[85vh]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -1356,8 +1357,8 @@ export default function HomePortal({
                 <span className="text-[9px] font-bold text-accent tracking-widest uppercase">{selectedProperty.project || 'Proyecto Destacado'}</span>
                 <h2 className="text-base md:text-lg font-bold text-content leading-snug">{selectedProperty.name}</h2>
               </div>
-              <button 
-                onClick={() => setSelectedProperty(null)} 
+              <button
+                onClick={() => setSelectedProperty(null)}
                 className="w-7 h-7 rounded-md border border-edge text-content-secondary hover:text-content hover:bg-surface flex items-center justify-center transition-colors font-bold text-base cursor-pointer focus:outline-none"
               >
                 &times;
@@ -1366,15 +1367,15 @@ export default function HomePortal({
 
             {/* Cuerpo Modal */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              
+
               {/* Sección Imágenes */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {/* Gran Imagen Principal */}
                 <div className="md:col-span-2 h-48 md:h-64 rounded-xl overflow-hidden border border-edge relative">
-                  <img 
-                    src={getImagesArray(selectedProperty)[activeImageIndex]} 
-                    alt={selectedProperty.name} 
-                    className="w-full h-full object-cover" 
+                  <img
+                    src={getImagesArray(selectedProperty)[activeImageIndex]}
+                    alt={selectedProperty.name}
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute bottom-2.5 right-2.5 bg-black/75 px-2 py-0.5 text-white text-[10px] rounded-md font-bold">
                     Foto {activeImageIndex + 1} de {getImagesArray(selectedProperty).length}
@@ -1384,7 +1385,7 @@ export default function HomePortal({
                 {/* Miniaturas de Galería */}
                 <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto md:max-h-64">
                   {getImagesArray(selectedProperty).map((img, idx) => (
-                    <button 
+                    <button
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
                       className={`relative w-14 h-14 md:w-full md:h-[68px] rounded-lg overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${activeImageIndex === idx ? 'border-accent ring-2 ring-accent/20' : 'border-edge opacity-70 hover:opacity-100'}`}
@@ -1397,7 +1398,7 @@ export default function HomePortal({
 
               {/* Ficha Técnica y Descripción */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-3 border-t border-edge">
-                
+
                 {/* Detalles / Ficha */}
                 <div className="lg:col-span-2 space-y-2.5">
                   <h3 className="font-bold text-sm text-content">Ficha de la Propiedad</h3>
@@ -1449,7 +1450,7 @@ export default function HomePortal({
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => handleWhatsAppContact(selectedProperty)}
                     className="w-full btn-primary h-10 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] shadow-md shadow-emerald-500/10 text-white font-bold text-xs rounded-lg transition-all border-none cursor-pointer"
                   >
@@ -1463,8 +1464,8 @@ export default function HomePortal({
 
             {/* Footer Modal */}
             <div className="px-5 py-3 border-t border-edge flex items-center justify-end bg-surface-inset">
-              <button 
-                onClick={() => setSelectedProperty(null)} 
+              <button
+                onClick={() => setSelectedProperty(null)}
                 className="text-[11px] font-bold text-content-secondary hover:text-content px-3.5 py-1.5 border border-edge rounded-md bg-surface hover:bg-surface-inset cursor-pointer"
               >
                 Cerrar Detalle
