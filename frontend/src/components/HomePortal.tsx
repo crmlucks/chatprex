@@ -306,6 +306,16 @@ export default function HomePortal({
     return [property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'];
   };
 
+  const getPartnersArray = (): string[] => {
+    if (!portalSettings?.partners) return [];
+    if (Array.isArray(portalSettings.partners)) return portalSettings.partners;
+    try {
+      return JSON.parse(portalSettings.partners);
+    } catch (e) {
+      return [];
+    }
+  };
+
   const renderFilterBar = () => {
     return (
       <div className="pt-8 max-w-4xl mx-auto w-full">
@@ -454,7 +464,7 @@ export default function HomePortal({
                 onChange={(e) => setFilterCurrency(e.target.value)}
                 className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
               >
-                <option value="todos">Cualquier moneda</option>
+                <option value="todos">Moneda</option>
                 <option value="USD">Dólares (USD)</option>
                 <option value="PEN">Soles (PEN)</option>
                 <option value="MXN">Pesos MX (MXN)</option>
@@ -533,7 +543,7 @@ export default function HomePortal({
               onClick={onLoginClick}
               className="text-xs font-semibold text-content-muted hover:text-accent transition-colors bg-transparent border-none cursor-pointer flex items-center gap-1.5 mx-auto"
             >
-              <LogIn size={12} /> Acceso Administrativo
+              <LogIn size={12} /> 
             </button>
           </div>
         </div>
@@ -722,15 +732,15 @@ export default function HomePortal({
                     className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
                     style={{
                       backgroundImage: `url(${img})`,
-                      opacity: currentHeroIndex === idx ? 1 : 0
+                      opacity: currentHeroIndex === idx ? 0.5 : 0
                     }}
                   />
                 ))}
                 {getHeroImages().length === 0 && (
                   <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-zinc-950 to-slate-950" />
                 )}
-                {/* Scrim Overlay (Adjusted: 35% black in light mode, 60% black in dark mode to ensure maximum text contrast) */}
-                <div className="absolute inset-0 bg-black/35 dark:bg-black/60 transition-all duration-300" />
+                {/* Scrim Overlay (Adjusted to be darker to lower the banner background opacity and improve readability) */}
+                <div className="absolute inset-0 bg-black/50 dark:bg-black/75 transition-all duration-300" />
                 {/* Bottom edge fade-out (Only at the very bottom to blend cleanly with the next section) */}
                 <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-surface-base to-transparent pointer-events-none" />
               </div>
@@ -937,7 +947,7 @@ export default function HomePortal({
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white space-y-1 text-left">
                       <p className="text-xs font-bold tracking-widest uppercase text-accent">Liderazgo Inmobiliario</p>
-                      <h3 className="text-xl font-bold">Líderes en conectar personas con sus hogares ideales</h3>
+                      <h3 className="text-xl font-bold"></h3>
                     </div>
                   </div>
 
@@ -961,7 +971,7 @@ export default function HomePortal({
                 <p className="body-text text-content-secondary leading-relaxed whitespace-pre-line">
                   {portalSettings?.about_description || (
                     <>
-                      En <strong>Zentra</strong>, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces. Nuestra misión es guiarte en el proceso de compra, venta o alquiler de propiedades de forma transparente, rápida y eficiente, asegurándote decisiones rentables y seguras.
+                      En <strong>Zentra</strong>, Somos especialistas en inversiones inmobiliarias seguras. Seleccionamos y verificamos cada propiedad mediante análisis legal, comercial y tecnológico, brindándote asesoría personalizada para que inviertas con confianza y minimices riesgos.
                     </>
                   )}
                 </p>
@@ -1027,6 +1037,51 @@ export default function HomePortal({
 
             </div>
           </section>
+
+          {/* CAROUSEL/SLIDER DE SOCIOS (PARTNERS) - Desplazamiento Infinito Compacto */}
+          {getPartnersArray().length > 0 && (
+            <div className="py-8 bg-surface-inset border-t border-b border-edge/60 overflow-hidden relative select-none w-full">
+              <style dangerouslySetInnerHTML={{__html: `
+                @keyframes marquee {
+                  0% { transform: translateX(0%); }
+                  100% { transform: translateX(-50%); }
+                }
+                .marquee-track {
+                  display: flex;
+                  width: max-content;
+                  animation: marquee 25s linear infinite;
+                }
+                .marquee-track:hover {
+                  animation-play-state: paused;
+                }
+              `}} />
+              
+              <div className="max-w-7xl mx-auto px-6 mb-3 text-center">
+                <p className="text-[9px] font-extrabold uppercase tracking-widest text-content-muted">Nuestras Alianzas y Socios Estratégicos</p>
+              </div>
+
+              <div className="relative w-full flex items-center overflow-hidden">
+                {/* Overlays de degradado para los bordes del slider */}
+                <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-surface-inset to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-surface-inset to-transparent z-10 pointer-events-none" />
+
+                {/* Duplicamos el track para que sea continuo y sin fin */}
+                <div className="marquee-track flex gap-12 items-center">
+                  {/* Bloque 1 */}
+                  {(() => {
+                    const logos = getPartnersArray();
+                    // Duplicamos el array varias veces para llenar pantallas anchas
+                    const repeated = [...logos, ...logos, ...logos, ...logos];
+                    return repeated.map((img, idx) => (
+                      <div key={idx} className="h-8 w-28 flex items-center justify-center shrink-0 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src={img} className="max-h-full max-w-full object-contain" alt="Socio" />
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 3.5. SECCIÓN DE LLAMADO A LA ACCIÓN (CONTACTAR POR WHATSAPP) - Compacto y Blended */}
           <section id="contacto" className="py-12 px-6 md:px-12 bg-surface border-t border-b border-edge">

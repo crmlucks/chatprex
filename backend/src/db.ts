@@ -465,6 +465,7 @@ export async function initDatabase() {
         ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS instagram_url VARCHAR(255) DEFAULT '';
         ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS linkedin_url VARCHAR(255) DEFAULT '';
         ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS youtube_url VARCHAR(255) DEFAULT '';
+        ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS partners JSONB DEFAULT '[]'::jsonb;
       END $$;
     `);
     
