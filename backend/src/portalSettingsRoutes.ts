@@ -53,12 +53,10 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
     facebook_url,
     instagram_url,
     linkedin_url,
-    youtube_url,
-    partners
+    youtube_url
   } = req.body;
 
   try {
-    const partnersJson = Array.isArray(partners) ? JSON.stringify(partners) : JSON.stringify([]);
     // Verificar si existe el registro con ID 1
     const checkResult = await pool.query('SELECT id FROM portal_settings WHERE id = 1');
     
@@ -71,9 +69,8 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
           banner_image_1, banner_image_2, banner_image_3, 
           about_title, about_description, about_image,
           phone, email, address, status,
-          facebook_url, instagram_url, linkedin_url, youtube_url,
-          partners
-        ) VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+          facebook_url, instagram_url, linkedin_url, youtube_url
+        ) VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
         RETURNING *`,
         [
           logo_day || '', logo_night || '', 
@@ -84,8 +81,7 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
           about_description || 'En ChatPrex, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces.',
           about_image || '',
           phone || '', email || '', address || '', status || 'Activo',
-          facebook_url || '', instagram_url || '', linkedin_url || '', youtube_url || '',
-          partnersJson
+          facebook_url || '', instagram_url || '', linkedin_url || '', youtube_url || ''
         ]
       );
     } else {
@@ -97,7 +93,6 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
              about_title = $8, about_description = $9, about_image = $10,
              phone = $11, email = $12, address = $13, status = $14,
              facebook_url = $15, instagram_url = $16, linkedin_url = $17, youtube_url = $18,
-             partners = $19,
              updated_at = NOW()
          WHERE id = 1 RETURNING *`,
         [
@@ -105,8 +100,7 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
           banner_image_1, banner_image_2, banner_image_3,
           about_title, about_description, about_image,
           phone, email, address, status,
-          facebook_url, instagram_url, linkedin_url, youtube_url,
-          partnersJson
+          facebook_url, instagram_url, linkedin_url, youtube_url
         ]
       );
     }

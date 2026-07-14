@@ -306,16 +306,6 @@ export default function HomePortal({
     return [property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'];
   };
 
-  const getPartnersArray = (): string[] => {
-    if (!portalSettings?.partners) return [];
-    if (Array.isArray(portalSettings.partners)) return portalSettings.partners;
-    try {
-      return JSON.parse(portalSettings.partners);
-    } catch (e) {
-      return [];
-    }
-  };
-
   const renderFilterBar = () => {
     return (
       <div className="pt-8 max-w-4xl mx-auto w-full">
@@ -1037,51 +1027,6 @@ export default function HomePortal({
 
             </div>
           </section>
-
-          {/* CAROUSEL/SLIDER DE SOCIOS (PARTNERS) - Desplazamiento Infinito Compacto */}
-          {getPartnersArray().length > 0 && (
-            <div className="py-8 bg-surface-inset border-t border-b border-edge/60 overflow-hidden relative select-none w-full">
-              <style dangerouslySetInnerHTML={{__html: `
-                @keyframes marquee {
-                  0% { transform: translateX(0%); }
-                  100% { transform: translateX(-50%); }
-                }
-                .marquee-track {
-                  display: flex;
-                  width: max-content;
-                  animation: marquee 25s linear infinite;
-                }
-                .marquee-track:hover {
-                  animation-play-state: paused;
-                }
-              `}} />
-              
-              <div className="max-w-7xl mx-auto px-6 mb-3 text-center">
-                <p className="text-[9px] font-extrabold uppercase tracking-widest text-content-muted">Nuestras Alianzas y Socios Estratégicos</p>
-              </div>
-
-              <div className="relative w-full flex items-center overflow-hidden">
-                {/* Overlays de degradado para los bordes del slider */}
-                <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-surface-inset to-transparent z-10 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-surface-inset to-transparent z-10 pointer-events-none" />
-
-                {/* Duplicamos el track para que sea continuo y sin fin */}
-                <div className="marquee-track flex gap-12 items-center">
-                  {/* Bloque 1 */}
-                  {(() => {
-                    const logos = getPartnersArray();
-                    // Duplicamos el array varias veces para llenar pantallas anchas
-                    const repeated = [...logos, ...logos, ...logos, ...logos];
-                    return repeated.map((img, idx) => (
-                      <div key={idx} className="h-8 w-28 flex items-center justify-center shrink-0 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-                        <img src={img} className="max-h-full max-w-full object-contain" alt="Socio" />
-                      </div>
-                    ));
-                  })()}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* 3.5. SECCIÓN DE LLAMADO A LA ACCIÓN (CONTACTAR POR WHATSAPP) - Compacto y Blended */}
           <section id="contacto" className="py-12 px-6 md:px-12 bg-surface border-t border-b border-edge">

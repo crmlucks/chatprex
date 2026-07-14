@@ -36,8 +36,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
   facebook_url: '',
   instagram_url: '',
   linkedin_url: '',
-  youtube_url: '',
-  partners: []
+  youtube_url: ''
  });
  const [savingPortal, setSavingPortal] = useState(false);
  const [saveSuccess, setSaveSuccess] = useState(false);
@@ -49,7 +48,6 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
  const banner2Ref = useRef<HTMLInputElement>(null);
  const banner3Ref = useRef<HTMLInputElement>(null);
  const aboutImgRef = useRef<HTMLInputElement>(null);
- const partnersRef = useRef<HTMLInputElement>(null);
 
  useEffect(() => {
    setTab(defaultTab);
@@ -80,22 +78,6 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
       }));
     };
     reader.readAsDataURL(file);
-    e.target.value = '';
-  };
-
-  const handlePartnerLogosUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPortalSettings((prev: any) => ({
-          ...prev,
-          partners: [...(prev.partners || []), reader.result as string]
-        }));
-      };
-      reader.readAsDataURL(file);
-    });
     e.target.value = '';
   };
 
@@ -143,12 +125,6 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
      const res = await fetch(`${API_URL}/api/portal-settings`, { headers });
      if(res.ok) {
         const data = await res.json();
-        let parsedPartners = [];
-        if (data.partners) {
-          try {
-            parsedPartners = Array.isArray(data.partners) ? data.partners : JSON.parse(data.partners);
-          } catch (e) {}
-        }
         setPortalSettings({
           logo_day: data.logo_day || '',
           logo_night: data.logo_night || '',
@@ -167,8 +143,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
           facebook_url: data.facebook_url || '',
           instagram_url: data.instagram_url || '',
           linkedin_url: data.linkedin_url || '',
-          youtube_url: data.youtube_url || '',
-          partners: parsedPartners || []
+          youtube_url: data.youtube_url || ''
         });
      }
      const propRes = await fetch(`${API_URL}/api/properties`, { headers });
@@ -671,45 +646,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
              </div>
            </div>
 
-            {/* SECCIÓN ADICIONAL: GESTIÓN DE SOCIOS / PARTNERS */}
-            <div className="card p-4 md:p-6 space-y-4">
-              <div className="border-b border-edge pb-2">
-                <h3 className="text-sm font-black uppercase text-content tracking-wider">Gestión de Socios (Partners)</h3>
-                <p className="text-[10px] text-content-muted mt-1">Sube los logotipos de tus socios estratégicos para mostrarlos en el portal web (sección desplazable).</p>
-              </div>
-
-              <div className="space-y-3">
-                <label className={label}>Logotipos de Socios</label>
-                <div className="flex flex-wrap gap-4 items-center">
-                  {(portalSettings.partners || []).map((img: string, idx: number) => (
-                    <div key={idx} className="relative w-24 h-16 rounded-xl border border-edge overflow-hidden bg-slate-50 dark:bg-slate-900 group animate-in zoom-in-95">
-                      <img src={img} className="w-full h-full object-contain p-2" alt="" />
-                      <button 
-                        type="button" 
-                        onClick={() => setPortalSettings((prev: any) => ({
-                          ...prev,
-                          partners: (prev.partners || []).filter((_: any, i: number) => i !== idx)
-                        }))}
-                        className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity border-none cursor-pointer"
-                      >
-                        <X size={10} />
-                      </button>
-                    </div>
-                  ))}
-                  
-                  <div 
-                    onClick={() => partnersRef.current?.click()} 
-                    className="w-24 h-16 rounded-xl border-2 border-dashed border-edge flex flex-col items-center justify-center cursor-pointer hover:border-accent hover:bg-surface-inset transition-all"
-                  >
-                    <Upload size={16} className="text-content-muted" />
-                    <span className="text-[8px] text-content-muted font-bold mt-1 uppercase">Añadir logo</span>
-                  </div>
-                </div>
-                <input type="file" ref={partnersRef} multiple accept="image/*" className="hidden" onChange={handlePartnerLogosUpload} />
-              </div>
-            </div>
-
-            {/* SECCIÓN 4: INFORMACIÓN DE CONTACTO, REDES Y ESTADO */}
+           {/* SECCIÓN 4: INFORMACIÓN DE CONTACTO, REDES Y ESTADO */}
            <div className="card p-4 md:p-6 space-y-4">
              <div className="border-b border-edge pb-2">
                <h3 className="text-sm font-black uppercase text-content tracking-wider">Sección 4: Información de Contacto, Redes y Estado</h3>
