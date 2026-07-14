@@ -722,15 +722,15 @@ export default function HomePortal({
                     className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
                     style={{
                       backgroundImage: `url(${img})`,
-                      opacity: currentHeroIndex === idx ? 0.5 : 0
+                      opacity: currentHeroIndex === idx ? 0.85 : 0
                     }}
                   />
                 ))}
                 {getHeroImages().length === 0 && (
                   <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-zinc-950 to-slate-950" />
                 )}
-                {/* Scrim Overlay (Adjusted to be darker to lower the banner background opacity and improve readability) */}
-                <div className="absolute inset-0 bg-black/50 dark:bg-black/75 transition-all duration-300" />
+                {/* Scrim Overlay (Adjusted to be lighter to show the background image clearer and brighter) */}
+                <div className="absolute inset-0 bg-black/20 dark:bg-black/45 transition-all duration-300" />
                 {/* Bottom edge fade-out (Only at the very bottom to blend cleanly with the next section) */}
                 <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-surface-base to-transparent pointer-events-none" />
               </div>
