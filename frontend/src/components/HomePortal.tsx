@@ -555,7 +555,7 @@ export default function HomePortal({
                 <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
                   <Home size={20} />
                 </div>
-                <span className="text-xl font-bold tracking-tight">Casaya <span className="text-accent font-medium text-xs py-0.5 px-2 bg-accent-subtle rounded-full ml-1">Portal</span></span>
+                <span className="text-xl font-bold tracking-tight">Casaya</span>
               </>
             )
           ) : (
@@ -566,7 +566,7 @@ export default function HomePortal({
                 <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
                   <Home size={20} />
                 </div>
-                <span className="text-xl font-bold tracking-tight">Casaya <span className="text-accent font-medium text-xs py-0.5 px-2 bg-accent-subtle rounded-full ml-1">Portal</span></span>
+                <span className="text-xl font-bold tracking-tight">Casaya</span>
               </>
             )
           )}
