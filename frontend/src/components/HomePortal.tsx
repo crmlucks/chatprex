@@ -549,24 +549,24 @@ export default function HomePortal({
         <div onClick={() => { setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-3 cursor-pointer">
           {isDarkMode ? (
             portalSettings?.logo_night ? (
-              <img src={portalSettings.logo_night} className="h-9 max-w-[180px] object-contain" alt="ChatPrex" />
+              <img src={portalSettings.logo_night} className="h-9 max-w-[180px] object-contain" alt="Casaya" />
             ) : (
               <>
                 <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
-                  <Building size={20} />
+                  <Home size={20} />
                 </div>
-                <span className="text-xl font-bold tracking-tight">ChatPrex <span className="text-accent font-medium text-xs py-0.5 px-2 bg-accent-subtle rounded-full ml-1">Portal</span></span>
+                <span className="text-xl font-bold tracking-tight">Casaya <span className="text-accent font-medium text-xs py-0.5 px-2 bg-accent-subtle rounded-full ml-1">Portal</span></span>
               </>
             )
           ) : (
             portalSettings?.logo_day ? (
-              <img src={portalSettings.logo_day} className="h-9 max-w-[180px] object-contain" alt="ChatPrex" />
+              <img src={portalSettings.logo_day} className="h-9 max-w-[180px] object-contain" alt="Casaya" />
             ) : (
               <>
                 <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
-                  <Building size={20} />
+                  <Home size={20} />
                 </div>
-                <span className="text-xl font-bold tracking-tight">ChatPrex <span className="text-accent font-medium text-xs py-0.5 px-2 bg-accent-subtle rounded-full ml-1">Portal</span></span>
+                <span className="text-xl font-bold tracking-tight">Casaya <span className="text-accent font-medium text-xs py-0.5 px-2 bg-accent-subtle rounded-full ml-1">Portal</span></span>
               </>
             )
           )}
@@ -758,7 +758,7 @@ export default function HomePortal({
                   textShadow: '0 1px 3px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.5)'
                 }}
               >
-                {portalSettings?.hero_subtitle || 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de ChatPrex.'}
+                {portalSettings?.hero_subtitle || 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de Casaya.'}
               </p>
 
               {/* BARRA DE FILTROS ESTILO AIRBNB */}
@@ -954,14 +954,14 @@ export default function HomePortal({
                 <div className="space-y-3">
                   <span className="text-xs font-bold text-accent tracking-widest uppercase block">Nosotros</span>
                   <h2 className="text-3xl md:text-4xl font-black text-content tracking-tight">
-                    {portalSettings?.about_title || 'Zentra Gestión Inmobiliaria'}
+                    {portalSettings?.about_title || 'Casaya Gestión Inmobiliaria'}
                   </h2>
                 </div>
 
                 <p className="body-text text-content-secondary leading-relaxed whitespace-pre-line">
                   {portalSettings?.about_description || (
                     <>
-                      En <strong>Zentra</strong>, Somos especialistas en inversiones inmobiliarias seguras. Seleccionamos y verificamos cada propiedad mediante análisis legal, comercial y tecnológico, brindándote asesoría personalizada para que inviertas con confianza y minimices riesgos.
+                      En <strong>Casaya</strong>, Somos especialistas en inversiones inmobiliarias seguras. Seleccionamos y verificamos cada propiedad mediante análisis legal, comercial y tecnológico, brindándote asesoría personalizada para que inviertas con confianza y minimices riesgos.
                     </>
                   )}
                 </p>
@@ -1040,7 +1040,7 @@ export default function HomePortal({
                   ¿Encontraste la propiedad ideal o tienes alguna pregunta?
                 </h2>
                 <p className="text-xs md:text-sm text-content-secondary leading-relaxed max-w-2xl">
-                  Nuestros asesores expertos, impulsados por la tecnología de inteligencia artificial de <strong>Zentra</strong>, están listos para asistirte. Escríbenos ahora mismo y recibe asesoramiento personalizado para concretar tu próxima inversión con las mejores condiciones del mercado.
+                  Nuestros asesores expertos, impulsados por la tecnología de inteligencia artificial de <strong>Casaya</strong>, están listos para asistirte. Escríbenos ahora mismo y recibe asesoramiento personalizado para concretar tu próxima inversión con las mejores condiciones del mercado.
                 </p>
               </div>
 
@@ -1048,7 +1048,7 @@ export default function HomePortal({
                 <button
                   onClick={() => {
                     const defaultPhone = "51900000000";
-                    const message = "Hola! Vengo del portal de ChatPrex y me gustaría recibir asesoría personalizada para adquirir un inmueble.";
+                    const message = "Hola! Vengo del portal de Casaya y me gustaría recibir asesoría personalizada para adquirir un inmueble.";
                     const url = `https://wa.me/${defaultPhone}?text=${encodeURIComponent(message)}`;
                     window.open(url, '_blank');
                   }}
@@ -1203,24 +1203,24 @@ export default function HomePortal({
             <div className="flex items-center gap-3">
               {isDarkMode ? (
                 portalSettings?.logo_night ? (
-                  <img src={portalSettings.logo_night} className="h-8 max-w-[160px] object-contain" alt="ChatPrex" />
+                  <img src={portalSettings.logo_night} className="h-8 max-w-[160px] object-contain" alt="Casaya" />
                 ) : (
                   <>
                     <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
-                      <Building size={16} />
+                      <Home size={16} />
                     </div>
-                    <span className="text-lg font-extrabold tracking-tight text-content">Zentra</span>
+                    <span className="text-lg font-extrabold tracking-tight text-content">Casaya</span>
                   </>
                 )
               ) : (
                 portalSettings?.logo_day ? (
-                  <img src={portalSettings.logo_day} className="h-8 max-w-[160px] object-contain" alt="ChatPrex" />
+                  <img src={portalSettings.logo_day} className="h-8 max-w-[160px] object-contain" alt="Casaya" />
                 ) : (
                   <>
                     <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
-                      <Building size={16} />
+                      <Home size={16} />
                     </div>
-                    <span className="text-lg font-extrabold tracking-tight text-content">Zentra</span>
+                    <span className="text-lg font-extrabold tracking-tight text-content">Casaya</span>
                   </>
                 )
               )}
@@ -1269,7 +1269,7 @@ export default function HomePortal({
               <h4 className="font-extrabold text-content text-xs uppercase tracking-wider">Contacto</h4>
               <ul className="space-y-2 text-xs">
                 <li className="flex items-center gap-2"><Phone size={12} className="text-accent" /> {portalSettings?.phone || '+51 900 000 000'}</li>
-                <li className="flex items-center gap-2"><Mail size={12} className="text-accent" /> {portalSettings?.email || 'ventas@chatprex.com'}</li>
+                <li className="flex items-center gap-2"><Mail size={12} className="text-accent" /> {portalSettings?.email || 'ventas@casaya.com'}</li>
                 {portalSettings?.address && (
                   <li className="flex items-center gap-2"><MapPin size={12} className="text-accent" /> {portalSettings.address}</li>
                 )}
@@ -1339,7 +1339,7 @@ export default function HomePortal({
             <span className="text-[11px] font-medium text-content-muted">Garantía Inmobiliaria Certificada y Protegida</span>
           </div>
           <p className="text-[11px] text-content-muted">
-            © {new Date().getFullYear()} ChatPrex Cloud · Todos los derechos reservados.
+            © {new Date().getFullYear()} Casaya Cloud · Todos los derechos reservados.
           </p>
         </div>
       </footer>

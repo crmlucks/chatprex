@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, LogIn, UserPlus, Bot, ShieldCheck, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, LogIn, UserPlus, Home, ShieldCheck, Loader2 } from 'lucide-react';
 
 const Login = ({ onBack }: { onBack?: () => void }) => {
  const { login, setup, needsSetup, demoLogin } = useAuth();
@@ -42,10 +42,10 @@ const Login = ({ onBack }: { onBack?: () => void }) => {
    <div className="w-full max-w-md px-6">
     {/* Logo Section */}
     <div className="text-center mb-10">
-     <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 mb-6">
-      <Bot size={32} className="text-content" />
+     <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-accent mb-6 shadow-lg shadow-accent/25">
+      <Home size={32} className="text-white" />
      </div>
-     <h1 className="text-3xl font-bold text-content tracking-tight">ChatPrex</h1>
+     <h1 className="text-3xl font-bold text-content tracking-tight">Casaya</h1>
      <div className="flex items-center justify-center gap-2 mt-2">
       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
       <p className="text-zinc-500 text-xs font-medium">Premium CRM ERP</p>
@@ -106,7 +106,7 @@ const Login = ({ onBack }: { onBack?: () => void }) => {
         value={email}
         onChange={e => setEmail(e.target.value)}
         className={inputCls}
-        placeholder="hola@chatprex.com"
+        placeholder="hola@casaya.com"
        />
       </div>
 
@@ -166,7 +166,7 @@ const Login = ({ onBack }: { onBack?: () => void }) => {
        <span className="text-xs font-medium text-zinc-500">Conexión segura SSL 256-bit</span>
      </div>
      <p className="text-zinc-600 text-xs font-medium">
-      © {new Date().getFullYear()} ChatPrex Cloud · v2.0
+      © {new Date().getFullYear()} Casaya Cloud · v2.0
      </p>
     </div>
    </div>

@@ -18,7 +18,7 @@ import LeadIntelligence from './components/LeadIntelligence';
 import UserManagement from './components/UserManagement';
 import { ToastProvider } from './components/Toast';
 import AlarmSystem, { AlarmItem } from './components/AlarmSystem';
-import { Bot, Loader2 } from 'lucide-react';
+import { Bot, Loader2, Home } from 'lucide-react';
 
 /**
  * Componente interno que renderiza la aplicación autenticada.
@@ -41,6 +41,7 @@ function AuthenticatedApp() {
   } else {
    document.documentElement.classList.remove('dark');
    localStorage.setItem('prexup_theme', 'light');
+   localStorage.setItem('casaya_theme', 'light');
   }
  }, [isDarkMode]);
 
@@ -48,7 +49,7 @@ function AuthenticatedApp() {
  const [alarms, setAlarms] = useState<AlarmItem[]>([]);
  React.useEffect(() => {
   const fetchAlarms = async () => {
-   const token = localStorage.getItem('chatprex_token');
+   const token = localStorage.getItem('casaya_token');
    if (!token) return;
    try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -91,10 +92,10 @@ function AuthenticatedApp() {
    <div className="flex h-screen w-full items-center justify-center bg-surface-base">
     <div className="flex flex-col items-center gap-4">
      <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center">
-      <Bot className="text-content" size={24} />
+      <Home className="text-white" size={24} />
      </div>
      <div className="flex flex-col items-center gap-1">
-      <h2 className="h2">ChatPrex</h2>
+      <h2 className="h2">Casaya</h2>
       <p className="label-text">Iniciando sistema...</p>
      </div>
      <Loader2 size={20} className="text-accent animate-spin mt-2" />
@@ -151,7 +152,7 @@ function AuthenticatedApp() {
     );
   }
 
-  // Si está autenticado pero entra desde el dominio principal (chatprex.com)
+  // Si está autenticado pero entra desde el dominio principal (casaya.com)
   if (!isAppSubdomain && !isLocalhost && activeTab !== 'Ver Portal') {
     return (
       <HomePortal
