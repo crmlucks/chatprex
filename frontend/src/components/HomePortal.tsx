@@ -1037,10 +1037,10 @@ export default function HomePortal({
                   <Send size={10} className="rotate-45" /> Contacto Inmediato
                 </div>
                 <h2 className="text-xl md:text-2xl font-extrabold text-content tracking-tight">
-                  Llevamos tu proyecto más lejos con estrategia, tecnología e inteligencia artificial.
+                  Hagamos realidad tu próximo proyecto inmobiliario
                 </h2>
                 <p className="text-xs md:text-sm text-content-secondary leading-relaxed max-w-2xl">
-                  En <strong>Casaya</strong>, combinamos experiencia comercial, un equipo especializado y una plataforma tecnológica propia con IA para atraer compradores calificados, automatizar el seguimiento de prospectos y acelerar las ventas de tus proyectos inmobiliarios.
+                  ¿Buscas una propiedad o quieres comercializar tu proyecto? Nuestro equipo está listo para brindarte asesoría especializada y acompañarte desde el primer contacto.
                 </p>
               </div>
 
@@ -1339,7 +1339,7 @@ export default function HomePortal({
             <span className="text-[11px] font-medium text-content-muted">Garantía Inmobiliaria Certificada y Protegida</span>
           </div>
           <p className="text-[11px] text-content-muted">
-            © {new Date().getFullYear()} Casaya Cloud · Todos los derechos reservados.
+            © {new Date().getFullYear()} Casaya app· Todos los derechos reservados.
           </p>
         </div>
       </footer>
