@@ -220,7 +220,7 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
              {connectionMode === 'brain' && "Personalidad del Bot"}
             </h2>
             <p className={`text-sm leading-relaxed font-medium ${isDarkMode ? 'text-content-muted' : 'text-content-muted'}`}>
-             {connectionMode === 'qr' && "Escanea el código con tu celular para que ChatPrex pueda leer y responder mensajes automáticamente. Sin costos por mensaje."}
+             {connectionMode === 'qr' && "Escanea el código con tu celular para que Casaya pueda leer y responder mensajes automáticamente. Sin costos por mensaje."}
              {connectionMode === 'meta' && "Ideal para empresas que manejan alto volumen y requieren el Check Verde. Mayor estabilidad y cumplimiento de políticas de WhatsApp."}
              {connectionMode === 'brain' && "Aquí defines cómo debe actuar tu IA: su tono, sus límites y qué información utilizará para convencer a tus clientes."}
             </p>

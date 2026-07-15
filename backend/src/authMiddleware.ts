@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'chatprex_secret_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'casaya_secret_key_2026';
 
 export interface JwtPayload {
   id: number;

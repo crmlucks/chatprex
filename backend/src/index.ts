@@ -73,7 +73,7 @@ app.post('/api/meta/conversion', async (req, res) => {
 
 // ─── Health check ───
 app.get('/api/status', (req, res) => {
-  res.json({ status: 'OK', message: 'ChatPrex Backend está en línea' });
+  res.json({ status: 'OK', message: 'Casaya Backend está en línea' });
 });
 
 // ─── WebSockets ───

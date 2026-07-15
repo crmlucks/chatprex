@@ -17,7 +17,7 @@ const pool = new Pool(
         port: parseInt(process.env.DB_PORT || '5432', 10),
         user: process.env.DB_USER || 'postgres',
         password: process.env.DB_PASSWORD || 'postgres',
-        database: process.env.DB_NAME || 'chatprex',
+        database: process.env.DB_NAME || 'casaya',
         ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
       }
 );
@@ -152,7 +152,7 @@ export async function initDatabase() {
         provider      VARCHAR(50) DEFAULT 'OpenAI',
         model         VARCHAR(50) DEFAULT 'gpt-4o-mini',
         api_key       VARCHAR(255) DEFAULT '',
-        prompt        TEXT DEFAULT 'Eres un asesor inmobiliario experto y persuasivo de ChatPrex.\nTu objetivo es perfilar leads (clientes potenciales), responder sus dudas sobre propiedades y agendar citas.\nReglas:\n1. Sé amable, conciso y utiliza emojis moderadamente.\n2. Si preguntan por precios, diles que los departamentos empiezan desde $85,000 USD.\n3. Si muestran interés, invítalos a agendar una visita.\n4. Responde SIEMPRE en español.',
+        prompt        TEXT DEFAULT 'Eres un asesor inmobiliario experto y persuasivo de Casaya.\nTu objetivo es perfilar leads (clientes potenciales), responder sus dudas sobre propiedades y agendar citas.\nReglas:\n1. Sé amable, conciso y utiliza emojis moderadamente.\n2. Si preguntan por precios, diles que los departamentos empiezan desde $85,000 USD.\n3. Si muestran interés, invítalos a agendar una visita.\n4. Responde SIEMPRE en español.',
         knowledge     TEXT DEFAULT '',
         voice_to_text BOOLEAN DEFAULT true,
         message_grouping BOOLEAN DEFAULT true,
@@ -347,12 +347,12 @@ export async function initDatabase() {
         logo_day            TEXT DEFAULT '',
         logo_night          TEXT DEFAULT '',
         hero_title          VARCHAR(255) DEFAULT 'Encuentra la propiedad perfecta para tu estilo de vida',
-        hero_subtitle       TEXT DEFAULT 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de ChatPrex.',
+        hero_subtitle       TEXT DEFAULT 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de Casaya.',
         banner_image_1      TEXT DEFAULT '',
         banner_image_2      TEXT DEFAULT '',
         banner_image_3      TEXT DEFAULT '',
         about_title         VARCHAR(255) DEFAULT 'Redefiniendo el sector inmobiliario con innovación y pasión',
-        about_description   TEXT DEFAULT 'En ChatPrex, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces. Nuestra misión es guiarte en el proceso de compra, venta o alquiler de propiedades de forma transparente, rápida y eficiente, asegurándote decisiones rentables y seguras.',
+        about_description   TEXT DEFAULT 'En Casaya, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces. Nuestra misión es guiarte en el proceso de compra, venta o alquiler de propiedades de forma transparente, rápida y eficiente, asegurándote decisiones rentables y seguras.',
         about_image         TEXT DEFAULT '',
         updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
@@ -391,9 +391,9 @@ export async function initDatabase() {
           hero_title, hero_subtitle, about_title, about_description
         ) VALUES (
           'Encuentra la propiedad perfecta para tu estilo de vida',
-          'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de ChatPrex.',
+          'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de Casaya.',
           'Redefiniendo el sector inmobiliario con innovación y pasión',
-          'En ChatPrex, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces. Nuestra misión es guiarte en el proceso de compra, venta o alquiler de propiedades de forma transparente, rápida y eficiente, asegurándote decisiones rentables y seguras.'
+          'En Casaya, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces. Nuestra misión es guiarte en el proceso de compra, venta o alquiler de propiedades de forma transparente, rápida y eficiente, asegurándote decisiones rentables y seguras.'
         )
       `);
     }

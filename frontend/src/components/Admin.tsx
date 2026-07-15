@@ -660,7 +660,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                </div>
                <div>
                  <label className={label}>Correo Electrónico de Ventas</label>
-                 <input type="email" value={portalSettings.email || ''} onChange={e => setPortalSettings({...portalSettings, email: e.target.value})} className={input} placeholder="Ej. ventas@chatprex.com" />
+                 <input type="email" value={portalSettings.email || ''} onChange={e => setPortalSettings({...portalSettings, email: e.target.value})} className={input} placeholder="Ej. ventas@casaya.com" />
                </div>
                <div>
                  <label className={label}>Dirección Física</label>

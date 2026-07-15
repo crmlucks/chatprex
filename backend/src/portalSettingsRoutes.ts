@@ -75,10 +75,10 @@ portalSettingsRouter.put('/', authMiddleware, async (req, res) => {
         [
           logo_day || '', logo_night || '', 
           hero_title || 'Encuentra la propiedad perfecta para tu estilo de vida',
-          hero_subtitle || 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de ChatPrex.',
+          hero_subtitle || 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de Casaya.',
           banner_image_1 || '', banner_image_2 || '', banner_image_3 || '',
           about_title || 'Redefiniendo el sector inmobiliario con innovación y pasión',
-          about_description || 'En ChatPrex, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces.',
+          about_description || 'En Casaya, combinamos la tecnología de inteligencia artificial más avanzada con la experiencia humana en bienes raíces.',
           about_image || '',
           phone || '', email || '', address || '', status || 'Activo',
           facebook_url || '', instagram_url || '', linkedin_url || '', youtube_url || ''

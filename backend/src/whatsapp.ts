@@ -260,7 +260,7 @@ whatsappRouter.post('/', async (req, res) => {
                       ioInstance.emit('whatsapp-message', {
                         id: `ai-media-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                         from: 'bot',
-                        name: 'ChatPrex Bot',
+                        name: 'Casaya Bot',
                         text: '[Archivo Multimedia Enviado]',
                         media: url,
                         fromMe: true,
@@ -277,7 +277,7 @@ whatsappRouter.post('/', async (req, res) => {
                         ioInstance.emit('whatsapp-message', {
                           id: botMsgId,
                           from: 'bot',
-                          name: 'ChatPrex Bot' + (globalUseN8n ? ' (n8n)' : ''),
+                          name: 'Casaya Bot' + (globalUseN8n ? ' (n8n)' : ''),
                           text: botText,
                           fromMe: true,
                           timestamp: new Date().toISOString(),

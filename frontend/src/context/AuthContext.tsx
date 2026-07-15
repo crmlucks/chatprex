@@ -35,7 +35,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('chatprex_token'));
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('casaya_token'));
   const [loading, setLoading] = useState(true);
   const [needsSetup, setNeedsSetup] = useState(false);
 
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(meData.user);
           } else {
             // Token inválido, limpiar
-            localStorage.removeItem('chatprex_token');
+            localStorage.removeItem('casaya_token');
             setToken(null);
           }
         }
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error al iniciar sesión');
-    localStorage.setItem('chatprex_token', data.token);
+    localStorage.setItem('casaya_token', data.token);
     setToken(data.token);
     setUser(data.user);
   };
@@ -95,14 +95,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error al configurar');
-    localStorage.setItem('chatprex_token', data.token);
+    localStorage.setItem('casaya_token', data.token);
     setToken(data.token);
     setUser(data.user);
     setNeedsSetup(false);
   };
 
   const logout = () => {
-    localStorage.removeItem('chatprex_token');
+    localStorage.removeItem('casaya_token');
     setToken(null);
     setUser(null);
   };
@@ -129,13 +129,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const dummyUser: User = {
       id: 999,
       name: 'Usuario Demo',
-      email: 'demo@chatprex.com',
+      email: 'demo@casaya.com',
       phone: '+51 900 000 000',
       role: 'propietario',
       status: 'activo',
       avatar: ''
     };
-    localStorage.setItem('chatprex_token', 'demo-token-123');
+    localStorage.setItem('casaya_token', 'demo-token-123');
     setToken('demo-token-123');
     setUser(dummyUser);
     setNeedsSetup(false);

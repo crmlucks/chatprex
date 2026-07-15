@@ -12,8 +12,8 @@ const evolutionRouter = express.Router();
 // Limpiar URL: quitar trailing slash
 const EVOLUTION_API_URL = (process.env.EVOLUTION_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
 const EVOLUTION_API_TOKEN = process.env.EVOLUTION_API_TOKEN || '';
-const INSTANCE_NAME = process.env.EVOLUTION_INSTANCE_NAME || 'ChatPrex';
-const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://api.chatprex.com/api/webhook/evolution/webhook';
+const INSTANCE_NAME = process.env.EVOLUTION_INSTANCE_NAME || 'Casaya';
+const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://api.casaya.com/api/webhook/evolution/webhook';
 
 let ioInstance: Server | null = null;
 const messageQueue: Record<string, { texts: string[], timer: NodeJS.Timeout | null }> = {};
@@ -964,7 +964,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
                   ioInstance.emit('whatsapp-message', {
                     id: `ai-media-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                     from: remoteJid,
-                    name: 'ChatPrex Bot',
+                    name: 'Casaya Bot',
                     text: '[Archivo Multimedia Enviado]',
                     media: url,
                     fromMe: true,
@@ -981,7 +981,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
                     ioInstance.emit('whatsapp-message', {
                       id: `ai-${Date.now()}-${i}`,
                       from: remoteJid,
-                      name: 'ChatPrex Bot',
+                      name: 'Casaya Bot',
                       text: aiText,
                       fromMe: true,
                       timestamp: new Date().toISOString(),

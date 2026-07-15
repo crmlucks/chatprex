@@ -16,7 +16,7 @@ const Automation = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
  // Automations State
  const [automations, setAutomations] = useState<any[]>([
-  { id: 1, name: 'Bienvenida inmobiliaria', type: 'Envío masivo', status: 'Activo', delay: 60, content: 'Hola {{nombre}}, bienvenido a ChatPrex...', target: 'Todos los contactos' },
+  { id: 1, name: 'Bienvenida inmobiliaria', type: 'Envío masivo', status: 'Activo', delay: 60, content: 'Hola {{nombre}}, bienvenido a Casaya...', target: 'Todos los contactos' },
   { id: 2, name: 'Seguimiento visita', type: 'Word trigger', status: 'Borrador', delay: 120, content: '¿Qué te pareció la propiedad?', target: 'Interesados' }
  ]);
  const [selectedId, setSelectedId] = useState<number | null>(1);
@@ -81,12 +81,12 @@ const Automation = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${dc ? 'bg-amber-500/10 text-amber-500' : 'bg-amber-50 text-amber-600'}`}>
          <Key size={20} />
         </div>
-        <h3 className="h3">API de ChatPrex</h3>
+        <h3 className="h3">API de Casaya</h3>
       </div>
       <p className="small-text mb-6">Utilice esta clave para conectar sus formularios externos o integraciones personalizadas.</p>
       <div className="space-y-3 mt-auto">
         <div className={`p-3 rounded-xl border font-mono text-xs break-all ${dc ? 'bg-surface-raised border-edge text-content-muted' : 'bg-surface-inset border-edge text-content-muted '}`}>
-         sk_live_chatprex_9876543210abcdef
+         sk_live_casaya_9876543210abcdef
         </div>
         <button className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all ${dc ? 'bg-surface-raised text-content hover:bg-slate-700' : 'bg-surface-raised text-content hover:bg-slate-700'}`}>
          Copiar clave

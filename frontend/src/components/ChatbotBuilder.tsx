@@ -335,7 +335,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <div className={`w-16 h-16 rounded-xl flex items-center justify-center ${dc ? 'bg-accent/20 text-accent' : 'bg-accent/10 text-accent'}`}><RefreshCw size={32} /></div>
          <div>
           <h4 className="h3">Sincronización en la nube</h4>
-          <p className="body-text max-w-sm mx-auto">ChatPrex sincroniza sus cambios instantáneamente en todos sus servidores de comunicación vinculados.</p>
+          <p className="body-text max-w-sm mx-auto">Casaya sincroniza sus cambios instantáneamente en todos sus servidores de comunicación vinculados.</p>
          </div>
        </div>
       </div>

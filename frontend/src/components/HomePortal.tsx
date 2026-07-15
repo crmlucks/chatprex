@@ -533,7 +533,7 @@ export default function HomePortal({
               onClick={onLoginClick}
               className="text-xs font-semibold text-content-muted hover:text-accent transition-colors bg-transparent border-none cursor-pointer flex items-center gap-1.5 mx-auto"
             >
-              <LogIn size={12} /> 
+              <LogIn size={12} />
             </button>
           </div>
         </div>
@@ -773,9 +773,9 @@ export default function HomePortal({
               {/* Cabecera Sección */}
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="space-y-1.5">
-                  <h2 className="text-2xl font-extrabold text-content tracking-tight">Oportunidades Destacadas</h2>
+                  <h2 className="text-2xl font-extrabold text-content tracking-tight">Propiedades Destacadas</h2>
                   <p className="text-xs md:text-sm text-content-secondary max-w-lg">
-                    Encuentra las mejores propiedades disponibles, evaluadas para ofrecerte una inversión más segura.
+                    Una selección de proyectos confiables con excelente ubicación y alto potencial de valorización.
                   </p>
                 </div>
 
@@ -898,10 +898,10 @@ export default function HomePortal({
                   <Layers size={10} /> Más Opciones para Invertir
                 </div>
                 <h2 className="text-xl md:text-2xl font-extrabold text-content tracking-tight">
-                  Propiedades seleccionadas con respaldo profesional.
+                  Explora nuestro catálogo completo.
                 </h2>
                 <p className="text-xs md:text-sm text-content-secondary leading-relaxed">
-                  Descubre nuestro catálogo completo de proyectos cuidadosamente evaluados para ayudarte a invertir con seguridad, transparencia y al precio justo.
+                  Accede a nuestro catálogo completo y encuentra la opción ideal según tu presupuesto, ubicación y objetivos.
                 </p>
               </div>
 
@@ -936,7 +936,7 @@ export default function HomePortal({
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white space-y-1 text-left">
-                      <p className="text-xs font-bold tracking-widest uppercase text-accent">Liderazgo Inmobiliario</p>
+                      <p className="text-xs font-bold tracking-widest uppercase text-accent">Usamos Inteligencia Artificiaal</p>
                       <h3 className="text-xl font-bold"></h3>
                     </div>
                   </div>
@@ -961,7 +961,7 @@ export default function HomePortal({
                 <p className="body-text text-content-secondary leading-relaxed whitespace-pre-line">
                   {portalSettings?.about_description || (
                     <>
-                      En <strong>Casaya</strong>, Somos especialistas en inversiones inmobiliarias seguras. Seleccionamos y verificamos cada propiedad mediante análisis legal, comercial y tecnológico, brindándote asesoría personalizada para que inviertas con confianza y minimices riesgos.
+                      En <strong>Casaya</strong>, conectamos a personas con oportunidades inmobiliarias confiables. Seleccionamos cuidadosamente cada proyecto y trabajamos junto a desarrolladores comprometidos con la calidad y la transparencia, respaldando cada operación con asesoría especializada y tecnología propia para ofrecer una experiencia de compra más segura, eficiente y confiable.
                     </>
                   )}
                 </p>
@@ -974,8 +974,8 @@ export default function HomePortal({
                       <Award size={18} />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-content">Garantía y Confianza</h4>
-                      <p className="text-xs text-content-secondary mt-1">Respaldo legal y profesional en cada fase de negociación.</p>
+                      <h4 className="font-extrabold text-sm text-content">Desarrolladores Verificados</h4>
+                      <p className="text-xs text-content-secondary mt-1">Trabajamos únicamente con empresas que cumplen nuestros estándares de calidad, transparencia y cumplimiento.</p>
                     </div>
                   </div>
 
@@ -984,8 +984,8 @@ export default function HomePortal({
                       <Users size={18} />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-content">Equipo Especializado</h4>
-                      <p className="text-xs text-content-secondary mt-1">Asesores inmobiliarios capacitados con herramientas de IA en tiempo real.</p>
+                      <h4 className="font-extrabold text-sm text-content">Tecnología Propia</h4>
+                      <p className="text-xs text-content-secondary mt-1">Desarrollamos herramientas inteligentes que optimizan la gestión comercial y mejoran la experiencia de nuestros clientes.</p>
                     </div>
                   </div>
 
@@ -994,8 +994,8 @@ export default function HomePortal({
                       <Heart size={18} />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-content">Compromiso Social</h4>
-                      <p className="text-xs text-content-secondary mt-1">Buscamos el bienestar de las familias y el desarrollo urbano sostenible.</p>
+                      <h4 className="font-extrabold text-sm text-content">Asesoría Especializada</h4>
+                      <p className="text-xs text-content-secondary mt-1">Acompañamos cada decisión con profesionales que brindan orientación personalizada durante todo el proceso.</p>
                     </div>
                   </div>
 
@@ -1004,8 +1004,8 @@ export default function HomePortal({
                       <ShieldCheck size={18} />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-content">Seguridad Certificada</h4>
-                      <p className="text-xs text-content-secondary mt-1">Procesos de documentación auditados de extremo a extremo.</p>
+                      <h4 className="font-extrabold text-sm text-content">Proyectos Verificados</h4>
+                      <p className="text-xs text-content-secondary mt-1">Solo incorporamos desarrollos que cumplen nuestros estándares de calidad, transparencia y confianza.</p>
                     </div>
                   </div>
 
@@ -1037,10 +1037,10 @@ export default function HomePortal({
                   <Send size={10} className="rotate-45" /> Contacto Inmediato
                 </div>
                 <h2 className="text-xl md:text-2xl font-extrabold text-content tracking-tight">
-                  ¿Encontraste la propiedad ideal o tienes alguna pregunta?
+                  Llevamos tu proyecto más lejos con estrategia, tecnología e inteligencia artificial.
                 </h2>
                 <p className="text-xs md:text-sm text-content-secondary leading-relaxed max-w-2xl">
-                  Nuestros asesores expertos, impulsados por la tecnología de inteligencia artificial de <strong>Casaya</strong>, están listos para asistirte. Escríbenos ahora mismo y recibe asesoramiento personalizado para concretar tu próxima inversión con las mejores condiciones del mercado.
+                  En <strong>Casaya</strong>, combinamos experiencia comercial, un equipo especializado y una plataforma tecnológica propia con IA para atraer compradores calificados, automatizar el seguimiento de prospectos y acelerar las ventas de tus proyectos inmobiliarios.
                 </p>
               </div>
 

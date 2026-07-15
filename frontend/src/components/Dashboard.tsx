@@ -100,7 +100,7 @@ const Dashboard = ({ isDarkMode }: { isDarkMode?: boolean }) => {
        </div>
        <div>
         <h1 className="h1">Hola, {user?.name || 'Usuario'}</h1>
-        <p className="body-text text-sm">Resumen operativo ChatPrex</p>
+        <p className="body-text text-sm">Resumen operativo Casaya</p>
        </div>
      </div>
      <div className="flex items-center gap-3 w-full md:w-auto">

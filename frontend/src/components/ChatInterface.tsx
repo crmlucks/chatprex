@@ -57,7 +57,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const messagesEndRef = useRef<HTMLDivElement>(null);
 
  useEffect(() => {
-  const saved = localStorage.getItem('chatprex_quick_replies');
+  const saved = localStorage.getItem('casaya_quick_replies');
   if (saved) {
    setQuickReplies(JSON.parse(saved));
   }
@@ -65,7 +65,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
  const saveQuickReplies = (replies: QuickReply[]) => {
   setQuickReplies(replies);
-  localStorage.setItem('chatprex_quick_replies', JSON.stringify(replies));
+  localStorage.setItem('casaya_quick_replies', JSON.stringify(replies));
  };
 
  useEffect(() => {
@@ -100,7 +100,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     method: 'PATCH',
     headers: {
      'Content-Type': 'application/json',
-     Authorization: `Bearer ${localStorage.getItem('chatprex_token')}`
+     Authorization: `Bearer ${localStorage.getItem('casaya_token')}`
     },
     body: JSON.stringify({ botActive: !chat.botActive })
    });
@@ -127,7 +127,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     method: 'PATCH',
     headers: {
      'Content-Type': 'application/json',
-     Authorization: `Bearer ${localStorage.getItem('chatprex_token')}`
+     Authorization: `Bearer ${localStorage.getItem('casaya_token')}`
     },
     body: JSON.stringify({ status: newStatus })
    });
@@ -205,7 +205,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  useEffect(() => {
   const fetchChats = async () => {
    try {
-    const token = localStorage.getItem('chatprex_token');
+    const token = localStorage.getItem('casaya_token');
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     const res = await fetch(`${API_URL}/api/webhook/evolution/chats`, {
      headers: { Authorization: `Bearer ${token}` }
@@ -239,7 +239,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
   const fetchHistory = async () => {
    try {
-    const token = localStorage.getItem('chatprex_token');
+    const token = localStorage.getItem('casaya_token');
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     const res = await fetch(`${API_URL}/api/webhook/evolution/messages/${activeChat}`, {
      headers: { Authorization: `Bearer ${token}` }
@@ -752,7 +752,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <div className={`w-32 h-32 rounded-xl flex items-center justify-center shadow-sm mb-10 transition-all rotate-3 ${dc ? 'bg-surface-raised/50 border border-edge' : 'bg-surface border border-edge'}`}>
           <MessageSquare size={64} className="text-accent opacity-20" />
          </div>
-         <h2 className="h1 mb-4">ChatPrex mensajes</h2>
+         <h2 className="h1 mb-4">Casaya mensajes</h2>
          <p className="body-text max-w-sm mx-auto">
           Gestiona todos tus leads de WhatsApp en un solo lugar. Selecciona un chat para comenzar la comunicación.
          </p>
