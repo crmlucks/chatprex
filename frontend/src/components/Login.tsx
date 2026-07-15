@@ -40,25 +40,27 @@ const Login = ({ onBack }: { onBack?: () => void }) => {
  return (
   <div className="min-h-screen flex items-center justify-center bg-zinc-950 font-sans">
    <div className="w-full max-w-md px-6">
-    {/* Logo Section */}
-    <div className="text-center mb-10">
-     <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-accent mb-6 shadow-lg shadow-accent/25">
-      <Home size={32} className="text-white" />
-     </div>
-     <h1 className="text-3xl font-bold text-content tracking-tight">Casaya</h1>
-     <div className="flex items-center justify-center gap-2 mt-2">
-      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-      <p className="text-zinc-500 text-xs font-medium">Premium CRM ERP</p>
-     </div>
-    </div>
-
     {/* Auth Card */}
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8">
-     <div className="mb-8">
-      <h2 className="text-xl font-semibold text-content">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 shadow-2xl">
+     {/* Brand Header Grouped Inside Card */}
+     <div className="flex items-center gap-3 mb-6 border-b border-zinc-800/80 pb-5">
+      <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center shadow-md shadow-accent/20 shrink-0">
+       <Home size={22} className="text-white" />
+      </div>
+      <div>
+       <div className="flex items-center gap-1.5">
+        <h1 className="text-xl font-black text-content tracking-tight leading-none">Casaya</h1>
+        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mt-0.5"></div>
+       </div>
+       <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mt-1">Premium CRM ERP</span>
+      </div>
+     </div>
+
+     <div className="mb-6">
+      <h2 className="text-base font-bold text-content">
        {showSetupForm ? 'Configuración inicial' : 'Bienvenido de nuevo'}
       </h2>
-      <p className="text-sm text-zinc-400 mt-1">
+      <p className="text-xs text-zinc-400 mt-1">
        {showSetupForm
         ? 'Crea la cuenta raíz para administrar el sistema'
         : 'Ingresa tus credenciales para acceder al panel'}
