@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X, Link, Settings, Database, Filter, Target, Users, Image as ImageIcon, Upload, XCircle } from 'lucide-react';
+import { Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X, Link, Settings, Database, Filter, Target, Users, Image as ImageIcon, Upload, XCircle, RotateCcw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -102,6 +102,30 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
       console.error(err);
     } finally {
       setSavingPortal(false);
+    }
+  };
+
+  const handleRestoreDefaults = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (window.confirm('¿Estás seguro de que deseas restablecer los valores de configuración por defecto? Las imágenes del carrusel del inicio (Hero) no se verán afectadas.')) {
+      setPortalSettings((prev: any) => ({
+        ...prev,
+        logo_day: '',
+        logo_night: '',
+        hero_title: 'Encuentra la propiedad perfecta para tu estilo de vida',
+        hero_subtitle: 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de Casaya.',
+        about_title: 'Redefiniendo el sector inmobiliario con innovación y pasión',
+        about_description: 'En Casaya, conectamos a personas con oportunidades inmobiliarias confiables. Seleccionamos cuidadosamente cada proyecto y trabajamos junto a desarrolladores comprometidos con la calidad y la transparencia, respaldando cada operación con asesoría especializada y tecnología propia para ofrecer una experiencia de compra más segura, eficiente y confiable.',
+        about_image: '',
+        phone: '',
+        email: '',
+        address: '',
+        status: 'Activo',
+        facebook_url: '',
+        instagram_url: '',
+        linkedin_url: '',
+        youtube_url: ''
+      }));
     }
   };
 
@@ -773,7 +797,14 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
            </div>
 
            {/* BOTÓN GUARDAR */}
-           <div className="flex justify-end pt-4 border-t border-edge">
+           <div className="flex justify-end items-center gap-3 pt-4 border-t border-edge">
+             <button 
+               type="button" 
+               onClick={handleRestoreDefaults} 
+               className="px-4 py-2.5 rounded-lg border border-red-500/30 hover:border-red-500 hover:bg-red-500/10 text-red-500 font-bold text-xs transition-all active:scale-95 flex items-center gap-2 cursor-pointer bg-transparent"
+             >
+               <RotateCcw size={14} /> Restablecer Defaults
+             </button>
              <button type="submit" disabled={savingPortal} className="btn-primary py-2.5 px-6 disabled:opacity-50 flex items-center gap-2 cursor-pointer border-none">
                {savingPortal ? 'Guardando...' : 'Guardar Configuración'}
              </button>
