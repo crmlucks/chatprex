@@ -1380,9 +1380,9 @@ export default function HomePortal({
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
               {/* Sección Imágenes */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
                 {/* Gran Imagen Principal */}
-                <div className="w-full max-w-[450px] aspect-square mx-auto rounded-xl overflow-hidden border border-edge relative bg-surface-inset flex items-center justify-center">
+                <div className="w-full max-w-[380px] md:max-w-none md:w-[380px] aspect-square rounded-xl overflow-hidden border border-edge relative bg-surface-inset flex items-center justify-center shrink-0">
                   <img
                     src={getImagesArray(selectedProperty)[activeImageIndex]}
                     alt={selectedProperty.name}
@@ -1393,14 +1393,14 @@ export default function HomePortal({
                   </div>
                 </div>
 
-                {/* Miniaturas de Galería (Abajo de la Imagen Principal) */}
+                {/* Miniaturas de Galería (Al lado derecho en desktop, abajo en mobile) */}
                 {getImagesArray(selectedProperty).length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto py-1 custom-scrollbar">
+                  <div className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-y-auto max-w-full md:max-h-[380px] py-1 md:py-0 px-0.5 custom-scrollbar shrink-0">
                     {getImagesArray(selectedProperty).map((img, idx) => (
                       <button
                         key={idx}
                         onClick={() => setActiveImageIndex(idx)}
-                        className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${activeImageIndex === idx ? 'border-accent ring-2 ring-accent/20' : 'border-edge opacity-70 hover:opacity-100'}`}
+                        className={`relative w-12 h-12 md:w-14 md:h-14 rounded-lg overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${activeImageIndex === idx ? 'border-accent ring-2 ring-accent/20' : 'border-edge opacity-70 hover:opacity-100'}`}
                       >
                         <img src={img} className="w-full h-full object-cover" alt="" />
                       </button>
