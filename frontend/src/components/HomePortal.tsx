@@ -839,11 +839,7 @@ export default function HomePortal({
 
                             {/* Precio flotante */}
                             <div className="absolute bottom-3.5 left-3.5 bg-black/75 text-white backdrop-blur-sm py-1.5 px-3 rounded-lg text-sm font-black tracking-tight">
-                              {p.type?.toLowerCase() === 'terreno' && p.proj_price_from && p.proj_price_to ? (
-                                <span className="text-xs">Desde {formatPrice(p.proj_price_from, p.currency)} - {formatPrice(p.proj_price_to, p.currency)}</span>
-                              ) : (
-                                formatPrice(p.price, p.currency)
-                              )}
+                              {formatPrice(p.price, p.currency)}
                             </div>
                           </div>
 
@@ -858,13 +854,22 @@ export default function HomePortal({
                               </div>
                             </div>
 
+                            {p.type?.toLowerCase() === 'terreno' && p.proj_price_from && p.proj_price_to && (
+                              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 p-2.5 rounded-lg text-[11px] font-bold flex flex-col gap-1">
+                                <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Precio Min:</span> <span className="text-xs">{formatPrice(p.proj_price_from, p.currency)}</span></div>
+                                <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Precio Max:</span> <span className="text-xs">{formatPrice(p.proj_price_to, p.currency)}</span></div>
+                                {p.proj_area_from && p.proj_area_to && (
+                                  <>
+                                    <div className="flex justify-between items-center mt-0.5 pt-1.5 border-t border-emerald-500/20"><span className="text-[9px] uppercase tracking-wider opacity-80">Área Min:</span> <span>{p.proj_area_from} m²</span></div>
+                                    <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Área Max:</span> <span>{p.proj_area_to} m²</span></div>
+                                  </>
+                                )}
+                              </div>
+                            )}
+
                             {/* Características con colores diferenciados */}
                             <div className="flex flex-wrap gap-2 pt-2 border-t border-edge mt-auto font-bold">
-                              {p.type?.toLowerCase() === 'terreno' && p.proj_area_from && p.proj_area_to ? (
-                                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-400 border border-slate-500/10 uppercase tracking-wider">{p.proj_area_from} - {p.proj_area_to} m²</span>
-                              ) : (
-                                p.area && <span className="text-[10px] px-2 py-0.5 rounded bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-400 border border-slate-500/10 uppercase tracking-wider">{p.area} m²</span>
-                              )}
+                              {p.type?.toLowerCase() !== 'terreno' && p.area && <span className="text-[10px] px-2 py-0.5 rounded bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-400 border border-slate-500/10 uppercase tracking-wider">{p.area} m²</span>}
                               {p.rooms && Number(p.rooms) > 0 && <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border border-blue-500/10 uppercase tracking-wider">{p.rooms} hab</span>}
                               {p.bathrooms && Number(p.bathrooms) > 0 && <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400 border border-cyan-500/10 uppercase tracking-wider">{p.bathrooms} bañ</span>}
                               {p.parking && Number(p.parking) > 0 && <span className="text-[10px] px-2 py-0.5 rounded bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400 border border-violet-500/10 uppercase tracking-wider">{p.parking} est</span>}
@@ -1166,11 +1171,7 @@ export default function HomePortal({
 
                           {/* Precio flotante */}
                           <div className="absolute bottom-3.5 left-3.5 bg-black/75 text-white backdrop-blur-sm py-1.5 px-3 rounded-lg text-sm font-black tracking-tight">
-                            {p.type?.toLowerCase() === 'terreno' && p.proj_price_from && p.proj_price_to ? (
-                              <span className="text-xs">Desde {formatPrice(p.proj_price_from, p.currency)} - {formatPrice(p.proj_price_to, p.currency)}</span>
-                            ) : (
-                              formatPrice(p.price, p.currency)
-                            )}
+                            {formatPrice(p.price, p.currency)}
                           </div>
                         </div>
 
@@ -1185,13 +1186,22 @@ export default function HomePortal({
                             </div>
                           </div>
 
+                          {p.type?.toLowerCase() === 'terreno' && p.proj_price_from && p.proj_price_to && (
+                            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 p-2.5 rounded-lg text-[11px] font-bold flex flex-col gap-1">
+                              <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Precio Min:</span> <span className="text-xs">{formatPrice(p.proj_price_from, p.currency)}</span></div>
+                              <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Precio Max:</span> <span className="text-xs">{formatPrice(p.proj_price_to, p.currency)}</span></div>
+                              {p.proj_area_from && p.proj_area_to && (
+                                <>
+                                  <div className="flex justify-between items-center mt-0.5 pt-1.5 border-t border-emerald-500/20"><span className="text-[9px] uppercase tracking-wider opacity-80">Área Min:</span> <span>{p.proj_area_from} m²</span></div>
+                                  <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Área Max:</span> <span>{p.proj_area_to} m²</span></div>
+                                </>
+                              )}
+                            </div>
+                          )}
+
                           {/* Características */}
                           <div className="flex flex-wrap gap-2 pt-2 border-t border-edge mt-auto font-bold">
-                            {p.type?.toLowerCase() === 'terreno' && p.proj_area_from && p.proj_area_to ? (
-                              <span className="text-[10px] px-2 py-0.5 rounded bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-400 border border-slate-500/10 uppercase tracking-wider">{p.proj_area_from} - {p.proj_area_to} m²</span>
-                            ) : (
-                              p.area && <span className="text-[10px] px-2 py-0.5 rounded bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-400 border border-slate-500/10 uppercase tracking-wider">{p.area} m²</span>
-                            )}
+                            {p.type?.toLowerCase() !== 'terreno' && p.area && <span className="text-[10px] px-2 py-0.5 rounded bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-400 border border-slate-500/10 uppercase tracking-wider">{p.area} m²</span>}
                             {p.rooms && Number(p.rooms) > 0 && <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border border-blue-500/10 uppercase tracking-wider">{p.rooms} hab</span>}
                             {p.bathrooms && Number(p.bathrooms) > 0 && <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400 border border-cyan-500/10 uppercase tracking-wider">{p.bathrooms} bañ</span>}
                             {p.parking && Number(p.parking) > 0 && <span className="text-[10px] px-2 py-0.5 rounded bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400 border border-violet-500/10 uppercase tracking-wider">{p.parking} est</span>}
@@ -1431,7 +1441,11 @@ export default function HomePortal({
                   <span className="text-[10px] font-extrabold text-content-muted uppercase tracking-wider">Precio de Lista:</span>
                   <span className="text-xl font-black text-accent tracking-tight">
                     {selectedProperty.type?.toLowerCase() === 'terreno' && selectedProperty.proj_price_from && selectedProperty.proj_price_to ? (
-                      <span className="text-sm">Desde {formatPrice(selectedProperty.proj_price_from, selectedProperty.currency)} - {formatPrice(selectedProperty.proj_price_to, selectedProperty.currency)}</span>
+                      <span className="text-sm font-bold flex flex-col sm:flex-row sm:gap-2">
+                        <span>Min: {formatPrice(selectedProperty.proj_price_from, selectedProperty.currency)}</span>
+                        <span className="hidden sm:inline">-</span>
+                        <span>Max: {formatPrice(selectedProperty.proj_price_to, selectedProperty.currency)}</span>
+                      </span>
                     ) : (
                       formatPrice(selectedProperty.price, selectedProperty.currency)
                     )}
@@ -1482,7 +1496,10 @@ export default function HomePortal({
                   <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Área Total</span>
                   <span className="text-xs font-extrabold text-content">
                     {selectedProperty.type?.toLowerCase() === 'terreno' && selectedProperty.proj_area_from && selectedProperty.proj_area_to ? (
-                      `${selectedProperty.proj_area_from} - ${selectedProperty.proj_area_to} m²`
+                      <div className="flex flex-col text-[10px] leading-tight mt-1">
+                        <span>Min: {selectedProperty.proj_area_from} m²</span>
+                        <span>Max: {selectedProperty.proj_area_to} m²</span>
+                      </div>
                     ) : (
                       `${selectedProperty.area || '—'} m²`
                     )}
