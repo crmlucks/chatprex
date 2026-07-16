@@ -7,6 +7,14 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+const resolveUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('/uploads')) {
+    return `${API_URL}${url}`;
+  }
+  return url;
+};
+
 interface Property {
   id: string | number;
   name: string;
@@ -85,7 +93,7 @@ export default function HomePortal({
         portalSettings.banner_image_1,
         portalSettings.banner_image_2,
         portalSettings.banner_image_3
-      ].filter(Boolean);
+      ].filter(Boolean).map(img => resolveUrl(img));
       if (customBanners.length > 0) return customBanners;
     }
     return [];
@@ -294,16 +302,19 @@ export default function HomePortal({
   };
 
   const getImagesArray = (property: Property): string[] => {
+    let list: string[] = [];
     if (Array.isArray(property.images)) {
-      return property.images.length > 0 ? property.images : [property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'];
-    }
-    if (typeof property.images === 'string') {
+      list = property.images.length > 0 ? property.images : [property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'];
+    } else if (typeof property.images === 'string') {
       try {
         const parsed = JSON.parse(property.images);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) list = parsed;
       } catch (e) { }
     }
-    return [property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'];
+    if (list.length === 0) {
+      list = [property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'];
+    }
+    return list.map(img => resolveUrl(img));
   };
 
   const renderFilterBar = () => {
@@ -549,7 +560,7 @@ export default function HomePortal({
         <div onClick={() => { setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-3 cursor-pointer">
           {isDarkMode ? (
             portalSettings?.logo_night ? (
-              <img src={portalSettings.logo_night} className="h-9 max-w-[180px] object-contain" alt="Casaya" />
+              <img src={resolveUrl(portalSettings.logo_night)} className="h-9 max-w-[180px] object-contain" alt="Casaya" />
             ) : (
               <>
                 <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
@@ -560,7 +571,7 @@ export default function HomePortal({
             )
           ) : (
             portalSettings?.logo_day ? (
-              <img src={portalSettings.logo_day} className="h-9 max-w-[180px] object-contain" alt="Casaya" />
+              <img src={resolveUrl(portalSettings.logo_day)} className="h-9 max-w-[180px] object-contain" alt="Casaya" />
             ) : (
               <>
                 <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
@@ -797,7 +808,7 @@ export default function HomePortal({
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {featuredListToRender.slice(0, 8).map((p) => {
-                      const imgUrl = (Array.isArray(p.images) && p.images[0]) || p.avatar || p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
+                      const imgUrl = resolveUrl((Array.isArray(p.images) && p.images[0]) || p.avatar || p.image || '') || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
 
                       return (
                         <div
@@ -930,7 +941,7 @@ export default function HomePortal({
                   <div className="absolute -top-4 -left-4 w-72 h-72 bg-accent/5 rounded-3xl blur-2xl pointer-events-none"></div>
                   <div className="rounded-2xl overflow-hidden shadow-2xl relative z-10 border border-edge">
                     <img
-                      src={portalSettings.about_image}
+                      src={resolveUrl(portalSettings.about_image)}
                       alt="Quiénes Somos"
                       className="w-full h-[400px] object-cover"
                     />
@@ -1116,7 +1127,7 @@ export default function HomePortal({
               ) : filteredList.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {filteredList.map((p) => {
-                    const imgUrl = (Array.isArray(p.images) && p.images[0]) || p.avatar || p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
+                    const imgUrl = resolveUrl((Array.isArray(p.images) && p.images[0]) || p.avatar || p.image || '') || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80';
 
                     return (
                       <div
@@ -1203,7 +1214,7 @@ export default function HomePortal({
             <div className="flex items-center gap-3">
               {isDarkMode ? (
                 portalSettings?.logo_night ? (
-                  <img src={portalSettings.logo_night} className="h-8 max-w-[160px] object-contain" alt="Casaya" />
+                  <img src={resolveUrl(portalSettings.logo_night)} className="h-8 max-w-[160px] object-contain" alt="Casaya" />
                 ) : (
                   <>
                     <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
@@ -1214,7 +1225,7 @@ export default function HomePortal({
                 )
               ) : (
                 portalSettings?.logo_day ? (
-                  <img src={portalSettings.logo_day} className="h-8 max-w-[160px] object-contain" alt="Casaya" />
+                  <img src={resolveUrl(portalSettings.logo_day)} className="h-8 max-w-[160px] object-contain" alt="Casaya" />
                 ) : (
                   <>
                     <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">

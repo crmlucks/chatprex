@@ -475,11 +475,153 @@ export async function initDatabase() {
       await client.query('INSERT INTO ai_config (provider, model) VALUES ($1, $2)', ['OpenAI', 'gpt-4o-mini']);
     }
 
+    // Migrar imágenes Base64 heredadas a archivos físicos
+    await migrateBase64ToFiles(client);
+
     console.log('✅ Base de datos inicializada correctamente.');
   } catch (err) {
     console.error('❌ Error inicializando la base de datos:', err);
   } finally {
     if (client) client.release();
+  }
+}
+
+async function migrateBase64ToFiles(client: any) {
+  const UPLOAD_DIR = path.join(__dirname, '../uploads');
+  if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  }
+
+  const helperSaveBase64 = (base64Str: string, prefix: string): string | null => {
+    try {
+      if (!base64Str || !base64Str.startsWith('data:image/')) return null;
+      const matches = base64Str.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) return null;
+      
+      const extension = matches[1].split('/')[1] || 'png';
+      const buffer = Buffer.from(matches[2], 'base64');
+      const filename = `${prefix}-${Date.now()}-${Math.round(Math.random() * 1e9)}.${extension}`;
+      const filePath = path.join(UPLOAD_DIR, filename);
+      
+      fs.writeFileSync(filePath, buffer);
+      return `/uploads/${filename}`;
+    } catch (e) {
+      console.error('[Migration] Error saving base64 to file:', e);
+      return null;
+    }
+  };
+
+  try {
+    console.log('[Migration] Iniciando migración de imágenes Base64 a archivos físicos...');
+    
+    // 1. Migrar Properties
+    const propRes = await client.query('SELECT id, avatar, images FROM properties');
+    let migratedProperties = 0;
+    for (const row of propRes.rows) {
+      let updatedAvatar = row.avatar;
+      let updatedImages = row.images;
+      let dirty = false;
+
+      // Avatar
+      if (row.avatar && row.avatar.startsWith('data:image/')) {
+        const fileUrl = helperSaveBase64(row.avatar, `prop-avatar-${row.id}`);
+        if (fileUrl) {
+          updatedAvatar = fileUrl;
+          dirty = true;
+        }
+      }
+
+      // Images
+      let imagesList: string[] = [];
+      try {
+        imagesList = typeof row.images === 'string' ? JSON.parse(row.images) : row.images || [];
+      } catch (e) {}
+
+      if (Array.isArray(imagesList)) {
+        const newImagesList = [];
+        for (let i = 0; i < imagesList.length; i++) {
+          const img = imagesList[i];
+          if (img && img.startsWith('data:image/')) {
+            const fileUrl = helperSaveBase64(img, `prop-img-${row.id}-${i}`);
+            if (fileUrl) {
+              newImagesList.push(fileUrl);
+              dirty = true;
+            } else {
+              newImagesList.push(img);
+            }
+          } else {
+            newImagesList.push(img);
+          }
+        }
+        if (dirty) {
+          updatedImages = JSON.stringify(newImagesList);
+        }
+      }
+
+      if (dirty) {
+        await client.query(
+          'UPDATE properties SET avatar = $1, images = $2 WHERE id = $3',
+          [updatedAvatar, updatedImages, row.id]
+        );
+        migratedProperties++;
+      }
+    }
+    if (migratedProperties > 0) {
+      console.log(`[Migration] Se migraron imágenes Base64 de ${migratedProperties} propiedades.`);
+    }
+
+    // 2. Migrar Portal Settings
+    const settingsRes = await client.query('SELECT * FROM portal_settings LIMIT 1');
+    if (settingsRes.rows.length > 0) {
+      const settings = settingsRes.rows[0];
+      const fields = ['logo_day', 'logo_night', 'banner_image_1', 'banner_image_2', 'banner_image_3', 'about_image'];
+      let dirty = false;
+      const updateFields: string[] = [];
+      const updateValues: any[] = [];
+      let valIndex = 1;
+
+      for (const field of fields) {
+        const val = settings[field];
+        if (val && val.startsWith('data:image/')) {
+          const fileUrl = helperSaveBase64(val, `portal-${field}`);
+          if (fileUrl) {
+            updateFields.push(`${field} = $${valIndex}`);
+            updateValues.push(fileUrl);
+            valIndex++;
+            dirty = true;
+          }
+        }
+      }
+
+      if (dirty) {
+        updateValues.push(settings.id);
+        await client.query(
+          `UPDATE portal_settings SET ${updateFields.join(', ')} WHERE id = $${valIndex}`,
+          updateValues
+        );
+        console.log(`[Migration] Se migraron imágenes Base64 de la configuración del portal.`);
+      }
+    }
+
+    // 3. Migrar Users
+    const usersRes = await client.query('SELECT id, avatar FROM users');
+    let migratedUsers = 0;
+    for (const row of usersRes.rows) {
+      if (row.avatar && row.avatar.startsWith('data:image/')) {
+        const fileUrl = helperSaveBase64(row.avatar, `user-avatar-${row.id}`);
+        if (fileUrl) {
+          await client.query('UPDATE users SET avatar = $1 WHERE id = $2', [fileUrl, row.id]);
+          migratedUsers++;
+        }
+      }
+    }
+    if (migratedUsers > 0) {
+      console.log(`[Migration] Se migraron avatares Base64 de ${migratedUsers} usuarios.`);
+    }
+
+    console.log('[Migration] Migración finalizada con éxito.');
+  } catch (e) {
+    console.error('[Migration] Error ejecutando la migración:', e);
   }
 }
 

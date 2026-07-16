@@ -4,6 +4,14 @@ import { useAuth } from '../context/AuthContext';
 
 const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
 
+const resolveUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('/uploads')) {
+    return `${API_URL}${url}`;
+  }
+  return url;
+};
+
 export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
  const [viewMode, setViewMode] = useState<'grid'|'list'>('list');
  const [filterType, setFilterType] = useState('todos');
@@ -228,14 +236,14 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
        {filteredProperties.filter(p => p.type?.toLowerCase() !== 'terreno').map(p => (
         <div key={p.id} className="card group overflow-hidden flex flex-col h-full">
           <div className="h-48 relative overflow-hidden shrink-0">
-           <img src={p.images?.[0] || p.avatar || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800'} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+           <img src={resolveUrl(p.images?.[0] || p.avatar) || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800'} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
            <div className="absolute top-3 left-3">
              <span className={`text-xs font-bold px-2 py-1 rounded-lg border backdrop-blur-sm ${p.status === 'disponible' ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30' : p.status === 'reservado' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' : 'bg-rose-500/20 text-rose-500 border-rose-500/30'}`}>{p.status}</span>
            </div>
             <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
               {p.avatar && (
                 <div className="w-10 h-10 rounded-xl border-2 border-white/50 bg-white overflow-hidden shadow-lg backdrop-blur-sm">
-                  <img src={p.avatar} className="w-full h-full object-contain p-1" alt="Logo" />
+                  <img src={resolveUrl(p.avatar)} className="w-full h-full object-contain p-1" alt="Logo" />
                 </div>
               )}
               {p.images?.length > 0 && (
@@ -308,7 +316,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                <td className="px-3 py-2 md:px-5 md:py-3">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg overflow-hidden border border-edge shrink-0 bg-surface-inset">
-                   {p.avatar ? <img src={p.avatar} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-content-muted"><Home size={16} /></div>}
+                   {p.avatar ? <img src={resolveUrl(p.avatar)} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-content-muted"><Home size={16} /></div>}
                   </div>
                   <div className="min-w-0">
                    <div className="font-bold text-xs md:text-sm text-content truncate max-w-[120px] md:max-w-[180px]">{p.name}</div>
@@ -495,7 +503,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
            <div className="space-y-2 shrink-0">
              <label className="label-text">Logo / Principal</label>
              <div onClick={() => !uploadingImage && fileInputRef.current?.click()} className="w-24 h-24 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden">
-               {uploadingImage ? <span className="text-[10px] text-content-muted">Subiendo...</span> : formData.avatar ? <img src={formData.avatar} className="w-full h-full object-cover" /> : <Upload size={20} className="text-content-muted" />}
+               {uploadingImage ? <span className="text-[10px] text-content-muted">Subiendo...</span> : formData.avatar ? <img src={resolveUrl(formData.avatar)} className="w-full h-full object-cover" /> : <Upload size={20} className="text-content-muted" />}
              </div>
              <input type="file" ref={fileInputRef} className="hidden" onChange={e => handleImageUpload(e, true)} />
            </div>
@@ -504,7 +512,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
              <div className="flex flex-wrap gap-3">
               {formData.images.map((img, i) => (
                <div key={i} className="w-20 h-20 rounded-xl overflow-hidden relative border border-edge group">
-                 <img src={img} className="w-full h-full object-cover" />
+                 <img src={resolveUrl(img)} className="w-full h-full object-cover" />
                  <button onClick={() => setFormData(prev => ({...prev, images: prev.images.filter((_, idx) => idx !== i)}))} className="absolute top-1 right-1 p-1 bg-red-500 text-content rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X size={10} /></button>
                </div>
               ))}

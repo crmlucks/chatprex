@@ -49,7 +49,7 @@ uploadRouter.post('/', authMiddleware, upload.single('image'), (req: any, res: a
     }
     
     // Generar la URL pública del archivo
-    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    const fileUrl = `/uploads/${req.file.filename}`;
     res.status(200).json({ url: fileUrl });
   } catch (error: any) {
     console.error('[Upload] Error procesando archivo:', error);

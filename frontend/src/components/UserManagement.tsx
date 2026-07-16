@@ -4,6 +4,14 @@ import { Search, Plus, Edit2, Trash2, KeyRound, X, Shield, ShieldCheck, UserIcon
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+const resolveUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('/uploads')) {
+    return `${API_URL}${url}`;
+  }
+  return url;
+};
+
 const ROLE_LABELS: Record<string, string> = { propietario: 'Propietario', administrador: 'Administrador', usuario: 'Usuario' };
 const STATUS_LABELS: Record<string, string> = { activo: 'Activo', suspendido: 'Suspendido', inactivo: 'Inactivo' };
 
@@ -200,7 +208,7 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <tr key={u.id} className="hover:bg-surface-inset transition-colors group">
           <td className="px-6 py-3">
            <div className="flex items-center gap-3">
-            <img src={u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=2563eb&color=fff&size=80`} alt="" className="w-8 h-8 rounded-lg object-cover shadow-sm" />
+            <img src={resolveUrl(u.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=2563eb&color=fff&size=80`} alt="" className="w-8 h-8 rounded-lg object-cover shadow-sm" />
             <div>
              <p className="text-xs font-bold text-content group-hover:text-accent transition-colors">{u.name}</p>
              <p className="text-[10px] text-content-muted">{u.email}</p>
@@ -275,7 +283,7 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          <div className="shrink-0 text-center">
           <label className={label}>Avatar</label>
           <div onClick={() => !uploadingImage && fileInputRef.current?.click()} className="w-12 h-12 rounded-xl border border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden bg-surface-inset">
-           {uploadingImage ? <span className="text-[9px] text-content-muted">...</span> : formData.avatar ? <img src={formData.avatar} className="w-full h-full object-cover" /> : <Upload size={16} className="text-content-muted" />}
+           {uploadingImage ? <span className="text-[9px] text-content-muted">...</span> : formData.avatar ? <img src={resolveUrl(formData.avatar)} className="w-full h-full object-cover" /> : <Upload size={16} className="text-content-muted" />}
           </div>
           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
          </div>

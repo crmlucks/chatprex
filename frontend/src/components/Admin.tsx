@@ -4,6 +4,14 @@ import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+const resolveUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('/uploads')) {
+    return `${API_URL}${url}`;
+  }
+  return url;
+};
+
 const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean; defaultTab?: string }) => {
  const { token } = useAuth();
  const [tab, setTab] = useState(defaultTab);
@@ -532,7 +540,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                  <div className="flex items-center gap-4">
                    <div className="w-48 h-16 rounded-xl border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
                      {portalSettings.logo_day ? (
-                       <img src={portalSettings.logo_day} className="max-w-full max-h-full object-contain p-2" alt="Logo Día" />
+                       <img src={resolveUrl(portalSettings.logo_day)} className="max-w-full max-h-full object-contain p-2" alt="Logo Día" />
                      ) : (
                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Logo Predeterminado</span>
                      )}
@@ -557,7 +565,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                  <div className="flex items-center gap-4">
                    <div className="w-48 h-16 rounded-xl border border-slate-800 bg-slate-950 flex items-center justify-center overflow-hidden shrink-0">
                      {portalSettings.logo_night ? (
-                       <img src={portalSettings.logo_night} className="max-w-full max-h-full object-contain p-2" alt="Logo Noche" />
+                       <img src={resolveUrl(portalSettings.logo_night)} className="max-w-full max-h-full object-contain p-2" alt="Logo Noche" />
                      ) : (
                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tight">Logo Predeterminado</span>
                      )}
@@ -603,7 +611,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                      <span className="text-[9px] font-bold text-content-muted uppercase">Banner 1</span>
                      <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-900 border border-edge flex items-center justify-center shrink-0">
                        {portalSettings.banner_image_1 ? (
-                         <img src={portalSettings.banner_image_1} className="w-full h-full object-cover" alt="Banner 1" />
+                         <img src={resolveUrl(portalSettings.banner_image_1)} className="w-full h-full object-cover" alt="Banner 1" />
                        ) : (
                          <span className="text-[9px] text-content-muted uppercase font-bold text-center p-2">Imagen por Defecto</span>
                        )}
@@ -626,7 +634,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                      <span className="text-[9px] font-bold text-content-muted uppercase">Banner 2</span>
                      <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-900 border border-edge flex items-center justify-center shrink-0">
                        {portalSettings.banner_image_2 ? (
-                         <img src={portalSettings.banner_image_2} className="w-full h-full object-cover" alt="Banner 2" />
+                         <img src={resolveUrl(portalSettings.banner_image_2)} className="w-full h-full object-cover" alt="Banner 2" />
                        ) : (
                          <span className="text-[9px] text-content-muted uppercase font-bold text-center p-2">Imagen por Defecto</span>
                        )}
@@ -649,7 +657,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                      <span className="text-[9px] font-bold text-content-muted uppercase">Banner 3</span>
                      <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-900 border border-edge flex items-center justify-center shrink-0">
                        {portalSettings.banner_image_3 ? (
-                         <img src={portalSettings.banner_image_3} className="w-full h-full object-cover" alt="Banner 3" />
+                         <img src={resolveUrl(portalSettings.banner_image_3)} className="w-full h-full object-cover" alt="Banner 3" />
                        ) : (
                          <span className="text-[9px] text-content-muted uppercase font-bold text-center p-2">Imagen por Defecto</span>
                        )}
@@ -694,7 +702,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                  <label className={label}>Imagen Descriptiva (Recomendado: 800x500 px, JPG/WebP)</label>
                  <div className="w-full h-36 rounded-xl border border-edge overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center shrink-0">
                    {portalSettings.about_image ? (
-                     <img src={portalSettings.about_image} className="w-full h-full object-cover" alt="Quiénes Somos" />
+                     <img src={resolveUrl(portalSettings.about_image)} className="w-full h-full object-cover" alt="Quiénes Somos" />
                    ) : (
                      <span className="text-[10px] text-content-muted uppercase font-bold text-center p-2">Imagen por Defecto</span>
                    )}
@@ -789,7 +797,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                      </tr>
                    ) : (
                      portalProperties.map((p: any) => {
-                       const imgUrl = (Array.isArray(p.images) && p.images[0]) || (typeof p.images === 'string' && JSON.parse(p.images)?.[0]) || p.avatar || p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=150&q=80';
+                       const imgUrl = resolveUrl((Array.isArray(p.images) && p.images[0]) || (typeof p.images === 'string' && JSON.parse(p.images)?.[0]) || p.avatar || p.image || '') || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=150&q=80';
                        return (
                          <tr key={p.id} className="hover:bg-surface-inset transition-colors">
                            <td className="px-4 py-3">
