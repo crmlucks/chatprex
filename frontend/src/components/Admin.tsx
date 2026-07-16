@@ -146,34 +146,43 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
     const res = await fetch(`${API_URL}/api/data/sources`, { headers });
     if(res.ok) setSources(await res.json());
    } else if (tab === 'portal') {
-     const res = await fetch(`${API_URL}/api/portal-settings`, { headers });
-     if(res.ok) {
-        const data = await res.json();
-        setPortalSettings({
-          logo_day: data.logo_day || '',
-          logo_night: data.logo_night || '',
-          hero_title: data.hero_title || '',
-          hero_subtitle: data.hero_subtitle || '',
-          banner_image_1: data.banner_image_1 || '',
-          banner_image_2: data.banner_image_2 || '',
-          banner_image_3: data.banner_image_3 || '',
-          about_title: data.about_title || '',
-          about_description: data.about_description || '',
-          about_image: data.about_image || '',
-          phone: data.phone || '',
-          email: data.email || '',
-          address: data.address || '',
-          status: data.status || 'Activo',
-          facebook_url: data.facebook_url || '',
-          instagram_url: data.instagram_url || '',
-          linkedin_url: data.linkedin_url || '',
-          youtube_url: data.youtube_url || ''
-        });
-     }
-     const propRes = await fetch(`${API_URL}/api/properties`, { headers });
-     if (propRes.ok) {
-       setPortalProperties(await propRes.json());
-     }
+      try {
+        const res = await fetch(`${API_URL}/api/portal-settings`, { headers });
+        if(res.ok) {
+           const data = await res.json();
+           setPortalSettings({
+             logo_day: data.logo_day || '',
+             logo_night: data.logo_night || '',
+             hero_title: data.hero_title || '',
+             hero_subtitle: data.hero_subtitle || '',
+             banner_image_1: data.banner_image_1 || '',
+             banner_image_2: data.banner_image_2 || '',
+             banner_image_3: data.banner_image_3 || '',
+             about_title: data.about_title || '',
+             about_description: data.about_description || '',
+             about_image: data.about_image || '',
+             phone: data.phone || '',
+             email: data.email || '',
+             address: data.address || '',
+             status: data.status || 'Activo',
+             facebook_url: data.facebook_url || '',
+             instagram_url: data.instagram_url || '',
+             linkedin_url: data.linkedin_url || '',
+             youtube_url: data.youtube_url || ''
+           });
+        }
+      } catch (err) {
+        console.error("Error al cargar ajustes del portal:", err);
+      }
+
+      try {
+        const propRes = await fetch(`${API_URL}/api/properties`, { headers });
+        if (propRes.ok) {
+          setPortalProperties(await propRes.json());
+        }
+      } catch (err) {
+        console.error("Error al cargar propiedades del portal:", err);
+      }
     }
    } catch (err) {}
   };
