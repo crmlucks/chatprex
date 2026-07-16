@@ -1369,9 +1369,9 @@ export default function HomePortal({
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
               {/* Sección Imágenes */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="flex flex-col gap-2">
                 {/* Gran Imagen Principal */}
-                <div className="md:col-span-2 h-48 md:h-64 rounded-xl overflow-hidden border border-edge relative">
+                <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden border border-edge relative bg-surface-inset flex items-center justify-center">
                   <img
                     src={getImagesArray(selectedProperty)[activeImageIndex]}
                     alt={selectedProperty.name}
@@ -1382,84 +1382,89 @@ export default function HomePortal({
                   </div>
                 </div>
 
-                {/* Miniaturas de Galería */}
-                <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto md:max-h-64">
-                  {getImagesArray(selectedProperty).map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveImageIndex(idx)}
-                      className={`relative w-14 h-14 md:w-full md:h-[68px] rounded-lg overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${activeImageIndex === idx ? 'border-accent ring-2 ring-accent/20' : 'border-edge opacity-70 hover:opacity-100'}`}
-                    >
-                      <img src={img} className="w-full h-full object-cover" alt="" />
-                    </button>
-                  ))}
-                </div>
+                {/* Miniaturas de Galería (Abajo de la Imagen Principal) */}
+                {getImagesArray(selectedProperty).length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto py-1 custom-scrollbar">
+                    {getImagesArray(selectedProperty).map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveImageIndex(idx)}
+                        className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${activeImageIndex === idx ? 'border-accent ring-2 ring-accent/20' : 'border-edge opacity-70 hover:opacity-100'}`}
+                      >
+                        <img src={img} className="w-full h-full object-cover" alt="" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Ficha Técnica y Descripción */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-3 border-t border-edge">
+              {/* Barra de Acción Rápida (Precio + WhatsApp CTA) */}
+              <div className="p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-950/10 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[10px] font-extrabold text-content-muted uppercase tracking-wider">Precio de Lista:</span>
+                  <span className="text-xl font-black text-accent tracking-tight">
+                    {formatPrice(selectedProperty.price, selectedProperty.currency)}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleWhatsAppContact(selectedProperty)}
+                  className="w-full sm:w-auto px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none"
+                >
+                  <Send size={12} className="rotate-45" />
+                  <span>Contactar por WhatsApp</span>
+                </button>
+              </div>
 
-                {/* Detalles / Ficha */}
-                <div className="lg:col-span-2 space-y-2.5">
-                  <h3 className="font-bold text-sm text-content">Ficha de la Propiedad</h3>
-                  <p className="text-xs text-content-secondary leading-relaxed bg-surface-inset p-3 rounded-lg border border-edge">
+              {/* Información Adicional y Ficha Técnica */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                {/* Descripción / Ficha */}
+                <div className="md:col-span-2 space-y-1.5">
+                  <span className="text-[10px] font-bold text-content-muted uppercase tracking-wider block">Ficha de la Propiedad</span>
+                  <p className="text-xs text-content-secondary leading-relaxed bg-surface-inset p-3 rounded-lg border border-edge whitespace-pre-line max-h-36 overflow-y-auto custom-scrollbar">
                     {selectedProperty.details || selectedProperty.notes || 'No hay descripción adicional disponible para esta propiedad.'}
                   </p>
+                </div>
 
-                  {/* Iconos de Características con colores diferenciados */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                    <div className="p-2 rounded-lg border border-slate-500/20 bg-slate-500/5 text-center space-y-0.5">
-                      <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Área Total</span>
-                      <span className="text-xs font-extrabold text-content">{selectedProperty.area || '—'} m²</span>
+                {/* Especificaciones / Metadatos */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-content-muted uppercase tracking-wider block">Especificaciones</span>
+                  <div className="p-3 rounded-lg border border-edge bg-surface-inset space-y-2">
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-content-muted">Ubicación:</span>
+                      <span className="font-semibold text-content truncate max-w-[130px]">{selectedProperty.location}</span>
                     </div>
-                    <div className="p-2 rounded-lg border border-blue-500/20 bg-blue-500/5 text-center space-y-0.5">
-                      <span className="text-[8px] font-bold text-blue-500 dark:text-blue-400 uppercase tracking-wider block">Habitaciones</span>
-                      <span className="text-xs font-extrabold text-content">{selectedProperty.rooms && Number(selectedProperty.rooms) > 0 ? selectedProperty.rooms : '—'}</span>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-content-muted">Tipo:</span>
+                      <span className="font-semibold text-content capitalize">{selectedProperty.type}</span>
                     </div>
-                    <div className="p-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 text-center space-y-0.5">
-                      <span className="text-[8px] font-bold text-cyan-500 dark:text-cyan-400 uppercase tracking-wider block">Baños</span>
-                      <span className="text-xs font-extrabold text-content">{selectedProperty.bathrooms && Number(selectedProperty.bathrooms) > 0 ? selectedProperty.bathrooms : '—'}</span>
-                    </div>
-                    <div className="p-2 rounded-lg border border-violet-500/20 bg-violet-500/5 text-center space-y-0.5">
-                      <span className="text-[8px] font-bold text-violet-500 dark:text-violet-400 uppercase tracking-wider block">Cocheras</span>
-                      <span className="text-xs font-extrabold text-content">{selectedProperty.parking && Number(selectedProperty.parking) > 0 ? selectedProperty.parking : '—'}</span>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-content-muted">Nivel/Piso:</span>
+                      <span className="font-semibold text-content">{selectedProperty.floor || '—'}</span>
                     </div>
                   </div>
                 </div>
-
-                {/* Resumen de Compra y Botón de Acción */}
-                <div className="p-4 rounded-xl border border-edge bg-surface-inset flex flex-col justify-between space-y-4">
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-content-muted uppercase tracking-wider block">Precio de Lista</span>
-                    <span className="text-xl md:text-2xl font-black text-accent tracking-tight block">
-                      {formatPrice(selectedProperty.price, selectedProperty.currency)}
-                    </span>
-                    <div className="space-y-1 pt-1.5 border-t border-edge/60">
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-content-muted">Ubicación:</span>
-                        <span className="font-semibold text-content truncate max-w-[120px]">{selectedProperty.location}</span>
-                      </div>
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-content-muted">Tipo:</span>
-                        <span className="font-semibold text-content capitalize">{selectedProperty.type}</span>
-                      </div>
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-content-muted">Nivel:</span>
-                        <span className="font-semibold text-content">{selectedProperty.floor || '—'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleWhatsAppContact(selectedProperty)}
-                    className="w-full btn-primary h-10 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] shadow-md shadow-emerald-500/10 text-white font-bold text-xs rounded-lg transition-all border-none cursor-pointer"
-                  >
-                    <Send size={14} />
-                    <span>Contactar por WhatsApp</span>
-                  </button>
-                </div>
-
               </div>
+
+              {/* Características Clave */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                <div className="p-2 rounded-lg border border-slate-500/20 bg-slate-500/5 text-center space-y-0.5">
+                  <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Área Total</span>
+                  <span className="text-xs font-extrabold text-content">{selectedProperty.area || '—'} m²</span>
+                </div>
+                <div className="p-2 rounded-lg border border-blue-500/20 bg-blue-500/5 text-center space-y-0.5">
+                  <span className="text-[8px] font-bold text-blue-500 dark:text-blue-400 uppercase tracking-wider block">Habitaciones</span>
+                  <span className="text-xs font-extrabold text-content">{selectedProperty.rooms && Number(selectedProperty.rooms) > 0 ? selectedProperty.rooms : '—'}</span>
+                </div>
+                <div className="p-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 text-center space-y-0.5">
+                  <span className="text-[8px] font-bold text-cyan-500 dark:text-cyan-400 uppercase tracking-wider block">Baños</span>
+                  <span className="text-xs font-extrabold text-content">{selectedProperty.bathrooms && Number(selectedProperty.bathrooms) > 0 ? selectedProperty.bathrooms : '—'}</span>
+                </div>
+                <div className="p-2 rounded-lg border border-violet-500/20 bg-violet-500/5 text-center space-y-0.5">
+                  <span className="text-[8px] font-bold text-violet-500 dark:text-violet-400 uppercase tracking-wider block">Cocheras</span>
+                  <span className="text-xs font-extrabold text-content">{selectedProperty.parking && Number(selectedProperty.parking) > 0 ? selectedProperty.parking : '—'}</span>
+                </div>
+              </div>
+
             </div>
 
             {/* Footer Modal */}
