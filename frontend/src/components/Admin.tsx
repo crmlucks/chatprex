@@ -40,6 +40,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
  });
  const [savingPortal, setSavingPortal] = useState(false);
  const [saveSuccess, setSaveSuccess] = useState(false);
+ const [uploadingImage, setUploadingImage] = useState(false);
 
  // File input refs for portal uploads
  const logoDayRef = useRef<HTMLInputElement>(null);
@@ -53,33 +54,67 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
    setTab(defaultTab);
  }, [defaultTab]);
 
- const handleProjectImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData((prev: any) => ({
-        ...prev, 
-        images: [...(prev.images || []), reader.result as string].slice(0, 4)
-      }));
-      reader.readAsDataURL(file);
-    });
-    e.target.value = '';
-  };
+  const handleProjectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+     const files = e.target.files;
+     if (!files || files.length === 0) return;
+     
+     setUploadingImage(true);
+     try {
+       const uploadedUrls: string[] = [];
+       for (const file of Array.from(files)) {
+         const formDataUpload = new FormData();
+         formDataUpload.append('image', file);
+         
+         const res = await fetch(`${API_URL}/api/upload`, {
+           method: 'POST',
+           headers: { Authorization: `Bearer ${token}` },
+           body: formDataUpload
+         });
+         if (res.ok) {
+           const data = await res.json();
+           uploadedUrls.push(data.url);
+         }
+       }
+       setFormData((prev: any) => ({
+         ...prev, 
+         images: [...(prev.images || []), ...uploadedUrls].slice(0, 4)
+       }));
+     } catch (err) {
+       console.error("Error al subir imagen del proyecto:", err);
+     } finally {
+       setUploadingImage(false);
+     }
+     e.target.value = '';
+   };
 
-  const handlePortalImageUpload = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPortalSettings((prev: any) => ({
-        ...prev,
-        [key]: reader.result as string
-      }));
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
+   const handlePortalImageUpload = (key: string) => async (e: React.ChangeEvent<HTMLInputElement>) => {
+     const file = e.target.files?.[0];
+     if (!file) return;
+     
+     setUploadingImage(true);
+     try {
+       const formDataUpload = new FormData();
+       formDataUpload.append('image', file);
+       
+       const res = await fetch(`${API_URL}/api/upload`, {
+         method: 'POST',
+         headers: { Authorization: `Bearer ${token}` },
+         body: formDataUpload
+       });
+       if (res.ok) {
+         const data = await res.json();
+         setPortalSettings((prev: any) => ({
+           ...prev,
+           [key]: data.url
+         }));
+       }
+     } catch (err) {
+       console.error("Error al subir imagen del portal:", err);
+     } finally {
+       setUploadingImage(false);
+     }
+     e.target.value = '';
+   };
 
   const handleSavePortal = async (e: React.FormEvent) => {
     e.preventDefault();

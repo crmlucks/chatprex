@@ -17,6 +17,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
  const fileInputRef = useRef<HTMLInputElement>(null);
  const multipleFileInputRef = useRef<HTMLInputElement>(null);
+ const [uploadingImage, setUploadingImage] = useState(false);
 
  const fetchProperties = async () => {
   try {
@@ -85,19 +86,51 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
  const resetForm = () => setFormData({ id: null, name: '', project: '', type: 'departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', bathrooms: '', parking: '', floor: '', notes: '', status: 'disponible', avatar: '', images: [], featured: false, visible: true });
 
- const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isAvatar: boolean = false) => {
+ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isAvatar: boolean = false) => {
   const files = e.target.files;
   if (!files || files.length === 0) return;
-  if (isAvatar) {
-   const reader = new FileReader();
-   reader.onloadend = () => setFormData(prev => ({ ...prev, avatar: reader.result as string }));
-   reader.readAsDataURL(files[0]);
-  } else {
-   Array.from(files).forEach(file => {
-    const reader = new FileReader();
-    reader.onloadend = () => setFormData(prev => ({ ...prev, images: [...prev.images, reader.result as string].slice(0, 3) }));
-    reader.readAsDataURL(file);
-   });
+  
+  setUploadingImage(true);
+  try {
+   if (isAvatar) {
+    const file = files[0];
+    const formDataUpload = new FormData();
+    formDataUpload.append('image', file);
+    
+    const res = await fetch(`${API_URL}/api/upload`, {
+     method: 'POST',
+     headers: { Authorization: `Bearer ${token}` },
+     body: formDataUpload
+    });
+    if (res.ok) {
+     const data = await res.json();
+     setFormData(prev => ({ ...prev, avatar: data.url }));
+    }
+   } else {
+    const uploadedUrls: string[] = [];
+    for (const file of Array.from(files)) {
+     const formDataUpload = new FormData();
+     formDataUpload.append('image', file);
+     
+     const res = await fetch(`${API_URL}/api/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formDataUpload
+     });
+     if (res.ok) {
+      const data = await res.json();
+      uploadedUrls.push(data.url);
+     }
+    }
+    setFormData(prev => ({ 
+     ...prev, 
+     images: [...(prev.images || []), ...uploadedUrls].slice(0, 3) 
+    }));
+   }
+  } catch (err) {
+   console.error("Error al subir archivo:", err);
+  } finally {
+   setUploadingImage(false);
   }
  };
 
@@ -461,8 +494,8 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
           <div className="flex flex-col sm:flex-row gap-6 items-start pt-6 border-t border-edge">
            <div className="space-y-2 shrink-0">
              <label className="label-text">Logo / Principal</label>
-             <div onClick={() => fileInputRef.current?.click()} className="w-24 h-24 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden">
-              {formData.avatar ? <img src={formData.avatar} className="w-full h-full object-cover" /> : <Upload size={20} className="text-content-muted" />}
+             <div onClick={() => !uploadingImage && fileInputRef.current?.click()} className="w-24 h-24 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden">
+               {uploadingImage ? <span className="text-[10px] text-content-muted">Subiendo...</span> : formData.avatar ? <img src={formData.avatar} className="w-full h-full object-cover" /> : <Upload size={20} className="text-content-muted" />}
              </div>
              <input type="file" ref={fileInputRef} className="hidden" onChange={e => handleImageUpload(e, true)} />
            </div>
@@ -476,8 +509,8 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
                </div>
               ))}
               {formData.images.length < 3 && (
-                <div onClick={() => multipleFileInputRef.current?.click()} className="w-20 h-20 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors">
-                 <ImageIcon size={20} className="text-content-muted" />
+                <div onClick={() => !uploadingImage && multipleFileInputRef.current?.click()} className="w-20 h-20 rounded-xl border-2 border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors">
+                  {uploadingImage ? <span className="text-[9px] text-content-muted">Subiendo...</span> : <ImageIcon size={20} className="text-content-muted" />}
                 </div>
               )}
              </div>

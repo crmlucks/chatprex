@@ -3,6 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ import { campaignRouter } from './campaignRoutes';
 import { analyticsRouter } from './analyticsRoutes';
 import { voiceRouter, setupVoiceWebSockets } from './twilioVoice';
 import { portalSettingsRouter } from './portalSettingsRoutes';
+import { uploadRouter } from './uploadRoutes';
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +35,7 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // ─── Rutas de autenticación (públicas) ───
 app.use('/api/auth', authRouter);
@@ -48,6 +51,7 @@ app.use('/api/data', crudRouter);
 app.use('/api/campaigns', campaignRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/portal-settings', portalSettingsRouter);
+app.use('/api/upload', uploadRouter);
 
 // ─── Rutas de WhatsApp ───
 app.use('/api/webhook/meta', whatsappRouter);

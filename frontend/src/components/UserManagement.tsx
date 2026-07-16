@@ -18,14 +18,33 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [showPasswordModal, setShowPasswordModal] = useState<number | null>(null);
  const [newPassword, setNewPassword] = useState('');
  const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '', role: 'usuario', status: 'activo', avatar: '', canAccessIntegrations: false, auto_assign: false });
+ const [uploadingImage, setUploadingImage] = useState(false);
  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
- const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const files = e.target.files;
   if (!files || files.length === 0) return;
-  const reader = new FileReader();
-  reader.onloadend = () => setFormData(prev => ({ ...prev, avatar: reader.result as string }));
-  reader.readAsDataURL(files[0]);
+  
+  setUploadingImage(true);
+  try {
+   const file = files[0];
+   const formDataUpload = new FormData();
+   formDataUpload.append('image', file);
+   
+   const res = await fetch(`${API_URL}/api/upload`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formDataUpload
+   });
+   if (res.ok) {
+    const data = await res.json();
+    setFormData(prev => ({ ...prev, avatar: data.url }));
+   }
+  } catch (err) {
+   console.error("Error al subir avatar de usuario:", err);
+  } finally {
+   setUploadingImage(false);
+  }
  };
  const [error, setError] = useState('');
  const [success, setSuccess] = useState('');
@@ -255,8 +274,8 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         <div className="md:col-span-2 flex items-center gap-4 py-2">
          <div className="shrink-0 text-center">
           <label className={label}>Avatar</label>
-          <div onClick={() => fileInputRef.current?.click()} className="w-12 h-12 rounded-xl border border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden bg-surface-inset">
-           {formData.avatar ? <img src={formData.avatar} className="w-full h-full object-cover" /> : <Upload size={16} className="text-content-muted" />}
+          <div onClick={() => !uploadingImage && fileInputRef.current?.click()} className="w-12 h-12 rounded-xl border border-dashed border-edge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden bg-surface-inset">
+           {uploadingImage ? <span className="text-[9px] text-content-muted">...</span> : formData.avatar ? <img src={formData.avatar} className="w-full h-full object-cover" /> : <Upload size={16} className="text-content-muted" />}
           </div>
           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
          </div>
