@@ -1382,18 +1382,11 @@ export default function HomePortal({
               {/* Sección Imágenes */}
               <div className="flex flex-col gap-2">
                 {/* Gran Imagen Principal */}
-                <div className="w-full h-64 md:h-[380px] rounded-xl overflow-hidden border border-edge relative bg-slate-950 flex items-center justify-center">
-                  {/* Imagen difuminada en el fondo para rellenar bordes laterales */}
-                  <img
-                    src={getImagesArray(selectedProperty)[activeImageIndex]}
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover blur-md opacity-35 scale-105 pointer-events-none"
-                  />
-                  {/* Imagen nítida principal completa */}
+                <div className="w-full max-w-[450px] aspect-square mx-auto rounded-xl overflow-hidden border border-edge relative bg-surface-inset flex items-center justify-center">
                   <img
                     src={getImagesArray(selectedProperty)[activeImageIndex]}
                     alt={selectedProperty.name}
-                    className="w-full h-full object-contain relative z-10"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute bottom-2.5 right-2.5 bg-black/75 px-2 py-0.5 text-white text-[10px] rounded-md font-bold z-20">
                     Foto {activeImageIndex + 1} de {getImagesArray(selectedProperty).length}
