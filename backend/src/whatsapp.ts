@@ -301,6 +301,31 @@ whatsappRouter.post('/', async (req, res) => {
               }
             }
           }
+
+          // --- 5. COEXISTENCIA (smb_message_echoes) ---
+          const smbEchoes = value?.smb_message_echoes;
+          if (smbEchoes && Array.isArray(smbEchoes)) {
+            for (const echo of smbEchoes) {
+              const customerPhone = echo.to;
+              if (customerPhone) {
+                console.log(`[Meta Coexistence] ⏸️ Mensaje enviado desde la App Móvil (Coexistence) hacia ${customerPhone}. Apagando bot...`);
+                try {
+                  await pool.query('UPDATE leads SET bot_active = false WHERE phone = $1', [customerPhone]);
+                  
+                  ioInstance.emit('whatsapp-message', {
+                    id: echo.id || `coex-${Date.now()}`,
+                    from: 'me',
+                    name: 'Asesor (App Móvil)',
+                    text: echo.text?.body || '[Mensaje de Coexistencia]',
+                    fromMe: true,
+                    timestamp: new Date().toISOString(),
+                  });
+                } catch (err: any) {
+                  console.error('[Meta Coexistence] Error apagando bot:', err.message);
+                }
+              }
+            }
+          }
         }
       }
     }
