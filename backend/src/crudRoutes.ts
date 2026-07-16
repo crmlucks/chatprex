@@ -322,11 +322,26 @@ router.get('/projects', async (req, res) => {
   } catch (error) { res.status(500).json({ error: 'Database error' }); }
 });
 router.post('/projects', async (req, res) => {
-  const { name, developer, contact, phone, email, address, currency, status, notes, images } = req.body;
+  const { name, developer, contact, phone, email, address, currency, status, notes, images, price_from, price_to, area_from, area_to } = req.body;
   try {
     const result = await pool.query(
-      'INSERT INTO projects (name, developer, contact, phone, email, address, currency, status, notes, images) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *', 
-      [name, developer, contact, phone, email, address, currency || 'PEN', status || 'Activo', notes, JSON.stringify(images || [])]
+      'INSERT INTO projects (name, developer, contact, phone, email, address, currency, status, notes, images, price_from, price_to, area_from, area_to) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *', 
+      [
+        name, 
+        developer, 
+        contact, 
+        phone, 
+        email, 
+        address, 
+        currency || 'PEN', 
+        status || 'Activo', 
+        notes, 
+        JSON.stringify(images || []),
+        parseInt(price_from) || 0,
+        parseInt(price_to) || 0,
+        parseInt(area_from) || 0,
+        parseInt(area_to) || 0
+      ]
     );
     res.json(result.rows[0]);
   } catch (error) { 
@@ -335,11 +350,27 @@ router.post('/projects', async (req, res) => {
   }
 });
 router.put('/projects/:id', async (req, res) => {
-  const { name, developer, contact, phone, email, address, currency, status, notes, images } = req.body;
+  const { name, developer, contact, phone, email, address, currency, status, notes, images, price_from, price_to, area_from, area_to } = req.body;
   try {
     const result = await pool.query(
-      'UPDATE projects SET name=$1, developer=$2, contact=$3, phone=$4, email=$5, address=$6, currency=$7, status=$8, notes=$9, images=$10 WHERE id=$11 RETURNING *', 
-      [name, developer, contact, phone, email, address, currency, status, notes, JSON.stringify(images || []), req.params.id]
+      'UPDATE projects SET name=$1, developer=$2, contact=$3, phone=$4, email=$5, address=$6, currency=$7, status=$8, notes=$9, images=$10, price_from=$11, price_to=$12, area_from=$13, area_to=$14 WHERE id=$15 RETURNING *', 
+      [
+        name, 
+        developer, 
+        contact, 
+        phone, 
+        email, 
+        address, 
+        currency, 
+        status, 
+        notes, 
+        JSON.stringify(images || []), 
+        parseInt(price_from) || 0,
+        parseInt(price_to) || 0,
+        parseInt(area_from) || 0,
+        parseInt(area_to) || 0,
+        req.params.id
+      ]
     );
     res.json(result.rows[0]);
   } catch (error) { 

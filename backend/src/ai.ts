@@ -4,6 +4,15 @@ import pool from './db';
 // Memoria a corto plazo para no perder el contexto de la conversación
 const conversationHistory: Record<string, { role: 'system' | 'user' | 'assistant', content: string }[]> = {};
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+const resolveBackendUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('/uploads')) {
+    return `${BACKEND_URL}${url}`;
+  }
+  return url;
+};
+
 /**
  * Obtiene la configuración de IA asignada al lead (Multi-Bot)
  */
@@ -388,24 +397,34 @@ ${advisorText}
           else if (functionName === 'solicitar_multimedia_proyecto') {
             let urls: string[] = [];
             
-            // 1. Primero buscar imágenes del PROYECTO (tabla projects) — ideal para terrenos
-            const projRes = await pool.query("SELECT images FROM projects WHERE name ILIKE $1 LIMIT 1", [`%${args.proyecto}%`]);
-            if (projRes.rowCount > 0 && projRes.rows[0].images) {
-              const projImages = projRes.rows[0].images;
-              if (Array.isArray(projImages)) {
-                urls.push(...projImages.filter((u: string) => u && u.startsWith('http')));
+            // 1. Primero buscar imágenes registradas en el inventario de PROPIEDADES asociadas a este proyecto
+            const propRes = await pool.query(
+              "SELECT avatar, images FROM properties WHERE project ILIKE $1 OR name ILIKE $1 LIMIT 6", 
+              [`%${args.proyecto}%`]
+            );
+            if (propRes.rowCount > 0) {
+              for (const p of propRes.rows) {
+                const avatarUrl = resolveBackendUrl(p.avatar);
+                if (avatarUrl && avatarUrl.startsWith('http')) urls.push(avatarUrl);
+                
+                let imagesList: string[] = [];
+                try {
+                  imagesList = typeof p.images === 'string' ? JSON.parse(p.images) : p.images || [];
+                } catch (e) {}
+                
+                if (Array.isArray(imagesList)) {
+                  urls.push(...imagesList.map((u: string) => resolveBackendUrl(u)).filter((u: string) => u && u.startsWith('http')));
+                }
               }
             }
             
-            // 2. Si no hay fotos del proyecto, buscar en el inventario de PROPIEDADES (casas, depas, oficinas)
+            // 2. Si no hay fotos en las propiedades, buscar en la tabla de proyectos (projects) como fallback (ideal para terrenos sin construcciones)
             if (urls.length === 0) {
-              const propRes = await pool.query("SELECT image, images FROM properties WHERE project ILIKE $1 OR name ILIKE $1 LIMIT 4", [`%${args.proyecto}%`]);
-              if (propRes.rowCount > 0) {
-                for (const p of propRes.rows) {
-                  if (p.image && p.image.startsWith('http')) urls.push(p.image);
-                  if (p.images && Array.isArray(p.images)) {
-                    urls.push(...p.images.filter((u: string) => u && u.startsWith('http')));
-                  }
+              const projRes = await pool.query("SELECT images FROM projects WHERE name ILIKE $1 LIMIT 1", [`%${args.proyecto}%`]);
+              if (projRes.rowCount > 0 && projRes.rows[0].images) {
+                const projImages = projRes.rows[0].images;
+                if (Array.isArray(projImages)) {
+                  urls.push(...projImages.map((u: string) => resolveBackendUrl(u)).filter((u: string) => u && u.startsWith('http')));
                 }
               }
             }

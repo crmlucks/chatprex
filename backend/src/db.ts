@@ -431,6 +431,10 @@ export async function initDatabase() {
         ALTER TABLE projects ADD COLUMN IF NOT EXISTS address VARCHAR(255) DEFAULT '';
         ALTER TABLE projects ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'PEN';
         ALTER TABLE projects ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT '';
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS price_from INTEGER DEFAULT 0;
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS price_to INTEGER DEFAULT 0;
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS area_from INTEGER DEFAULT 0;
+        ALTER TABLE projects ADD COLUMN IF NOT EXISTS area_to INTEGER DEFAULT 0;
 
         -- Nuevos campos para Finanzas / Clientes
         ALTER TABLE finances_clients ADD COLUMN IF NOT EXISTS doc VARCHAR(50) DEFAULT '';

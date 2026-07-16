@@ -348,15 +348,17 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
         <table className="w-full text-left">
          <thead>
           <tr className={`text-[10px] font-bold text-content-muted border-b uppercase tracking-wider ${dc ? 'bg-surface-raised border-edge' : 'bg-surface-inset border-edge'}`}>
-           <th className="px-6 py-4">Proyecto</th>
-           <th className="px-6 py-4">Desarrollador / Contacto</th>
-           <th className="px-6 py-4 text-center">Estado</th>
-           <th className="px-6 py-4 text-right">Acciones</th>
+            <th className="px-6 py-4">Proyecto</th>
+            <th className="px-6 py-4">Desarrollador / Contacto</th>
+            <th className="px-6 py-4">Rango de Precios</th>
+            <th className="px-6 py-4">Rango de Áreas</th>
+            <th className="px-6 py-4 text-center">Estado</th>
+            <th className="px-6 py-4 text-right">Acciones</th>
           </tr>
          </thead>
          <tbody className={`divide-y ${dc ? 'divide-edge' : 'divide-slate-100'}`}>
           {projects.length === 0 ? (
-           <tr><td colSpan={4} className="px-6 py-10 text-center text-xs font-bold text-content-muted uppercase">No hay proyectos registrados</td></tr>
+           <tr><td colSpan={6} className="px-6 py-10 text-center text-xs font-bold text-content-muted uppercase">No hay proyectos registrados</td></tr>
           ) : projects.map((p: any) => (
            <tr key={p.id} className="group hover:bg-surface-inset transition-colors">
             <td className="px-6 py-4">
@@ -373,15 +375,33 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
              </div>
             </td>
             <td className="px-6 py-4">
-             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-content">{p.developer || '—'}</span>
-              <span className="text-[10px] text-content-muted">{p.contact || 'Sin contacto'}</span>
-             </div>
-            </td>
-            <td className="px-6 py-4 text-center">
-             <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-tight ${p.status === 'Activo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
-              {p.status || 'Activo'}
-             </span>
+              <div className="flex flex-col">
+               <span className="text-xs font-semibold text-content">{p.developer || '—'}</span>
+               <span className="text-[10px] text-content-muted">{p.contact || 'Sin contacto'}</span>
+              </div>
+             </td>
+             <td className="px-6 py-4">
+              <span className="text-xs font-bold text-accent">
+                {p.price_from || p.price_to ? (
+                  `${p.currency || 'PEN'} ${Number(p.price_from).toLocaleString('es-PE')} - ${Number(p.price_to).toLocaleString('es-PE')}`
+                ) : (
+                  '—'
+                )}
+              </span>
+             </td>
+             <td className="px-6 py-4">
+              <span className="text-xs font-semibold text-content">
+                {p.area_from || p.area_to ? (
+                  `${p.area_from} - ${p.area_to} m²`
+                ) : (
+                  '—'
+                )}
+              </span>
+             </td>
+             <td className="px-6 py-4 text-center">
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-tight ${p.status === 'Activo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+               {p.status || 'Activo'}
+              </span>
             </td>
             <td className="px-6 py-4 text-right">
              <div className="flex justify-end gap-1">
@@ -915,6 +935,22 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
            <option value="Activo">Activo</option>
            <option value="Inactivo">Inactivo</option>
           </select>
+         </div>
+         <div>
+          <label className={label}>Precio Mínimo (Desde)</label>
+          <input type="number" value={formData.price_from || ''} onChange={e => setFormData({...formData, price_from: e.target.value})} className={input} placeholder="Mínimo..." />
+         </div>
+         <div>
+          <label className={label}>Precio Máximo (Hasta)</label>
+          <input type="number" value={formData.price_to || ''} onChange={e => setFormData({...formData, price_to: e.target.value})} className={input} placeholder="Máximo..." />
+         </div>
+         <div>
+          <label className={label}>Área Mínima (Desde m²)</label>
+          <input type="number" value={formData.area_from || ''} onChange={e => setFormData({...formData, area_from: e.target.value})} className={input} placeholder="Mínima m²..." />
+         </div>
+         <div>
+          <label className={label}>Área Máxima (Hasta m²)</label>
+          <input type="number" value={formData.area_to || ''} onChange={e => setFormData({...formData, area_to: e.target.value})} className={input} placeholder="Máxima m²..." />
          </div>
          <div className="md:col-span-2">
           <label className={label}>Notas</label>
