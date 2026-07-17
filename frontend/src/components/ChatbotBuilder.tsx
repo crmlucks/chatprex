@@ -193,13 +193,13 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  }
 
  return (
-  <div className={`flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 flex flex-col gap-8 transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
+  <div className={`flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6 flex flex-col gap-6 transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
    
    {/* Top Row: Sidebar & Editor */}
-   <div className="flex flex-col lg:flex-row gap-8">
+   <div className="flex flex-col lg:flex-row gap-6">
     {/* 1. Sidebar: Lista de bots */}
    <div className={`w-full lg:w-80 shrink-0 card-premium flex flex-col overflow-hidden`}>
-    <div className={`p-6 border-b flex justify-between items-center transition-colors ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
+    <div className={`p-5 border-b flex justify-between items-center transition-colors ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
      <div className="flex items-center gap-2">
        <div className="w-2.5 h-2.5 rounded-full bg-accent shadow-[0_0_8px_rgba(25,118,210,0.5)] animate-pulse"></div>
        <h2 className="h3">Asistentes IA</h2>
@@ -235,7 +235,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    <div className="flex-1 card-premium flex flex-col transition-all overflow-hidden">
     
     {/* Editor Header */}
-    <div className={`p-8 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 transition-colors ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
+    <div className={`p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 transition-colors ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
      <div className="flex-1 w-full">
       <div className="flex items-center gap-4 mb-2">
        <Bot className="text-accent shrink-0" size={32} />

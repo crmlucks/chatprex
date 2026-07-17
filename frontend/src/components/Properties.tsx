@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Home, Building2, Map, LayoutGrid, LayoutList, Search, Plus, Filter, MapPin, X, Edit2, Trash2, Upload, XCircle, Image as ImageIcon, DollarSign, Tag, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from './Toast';
 
 const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
 
@@ -13,6 +14,7 @@ const resolveUrl = (url: string) => {
 };
 
 export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
+ const { showConfirm } = useToast();
  const [viewMode, setViewMode] = useState<'grid'|'list'>('list');
  const [filterType, setFilterType] = useState('todos');
  const [filterProject, setFilterProject] = useState('todos');
@@ -62,9 +64,12 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
   notes: '', status: 'disponible', avatar: '', images: [] as string[],
   featured: false, visible: true
  });
+ const [isSaving, setIsSaving] = useState(false);
 
  const handleSave = async (e: React.FormEvent) => {
   e.preventDefault();
+  if (isSaving) return;
+  setIsSaving(true);
   try {
    const isEdit = formData.id != null;
    const url = isEdit ? `${API_URL}/api/properties/${formData.id}` : `${API_URL}/api/properties`;
@@ -78,18 +83,19 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
     setShowModal(false);
     resetForm();
    }
-  } catch (err) { console.error(err); }
+  } catch (err) { console.error(err); } finally { setIsSaving(false); }
  };
 
  const deleteProperty = async (id: number) => {
-  if(!window.confirm('¿Eliminar esta propiedad?')) return;
-  try {
-   const res = await fetch(`${API_URL}/api/properties/${id}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` }
-   });
-   if (res.ok) fetchProperties();
-  } catch (err) { console.error(err); }
+  showConfirm('¿Estás seguro de eliminar esta propiedad? Esta acción no se puede deshacer.', async () => {
+   try {
+    const res = await fetch(`${API_URL}/api/properties/${id}`, {
+     method: 'DELETE',
+     headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) fetchProperties();
+   } catch (err) { console.error(err); }
+  }, { confirmText: 'Eliminar', cancelText: 'Cancelar' });
  };
 
  const resetForm = () => setFormData({ id: null, name: '', project: '', type: 'departamento', price: '', currency: 'USD', location: '', area: '', rooms: '', bathrooms: '', parking: '', floor: '', notes: '', status: 'disponible', avatar: '', images: [], featured: false, visible: true });
@@ -558,8 +564,8 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
         {/* Modal Footer */}
         <div className="px-6 py-4 border-t border-edge flex items-center justify-end gap-3 bg-surface-inset">
           <button onClick={() => setShowModal(false)} className="text-sm font-medium text-content-muted hover:text-content px-3">Cancelar</button>
-          <button onClick={handleSave} className="btn-primary">
-           {formData.id ? 'Actualizar registro' : 'Guardar propiedad'}
+          <button onClick={handleSave} disabled={isSaving} className={`btn-primary ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}>
+           {isSaving ? 'Guardando...' : formData.id ? 'Actualizar registro' : 'Guardar propiedad'}
           </button>
         </div>
        </div>

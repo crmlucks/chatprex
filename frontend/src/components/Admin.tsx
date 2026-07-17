@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Layers, Layout, Facebook, Instagram, Hash, Globe, Smartphone, Edit2, Trash2, Plus, X, Link, Settings, Database, Filter, Target, Users, Image as ImageIcon, Upload, XCircle, RotateCcw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from './Toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -14,6 +15,7 @@ const resolveUrl = (url: string) => {
 
 const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean; defaultTab?: string }) => {
  const { token } = useAuth();
+ const { showConfirm, showToast } = useToast();
  const [tab, setTab] = useState(defaultTab);
  const [modalType, setModalType] = useState<string | null>(null);
  const [projects, setProjects] = useState<any[]>([]);
@@ -150,7 +152,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
 
   const handleRestoreDefaults = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (window.confirm('¿Estás seguro de que deseas restablecer los valores de configuración por defecto? Las imágenes del carrusel del inicio (Hero) no se verán afectadas.')) {
+    showConfirm('¿Estás seguro de que deseas restablecer los valores de configuración por defecto? Las imágenes del carrusel del inicio no se verán afectadas.', () => {
       setPortalSettings((prev: any) => ({
         ...prev,
         logo_day: '',
@@ -163,13 +165,12 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
         phone: '',
         email: '',
         address: '',
-        status: 'Activo',
         facebook_url: '',
         instagram_url: '',
-        linkedin_url: '',
-        youtube_url: ''
+        tiktok_url: ''
       }));
-    }
+      showToast('Valores por defecto restablecidos. No olvides guardar los cambios.', 'info');
+    }, { confirmText: 'Restablecer', cancelText: 'Cancelar' });
   };
 
  useEffect(() => {
@@ -294,19 +295,23 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
  };
 
  const handleDelete = async (type: string, id: number) => {
-  if (!window.confirm('¿Estás seguro de eliminar este elemento?')) return;
-  let endpoint = '';
-  if (type === 'proyecto') endpoint = '/api/data/projects';
-  if (type === 'etapa') endpoint = '/api/data/pipeline';
-  if (type === 'fuente') endpoint = '/api/data/sources';
+  showConfirm('¿Estás seguro de eliminar este elemento?', async () => {
+   let endpoint = '';
+   if (type === 'proyecto') endpoint = '/api/data/projects';
+   if (type === 'etapa') endpoint = '/api/data/pipeline';
+   if (type === 'fuente') endpoint = '/api/data/sources';
 
-  try {
-   const res = await fetch(`${API_URL}${endpoint}/${id}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` }
-   });
-   if (res.ok) loadData();
-  } catch (err) {}
+   try {
+    const res = await fetch(`${API_URL}${endpoint}/${id}`, {
+     method: 'DELETE',
+     headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+     loadData();
+     showToast('Elemento eliminado exitosamente', 'success');
+    }
+   } catch (err) {}
+  }, { confirmText: 'Eliminar', cancelText: 'Cancelar' });
  };
 
  const dc = isDarkMode;

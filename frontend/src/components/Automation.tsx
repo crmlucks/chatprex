@@ -50,8 +50,8 @@ const Automation = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const dc = isDarkMode;
 
  return (
-  <div className={`flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
-   <div className="max-w-7xl mx-auto space-y-8">
+  <div className={`flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
+   <div className="max-w-7xl mx-auto space-y-6">
     
     {/* Header Section */}
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">

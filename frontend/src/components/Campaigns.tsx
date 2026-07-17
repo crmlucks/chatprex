@@ -2,12 +2,14 @@ import React, { useState, useRef } from 'react';
 import { Play, Pause, AlertCircle, Settings, Users, MessageSquare, Megaphone, Plus, Trash2, Send, Paperclip, X, Bot, Shield, CheckCircle2, Clock, Search, BarChart3, Upload, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePipeline } from '../hooks/usePipeline';
+import { useToast } from './Toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
- const { token } = useAuth();
- const pipelineHelpers = usePipeline();
+ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
+  const { token } = useAuth();
+  const { showConfirm, showToast } = useToast();
+  const pipelineHelpers = usePipeline();
  const [campaigns, setCampaigns] = useState<any[]>([]);
  const [showModal, setShowModal] = useState(false);
  const [activeTab, setActiveTab] = useState('mensaje');
@@ -141,15 +143,18 @@ export default function Campaigns({ isDarkMode }: { isDarkMode?: boolean }) {
  };
 
  const deleteCampaign = async (id: number) => {
-  if(confirm("¿Eliminar esta campaña?")) {
+  showConfirm("¿Estás seguro de eliminar esta campaña? Se borrará todo el registro asociado.", async () => {
    try {
     const res = await fetch(`${API_URL}/api/campaigns/${id}`, {
      method: 'DELETE',
      headers: { Authorization: `Bearer ${token}` }
     });
-    if (res.ok) fetchCampaigns();
+    if (res.ok) {
+     fetchCampaigns();
+     showToast('Campaña eliminada', 'success');
+    }
    } catch (err) {}
-  }
+  }, { confirmText: 'Eliminar', cancelText: 'Cancelar' });
  };
 
  const dc = isDarkMode;

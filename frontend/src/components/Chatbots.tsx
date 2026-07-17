@@ -158,8 +158,8 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  }, []);
 
  return (
-  <div className={`flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8 transition-colors ${isDarkMode ? 'bg-surface-base' : 'bg-surface-base'}`}>
-   <div className="max-w-7xl mx-auto space-y-8">
+  <div className={`flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 transition-colors ${isDarkMode ? 'bg-surface-base' : 'bg-surface-base'}`}>
+   <div className="max-w-7xl mx-auto space-y-6">
     
     {/* Header con Estado de Red */}
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -183,12 +183,11 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
      </div>
     </div>
 
-    {/* Path Selection (3 Paths) */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    {/* Path Selection (2 Paths) */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {[
        { id: 'qr', icon: <QrCode size={20} />, label: 'WhatsApp Libre', desc: 'Conexión rápida vía QR', color: 'emerald' },
-       { id: 'meta', icon: <Shield size={20} />, label: 'Meta Cloud API', desc: 'Canal oficial verificado', color: 'blue' },
-       { id: 'brain', icon: <Bot size={20} />, label: 'Cerebro IA', desc: 'Configura la mente del bot', color: 'purple' },
+       { id: 'meta', icon: <Shield size={20} />, label: 'Meta Cloud API', desc: 'Canal oficial verificado', color: 'blue' }
       ].map(path => (
        <button 
         key={path.id}
@@ -208,21 +207,19 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
     {/* Main Interface */}
     <div className={`rounded-xl border shadow-sm overflow-hidden transition-colors ${isDarkMode ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
-      <div className="flex flex-col lg:flex-row min-h-[500px]">
+      <div className="flex flex-col lg:flex-row min-h-[400px]">
        
        {/* Left Column: Context & Help */}
-       <div className={`lg:w-1/3 p-8 md:p-10 border-b lg:border-b-0 lg:border-r flex flex-col justify-between transition-colors ${isDarkMode ? 'bg-surface-raised/30 border-edge' : 'bg-surface-inset/50 border-edge'}`}>
+       <div className={`lg:w-1/3 p-6 md:p-8 border-b lg:border-b-0 lg:border-r flex flex-col justify-between transition-colors ${isDarkMode ? 'bg-surface-raised/30 border-edge' : 'bg-surface-inset/50 border-edge'}`}>
          <div>
           <div className="mb-8">
             <h2 className={`text-xl font-semibold tracking-tight mb-3 ${isDarkMode ? 'text-content' : 'text-content'}`}>
              {connectionMode === 'qr' && "Vinculación por QR"}
              {connectionMode === 'meta' && "API Oficial de Meta"}
-             {connectionMode === 'brain' && "Personalidad del Bot"}
             </h2>
             <p className={`text-sm leading-relaxed font-medium ${isDarkMode ? 'text-content-muted' : 'text-content-muted'}`}>
              {connectionMode === 'qr' && "Escanea el código con tu celular para que Casaya pueda leer y responder mensajes automáticamente. Sin costos por mensaje."}
              {connectionMode === 'meta' && "Ideal para empresas que manejan alto volumen y requieren el Check Verde. Mayor estabilidad y cumplimiento de políticas de WhatsApp."}
-             {connectionMode === 'brain' && "Aquí defines cómo debe actuar tu IA: su tono, sus límites y qué información utilizará para convencer a tus clientes."}
             </p>
           </div>
 
@@ -248,7 +245,7 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
        </div>
 
        {/* Right Column: Interaction Area */}
-       <div className={`flex-1 p-8 md:p-12 flex flex-col justify-center items-center transition-colors ${isDarkMode ? 'bg-[#151316]' : 'bg-surface'}`}>
+       <div className={`flex-1 p-6 md:p-8 flex flex-col justify-center items-center transition-colors ${isDarkMode ? 'bg-[#151316]' : 'bg-surface'}`}>
          
          {connectionMode === 'qr' && (
           <div className="w-full max-w-sm text-center animate-in zoom-in duration-500">
@@ -272,8 +269,8 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
              </div>
             ) : qrCode ? (
              <div className="space-y-6">
-               <div className={`p-6 rounded-xl bg-surface border-8 shadow-sm relative inline-block transition-colors ${isDarkMode ? 'border-edge' : 'border-edge'}`}>
-                <img src={qrCode} alt="QR" className="w-64 h-64 object-contain rounded-2xl" />
+               <div className={`p-4 rounded-xl bg-surface border-4 shadow-sm relative inline-block transition-colors ${isDarkMode ? 'border-edge' : 'border-edge'}`}>
+                <img src={qrCode} alt="QR" className="w-48 h-48 object-contain rounded-xl" />
                 <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-accent text-content flex items-center justify-center shadow-lg border-4 border-white dark:border-slate-900 font-semibold text-sm">
                   {qrCountdown}
                 </div>
@@ -308,40 +305,12 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           </div>
          )}
 
-         {connectionMode === 'brain' && (
-          <div className="w-full max-w-md space-y-6 animate-in slide-in-from-bottom duration-500">
-            <div className="grid grid-cols-2 gap-4">
-             <div className="space-y-1">
-               <label className="text-xs font-semibold uppercase tracking-normal text-content-muted ml-1">ia provider</label>
-               <select value={aiProvider} onChange={e => setAiProvider(e.target.value)} className={`w-full p-4 rounded-2xl border text-sm font-bold focus:ring-2 focus:ring-accent/20 outline-none transition-all ${isDarkMode ? 'bg-surface-raised border-edge text-content' : 'bg-surface-inset border-edge text-content'}`}>
-                <option>OpenAI</option>
-                <option>Gemini</option>
-                <option>DeepSeek</option>
-               </select>
-             </div>
-             <div className="space-y-1">
-               <label className="text-xs font-semibold uppercase tracking-normal text-content-muted ml-1">model</label>
-               <input type="text" value={aiModel} onChange={e => setAiModel(e.target.value)} className={`w-full p-4 rounded-2xl border text-sm font-bold focus:ring-2 focus:ring-accent/20 outline-none transition-all ${isDarkMode ? 'bg-surface-raised border-edge text-content' : 'bg-surface-inset border-edge text-content'}`} />
-             </div>
-            </div>
-            <div className="space-y-1">
-             <label className="text-xs font-semibold uppercase tracking-normal text-content-muted ml-1">personalidad (prompt base)</label>
-             <textarea rows={6} value={aiPrompt} onChange={e => setAiPrompt(e.target.value)} placeholder="Ej: Eres un vendedor amable..." className={`w-full p-4 rounded-2xl border text-sm focus:ring-2 focus:ring-accent/20 outline-none transition-all resize-none ${isDarkMode ? 'bg-surface-raised border-edge text-content' : 'bg-surface-inset border-edge text-content'}`} />
-            </div>
-            <div className="pt-2">
-             <button onClick={saveAiConfig} disabled={isSavingAi} className="w-full py-4 bg-accent text-content rounded-2xl font-semibold text-sm uppercase tracking-normal shadow-sm shadow-accent/20 hover:bg-accent-dark transition-all active:scale-95 disabled:opacity-50">
-               {isSavingAi ? "Guardando..." : aiSaveSuccess ? "¡Configuración Guardada!" : "Actualizar Cerebro IA"}
-             </button>
-            </div>
-          </div>
-         )}
-
        </div>
       </div>
     </div>
 
     {/* Footer Info Section */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {[
        { label: "Mensajes Enviados", val: "12,402", sub: "+12% hoy", icon: <MessageCircle size={18} />, color: "emerald" },
        { label: "Bots Activos", val: "04", sub: "Todos OK", icon: <Bot size={18} />, color: "blue" },

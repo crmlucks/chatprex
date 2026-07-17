@@ -148,18 +148,19 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
 
  const del = async () => {
   if (!editing) return;
-  if (!window.confirm('¿Estás seguro de que deseas eliminar este evento permanentemente?')) return;
-  try {
-   await fetch(`${API_URL}/api/data/tasks/${editing.id}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` }
-   });
-   showToast('Evento eliminado', 'info');
-   fetchEvents();
-   setModal(false);
-  } catch {
-   showToast('Error al eliminar', 'error');
-  }
+  showConfirm('¿Estás seguro de que deseas eliminar este evento permanentemente?', async () => {
+   try {
+    await fetch(`${API_URL}/api/data/tasks/${editing.id}`, {
+     method: 'DELETE',
+     headers: { Authorization: `Bearer ${token}` }
+    });
+    showToast('Evento eliminado', 'info');
+    fetchEvents();
+    setModal(false);
+   } catch {
+    showToast('Error al eliminar', 'error');
+   }
+  }, { confirmText: 'Eliminar', cancelText: 'Cancelar' });
  };
 
  const toggleStatus = async (ev: CalEvent, e: React.MouseEvent) => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, User } from '../context/AuthContext';
+import { useToast } from './Toast';
 import { Search, Plus, Edit2, Trash2, KeyRound, X, Shield, ShieldCheck, UserIcon, MoreHorizontal, UserPlus, Users, Upload } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -17,6 +18,7 @@ const STATUS_LABELS: Record<string, string> = { activo: 'Activo', suspendido: 'S
 
 const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const { token, user: currentUser, hasRole } = useAuth();
+ const { showConfirm, showToast } = useToast();
  const [users, setUsers] = useState<User[]>([]);
  const [search, setSearch] = useState('');
  const [filterRole, setFilterRole] = useState('');
@@ -106,15 +108,20 @@ const UserManagement = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  };
 
  const handleDelete = async (id: number) => {
-  if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
-  try {
-   const res = await fetch(`${API_URL}/api/users/${id}`, { method: 'DELETE', headers });
-   const data = await res.json();
-   if (!res.ok) throw new Error(data.error);
-   setSuccess('Usuario eliminado');
-   fetchUsers();
-   setTimeout(() => setSuccess(''), 3000);
-  } catch (err: any) { setError(err.message); setTimeout(() => setError(''), 3000); }
+  showConfirm('¿Estás seguro de eliminar este usuario? Esta acción es irreversible.', async () => {
+   try {
+    const res = await fetch(`${API_URL}/api/users/${id}`, {
+     method: 'DELETE',
+     headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+     fetchUsers();
+     showToast('Usuario eliminado', 'success');
+    }
+   } catch (error) {
+    console.error('Error deleting user:', error);
+   }
+  }, { confirmText: 'Eliminar', cancelText: 'Cancelar' });
  };
 
  const openCreateModal = () => {
