@@ -90,6 +90,7 @@ whatsappRouter.post('/', async (req, res) => {
         if (!changes || !Array.isArray(changes)) continue;
         for (const change of changes) {
           const value = change.value;
+          const phoneNumberId = value.metadata?.phone_number_id;
           const messages = value?.messages;
           if (messages && Array.isArray(messages)) {
             for (const msg of messages) {
@@ -254,7 +255,7 @@ whatsappRouter.post('/', async (req, res) => {
 
                     // Enviar fotos/videos primero
                     for (const url of mediaUrlsToSend) {
-                      await sendWhatsAppMessage(from, '', url);
+                      await sendWhatsAppMessage(from, '', url, undefined, phoneNumberId);
                       await new Promise(r => setTimeout(r, 1500));
                       
                       ioInstance.emit('whatsapp-message', {
@@ -290,7 +291,7 @@ whatsappRouter.post('/', async (req, res) => {
                           );
                         } catch (e) {}
                         
-                        await sendWhatsAppMessage(from, botText);
+                        await sendWhatsAppMessage(from, botText, undefined, undefined, phoneNumberId);
                         if (i < messagesToSend.length - 1) {
                           await new Promise(r => setTimeout(r, 5000));
                         }
@@ -342,9 +343,11 @@ const sendWhatsAppMessage = async (
   to: string,
   text: string,
   mediaUrl?: string,
-  mimeType?: string
+  mimeType?: string,
+  phoneNumberId?: string
 ) => {
-  const endpoint = `https://graph.facebook.com/v13.0/${META_PHONE_ID}/messages`;
+  const senderId = phoneNumberId || META_PHONE_ID;
+  const endpoint = `https://graph.facebook.com/v13.0/${senderId}/messages`;
   const payload: any = {
     messaging_product: 'whatsapp',
     to,
