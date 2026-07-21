@@ -862,7 +862,7 @@ const handleWebhookEvent = async (req: any, res: any) => {
               [pushName, phone, isBotActive, matchedBotId, assignedAdvisorId]
             );
             console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) - Bot: ${isBotActive ? 'ACTIVO (keyword match)' : 'INACTIVO (sin keyword)'} - Bot ID: ${matchedBotId}`);
-            ioInstance.emit('new-lead', { name: pushName, phone });
+            ioInstance.emit('new-lead', { name: pushName, phone, source: 'WhatsApp', interest: 'Consulta WhatsApp' });
           } else {
             isBotActive = existRes.rows[0].bot_active;
             const currentBotId = existRes.rows[0].bot_id || 1;

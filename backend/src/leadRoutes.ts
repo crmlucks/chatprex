@@ -41,7 +41,18 @@ leadRouter.post('/', authMiddleware, async (req, res) => {
         birth_date || ''
       ]
     );
-    res.status(201).json(result.rows[0]);
+    const newLead = result.rows[0];
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('new-lead', {
+        id: newLead.id,
+        name: newLead.name,
+        phone: newLead.phone,
+        source: newLead.source || 'Manual',
+        interest: newLead.interest || 'Comprar'
+      });
+    }
+    res.status(201).json(newLead);
   } catch (error) {
     console.error('Error creating lead', error);
     res.status(500).json({ error: 'Failed to create lead' });
@@ -134,4 +145,54 @@ leadRouter.patch('/:id/bot', authMiddleware, async (req, res) => {
   }
 });
 
+// POST auto-registro público desde formulario web
+leadRouter.post('/public', async (req, res) => {
+  const { name, phone, email, interest, comments } = req.body;
+  if (!name || !phone || !interest) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios: interés, nombre y celular' });
+  }
+
+  // Si el interés es 'Vender', NO se guarda en la tabla de leads (es socio/partner)
+  if (interest?.toString().toLowerCase() === 'vender') {
+    return res.status(200).json({ success: true, savedInLeads: false, message: 'Contacto procesado (Interés Vender: no guardado en leads)' });
+  }
+
+  try {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const existRes = await pool.query('SELECT id FROM leads WHERE phone = $1 OR phone = $2', [phone, cleanPhone]);
+    let lead;
+    if (existRes.rowCount && existRes.rowCount > 0) {
+      const updateRes = await pool.query(
+        `UPDATE leads SET name = COALESCE(NULLIF($1, ''), name), email = COALESCE(NULLIF($2, ''), email), interest = $3, source = 'Sitio Web', notes = COALESCE(NULLIF($4, ''), notes), updated_at = NOW() WHERE id = $5 RETURNING *`,
+        [name, email || '', interest, comments || '', existRes.rows[0].id]
+      );
+      lead = updateRes.rows[0];
+    } else {
+      const insertRes = await pool.query(
+        `INSERT INTO leads (name, phone, score, status, email, source, notes, interest, tags)
+         VALUES ($1, $2, '60%', 'Nuevo', $3, 'Sitio Web', $4, $5, $6) RETURNING *`,
+        [name, cleanPhone || phone, email || '', comments || '', interest, JSON.stringify(['Contacto Web'])]
+      );
+      lead = insertRes.rows[0];
+    }
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('new-lead', {
+        id: lead.id,
+        name: lead.name,
+        phone: lead.phone,
+        source: 'Sitio Web',
+        interest: lead.interest || 'Comprar'
+      });
+    }
+
+    res.status(201).json({ success: true, savedInLeads: true, lead });
+  } catch (error: any) {
+    console.error('Error al registrar lead desde formulario público:', error.message);
+    res.status(500).json({ error: 'Error al registrar contacto' });
+  }
+});
+
 export { leadRouter };
+
+

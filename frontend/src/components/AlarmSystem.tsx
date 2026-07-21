@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bell, BellOff, X, Clock, CalendarDays, Phone, ListTodo, AlertTriangle } from 'lucide-react';
+import { Bell, BellOff, X, Clock, CalendarDays, Phone, ListTodo, AlertTriangle, UserCheck, Sparkles, ExternalLink, Globe } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
 
 export interface AlarmItem {
   id: string;
@@ -14,6 +15,14 @@ export interface AlarmItem {
 
 interface ActiveAlarm {
   item: AlarmItem;
+  triggeredAt: Date;
+}
+
+interface LeadAlarmData {
+  name: string;
+  phone: string;
+  source?: string;
+  interest?: string;
   triggeredAt: Date;
 }
 
@@ -151,10 +160,138 @@ const AlarmBanner = ({ alarm, onDismiss }: { alarm: ActiveAlarm; onDismiss: () =
   );
 };
 
-export const AlarmSystem = ({ items, enabled = true, onDismiss }: { items: AlarmItem[], enabled?: boolean, onDismiss?: (id: string) => void }) => {
+// Componente Banner de Alarma para Nuevos Leads
+const LeadAlarmBanner = ({ lead, onDismiss, onView }: { lead: LeadAlarmData; onDismiss: () => void; onView?: () => void }) => {
+  const [pulse, setPulse] = useState(true);
+
+  useEffect(() => {
+    const i = setInterval(() => setPulse(p => !p), 800);
+    return () => clearInterval(i);
+  }, []);
+
+  return (
+    <div
+      className={`fixed top-6 left-1/2 -translate-x-1/2 z-[10005] w-full max-w-md mx-auto px-4 transition-all duration-300 ${pulse ? 'scale-100' : 'scale-[1.02]'}`}
+      style={{ animation: 'alarmSlideDown 0.4s ease-out' }}
+    >
+      <div className="relative overflow-hidden rounded-2xl border-2 border-emerald-500/50 bg-surface p-5 shadow-2xl shadow-emerald-500/20">
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-emerald-500 animate-pulse" />
+
+        <div className="flex items-start gap-3.5">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/30 animate-bounce">
+            <Bell size={24} />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <Sparkles size={10} /> ¡NUEVO LEAD REGISTRADO!
+              </span>
+            </div>
+
+            <h3 className="text-content text-base font-black truncate">{lead.name || 'Cliente Interesado'}</h3>
+
+            <div className="mt-2 space-y-1 text-xs text-content-secondary font-semibold">
+              <div className="flex items-center gap-2">
+                <Phone size={13} className="text-emerald-500 shrink-0" />
+                <span>{lead.phone}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Globe size={13} className="text-accent shrink-0" />
+                <span>Origen: <strong className="text-accent font-extrabold">{lead.source || 'Sitio Web'}</strong></span>
+              </div>
+              {lead.interest && (
+                <div className="flex items-center gap-2">
+                  <UserCheck size={13} className="text-purple-500 shrink-0" />
+                  <span>Interés: <strong className="text-content font-extrabold">{lead.interest}</strong></span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-edge flex items-center justify-end gap-2">
+          <button
+            onClick={onDismiss}
+            className="px-3.5 py-2 rounded-xl bg-surface-base hover:bg-edge border border-edge text-content text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <BellOff size={14} /> Silenciar
+          </button>
+          {onView && (
+            <button
+              onClick={() => {
+                onDismiss();
+                onView();
+              }}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition-all cursor-pointer shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
+            >
+              <span>Ver en Leads</span>
+              <ExternalLink size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const AlarmSystem = ({
+  items,
+  enabled = true,
+  onDismiss,
+  onNavigateToLeads
+}: {
+  items: AlarmItem[];
+  enabled?: boolean;
+  onDismiss?: (id: string) => void;
+  onNavigateToLeads?: () => void;
+}) => {
   const [activeAlarms, setActiveAlarms] = useState<ActiveAlarm[]>([]);
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+  const [activeLeadAlarm, setActiveLeadAlarm] = useState<LeadAlarmData | null>(null);
   const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Solicitar permiso de notificaciones del navegador
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {});
+    }
+  }, []);
+
+  // Listener de WebSockets para nuevos leads
+  useEffect(() => {
+    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+    const socket: Socket = io(SOCKET_URL, { transports: ['websocket'] });
+
+    socket.on('new-lead', (data: any) => {
+      console.log('🚨 [AlarmSystem] Nuevo lead detectado:', data);
+      
+      // Iniciar sonido de alarma
+      toneGenerator.start(30000);
+
+      // Mostrar banner de alarma
+      setActiveLeadAlarm({
+        name: data.name || 'Nuevo Prospecto',
+        phone: data.phone || '',
+        source: data.source || 'Sitio Web',
+        interest: data.interest || 'Comprar',
+        triggeredAt: new Date()
+      });
+
+      // Disparar notificación de escritorio si está permitida
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification('🚨 ¡NUEVO LEAD REGISTRADO!', {
+            body: `${data.name || 'Lead Web'} (${data.phone || ''})\nOrigen: ${data.source || 'Sitio Web'}`
+          });
+        } catch (e) {}
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const checkAlarms = useCallback(() => {
     if (!enabled) return;
@@ -183,11 +320,27 @@ export const AlarmSystem = ({ items, enabled = true, onDismiss }: { items: Alarm
 
   const dismissAlarm = (id: string) => { toneGenerator.stop(); setActiveAlarms(prev => prev.filter(a => a.item.id !== id)); setDismissedIds(prev => new Set(prev).add(id)); };
 
-  if (activeAlarms.length === 0) return null;
+  const dismissLeadAlarm = () => {
+    toneGenerator.stop();
+    setActiveLeadAlarm(null);
+  };
 
   return (
     <>
-      <AlarmBanner alarm={activeAlarms[activeAlarms.length - 1]} onDismiss={() => dismissAlarm(activeAlarms[activeAlarms.length - 1].item.id)} />
+      {activeLeadAlarm && (
+        <LeadAlarmBanner
+          lead={activeLeadAlarm}
+          onDismiss={dismissLeadAlarm}
+          onView={() => {
+            if (onNavigateToLeads) onNavigateToLeads();
+          }}
+        />
+      )}
+
+      {activeAlarms.length > 0 && (
+        <AlarmBanner alarm={activeAlarms[activeAlarms.length - 1]} onDismiss={() => dismissAlarm(activeAlarms[activeAlarms.length - 1].item.id)} />
+      )}
+
       {activeAlarms.length > 1 && (
         <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[10001] animate-bounce">
           <div className="bg-surface text-content px-4 py-2 rounded-lg text-xs font-medium border border-edge shadow-sm">
@@ -195,6 +348,7 @@ export const AlarmSystem = ({ items, enabled = true, onDismiss }: { items: Alarm
           </div>
         </div>
       )}
+
       <style>{`
         @keyframes alarmSlideDown { from { opacity: 0; transform: translateX(-50%) translateY(-40px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         @keyframes alarmIconPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
@@ -204,3 +358,4 @@ export const AlarmSystem = ({ items, enabled = true, onDismiss }: { items: Alarm
 };
 
 export default AlarmSystem;
+

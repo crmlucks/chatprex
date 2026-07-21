@@ -241,7 +241,7 @@ function AuthenticatedApp() {
    <main className="flex-1 min-w-0 flex flex-col relative h-full overflow-hidden">
     {renderContent()}
    </main>
-   <AlarmSystem items={alarms} />
+   <AlarmSystem items={alarms} onNavigateToLeads={() => setActiveTab('Leads Pipeline')} />
   </div>
  );
 }

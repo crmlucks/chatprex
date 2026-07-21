@@ -33,6 +33,8 @@ const io = new Server(server, {
   maxHttpBufferSize: 5e7 // Aumentar límite a 50MB para multimedia
 });
 
+app.set('io', io);
+
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

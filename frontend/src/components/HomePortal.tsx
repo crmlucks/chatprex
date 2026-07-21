@@ -84,8 +84,67 @@ export default function HomePortal({
   // Propiedad seleccionada para el Modal
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'portal' | 'catalog'>('portal');
+
+  // Estado del formulario de contacto
+  const [contactInterest, setContactInterest] = useState<'Comprar' | 'Vender'>('Comprar');
+  const [contactName, setContactName] = useState<string>('');
+  const [contactPhone, setContactPhone] = useState<string>('');
+  const [contactEmail, setContactEmail] = useState<string>('');
+  const [contactComments, setContactComments] = useState<string>('');
+  const [contactError, setContactError] = useState<string>('');
+  const [contactSubmitted, setContactSubmitted] = useState<boolean>(false);
+
+  const handleContactSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setContactError('');
+
+    if (!contactInterest) {
+      setContactError('Por favor selecciona tu interés (Comprar o Vender).');
+      return;
+    }
+    if (!contactName.trim()) {
+      setContactError('Por favor ingresa tu nombre completo.');
+      return;
+    }
+    if (!contactPhone.trim()) {
+      setContactError('Por favor ingresa tu celular de contacto.');
+      return;
+    }
+
+    // Auto-registrar lead en backend de forma silenciosa
+    try {
+      fetch(`${API_URL}/api/leads/public`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: contactName.trim(),
+          phone: contactPhone.trim(),
+          email: contactEmail.trim(),
+          interest: contactInterest,
+          comments: contactComments.trim()
+        })
+      }).catch(err => console.error("Error guardando lead:", err));
+    } catch (err) { }
+
+    // Generar mensaje estructurado para WhatsApp
+    const targetPhone = portalSettings?.phone ? portalSettings.phone.replace(/\D/g, '') : "51900000000";
+    const summaryMessage = 
+`📌 *NUEVA CONSULTA DE CONTACTO*
+----------------------------------
+🎯 *Interés:* ${contactInterest}
+👤 *Nombre:* ${contactName.trim()}
+📱 *Celular:* ${contactPhone.trim()}
+✉️ *Email:* ${contactEmail.trim() || 'No especificado'}
+💬 *Comentarios:* ${contactComments.trim() || 'Sin comentarios'}
+----------------------------------
+Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera de su comunicación.`;
+
+    const waUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(summaryMessage)}`;
+    window.open(waUrl, '_blank');
+
+    setContactSubmitted(true);
+  };
 
   const getHeroImages = () => {
     if (portalSettings) {
@@ -855,14 +914,20 @@ export default function HomePortal({
                             </div>
 
                             {p.type?.toLowerCase() === 'terreno' && p.proj_price_from && p.proj_price_to && (
-                              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 p-2.5 rounded-lg text-[11px] font-bold flex flex-col gap-1">
-                                <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Precio Min:</span> <span className="text-xs">{formatPrice(p.proj_price_from, p.currency)}</span></div>
-                                <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Precio Max:</span> <span className="text-xs">{formatPrice(p.proj_price_to, p.currency)}</span></div>
+                              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 p-2 rounded-lg text-[10px] font-bold flex flex-col gap-1">
+                                <div className="flex items-center justify-between gap-1 leading-tight">
+                                  <span className="text-[9px] uppercase tracking-wider opacity-75 shrink-0">Precio:</span>
+                                  <span className="text-[10px] font-extrabold truncate">
+                                    desde {formatPrice(p.proj_price_from, p.currency)} hasta {formatPrice(p.proj_price_to, p.currency)}
+                                  </span>
+                                </div>
                                 {p.proj_area_from && p.proj_area_to && (
-                                  <>
-                                    <div className="flex justify-between items-center mt-0.5 pt-1.5 border-t border-emerald-500/20"><span className="text-[9px] uppercase tracking-wider opacity-80">Área Min:</span> <span>{p.proj_area_from} m²</span></div>
-                                    <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Área Max:</span> <span>{p.proj_area_to} m²</span></div>
-                                  </>
+                                  <div className="flex items-center justify-between gap-1 leading-tight pt-1 border-t border-emerald-500/20">
+                                    <span className="text-[9px] uppercase tracking-wider opacity-75 shrink-0">Área:</span>
+                                    <span className="text-[10px] font-extrabold truncate">
+                                      desde {p.proj_area_from} m² hasta {p.proj_area_to} m²
+                                    </span>
+                                  </div>
                                 )}
                               </div>
                             )}
@@ -1052,36 +1117,169 @@ export default function HomePortal({
             </div>
           </section>
 
-          {/* 3.5. SECCIÓN DE LLAMADO A LA ACCIÓN (CONTACTAR POR WHATSAPP) - Compacto y Blended */}
-          <section id="contacto" className="py-12 px-6 md:px-12 bg-surface border-t border-b border-edge">
-            <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-6 relative">
+          {/* 3.5. SECCIÓN DE CONTACTO Y FORMULARIO */}
+          <section id="contacto" className="py-14 px-6 md:px-12 bg-surface border-t border-b border-edge">
+            <div className="max-w-3xl mx-auto space-y-8 relative">
 
-              <div className="space-y-3 flex flex-col items-center">
-                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider">
-                  <Send size={10} className="rotate-45" /> Contacto Inmediato
+              <div className="space-y-3 text-center flex flex-col items-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-extrabold uppercase tracking-wider">
+                  <Send size={12} className="rotate-45" /> Contacto Inmediato
                 </div>
-                <h2 className="text-xl md:text-2xl font-extrabold text-content tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-content tracking-tight">
                   Hagamos realidad tu próximo proyecto inmobiliario
                 </h2>
-                <p className="text-xs md:text-sm text-content-secondary leading-relaxed max-w-2xl">
-                  ¿Buscas una propiedad o quieres comercializar tu proyecto? Nuestro equipo está listo para brindarte asesoría especializada y acompañarte desde el primer contacto.
+                <p className="text-xs md:text-sm text-content-secondary leading-relaxed max-w-xl">
+                  Completa el siguiente formulario con tu interés y datos de contacto para recibir atención personalizada de uno de nuestros agentes.
                 </p>
               </div>
 
-              <div className="shrink-0 w-full sm:w-auto flex justify-center">
-                <button
-                  onClick={() => {
-                    const defaultPhone = "51900000000";
-                    const message = "Hola! Vengo del portal de Casaya y me gustaría recibir asesoría personalizada para adquirir un inmueble.";
-                    const url = `https://wa.me/${defaultPhone}?text=${encodeURIComponent(message)}`;
-                    window.open(url, '_blank');
-                  }}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
-                >
-                  <Send size={14} className="rotate-45" />
-                  <span>Contactar por WhatsApp</span>
-                </button>
-              </div>
+              {contactSubmitted ? (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 md:p-8 text-center space-y-4 max-w-xl mx-auto">
+                  <div className="w-14 h-14 rounded-full bg-emerald-600 text-white mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <Check size={28} />
+                  </div>
+                  <h3 className="text-lg font-black text-content">¡Solicitud Registrada!</h3>
+                  <p className="text-xs md:text-sm text-content-secondary leading-relaxed font-semibold">
+                    Gracias <span className="text-accent font-bold">{contactName}</span>. En breve uno de nuestros agentes se pondrá en contacto contigo.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setContactSubmitted(false);
+                      setContactName('');
+                      setContactPhone('');
+                      setContactEmail('');
+                      setContactComments('');
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-surface-base hover:bg-edge border border-edge text-content text-xs font-bold transition-all cursor-pointer mt-2"
+                  >
+                    Enviar otra consulta
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleContactSubmit} className="bg-surface-base border border-edge p-6 md:p-8 rounded-2xl shadow-xl space-y-5">
+                  {contactError && (
+                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold text-center">
+                      {contactError}
+                    </div>
+                  )}
+
+                  {/* Selector de Interés (Obligatorio) */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-extrabold text-content block uppercase tracking-wider">
+                      ¿Cuál es tu interés? <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setContactInterest('Comprar')}
+                        className={`py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${
+                          contactInterest === 'Comprar'
+                            ? 'bg-accent text-white border-accent shadow-md shadow-accent/20'
+                            : 'bg-surface border-edge text-content-secondary hover:text-content hover:bg-edge'
+                        }`}
+                      >
+                        <Home size={14} />
+                        <span>Quiero Comprar</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setContactInterest('Vender')}
+                        className={`py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${
+                          contactInterest === 'Vender'
+                            ? 'bg-accent text-white border-accent shadow-md shadow-accent/20'
+                            : 'bg-surface border-edge text-content-secondary hover:text-content hover:bg-edge'
+                        }`}
+                      >
+                        <Building size={14} />
+                        <span>Quiero Vender</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Nombres y Celular (Obligatorios) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-content block uppercase tracking-wider">
+                        Nombre completo <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Users size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-content-muted" />
+                        <input
+                          type="text"
+                          required
+                          value={contactName}
+                          onChange={(e) => setContactName(e.target.value)}
+                          placeholder="Ingresa tu nombre completo..."
+                          className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-content block uppercase tracking-wider">
+                        Celular de contacto <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-content-muted" />
+                        <input
+                          type="tel"
+                          required
+                          value={contactPhone}
+                          onChange={(e) => setContactPhone(e.target.value)}
+                          placeholder="Ej: 912345678"
+                          className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Email (Opcional) */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-content block uppercase tracking-wider">
+                      Correo electrónico <span className="text-content-muted font-medium text-[10px] uppercase">(Opcional)</span>
+                    </label>
+                    <div className="relative">
+                      <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-content-muted" />
+                      <input
+                        type="email"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        placeholder="ejemplo@correo.com"
+                        className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Comentarios (Opcional) */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-content block uppercase tracking-wider">
+                      Comentarios o detalles <span className="text-content-muted font-medium text-[10px] uppercase">(Opcional)</span>
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={contactComments}
+                      onChange={(e) => setContactComments(e.target.value)}
+                      placeholder="¿Tienes alguna consulta o requerimiento específico?..."
+                      className="w-full p-3 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors resize-none"
+                    />
+                  </div>
+
+                  {/* Botón WhatsApp */}
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      className="w-full py-3.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
+                    >
+                      <Send size={16} className="rotate-45" />
+                      <span>Contactar por WhatsApp</span>
+                    </button>
+                    <p className="text-[10px] text-content-muted text-center mt-2 font-medium">
+                      Tus datos se enviarán estructurados al número de WhatsApp de ventas para brindarte atención inmediata.
+                    </p>
+                  </div>
+                </form>
+              )}
+
             </div>
           </section>
         </>
@@ -1095,16 +1293,14 @@ export default function HomePortal({
               <div className="absolute bottom-1/4 right-1/10 w-96 h-96 bg-accent-hover/5 rounded-full blur-3xl"></div>
             </div>
 
-            <div className="relative z-10 max-w-4xl mx-auto space-y-4">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-accent/10 border border-accent text-accent text-[10px] font-extrabold uppercase tracking-wider mb-1">
+            <div className="relative z-10 max-w-4xl mx-auto space-y-3">
+              <p className="text-xs md:text-sm text-content-secondary font-bold">
+                Mostrando <strong className="text-accent">{filteredList.length}</strong> propiedades encontradas
+              </p>
+
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent text-accent text-[11px] font-extrabold uppercase tracking-wider mb-2">
                 <Award size={12} /> Catálogo Completo
               </div>
-              <h1 className="text-3xl md:text-[36px] font-black text-accent tracking-tight leading-tight">
-                Todas las Propiedades y Proyectos
-              </h1>
-              <p className="text-sm md:text-base text-content-secondary font-semibold max-w-2xl mx-auto leading-relaxed font-sans">
-                Explora el inventario inmobiliario registrado en nuestra plataforma sin límites de visualización. Refina los resultados utilizando la barra de filtros.
-              </p>
 
               {renderFilterBar()}
             </div>
@@ -1114,23 +1310,15 @@ export default function HomePortal({
           <section id="propiedades" className="py-12 px-6 md:px-12 bg-surface-base">
             <div className="max-w-7xl mx-auto space-y-8">
 
-              {/* Cabecera del Catálogo */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-edge pb-4">
-                <div className="space-y-1.5 text-left">
-                  <h2 className="text-xl font-extrabold text-content tracking-tight">Catálogo de Inmuebles Registrados</h2>
-                  <p className="text-xs text-content-secondary">
-                    Mostrando <strong className="text-accent">{filteredList.length}</strong> propiedades encontradas
-                  </p>
-                </div>
-
-                {/* Filtros Activos Indicator */}
-                {(searchLocation || filterType !== 'todos' || filterCurrency !== 'todos' || minPrice || maxPrice) && (
+              {/* Indicador de Búsqueda Filtrada */}
+              {(searchLocation || filterType !== 'todos' || filterCurrency !== 'todos' || minPrice || maxPrice) && (
+                <div className="flex justify-end border-b border-edge pb-4">
                   <div className="flex items-center gap-1.5 text-xs text-accent font-bold px-3 py-1.5 bg-accent/5 rounded-xl border border-accent/10">
                     <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
                     <span>Búsqueda filtrada</span>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -1187,14 +1375,20 @@ export default function HomePortal({
                           </div>
 
                           {p.type?.toLowerCase() === 'terreno' && p.proj_price_from && p.proj_price_to && (
-                            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 p-2.5 rounded-lg text-[11px] font-bold flex flex-col gap-1">
-                              <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Precio Min:</span> <span className="text-xs">{formatPrice(p.proj_price_from, p.currency)}</span></div>
-                              <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Precio Max:</span> <span className="text-xs">{formatPrice(p.proj_price_to, p.currency)}</span></div>
+                            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 p-2 rounded-lg text-[10px] font-bold flex flex-col gap-1">
+                              <div className="flex items-center justify-between gap-1 leading-tight">
+                                <span className="text-[9px] uppercase tracking-wider opacity-75 shrink-0">Precio:</span>
+                                <span className="text-[10px] font-extrabold truncate">
+                                  desde {formatPrice(p.proj_price_from, p.currency)} hasta {formatPrice(p.proj_price_to, p.currency)}
+                                </span>
+                              </div>
                               {p.proj_area_from && p.proj_area_to && (
-                                <>
-                                  <div className="flex justify-between items-center mt-0.5 pt-1.5 border-t border-emerald-500/20"><span className="text-[9px] uppercase tracking-wider opacity-80">Área Min:</span> <span>{p.proj_area_from} m²</span></div>
-                                  <div className="flex justify-between items-center"><span className="text-[9px] uppercase tracking-wider opacity-80">Área Max:</span> <span>{p.proj_area_to} m²</span></div>
-                                </>
+                                <div className="flex items-center justify-between gap-1 leading-tight pt-1 border-t border-emerald-500/20">
+                                  <span className="text-[9px] uppercase tracking-wider opacity-75 shrink-0">Área:</span>
+                                  <span className="text-[10px] font-extrabold truncate">
+                                    desde {p.proj_area_from} m² hasta {p.proj_area_to} m²
+                                  </span>
+                                </div>
                               )}
                             </div>
                           )}

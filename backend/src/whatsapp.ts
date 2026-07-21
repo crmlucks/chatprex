@@ -187,7 +187,7 @@ whatsappRouter.post('/', async (req, res) => {
                     [pushName, phone, isBotActive, matchedBotId, assignedAdvisorId]
                   );
                   console.log(`[Meta] ✅ Lead registrado: ${pushName} (${phone}) - Bot: ${isBotActive ? 'ACTIVO (keyword match)' : 'INACTIVO (sin keyword)'} - Bot ID: ${matchedBotId}`);
-                  ioInstance.emit('new-lead', { name: pushName, phone });
+                  ioInstance.emit('new-lead', { name: pushName, phone, source: 'WhatsApp (Meta)', interest: 'Consulta WhatsApp' });
                 } else {
                   // ═══ LEAD EXISTENTE ═══
                   isBotActive = existRes.rows[0].bot_active;
