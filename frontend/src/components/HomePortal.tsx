@@ -487,70 +487,73 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
         </div>
 
         {/* Vista Mobile: Stacked Card optimizado y compacto */}
-        <div className="flex md:hidden flex-col gap-2.5 bg-surface dark:bg-zinc-900 border border-accent rounded-2xl p-3.5 shadow-2xl text-left max-w-sm mx-auto w-full">
-          <div className="space-y-0.5">
-            <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Ubicación</label>
-            <input
-              type="text"
-              placeholder="Ciudad, distrito o región..."
-              value={searchLocation}
-              onChange={(e) => setSearchLocation(e.target.value)}
-              className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2.5">
+        <div className="flex md:hidden flex-col gap-2 bg-surface dark:bg-zinc-900 border border-accent rounded-xl p-3 shadow-2xl text-left max-w-sm mx-auto w-full">
+          
+          {/* Fila 1: Ubicación y Tipo */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-0.5">
+              <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Ubicación</label>
+              <input
+                type="text"
+                placeholder="Ciudad, distrito..."
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
+                className="w-full bg-surface-inset border border-edge rounded-lg px-2 py-1.5 text-[11px] font-semibold text-content focus:outline-none"
+              />
+            </div>
             <div className="space-y-0.5">
               <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Tipo</label>
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
+                className="w-full bg-surface-inset border border-edge rounded-lg px-1 py-1.5 text-[11px] font-semibold text-content focus:outline-none"
               >
-                <option value="todos">Cualquier tipo</option>
+                <option value="todos">Todos</option>
                 <option value="casa">Casa</option>
-                <option value="departamento">Departamento</option>
-                <option value="lotes">Lotes / Terreno</option>
+                <option value="departamento">Dpto</option>
+                <option value="lotes">Lote/Terreno</option>
                 <option value="oficinas">Oficina</option>
                 <option value="cocheras">Cochera</option>
                 <option value="local">Local</option>
                 <option value="deposito">Depósito</option>
               </select>
             </div>
+          </div>
 
-            <div className="space-y-0.5">
+          {/* Fila 2: Moneda y Rango de Precios */}
+          <div className="flex gap-2">
+            <div className="space-y-0.5 w-1/3">
               <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Moneda</label>
               <select
                 value={filterCurrency}
                 onChange={(e) => setFilterCurrency(e.target.value)}
-                className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
+                className="w-full bg-surface-inset border border-edge rounded-lg px-1 py-1.5 text-[11px] font-semibold text-content focus:outline-none"
               >
-                <option value="todos">Moneda</option>
-                <option value="USD">Dólares (USD)</option>
-                <option value="PEN">Soles (PEN)</option>
-                <option value="MXN">Pesos MX (MXN)</option>
-                <option value="COP">Pesos CO (COP)</option>
+                <option value="todos">Todas</option>
+                <option value="USD">USD</option>
+                <option value="PEN">PEN</option>
+                <option value="MXN">MXN</option>
+                <option value="COP">COP</option>
               </select>
             </div>
-          </div>
-
-          <div className="space-y-0.5">
-            <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Precio (Min - Max)</label>
-            <div className="grid grid-cols-2 gap-2.5">
-              <input
-                type="number"
-                placeholder="Min"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
-              />
-              <input
-                type="number"
-                placeholder="Max"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-full bg-surface-inset border border-edge rounded-lg px-2.5 py-1.5 text-xs font-semibold text-content focus:outline-none"
-              />
+            <div className="space-y-0.5 w-2/3">
+              <label className="text-[8px] font-extrabold text-accent uppercase tracking-wider block">Precios (Min-Max)</label>
+              <div className="grid grid-cols-2 gap-1.5">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  className="w-full bg-surface-inset border border-edge rounded-lg px-2 py-1.5 text-[11px] font-semibold text-content focus:outline-none"
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  className="w-full bg-surface-inset border border-edge rounded-lg px-2 py-1.5 text-[11px] font-semibold text-content focus:outline-none"
+                />
+              </div>
             </div>
           </div>
 
@@ -559,7 +562,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
               const el = document.getElementById('propiedades');
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="btn-primary w-full py-2 flex items-center justify-center gap-1.5 text-xs font-bold shadow-md shadow-accent/20 rounded-lg cursor-pointer border-none"
+            className="btn-primary w-full py-1.5 mt-1 flex items-center justify-center gap-1.5 text-xs font-bold shadow-md shadow-accent/20 rounded-lg cursor-pointer border-none"
           >
             <Search size={14} />
             <span>Buscar Propiedades</span>
@@ -1295,13 +1298,6 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
             </div>
 
             <div className="relative z-10 max-w-4xl mx-auto space-y-3">
-              <p className="text-xs md:text-sm text-content-secondary font-bold">
-                Mostrando <strong className="text-accent">{filteredList.length}</strong> propiedades encontradas
-              </p>
-
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent text-accent text-[11px] font-extrabold uppercase tracking-wider mb-2">
-                <Award size={12} /> Catálogo Completo
-              </div>
 
               {renderFilterBar()}
             </div>
