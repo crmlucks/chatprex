@@ -1290,7 +1290,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
       ) : (
         <>
           {/* BANNER DEL CATÁLOGO */}
-          <section className="relative py-14 px-6 md:px-12 bg-surface border-b border-edge text-center overflow-visible">
+          <section className="relative py-6 md:py-8 px-6 md:px-12 bg-surface border-b border-edge text-center overflow-visible">
             {/* Decoración */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
               <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-accent/5 rounded-full blur-3xl"></div>
@@ -1304,7 +1304,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
           </section>
 
           {/* GRILLA DEL CATÁLOGO COMPLETO */}
-          <section id="propiedades" className="py-12 px-6 md:px-12 bg-surface-base">
+          <section id="propiedades" className="py-6 md:py-8 px-6 md:px-12 bg-surface-base">
             <div className="max-w-7xl mx-auto space-y-8">
 
               {/* Indicador de Búsqueda Filtrada */}
