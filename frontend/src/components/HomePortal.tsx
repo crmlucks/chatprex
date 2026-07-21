@@ -94,6 +94,7 @@ export default function HomePortal({
   const [contactComments, setContactComments] = useState<string>('');
   const [contactError, setContactError] = useState<string>('');
   const [contactSubmitted, setContactSubmitted] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   const handleContactSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
