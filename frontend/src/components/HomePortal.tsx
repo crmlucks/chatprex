@@ -1097,7 +1097,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                       <ShieldCheck size={18} />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-content">ransparencia Absoluta</h4>
+                      <h4 className="font-extrabold text-sm text-content">Transparencia Absoluta</h4>
                       <p className="text-xs text-content-secondary mt-1">Ética y claridad en cada paso. Eliminamos la letra chica para asegurar operaciones justas y confiables.</p>
                     </div>
                   </div>
