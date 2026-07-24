@@ -824,7 +824,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.9), 0 4px 16px rgba(0, 0, 0, 0.7)'
                 }}
               >
-                {portalSettings?.hero_title || 'Encuentra la propiedad perfecta para tu estilo de vida'}
+                {portalSettings?.hero_title || 'La forma más segura e inteligente de comprar inmuebles.'}
               </h1>
               <p
                 className="text-sm md:text-base text-white font-bold max-w-2xl mx-auto leading-relaxed"
@@ -832,7 +832,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   textShadow: '0 1px 3px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.5)'
                 }}
               >
-                {portalSettings?.hero_subtitle || 'Explora las mejores casas, departamentos, terrenos, oficinas y cocheras en las ubicaciones más exclusivas con la asesoría de IA líder de Casaya.'}
+                {portalSettings?.hero_subtitle || 'Accede a un inventario de proyectos legales, con asesoría inmediata 24/7 impulsada por IA para resolver todas tus dudas.'}
               </p>
 
               {/* BARRA DE FILTROS ESTILO AIRBNB */}
@@ -849,7 +849,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 <div className="space-y-1.5">
                   <h2 className="text-2xl font-extrabold text-content tracking-tight">Propiedades Destacadas</h2>
                   <p className="text-xs md:text-sm text-content-secondary max-w-lg">
-                    Una selección de proyectos confiables con excelente ubicación y alto potencial de valorización.
+                    Filtramos más del 80% de los proyectos del mercado. Solo publicamos inmuebles que superan nuestra auditoría técnica, jurídica y financiera.
                   </p>
                 </div>
 
@@ -1029,7 +1029,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white space-y-1 text-left">
-                      <p className="text-xs font-bold tracking-widest uppercase text-accent">Usamos IA inmobiliaria</p>
+                      <p className="text-xs font-bold tracking-widest uppercase text-accent">Plataforma Inmobiliaria</p>
                       <h3 className="text-xl font-bold"></h3>
                     </div>
                   </div>
@@ -1045,16 +1045,16 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
               {/* Columna Derecha: Texto */}
               <div className={`space-y-8 ${portalSettings?.about_image ? 'text-left' : 'max-w-2xl mx-auto text-center'}`}>
                 <div className="space-y-3">
-                  <span className="text-xs font-bold text-accent tracking-widest uppercase block">Nosotros</span>
+                  <span className="text-xs font-bold text-accent tracking-widest uppercase block">La forma más segura de comprar y vender inmuebles.</span>
                   <h2 className="text-3xl md:text-4xl font-black text-content tracking-tight">
-                    {portalSettings?.about_title || 'Casaya Gestión Inmobiliaria'}
+                    {portalSettings?.about_title || 'Respaldados por 10+ años de trayectoria y software inmobiliario inhouse.'}
                   </h2>
                 </div>
 
                 <p className="body-text text-content-secondary leading-relaxed whitespace-pre-line">
                   {portalSettings?.about_description || (
                     <>
-                      En <strong>Casaya</strong>, conectamos a personas con oportunidades inmobiliarias confiables. Seleccionamos cuidadosamente cada proyecto y trabajamos junto a desarrolladores comprometidos con la calidad y la transparencia, respaldando cada operación con asesoría especializada y tecnología propia para ofrecer una experiencia de compra más segura, eficiente y confiable.
+                      En <strong>Casaya.app</strong>, evalúa exhaustivamente cada desarrollo antes de publicar. Nuestra tecnología con IA monitorea la legalidad y disponibilidad del catálogo para que inviertas con total tranquilidad.
                     </>
                   )}
                 </p>
@@ -1067,8 +1067,8 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                       <Award size={18} />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-content">Desarrolladores Verificados</h4>
-                      <p className="text-xs text-content-secondary mt-1">Trabajamos únicamente con empresas que cumplen nuestros estándares de calidad, transparencia y cumplimiento.</p>
+                      <h4 className="font-extrabold text-sm text-content">Tecnología e IA Propia</h4>
+                      <p className="text-xs text-content-secondary mt-1">Software e inteligencia artificial inhouse que gestiona inventarios en tiempo real y brinda atención inmediata 24/7.</p>
                     </div>
                   </div>
 
@@ -1077,8 +1077,8 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                       <Users size={18} />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-content">Tecnología Propia</h4>
-                      <p className="text-xs text-content-secondary mt-1">Desarrollamos herramientas inteligentes que optimizan la gestión comercial y mejoran la experiencia de nuestros clientes.</p>
+                      <h4 className="font-extrabold text-sm text-content">Filtro de Legalidad</h4>
+                      <p className="text-xs text-content-secondary mt-1">No publicamos cualquier proyecto. Cada desarrollo pasa por un análisis minucioso. Si un inmueble no cumple con el estándar de verificación, no entra a nuestra plataforma.</p>
                     </div>
                   </div>
 
@@ -1087,8 +1087,8 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                       <Heart size={18} />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-content">Asesoría Especializada</h4>
-                      <p className="text-xs text-content-secondary mt-1">Acompañamos cada decisión con profesionales que brindan orientación personalizada durante todo el proceso.</p>
+                      <h4 className="font-extrabold text-sm text-content">+10 Años de Experiencia</h4>
+                      <p className="text-xs text-content-secondary mt-1">Una década de trayectoria evaluando proyectos, garantizando plusvalía, viabilidad y el mejor criterio del mercado.</p>
                     </div>
                   </div>
 
@@ -1097,8 +1097,8 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                       <ShieldCheck size={18} />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-content">Proyectos Verificados</h4>
-                      <p className="text-xs text-content-secondary mt-1">Solo incorporamos desarrollos que cumplen nuestros estándares de calidad, transparencia y confianza.</p>
+                      <h4 className="font-extrabold text-sm text-content">ransparencia Absoluta</h4>
+                      <p className="text-xs text-content-secondary mt-1">Ética y claridad en cada paso. Eliminamos la letra chica para asegurar operaciones justas y confiables.</p>
                     </div>
                   </div>
 
@@ -1177,8 +1177,8 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                         type="button"
                         onClick={() => setContactInterest('Comprar')}
                         className={`py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${contactInterest === 'Comprar'
-                            ? 'bg-accent text-white border-accent shadow-md shadow-accent/20'
-                            : 'bg-surface border-edge text-content-secondary hover:text-content hover:bg-edge'
+                          ? 'bg-accent text-white border-accent shadow-md shadow-accent/20'
+                          : 'bg-surface border-edge text-content-secondary hover:text-content hover:bg-edge'
                           }`}
                       >
                         <Home size={14} />
@@ -1188,8 +1188,8 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                         type="button"
                         onClick={() => setContactInterest('Vender')}
                         className={`py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${contactInterest === 'Vender'
-                            ? 'bg-accent text-white border-accent shadow-md shadow-accent/20'
-                            : 'bg-surface border-edge text-content-secondary hover:text-content hover:bg-edge'
+                          ? 'bg-accent text-white border-accent shadow-md shadow-accent/20'
+                          : 'bg-surface border-edge text-content-secondary hover:text-content hover:bg-edge'
                           }`}
                       >
                         <Building size={14} />
