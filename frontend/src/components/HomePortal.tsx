@@ -824,7 +824,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.9), 0 4px 16px rgba(0, 0, 0, 0.7)'
                 }}
               >
-                {portalSettings?.hero_title || 'La forma más segura e inteligente de comprar inmuebles.'}
+                {portalSettings?.hero_title || 'Ventas impulsadas por IA.'}
               </h1>
               <p
                 className="text-sm md:text-base text-white font-bold max-w-2xl mx-auto leading-relaxed"
@@ -832,7 +832,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   textShadow: '0 1px 3px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.5)'
                 }}
               >
-                {portalSettings?.hero_subtitle || 'Accede a un inventario de proyectos legales, con asesoría inmediata 24/7 impulsada por IA para resolver todas tus dudas.'}
+                {portalSettings?.hero_subtitle || 'Transparencia total para compradores y gestión avanzada para desarrolladores inmobiliarios.'}
               </p>
 
               {/* BARRA DE FILTROS ESTILO AIRBNB */}
@@ -849,7 +849,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 <div className="space-y-1.5">
                   <h2 className="text-2xl font-extrabold text-content tracking-tight">Propiedades Destacadas</h2>
                   <p className="text-xs md:text-sm text-content-secondary max-w-lg">
-                    Filtramos más del 80% de los proyectos del mercado. Solo publicamos inmuebles que superan nuestra auditoría técnica, jurídica y financiera.
+                    Inmuebles filtrados por nuestro sistema para garantizar una inversión sin riesgos.
                   </p>
                 </div>
 
@@ -1019,13 +1019,13 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
               {/* Columna Izquierda: Imagen */}
               {portalSettings?.about_image && (
-                <div className="relative">
+                <div className="relative max-w-sm mx-auto lg:mx-0 lg:ml-auto">
                   <div className="absolute -top-4 -left-4 w-72 h-72 bg-accent/5 rounded-3xl blur-2xl pointer-events-none"></div>
-                  <div className="rounded-2xl overflow-hidden shadow-2xl relative z-10 border border-edge">
+                  <div className="rounded-3xl overflow-hidden shadow-2xl relative z-10 border border-edge">
                     <img
                       src={resolveUrl(portalSettings.about_image)}
                       alt="Quiénes Somos"
-                      className="w-full h-[400px] object-cover"
+                      className="w-full aspect-[4/5] object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white space-y-1 text-left">
@@ -1036,8 +1036,8 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
                   {/* Tarjeta flotante de experiencia */}
                   <div className="absolute -bottom-6 -right-6 bg-accent text-white p-6 rounded-2xl shadow-xl z-20 flex flex-col items-center justify-center text-center w-36 h-36 border-4 border-surface">
-                    <span className="text-3xl font-black">5+</span>
-                    <span className="text-[10px] font-bold tracking-wider uppercase mt-1">Años de Trayectoria</span>
+                    <span className="text-3xl font-black">100%</span>
+                    <span className="text-[10px] font-bold tracking-wider uppercase mt-1">Garantía Legal</span>
                   </div>
                 </div>
               )}
@@ -1046,7 +1046,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
               <div className={`space-y-8 ${portalSettings?.about_image ? 'text-left' : 'max-w-2xl mx-auto text-center'}`}>
                 <div className="space-y-3">
                   <span className="text-xs font-bold text-accent tracking-widest uppercase block">La forma más segura de comprar y vender inmuebles.</span>
-                  <h2 className="text-3xl md:text-4xl font-black text-content tracking-tight">
+                  <h2 className="text-2xl md:text-3xl font-black text-content tracking-tight">
                     {portalSettings?.about_title || 'Respaldados por 10+ años de trayectoria y software inmobiliario inhouse.'}
                   </h2>
                 </div>
@@ -1126,7 +1126,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
             <div className="max-w-2xl mx-auto space-y-6 relative">
 
               <div className="space-y-3 text-center flex flex-col items-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-inset border border-edge text-content-secondary text-[11px] font-extrabold uppercase tracking-wider">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[11px] font-extrabold uppercase tracking-wider">
                   <Send size={12} className="rotate-45" /> Contacto Inmediato
                 </div>
                 <h2 className="text-2xl md:text-3xl font-extrabold text-content tracking-tight">
@@ -1270,7 +1270,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="w-full py-2.5 px-6 rounded-xl bg-content hover:bg-content-secondary text-surface font-black text-xs shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer border-none dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white"
+                      className="w-full py-2.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
                     >
                       <Send size={16} className="rotate-45" />
                       <span>Contactar por WhatsApp</span>
