@@ -108,7 +108,8 @@ function AuthenticatedApp() {
   const hostname = window.location.hostname;
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
   const isAppSubdomain = hostname.startsWith('app.');
-  const isChatprexLanding = hostname === 'chatprex.com' || hostname === 'www.chatprex.com';
+  // FORZADO TEMPORAL PARA VER LA LANDING B2B EN LOCALHOST:
+  const isChatprexLanding = isLocalhost || hostname === 'chatprex.com' || hostname === 'www.chatprex.com';
 
   // Si no hay usuario, mostrar el Portal, la Landing B2B, o la pantalla de Login según el dominio
   if (!user) {
@@ -244,6 +245,28 @@ function AuthenticatedApp() {
 }
 
 function App() {
+ React.useEffect(() => {
+  const hostname = window.location.hostname;
+  
+  let title = 'CasaYa';
+  let favicon = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2310b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+  
+  if (hostname.includes('chatprex.com')) {
+   title = 'ChatPrex';
+   favicon = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>';
+  }
+
+  document.title = title;
+  
+  let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+  if (!link) {
+   link = document.createElement('link');
+   link.rel = 'icon';
+   document.getElementsByTagName('head')[0].appendChild(link);
+  }
+  link.href = favicon;
+ }, []);
+
  return (
   <AuthProvider>
    <ToastProvider>
