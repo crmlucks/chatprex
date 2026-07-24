@@ -1514,7 +1514,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 href={portalSettings?.facebook_url || "https://facebook.com"}
                 target="_blank"
                 rel="noreferrer"
-                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-xl border border-accent text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
                 title="Facebook"
               >
                 <Facebook size={16} />
@@ -1523,7 +1523,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 href={portalSettings?.instagram_url || "https://instagram.com"}
                 target="_blank"
                 rel="noreferrer"
-                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-xl border border-accent text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
                 title="Instagram"
               >
                 <Instagram size={16} />
@@ -1532,7 +1532,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 href={portalSettings?.linkedin_url || "https://linkedin.com"}
                 target="_blank"
                 rel="noreferrer"
-                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-xl border border-accent text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
                 title="LinkedIn"
               >
                 <Linkedin size={16} />
@@ -1541,7 +1541,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 href={portalSettings?.youtube_url || "https://youtube.com"}
                 target="_blank"
                 rel="noreferrer"
-                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-xl border border-accent text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-105 flex items-center justify-center transition-all"
                 title="YouTube"
               >
                 <Youtube size={16} />
@@ -1550,7 +1550,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 href={portalSettings?.phone ? `https://wa.me/${portalSettings.phone.replace(/[^0-9]/g, '')}` : "https://wa.me/51900000000"}
                 target="_blank"
                 rel="noreferrer"
-                className="w-9 h-9 rounded-xl border border-accent/40 text-accent hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:scale-105 flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-xl border border-accent text-accent hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:scale-105 flex items-center justify-center transition-all"
                 title="WhatsApp Ventas"
               >
                 <Send size={16} />
