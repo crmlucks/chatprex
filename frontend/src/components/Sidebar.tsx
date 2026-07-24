@@ -62,14 +62,14 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
         <div className={`h-16 flex items-center border-b border-edge ${isCollapsed ? 'px-3 justify-center' : 'px-5'}`}>
           <div className="flex items-center gap-3 w-full">
             <div className="w-9 h-9 bg-accent rounded-lg flex items-center justify-center shrink-0 shadow-md shadow-accent/20">
-              <Home className="text-white" size={18} />
+              <Bot className="text-white" size={18} />
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <span className="text-sm font-bold text-content">Casaya</span>
+                <span className="text-sm font-bold text-content">Chatprex</span>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                  <span className="text-[11px] font-medium text-content-muted">Premium CRM</span>
+                  <span className="text-[11px] font-medium text-content-muted">CRM Inmobiliario</span>
                 </div>
               </div>
             )}
