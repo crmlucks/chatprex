@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Login';
+import ChatprexLanding from './components/ChatprexLanding';
 import HomePortal from './components/HomePortal';
 import ChatInterface from './components/ChatInterface';
 import Sidebar from './components/Sidebar';
@@ -107,8 +108,9 @@ function AuthenticatedApp() {
   const hostname = window.location.hostname;
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
   const isAppSubdomain = hostname.startsWith('app.');
+  const isChatprexLanding = hostname === 'chatprex.com' || hostname === 'www.chatprex.com';
 
-  // Si no hay usuario, mostrar el Portal o la pantalla de Login según el dominio
+  // Si no hay usuario, mostrar el Portal, la Landing B2B, o la pantalla de Login según el dominio
   if (!user) {
     if (isAppSubdomain) {
       return (
@@ -126,6 +128,11 @@ function AuthenticatedApp() {
       }
       window.location.href = isLocalhost ? '/' : 'https://app.chatprex.com';
       return null;
+    }
+
+    // Mostrar B2B Landing Page si el dominio es chatprex.com o si forzamos la vista en modo local
+    if (isChatprexLanding) {
+      return <ChatprexLanding />;
     }
 
     return (
