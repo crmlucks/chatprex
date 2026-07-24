@@ -201,27 +201,6 @@ export default function ChatprexLanding() {
               </li>
             </ul>
           </div>
-          
-          <div className="flex-1 relative w-full max-w-[100px] lg:max-w-[120px] shrink-0 mx-auto lg:mx-0">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-accent/20 rounded-full blur-[100px]"></div>
-            <div className="relative border-[6px] border-[#1e1e24] rounded-[2rem] bg-[#0b0f19] shadow-2xl overflow-hidden aspect-[9/19]">
-              {/* Fake Phone UI */}
-              <div className="absolute top-0 inset-x-0 h-4 bg-[#1e1e24] flex justify-center z-20">
-                <div className="w-1/3 h-2.5 bg-black rounded-b-md"></div>
-              </div>
-              <div className="p-2 pt-6 h-full flex flex-col gap-2 font-sans relative z-10 leading-snug">
-                <div className="self-end bg-emerald-600 text-white p-2 rounded-xl rounded-tr-sm text-[9px] max-w-[85%] shadow-md">
-                  Hola, vi su proyecto en Facebook y quisiera más información de los depas de 2 habitaciones.
-                </div>
-                <div className="self-start bg-[#1e293b] text-white p-2 rounded-xl rounded-tl-sm text-[9px] max-w-[85%] border border-white/5">
-                  ¡Hola! 🤖 Soy el asistente virtual de Casaya. Claro que sí, tenemos excelentes opciones.
-                </div>
-                <div className="self-start bg-[#1e293b] text-white p-2 rounded-xl rounded-tl-sm text-[9px] max-w-[85%] border border-white/5">
-                  📁 *Enviando brochure_proyecto.pdf*<br/><br/>¿En qué rango de presupuesto estás buscando invertir?
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
