@@ -152,25 +152,34 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
 
   const handleRestoreDefaults = (e: React.MouseEvent) => {
     e.preventDefault();
-    showConfirm('¿Estás seguro de que deseas restablecer los valores de configuración por defecto? Las imágenes del carrusel del inicio no se verán afectadas.', () => {
-      setPortalSettings((prev: any) => ({
-        ...prev,
-        logo_day: '',
-        logo_night: '',
+    showConfirm('¿Estás seguro de que deseas restablecer los valores de configuración por defecto? Las imágenes del carrusel del inicio no se verán afectadas.', async () => {
+      const resetSettings = {
+        ...portalSettings,
         hero_title: '',
         hero_subtitle: '',
         about_title: '',
-        about_description: '',
-        about_image: '',
-        phone: '',
-        email: '',
-        address: '',
-        facebook_url: '',
-        instagram_url: '',
-        tiktok_url: ''
-      }));
-      showToast('Valores por defecto restablecidos. No olvides guardar los cambios.', 'info');
-    }, { confirmText: 'Restablecer', cancelText: 'Cancelar' });
+        about_description: ''
+      };
+      setPortalSettings(resetSettings);
+      
+      setSavingPortal(true);
+      setSaveSuccess(false);
+      try {
+        const res = await fetch(`${API_URL}/api/portal-settings`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify(resetSettings)
+        });
+        if (res.ok) {
+          setSaveSuccess(true);
+          setTimeout(() => setSaveSuccess(false), 3000);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setSavingPortal(false);
+      }
+    });
   };
 
  useEffect(() => {
@@ -621,11 +630,11 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
              <div className="space-y-4">
                <div>
                  <label className={label}>Título Principal (H1)</label>
-                 <input required type="text" value={portalSettings.hero_title || ''} onChange={e => setPortalSettings({...portalSettings, hero_title: e.target.value})} className={input} placeholder="Ej. Encuentra la propiedad perfecta..." />
+                 <input type="text" value={portalSettings.hero_title || ''} onChange={e => setPortalSettings({...portalSettings, hero_title: e.target.value})} className={input} placeholder="Ej. Encuentra la propiedad perfecta..." />
                </div>
                <div>
                  <label className={label}>Subtítulo Descriptivo</label>
-                 <textarea required value={portalSettings.hero_subtitle || ''} onChange={e => setPortalSettings({...portalSettings, hero_subtitle: e.target.value})} className={`${input} h-16 resize-none py-2`} placeholder="Explora las mejores casas y departamentos..."></textarea>
+                 <textarea value={portalSettings.hero_subtitle || ''} onChange={e => setPortalSettings({...portalSettings, hero_subtitle: e.target.value})} className={`${input} h-16 resize-none py-2`} placeholder="Explora las mejores casas y departamentos..."></textarea>
                </div>
 
                <div>
@@ -715,11 +724,11 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                <div className="md:col-span-2 space-y-4">
                  <div>
                    <label className={label}>Título de Sección ("Sobre Nosotros")</label>
-                   <input required type="text" value={portalSettings.about_title || ''} onChange={e => setPortalSettings({...portalSettings, about_title: e.target.value})} className={input} placeholder="Ej. Redefiniendo el sector inmobiliario..." />
+                   <input type="text" value={portalSettings.about_title || ''} onChange={e => setPortalSettings({...portalSettings, about_title: e.target.value})} className={input} placeholder="Ej. Redefiniendo el sector inmobiliario..." />
                  </div>
                  <div>
                    <label className={label}>Descripción Institucional</label>
-                   <textarea required value={portalSettings.about_description || ''} onChange={e => setPortalSettings({...portalSettings, about_description: e.target.value})} className={`${input} min-h-[160px] resize-y py-2`} placeholder="En nuestra empresa combinamos..."></textarea>
+                   <textarea value={portalSettings.about_description || ''} onChange={e => setPortalSettings({...portalSettings, about_description: e.target.value})} className={`${input} h-40 resize-none py-2`} placeholder="En Casaya, conectamos a personas..."></textarea>
                  </div>
                </div>
 
