@@ -130,8 +130,8 @@ export default function HomePortal({
 
     // Generar mensaje estructurado para WhatsApp
     const targetPhone = portalSettings?.phone ? portalSettings.phone.replace(/\D/g, '') : "51900000000";
-    const summaryMessage = 
-`📌 *NUEVA CONSULTA DE CONTACTO*
+    const summaryMessage =
+      `📌 *NUEVA CONSULTA DE CONTACTO*
 ----------------------------------
 🎯 *Interés:* ${contactInterest}
 👤 *Nombre:* ${contactName.trim()}
@@ -488,7 +488,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
         {/* Vista Mobile: Stacked Card optimizado y compacto */}
         <div className="flex md:hidden flex-col gap-2 bg-surface dark:bg-zinc-900 border border-accent rounded-xl p-3 shadow-2xl text-left max-w-sm mx-auto w-full">
-          
+
           {/* Fila 1: Ubicación y Tipo */}
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-0.5">
@@ -994,7 +994,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   Explora nuestro catálogo completo.
                 </h2>
                 <p className="text-xs md:text-sm text-content-secondary leading-relaxed">
-                  Accede a nuestro catálogo completo y encuentra la opción ideal según tu presupuesto, ubicación y objetivos.
+                  Ecuentra la opción ideal según tu presupuesto, ubicación y objetivos.
                 </p>
               </div>
 
@@ -1029,7 +1029,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white space-y-1 text-left">
-                      <p className="text-xs font-bold tracking-widest uppercase text-accent">Usamos Inteligencia Artificiaal</p>
+                      <p className="text-xs font-bold tracking-widest uppercase text-accent">Usamos IA inmobiliaria</p>
                       <h3 className="text-xl font-bold"></h3>
                     </div>
                   </div>
@@ -1122,11 +1122,11 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
           </section>
 
           {/* 3.5. SECCIÓN DE CONTACTO Y FORMULARIO */}
-          <section id="contacto" className="py-14 px-6 md:px-12 bg-surface border-t border-b border-edge">
-            <div className="max-w-3xl mx-auto space-y-8 relative">
+          <section id="contacto" className="py-10 px-6 md:px-12 bg-surface border-t border-b border-edge">
+            <div className="max-w-2xl mx-auto space-y-6 relative">
 
               <div className="space-y-3 text-center flex flex-col items-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-extrabold uppercase tracking-wider">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-inset border border-edge text-content-secondary text-[11px] font-extrabold uppercase tracking-wider">
                   <Send size={12} className="rotate-45" /> Contacto Inmediato
                 </div>
                 <h2 className="text-2xl md:text-3xl font-extrabold text-content tracking-tight">
@@ -1138,8 +1138,8 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
               </div>
 
               {contactSubmitted ? (
-                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 md:p-8 text-center space-y-4 max-w-xl mx-auto">
-                  <div className="w-14 h-14 rounded-full bg-emerald-600 text-white mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <div className="bg-surface-inset border border-edge rounded-2xl p-6 md:p-8 text-center space-y-4 max-w-xl mx-auto">
+                  <div className="w-14 h-14 rounded-full bg-accent text-white mx-auto flex items-center justify-center shadow-lg shadow-accent/20">
                     <Check size={28} />
                   </div>
                   <h3 className="text-lg font-black text-content">¡Solicitud Registrada!</h3>
@@ -1160,7 +1160,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleContactSubmit} className="bg-surface-base border border-edge p-6 md:p-8 rounded-2xl shadow-xl space-y-5">
+                <form onSubmit={handleContactSubmit} className="bg-surface-inset border border-edge p-5 md:p-6 rounded-2xl shadow-md space-y-4">
                   {contactError && (
                     <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold text-center">
                       {contactError}
@@ -1176,11 +1176,10 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                       <button
                         type="button"
                         onClick={() => setContactInterest('Comprar')}
-                        className={`py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${
-                          contactInterest === 'Comprar'
+                        className={`py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${contactInterest === 'Comprar'
                             ? 'bg-accent text-white border-accent shadow-md shadow-accent/20'
                             : 'bg-surface border-edge text-content-secondary hover:text-content hover:bg-edge'
-                        }`}
+                          }`}
                       >
                         <Home size={14} />
                         <span>Quiero Comprar</span>
@@ -1188,11 +1187,10 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                       <button
                         type="button"
                         onClick={() => setContactInterest('Vender')}
-                        className={`py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${
-                          contactInterest === 'Vender'
+                        className={`py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${contactInterest === 'Vender'
                             ? 'bg-accent text-white border-accent shadow-md shadow-accent/20'
                             : 'bg-surface border-edge text-content-secondary hover:text-content hover:bg-edge'
-                        }`}
+                          }`}
                       >
                         <Building size={14} />
                         <span>Quiero Vender</span>
@@ -1201,7 +1199,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   </div>
 
                   {/* Nombres y Celular (Obligatorios) */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <label className="text-xs font-extrabold text-content block uppercase tracking-wider">
                         Nombre completo <span className="text-rose-500">*</span>
@@ -1214,7 +1212,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                           value={contactName}
                           onChange={(e) => setContactName(e.target.value)}
                           placeholder="Ingresa tu nombre completo..."
-                          className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors"
+                          className="w-full pl-9 pr-4 py-2 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors"
                         />
                       </div>
                     </div>
@@ -1231,7 +1229,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                           value={contactPhone}
                           onChange={(e) => setContactPhone(e.target.value)}
                           placeholder="Ej: 912345678"
-                          className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors"
+                          className="w-full pl-9 pr-4 py-2 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors"
                         />
                       </div>
                     </div>
@@ -1249,7 +1247,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                         value={contactEmail}
                         onChange={(e) => setContactEmail(e.target.value)}
                         placeholder="ejemplo@correo.com"
-                        className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors"
+                        className="w-full pl-9 pr-4 py-2 rounded-xl border border-edge bg-surface text-content text-xs font-semibold focus:outline-none focus:border-accent transition-colors"
                       />
                     </div>
                   </div>
@@ -1260,7 +1258,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                       Comentarios o detalles <span className="text-content-muted font-medium text-[10px] uppercase">(Opcional)</span>
                     </label>
                     <textarea
-                      rows={3}
+                      rows={2}
                       value={contactComments}
                       onChange={(e) => setContactComments(e.target.value)}
                       placeholder="¿Tienes alguna consulta o requerimiento específico?..."
@@ -1272,13 +1270,13 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="w-full py-3.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
+                      className="w-full py-2.5 px-6 rounded-xl bg-content hover:bg-content-secondary text-surface font-black text-xs shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer border-none dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white"
                     >
                       <Send size={16} className="rotate-45" />
                       <span>Contactar por WhatsApp</span>
                     </button>
                     <p className="text-[10px] text-content-muted text-center mt-2 font-medium">
-                      Tus datos se enviarán estructurados al número de WhatsApp de ventas para brindarte atención inmediata.
+                      Tus datos se enviarán al número de WhatsApp de ventas para brindarte atención inmediata.
                     </p>
                   </div>
                 </form>
@@ -1496,8 +1494,8 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
             <div className="space-y-3">
               <h4 className="font-extrabold text-content text-xs uppercase tracking-wider">Contacto</h4>
               <ul className="space-y-2 text-xs">
-                <li className="flex items-center gap-2"><Phone size={12} className="text-accent" /> {portalSettings?.phone || '+51 900 000 000'}</li>
-                <li className="flex items-center gap-2"><Mail size={12} className="text-accent" /> {portalSettings?.email || 'ventas@casaya.com'}</li>
+                <li className="flex items-center gap-2"><Phone size={12} className="text-accent" /> {portalSettings?.phone || '+51 958 716 850'}</li>
+                <li className="flex items-center gap-2"><Mail size={12} className="text-accent" /> {portalSettings?.email || 'ventas@casaya.app'}</li>
                 {portalSettings?.address && (
                   <li className="flex items-center gap-2"><MapPin size={12} className="text-accent" /> {portalSettings.address}</li>
                 )}

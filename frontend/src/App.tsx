@@ -114,9 +114,8 @@ function AuthenticatedApp() {
       return (
         <Login 
           onBack={() => {
-            const targetHost = hostname.replace('app.', '');
-            window.location.href = window.location.protocol + '//' + targetHost + (window.location.port ? ':' + window.location.port : '');
-          }} 
+            window.location.href = isLocalhost ? '/' : 'https://casaya.app';
+          }}
         />
       );
     }
@@ -125,10 +124,7 @@ function AuthenticatedApp() {
       if (isLocalhost) {
         return <Login onBack={() => setShowLogin(false)} />;
       }
-      const targetHost = hostname.startsWith('www.') 
-        ? hostname.replace('www.', 'app.')
-        : 'app.' + hostname;
-      window.location.href = window.location.protocol + '//' + targetHost + (window.location.port ? ':' + window.location.port : '');
+      window.location.href = isLocalhost ? '/' : 'https://app.chatprex.com';
       return null;
     }
 
@@ -140,10 +136,7 @@ function AuthenticatedApp() {
           if (isLocalhost) {
             setShowLogin(true);
           } else {
-            const targetHost = hostname.startsWith('www.') 
-              ? hostname.replace('www.', 'app.')
-              : 'app.' + hostname;
-            window.location.href = window.location.protocol + '//' + targetHost + (window.location.port ? ':' + window.location.port : '');
+            window.location.href = 'https://app.chatprex.com';
           }
         }}
         isLoggedIn={false}
@@ -161,10 +154,7 @@ function AuthenticatedApp() {
         onLoginClick={() => {}}
         isLoggedIn={true}
         onGoToDashboard={() => {
-          const targetHost = hostname.startsWith('www.') 
-            ? hostname.replace('www.', 'app.')
-            : 'app.' + hostname;
-          window.location.href = window.location.protocol + '//' + targetHost + (window.location.port ? ':' + window.location.port : '');
+          window.location.href = 'https://app.chatprex.com';
         }}
       />
     );
