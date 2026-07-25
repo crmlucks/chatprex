@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Login';
 import ChatprexLanding from './components/ChatprexLanding';
 import HomePortal from './components/HomePortal';
+import PrivacyPolicy from './components/PrivacyPolicy';
 import ChatInterface from './components/ChatInterface';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -106,10 +107,16 @@ function AuthenticatedApp() {
  }
 
   const hostname = window.location.hostname;
+  const pathname = window.location.pathname;
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
   const isAppSubdomain = hostname.startsWith('app.');
   // FORZADO TEMPORAL PARA VER LA LANDING B2B EN LOCALHOST:
   const isChatprexLanding = isLocalhost || hostname === 'chatprex.com' || hostname === 'www.chatprex.com';
+
+  // Mostrar página estática de Políticas de Privacidad
+  if (pathname === '/politicas-privacidad') {
+    return <PrivacyPolicy />;
+  }
 
   // Si no hay usuario, mostrar el Portal, la Landing B2B, o la pantalla de Login según el dominio
   if (!user) {
