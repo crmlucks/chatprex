@@ -1047,7 +1047,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 <div className="space-y-3">
                   <span className="text-xs font-bold text-accent tracking-widest uppercase block">La forma más segura de comprar y vender inmuebles.</span>
                   <h2 className="text-2xl md:text-3xl font-black text-content tracking-tight">
-                    {portalSettings?.about_title || 'Respaldados por 10+ años de trayectoria y software inmobiliario inhouse.'}
+                    {portalSettings?.about_title || 'Tecnología e IA al servicio de tu inversión.'}
                   </h2>
                 </div>
 
@@ -1564,9 +1564,15 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
             <ShieldCheck size={14} className="text-emerald-500" />
             <span className="text-[11px] font-medium text-content-muted">Garantía Inmobiliaria Certificada y Protegida</span>
           </div>
-          <p className="text-[11px] text-content-muted">
-            © {new Date().getFullYear()} Casaya app· Todos los derechos reservados.
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-[11px] text-content-muted">
+            <a href="/politicas-privacidad" className="hover:text-accent hover:underline transition-colors font-bold">
+              Políticas de Privacidad
+            </a>
+            <span className="hidden sm:inline text-content-muted/30">|</span>
+            <span>
+              © {new Date().getFullYear()} Casaya.app - Todos los derechos reservados.
+            </span>
+          </div>
         </div>
       </footer>
 
