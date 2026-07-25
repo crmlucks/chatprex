@@ -22,6 +22,7 @@ import { analyticsRouter } from './analyticsRoutes';
 import { voiceRouter, setupVoiceWebSockets } from './twilioVoice';
 import { portalSettingsRouter } from './portalSettingsRoutes';
 import { uploadRouter } from './uploadRoutes';
+import { dataDeletionRouter } from './metaDataDeletion';
 
 const app = express();
 const server = http.createServer(app);
@@ -58,6 +59,7 @@ app.use('/api/upload', uploadRouter);
 // ─── Rutas de WhatsApp ───
 app.use('/api/webhook/meta', whatsappRouter);
 app.use('/api/webhook/evolution', evolutionRouter);
+app.use('/api/meta', dataDeletionRouter); // Meta Data Deletion callback
 app.use('/api/ai-mode', aiModeRouter);
 
 // ─── Rutas de Voz (Twilio) ───
