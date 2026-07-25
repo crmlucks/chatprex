@@ -4,6 +4,7 @@ import Login from './components/Login';
 import ChatprexLanding from './components/ChatprexLanding';
 import HomePortal from './components/HomePortal';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 import ChatInterface from './components/ChatInterface';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -116,6 +117,11 @@ function AuthenticatedApp() {
   // Mostrar página estática de Políticas de Privacidad
   if (pathname === '/politicas-privacidad') {
     return <PrivacyPolicy />;
+  }
+
+  // Mostrar página estática de Términos de Servicio
+  if (pathname === '/terminos-de-servicio') {
+    return <TermsOfService />;
   }
 
   // Si no hay usuario, mostrar el Portal, la Landing B2B, o la pantalla de Login según el dominio

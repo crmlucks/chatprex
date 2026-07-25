@@ -1569,6 +1569,10 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
               Políticas de Privacidad
             </a>
             <span className="hidden sm:inline text-content-muted/30">|</span>
+            <a href="/terminos-de-servicio" className="hover:text-accent hover:underline transition-colors font-bold">
+              Términos de Servicio
+            </a>
+            <span className="hidden sm:inline text-content-muted/30">|</span>
             <span>
               © {new Date().getFullYear()} Casaya.app - Todos los derechos reservados.
             </span>
