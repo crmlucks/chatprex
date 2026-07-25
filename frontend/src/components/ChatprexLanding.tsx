@@ -262,7 +262,11 @@ export default function ChatprexLanding() {
       </section>
 
       {/* FOOTER B2B */}
-      <footer className="py-8 border-t border-white/5 text-center text-xs text-content-secondary font-bold">
+      <footer className="py-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-content-secondary font-bold text-center">
+        <a href="/politicas-privacidad" className="hover:text-accent hover:underline transition-colors">Políticas de Privacidad</a>
+        <span className="hidden sm:inline text-white/20">|</span>
+        <a href="/terminos-de-servicio" className="hover:text-accent hover:underline transition-colors">Términos de Servicio</a>
+        <span className="hidden sm:inline text-white/20">|</span>
         <p>&copy; {new Date().getFullYear()} Chatprex & Casaya Ecosystem. Todos los derechos reservados.</p>
       </footer>
     </div>
