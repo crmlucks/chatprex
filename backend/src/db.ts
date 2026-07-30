@@ -210,6 +210,11 @@ export async function initDatabase() {
       );
     `);
 
+    try {
+      await client.query('ALTER TABLE reviews ADD COLUMN IF NOT EXISTS campaign_id INTEGER;');
+      await client.query('ALTER TABLE reviews ADD COLUMN IF NOT EXISTS lead_id INTEGER;');
+    } catch(e) {}
+
     // Crear tabla follow_up_rules
     await client.query(`
       CREATE TABLE IF NOT EXISTS follow_up_rules (

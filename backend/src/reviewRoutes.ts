@@ -23,15 +23,15 @@ const optionalAuthMiddleware = (req: any, res: any, next: any) => {
 
 // POST: Crear una nueva reseña (pública, pasa a pendiente)
 router.post('/', async (req, res) => {
-  const { property_id, author_name, rating, comment } = req.body;
+  const { property_id, author_name, rating, comment, campaign_id, lead_id } = req.body;
   if (!author_name || !rating) {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
   try {
     const result = await pool.query(
-      `INSERT INTO reviews (property_id, author_name, rating, comment, status) 
-       VALUES ($1, $2, $3, $4, 'pendiente') RETURNING *`,
-      [property_id || null, author_name, rating, comment || '']
+      `INSERT INTO reviews (property_id, author_name, rating, comment, status, campaign_id, lead_id) 
+       VALUES ($1, $2, $3, $4, 'pendiente', $5, $6) RETURNING *`,
+      [property_id || null, author_name, rating, comment || '', campaign_id || null, lead_id || null]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {

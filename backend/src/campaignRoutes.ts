@@ -79,7 +79,7 @@ campaignRouter.post('/:id/start', authMiddleware, async (req, res) => {
     // 3. Get leads based on filter
     let phones: string[] = [];
     if (campaign.recipient_source === 'database') {
-      let query = 'SELECT phone, name, birth_date FROM leads WHERE phone IS NOT NULL AND phone != \'\'';
+      let query = 'SELECT id, phone, name, birth_date FROM leads WHERE phone IS NOT NULL AND phone != \'\'';
       if (campaign.db_filter === 'cumpleaños') {
         // Asumiendo formato YYYY-MM-DD en birth_date, buscamos los que coincidan en mes y día
         const today = new Date();
@@ -104,7 +104,16 @@ campaignRouter.post('/:id/start', authMiddleware, async (req, res) => {
         for (const lead of leadsRes.rows) {
           try {
             // Reemplazar variables básicas
-            const personalizedMsg = campaign.message.replace(/{{nombre}}/g, lead.name || 'Cliente');
+            let personalizedMsg = campaign.message.replace(/{{nombre}}/g, lead.name || 'Cliente');
+            
+            // Reemplazar link de reseña si existe
+            if (personalizedMsg.includes('{{link_reseña}}')) {
+              // Obtenemos la URL del frontend. Asumimos app.chatprex.com o casaya.app
+              const baseUrl = process.env.FRONTEND_URL || 'https://casaya.app';
+              const reviewLink = `${baseUrl}/encuesta/${id}/${lead.id}`;
+              personalizedMsg = personalizedMsg.replace(/{{link_reseña}}/g, reviewLink);
+            }
+
             await sendEvolutionMessage(lead.phone, personalizedMsg);
           } catch(e) {
             console.error('Error sending campaign message to', lead.phone, e);

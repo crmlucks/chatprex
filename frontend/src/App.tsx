@@ -6,6 +6,7 @@ import HomePortal from './components/HomePortal';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import ReviewsAdmin from './components/ReviewsAdmin';
+import ReviewSurvey from './components/ReviewSurvey';
 import ChatInterface from './components/ChatInterface';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -118,6 +119,15 @@ function AuthenticatedApp() {
   // Mostrar página estática de Políticas de Privacidad
   if (pathname === '/politicas-privacidad') {
     return <PrivacyPolicy />;
+  }
+
+  // Rutas públicas de Encuesta de Reseñas
+  if (pathname.startsWith('/encuesta/')) {
+    return (
+      <ToastProvider>
+        <ReviewSurvey isDarkMode={isDarkMode} />
+      </ToastProvider>
+    );
   }
 
   // Mostrar página estática de Términos de Servicio

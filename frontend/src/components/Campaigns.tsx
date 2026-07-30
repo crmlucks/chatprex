@@ -208,14 +208,14 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
          if (listTab === 'Activas') return c.status === 'Activo';
          if (listTab === 'Borradores') return c.status === 'Borrador';
          if (listTab === 'Seguimiento') return c.type === 'Seguimiento';
-         if (listTab === 'Post Venta') return c.type === 'Post venta';
+         if (listTab === 'Post Venta' || listTab === 'Reseñas') return c.type === 'Post venta' || c.type === 'Solicitud de Reseñas';
          return true;
        }).map(c => (
        <div key={c.id} className="card overflow-hidden flex flex-col h-full hover:shadow-lg transition-all group border-edge">
          <div className={`p-4 border-b flex justify-between items-start ${dc ? 'bg-surface-raised/30 border-edge' : 'bg-surface-inset/30 border-slate-100'}`}>
           <div>
-           <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider mb-2 ${c.type === 'Envío masivo' ? 'bg-blue-500/10 text-blue-500' : 'bg-purple-500/10 text-purple-500'}`}>
-             {c.type === 'Envío masivo' ? <Megaphone size={10} /> : <Clock size={10} />} {c.type}
+           <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider mb-2 ${c.type === 'Envío masivo' ? 'bg-blue-500/10 text-blue-500' : c.type === 'Solicitud de Reseñas' ? 'bg-amber-500/10 text-amber-500' : 'bg-purple-500/10 text-purple-500'}`}>
+             {c.type === 'Envío masivo' ? <Megaphone size={10} /> : c.type === 'Solicitud de Reseñas' ? <Star size={10} /> : <Clock size={10} />} {c.type}
            </div>
            <h3 className="text-sm font-bold text-content leading-tight group-hover:text-accent transition-colors">{c.name}</h3>
           </div>
@@ -308,9 +308,16 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
            <div className="space-y-5">
             <div>
              <label className={labelClass}>Tipo de Campaña</label>
-             <div className="grid grid-cols-3 gap-2">
-              {['Envío masivo', 'Seguimiento', 'Post venta'].map(t => (
-               <button key={t} onClick={() => setFormData({...formData, type: t})} className={`py-2 rounded-lg border text-[10px] font-black uppercase transition-all ${formData.type === t ? 'border-accent bg-accent/10 text-accent' : 'border-edge text-content-muted hover:border-content-muted'}`}>{t}</button>
+             <div className="grid grid-cols-4 gap-2">
+              {['Envío masivo', 'Seguimiento', 'Post venta', 'Solicitud de Reseñas'].map(t => (
+               <button key={t} onClick={() => {
+                const newFormData = {...formData, type: t};
+                if (t === 'Solicitud de Reseñas' && !formData.message) {
+                  newFormData.message = "Hola {{nombre}}, ha sido un placer ayudarte a encontrar tu propiedad. ¿Podrías regalarnos 1 minuto para dejarnos tu opinión en el siguiente enlace? Nos ayuda muchísimo a mejorar. 👇\n\n{{link_reseña}}";
+                  newFormData.dbFilter = "Vendido"; // Default status filter
+                }
+                setFormData(newFormData);
+               }} className={`py-2 rounded-lg border text-[10px] font-black uppercase transition-all flex items-center justify-center text-center ${formData.type === t ? 'border-accent bg-accent/10 text-accent' : 'border-edge text-content-muted hover:border-content-muted'}`}>{t}</button>
               ))}
              </div>
             </div>
@@ -332,12 +339,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
               placeholder={formData.useAI ? "Describe tu objetivo y la IA redactará..." : "Hola {{nombre}}, te escribo para..."}
               className="w-full h-32 p-4 rounded-xl border input-field resize-none text-xs"
              />
-             <div className="flex items-center gap-2 mt-2">
-              <span className="text-[9px] font-black text-content-muted uppercase mr-1">Variables:</span>
-              {['{{nombre}}', '{{proyecto}}'].map(v => (
-               <button key={v} onClick={() => setFormData(p => ({...p, message: p.message + ' ' + v}))} className="px-2 py-1 rounded-md text-[10px] font-bold border border-edge text-content hover:bg-surface-inset transition-colors uppercase">{v}</button>
-              ))}
-             </div>
+              <div className="flex items-center gap-2 mt-2">
+               <span className="text-[9px] font-black text-content-muted uppercase mr-1">Variables:</span>
+               {['{{nombre}}', '{{proyecto}}', '{{link_reseña}}'].map(v => (
+                <button key={v} onClick={() => setFormData(p => ({...p, message: p.message + ' ' + v}))} className="px-2 py-1 rounded-md text-[10px] font-bold border border-edge text-content hover:bg-surface-inset transition-colors uppercase">{v}</button>
+               ))}
+              </div>
             </div>
 
             <div>
