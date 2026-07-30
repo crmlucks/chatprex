@@ -180,6 +180,18 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
  const input = `input-field py-1.5 h-9 text-[11px]`;
  const label = "text-[10px] font-bold text-content-muted mb-1 block ml-1 uppercase tracking-tight";
 
+ const formatAMPM = (timeStr?: string) => {
+    if (!timeStr) return '';
+    const parts = timeStr.split(':');
+    if (parts.length < 2) return timeStr;
+    let h = parseInt(parts[0], 10);
+    const m = parts[1];
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    h = h ? h : 12;
+    return `${h}:${m} ${ampm}`;
+  };
+
  return (
   <div className="flex-1 flex flex-col overflow-hidden bg-surface-base">
 
@@ -261,7 +273,7 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
                    return (
                     <div key={ev.id} onClick={(e) => openEdit(ev, e)}
                      className={`px-1.5 py-0.5 rounded-lg text-[9px] font-bold truncate border transition-all hover:translate-x-0.5 ${style.bg} ${style.color} ${style.border} ${ev.status === 'completada' ? 'opacity-30 line-through' : ''}`}>
-                     {ev.time} {ev.title}
+                     {formatAMPM(ev.time)} {ev.title}
                     </div>
                    );
                   })}
@@ -281,7 +293,6 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
               if (view === 'day') {
                 return e.date === todayStr;
               } else {
-                // simple week view: current month events for now, or actual week
                 const d = new Date(e.date + 'T12:00:00');
                 const now = new Date();
                 const start = new Date(now.setDate(now.getDate() - now.getDay()));
@@ -297,29 +308,27 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
               </div>
             );
 
-            return displayEvents.map(ev => {
-              const style = getTypeStyle(ev.type);
+            return displayEvents.map(e => {
+              const style = getTypeStyle(e.type);
+              const Icon = style.icon;
               return (
-                <div key={ev.id} onClick={(e) => openEdit(ev, e)} className={`p-4 rounded-2xl border flex items-center justify-between group transition-all cursor-pointer ${dc ? 'bg-surface border-edge hover:border-accent/40' : 'bg-white border-edge hover:shadow-md'}`}>
+                <div key={e.id} onClick={(ev) => openEdit(e, ev)} className={`p-4 rounded-2xl border flex items-center justify-between group transition-all cursor-pointer ${dc ? 'bg-surface border-edge hover:border-accent/40' : 'bg-white border-edge hover:shadow-md'}`}>
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${style.bg} ${style.color}`}>
-                      <style.icon size={24} />
+                    <div className={`p-3 rounded-xl border ${style.bg} ${style.color} ${style.border}`}>
+                      <Icon size={24} />
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-lg ${style.bg} ${style.color}`}>{ev.type}</span>
-                        <span className="text-xs font-black text-content">{ev.time}</span>
+                    <div className={e.status === 'completada' ? 'opacity-50 line-through' : ''}>
+                      <h4 className="text-sm font-bold text-content">{e.title}</h4>
+                      <div className="flex items-center gap-3 mt-1 text-[11px] font-bold text-content-muted">
+                        <span className="flex items-center gap-1"><Clock size={12} /> {formatAMPM(e.time)}</span>
+                        <span className="flex items-center gap-1"><CalendarDays size={12} /> {e.date}</span>
+                        <span className="flex items-center gap-1 uppercase"><Tag size={12} /> {e.type}</span>
+                        <span className="flex items-center gap-1"><User size={12} /> {e.client || 'Sin cliente'}</span>
                       </div>
-                      <h4 className="text-sm font-bold text-content">{ev.title}</h4>
-                      <p className="text-[11px] font-bold text-content-muted uppercase tracking-tight flex items-center gap-1 mt-1">
-                        <User size={12} className="text-accent" /> {ev.client || 'Sin cliente'} 
-                        {ev.advisor_name && <span className="text-emerald-500">• Asesor: {ev.advisor_name}</span>}
-                        • {ev.date}
-                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={(e) => toggleStatus(ev, e)} className={`p-2 rounded-xl transition-all ${ev.status === 'completada' ? 'text-emerald-500 bg-emerald-500/10' : 'text-content-muted hover:text-accent hover:bg-surface-raised'}`}>
+                    <button onClick={(ev) => toggleStatus(e, ev)} className={`p-2 rounded-xl transition-all ${e.status === 'completada' ? 'text-emerald-500 bg-emerald-500/10' : 'text-content-muted hover:text-accent hover:bg-surface-raised'}`}>
                       <CheckCircle2 size={20} />
                     </button>
                   </div>
@@ -373,7 +382,10 @@ export default function Calendar({ isDarkMode }: { isDarkMode?: boolean }) {
            </div>
          </div>
          <div className="relative">
-           <label className={label}>Hora</label>
+           <label className={`${label} flex justify-between`}>
+             <span>Hora</span>
+             <span className="text-[9px] opacity-70 font-normal lowercase">(Formato 24h)</span>
+           </label>
            <div className="relative">
             <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 pointer-events-none" size={14} />
             <input required type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} className={`${input} pl-9`} />

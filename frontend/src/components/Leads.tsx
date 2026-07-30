@@ -397,6 +397,19 @@ const LeadList = ({ leads, onSelect, onEdit, onDelete, onToggleBot, onGoChat, is
 
 const PipelineColumn = ({ status, leads, onDrop, onToggleBot, onSelect, onEdit, onDelete, onGoChat, isDarkMode, pipelineHelpers }: any) => {
  const dc = isDarkMode;
+
+ const formatAMPM = (timeStr?: string) => {
+   if (!timeStr) return '';
+   const parts = timeStr.split(':');
+   if (parts.length < 2) return timeStr;
+   let h = parseInt(parts[0], 10);
+   const m = parts[1];
+   const ampm = h >= 12 ? 'PM' : 'AM';
+   h = h % 12;
+   h = h ? h : 12;
+   return `${h}:${m} ${ampm}`;
+ };
+
  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
  const handleDrop = (e: React.DragEvent) => { e.preventDefault(); onDrop(e.dataTransfer.getData('leadId'), status); };
  
@@ -680,6 +693,7 @@ const LeadModal = ({ lead, onClose, isDarkMode, registerAlarm, unregisterAlarm }
            <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-sky-400 pointer-events-none" />
            <input type="time" value={taskTime} onChange={e=>setTaskTime(e.target.value)} className={`text-xs font-bold pl-9 pr-3 py-2 border rounded-xl bg-transparent outline-none ${dc ? 'border-edge text-content-muted' : 'border-edge text-content-secondary shadow-sm'}`} />
          </div>
+         <span className="text-[10px] text-content-muted self-center ml-2">(Si no ves AM/PM usa formato 24h, ej. 15:00)</span>
         </div>
         <div className="flex justify-end pt-2">
          <button onClick={addTask} className="btn-primary flex items-center gap-2">
@@ -835,6 +849,18 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
  const today = new Date().toISOString().split('T')[0];
  const [nTitle, setNTitle] = useState(''); const [nType, setNType] = useState('Visita'); const [nDate, setNDate] = useState(today); const [nTime, setNTime] = useState('12:00');
 
+ const formatAMPM = (timeStr?: string) => {
+    if (!timeStr) return '';
+    const parts = timeStr.split(':');
+    if (parts.length < 2) return timeStr;
+    let h = parseInt(parts[0], 10);
+    const m = parts[1];
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    h = h ? h : 12;
+    return `${h}:${m} ${ampm}`;
+  };
+
  useEffect(() => {
   if (leadId) {
    fetch(`${API_URL}/api/data/tasks?lead_id=${leadId}&type=cita`, { headers: { Authorization: `Bearer ${token}` } })
@@ -921,7 +947,10 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
         </div>
        </div>
        <div className="space-y-2">
-        <label className="small-text font-bold text-content-muted ml-1">Hora</label>
+        <label className="small-text font-bold text-content-muted ml-1 flex justify-between">
+          <span>Hora</span>
+          <span className="text-[9px] opacity-70 font-normal">(Formato 24h)</span>
+        </label>
         <div className="relative">
           <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-sky-400 pointer-events-none" />
           <input type="time" value={nTime} onChange={e=>setNTime(e.target.value)} className={`w-full pl-9 pr-3 py-3 rounded-xl text-xs font-bold outline-none border ${dc ? 'bg-surface-raised border-edge text-content-secondary' : 'bg-surface border-edge text-content-secondary '}`}/>
@@ -949,9 +978,9 @@ const ModalCitas = ({ leadName, leadId, isDarkMode, registerAlarm, unregisterAla
         </span>
         <span className={`text-sm font-bold ${dc ? 'text-content' : 'text-content'}`}>{c.title}</span>
        </div>
-       <div className="flex items-center gap-4 text-xs font-bold text-content-muted">
-        <span className="flex items-center gap-1.5"><Calendar size={12}/> {c.date}</span>
-        <span className="flex items-center gap-1.5"><Clock size={12}/> {c.time}</span>
+       <div className="text-xs text-content-muted flex items-center gap-4 font-semibold">
+        <span className="flex items-center gap-1"><Calendar size={12}/> {c.date}</span>
+        <span className="flex items-center gap-1"><Clock size={12}/> {formatAMPM(c.time)}</span>
        </div>
       </div>
       { (user?.role === 'propietario' || user?.role === 'administrador') && (
