@@ -117,11 +117,12 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
               label="Ajustes" 
               isOpen={openGroup === 'ajustes'} 
               onToggle={() => toggleGroup('ajustes')}
-              active={['Configuración', 'Administración', 'Usuarios'].includes(activeTab)}
+              active={['Configuración', 'Administración', 'Usuarios', 'Reseñas'].includes(activeTab)}
             >
               <SubNavItem onClick={() => { setActiveTab('Usuarios'); setIsMobileOpen(false); }} label="Gestión de usuarios" active={activeTab === 'Usuarios'} />
               <SubNavItem onClick={() => { setActiveTab('Administración'); setIsMobileOpen(false); }} label="Administración" active={activeTab === 'Administración'} />
               <SubNavItem onClick={() => { setActiveTab('Configuración'); setIsMobileOpen(false); }} label="Configurar Portal" active={activeTab === 'Configuración'} />
+              <SubNavItem onClick={() => { setActiveTab('Reseñas'); setIsMobileOpen(false); }} label="Moderar Reseñas" active={activeTab === 'Reseñas'} />
             </NavGroup>
           )}
 

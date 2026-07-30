@@ -5,6 +5,7 @@ import ChatprexLanding from './components/ChatprexLanding';
 import HomePortal from './components/HomePortal';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
+import ReviewsAdmin from './components/ReviewsAdmin';
 import ChatInterface from './components/ChatInterface';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -230,6 +231,7 @@ function AuthenticatedApp() {
    case 'Configuración': return <Admin isDarkMode={isDarkMode} defaultTab="portal" />;
    case 'Automatización': return <Automation isDarkMode={isDarkMode} />;
    case 'Usuarios': return <UserManagement isDarkMode={isDarkMode} />;
+   case 'Reseñas': return <ReviewsAdmin isDarkMode={isDarkMode} />;
    default: return (
     <div className="flex-1 flex flex-col items-center justify-center p-10">
      <p className="label-text">Módulo en construcción...</p>

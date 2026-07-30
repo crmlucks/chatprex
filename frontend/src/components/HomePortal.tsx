@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import {
   Search, MapPin, Home, Building, Layers, Briefcase, Car, HelpCircle,
   Phone, Mail, Globe, Moon, Sun, ArrowRight, Eye, Send,
-  Facebook, Instagram, Linkedin, Youtube, ShieldCheck, Award, Heart, Users, ChevronDown, Check, LogIn, Menu, X, Lock
+  Facebook, Instagram, Linkedin, Youtube, ShieldCheck, Award, Heart, Users, ChevronDown, Check, LogIn, Menu, X, Lock, Star
 } from 'lucide-react';
+import PropertyReviews from './PropertyReviews';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -71,6 +72,7 @@ export default function HomePortal({
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [portalSettings, setPortalSettings] = useState<any>(null);
+  const [globalReviews, setGlobalReviews] = useState<any[]>([]);
 
   // Filtros de búsqueda
   const [searchLocation, setSearchLocation] = useState<string>('');
@@ -207,8 +209,20 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
       }
     };
 
+    const fetchGlobalReviews = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/reviews`);
+        if (res.ok) {
+          setGlobalReviews(await res.json());
+        }
+      } catch (err) {
+        console.error("Error al cargar reseñas:", err);
+      }
+    };
+
     fetchPublicProperties();
     fetchPortalSettings();
+    fetchGlobalReviews();
   }, []);
 
   // Función para filtrar las propiedades en el cliente
@@ -617,6 +631,21 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
   return (
     <div className={`min-h-screen font-sans flex flex-col transition-all bg-surface-base text-content ${isDarkMode ? 'dark' : ''}`}>
+      {/* Microdatos SEO (AggregateRating) */}
+      {globalReviews.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateAgent",
+            "name": "Casaya",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": (globalReviews.reduce((sum, r) => sum + r.rating, 0) / globalReviews.length).toFixed(1),
+              "reviewCount": globalReviews.length
+            }
+          })
+        }} />
+      )}
 
       {/* 1. HEADER */}
       <header className="sticky top-0 z-50 w-full bg-surface/85 backdrop-blur-md border-b border-edge transition-all py-4 px-6 md:px-12 flex items-center justify-between">
@@ -1420,6 +1449,48 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
         </>
       )}
 
+      {/* Testimonios Destacados */}
+      {globalReviews.length > 0 && (
+        <section className="py-16 px-6 md:px-12 bg-surface">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-black text-content tracking-tight mb-3">Lo que dicen nuestros clientes</h2>
+              <p className="text-sm text-content-secondary max-w-2xl mx-auto">
+                Experiencias reales de personas que encontraron su hogar ideal o invirtieron con nosotros.
+              </p>
+              <div className="flex items-center justify-center gap-2 mt-4 text-accent">
+                <span className="font-bold text-xl">{(globalReviews.reduce((sum, r) => sum + r.rating, 0) / globalReviews.length).toFixed(1)}</span>
+                <div className="flex text-amber-400">
+                  <Star size={20} fill="currentColor" />
+                </div>
+                <span className="text-sm text-content-secondary">({globalReviews.length} reseñas verificadas)</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {globalReviews.slice(0, 3).map((r, idx) => (
+                <div key={idx} className="p-6 rounded-2xl border border-edge bg-surface-inset shadow-sm">
+                  <div className="flex text-amber-400 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={14} fill={i < r.rating ? 'currentColor' : 'none'} className={i < r.rating ? 'text-amber-400' : 'text-content-muted/30'} />
+                    ))}
+                  </div>
+                  <p className="text-sm text-content-secondary italic mb-6">"{r.comment}"</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-accent/10 text-accent flex items-center justify-center font-bold uppercase">
+                      {r.author_name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-content">{r.author_name}</p>
+                      <p className="text-[10px] text-content-muted">Comprador Verificado</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 5. FOOTER */}
       <footer className="mt-auto border-t border-edge bg-surface/50 transition-all pt-16 pb-8 px-6 md:px-12 text-sm text-content-secondary">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-10 mb-12">
@@ -1717,6 +1788,9 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   <span className="text-xs font-extrabold text-content">{selectedProperty.parking && Number(selectedProperty.parking) > 0 ? selectedProperty.parking : '—'}</span>
                 </div>
               </div>
+
+              {/* Sistema de Reseñas de Propiedad */}
+              <PropertyReviews propertyId={selectedProperty.id} isDarkMode={isDarkMode} />
 
             </div>
 

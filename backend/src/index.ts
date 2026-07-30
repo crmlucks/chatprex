@@ -23,6 +23,7 @@ import { voiceRouter, setupVoiceWebSockets } from './twilioVoice';
 import { portalSettingsRouter } from './portalSettingsRoutes';
 import { uploadRouter } from './uploadRoutes';
 import { dataDeletionRouter } from './metaDataDeletion';
+import reviewRouter from './reviewRoutes';
 
 const app = express();
 const server = http.createServer(app);
@@ -55,6 +56,7 @@ app.use('/api/campaigns', campaignRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/portal-settings', portalSettingsRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/reviews', reviewRouter);
 
 // ─── Rutas de WhatsApp ───
 app.use('/api/webhook/meta', whatsappRouter);

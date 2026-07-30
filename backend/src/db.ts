@@ -197,6 +197,19 @@ export async function initDatabase() {
       );
     `);
 
+    // Crear tabla reviews
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS reviews (
+        id            SERIAL PRIMARY KEY,
+        property_id   INTEGER,
+        author_name   VARCHAR(150) NOT NULL,
+        rating        INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        comment       TEXT DEFAULT '',
+        status        VARCHAR(20) DEFAULT 'pendiente' CHECK (status IN ('pendiente', 'aprobada', 'rechazada')),
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
     // Crear tabla follow_up_rules
     await client.query(`
       CREATE TABLE IF NOT EXISTS follow_up_rules (
