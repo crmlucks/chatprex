@@ -93,11 +93,11 @@ export default function ReviewSurvey({ isDarkMode }: { isDarkMode?: boolean }) {
   const inputClass = `w-full h-12 px-4 rounded-xl border text-sm transition-colors focus:ring-2 focus:outline-none ${isDarkMode ? 'bg-[#252525] border-white/10 text-white focus:ring-emerald-500/50 focus:border-emerald-500' : 'bg-white border-slate-300 text-slate-900 focus:ring-emerald-500/20 focus:border-emerald-500'}`;
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-6 ${isDarkMode ? 'bg-[#121212] text-white' : 'bg-slate-50 text-slate-900'}`}>
-      <div className={`max-w-md w-full p-8 rounded-3xl shadow-2xl border ${isDarkMode ? 'bg-[#1e1e1e] border-white/10' : 'bg-white border-slate-200'}`}>
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-emerald-600 text-white rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
-            <Star size={24} />
+    <div className={`min-h-screen flex items-center justify-center p-4 ${isDarkMode ? 'bg-[#121212] text-white' : 'bg-slate-50 text-slate-900'}`}>
+      <div className={`max-w-md w-full p-6 rounded-3xl shadow-2xl border ${isDarkMode ? 'bg-[#1e1e1e] border-white/10' : 'bg-white border-slate-200'}`}>
+        <div className="text-center mb-6">
+          <div className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-emerald-500/20">
+            <Star size={20} />
           </div>
           <h2 className="text-2xl font-black tracking-tight mb-2">Cuéntanos tu experiencia</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -105,16 +105,16 @@ export default function ReviewSurvey({ isDarkMode }: { isDarkMode?: boolean }) {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex justify-center gap-2 mb-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex justify-center gap-1.5 mb-2">
             {[1, 2, 3, 4, 5].map(star => (
               <button
                 key={star}
                 type="button"
                 onClick={() => setRating(star)}
-                className="focus:outline-none transition-transform hover:scale-125"
+                className="focus:outline-none transition-transform hover:scale-110"
               >
-                <Star size={36} fill={star <= rating ? 'currentColor' : 'none'} className={star <= rating ? 'text-amber-400 drop-shadow-md' : 'text-slate-300 dark:text-slate-600'} />
+                <Star size={32} fill={star <= rating ? 'currentColor' : 'none'} className={star <= rating ? 'text-amber-400 drop-shadow-md' : 'text-slate-300 dark:text-slate-600'} />
               </button>
             ))}
           </div>
@@ -132,12 +132,12 @@ export default function ReviewSurvey({ isDarkMode }: { isDarkMode?: boolean }) {
           </div>
           
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 ml-1">Tu Comentario (Opcional)</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 ml-1">Tu Comentario (Opcional)</label>
             <textarea 
               placeholder="¿Qué es lo que más te gustó? ¿Cómo fue la atención?" 
               value={comment}
               onChange={e => setComment(e.target.value)}
-              className={`${inputClass} min-h-[120px] py-3 resize-none`}
+              className={`${inputClass} min-h-[80px] py-3 resize-none`}
             />
           </div>
           

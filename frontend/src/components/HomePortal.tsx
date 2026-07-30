@@ -220,9 +220,20 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
       }
     };
 
+    const trackVisit = async () => {
+      try {
+        await fetch(`${API_URL}/api/analytics/view`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: window.location.pathname })
+        });
+      } catch (err) {}
+    };
+
     fetchPublicProperties();
     fetchPortalSettings();
     fetchGlobalReviews();
+    trackVisit();
   }, []);
 
   // Función para filtrar las propiedades en el cliente
@@ -1358,7 +1369,15 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                       <div
                         key={p.id}
                         className="card group overflow-hidden flex flex-col h-full hover:shadow-xl hover:border-accent/30 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-surface"
-                        onClick={() => { setSelectedProperty(p); setActiveImageIndex(0); }}
+                        onClick={() => { 
+                          setSelectedProperty(p); 
+                          setActiveImageIndex(0); 
+                          fetch(`${API_URL}/api/analytics/view`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ path: '/propiedad/' + p.id, property_id: p.id })
+                          }).catch(console.error);
+                        }}
                       >
                         {/* Imagen de Portada */}
                         <div className="h-56 relative overflow-hidden shrink-0">

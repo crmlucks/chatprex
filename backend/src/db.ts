@@ -215,6 +215,16 @@ export async function initDatabase() {
       await client.query('ALTER TABLE reviews ADD COLUMN IF NOT EXISTS lead_id INTEGER;');
     } catch(e) {}
 
+    // Crear tabla page_views (Analytics)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS page_views (
+        id            SERIAL PRIMARY KEY,
+        property_id   INTEGER,
+        path          VARCHAR(255) NOT NULL,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
     // Crear tabla follow_up_rules
     await client.query(`
       CREATE TABLE IF NOT EXISTS follow_up_rules (

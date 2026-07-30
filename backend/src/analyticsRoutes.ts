@@ -3,9 +3,66 @@ import { authMiddleware } from './authMiddleware';
 import { calculateLeadScore, recalculateAllScores, getAnalyticsInsights, getFollowUpQueue } from './scoring';
 
 const analyticsRouter = express.Router();
+import pool from './db';
 
-// Todas las rutas requieren autenticación
+// --- RUTAS PÚBLICAS ---
+/**
+ * POST /api/analytics/view - Registrar visita de página o propiedad
+ */
+analyticsRouter.post('/view', async (req, res) => {
+  const { path, property_id } = req.body;
+  if (!path) return res.status(400).json({ error: 'Path is required' });
+  try {
+    await pool.query(
+      'INSERT INTO page_views (path, property_id) VALUES ($1, $2)',
+      [path, property_id || null]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[Analytics] Error logging view:', err);
+    res.status(500).json({ error: 'Error recording view' });
+  }
+});
+
+// --- RUTAS PROTEGIDAS ---
+// Todas las rutas siguientes requieren autenticación
 analyticsRouter.use(authMiddleware);
+
+/**
+ * GET /api/analytics/visits - Obtener estadisticas de visitas
+ */
+analyticsRouter.get('/visits', async (req, res) => {
+  try {
+    const { range } = req.query; // 'hoy', 'mes', 'todo'
+    
+    let dateFilter = '';
+    if (range === 'hoy') {
+      dateFilter = `WHERE created_at >= NOW() - INTERVAL '1 day'`;
+    } else if (range === 'mes') {
+      dateFilter = `WHERE created_at >= NOW() - INTERVAL '30 days'`;
+    }
+
+    const totalRes = await pool.query(`SELECT COUNT(*) as total FROM page_views ${dateFilter}`);
+    
+    // Top propiedades
+    const topPropsRes = await pool.query(`
+      SELECT property_id, COUNT(*) as views 
+      FROM page_views 
+      ${dateFilter ? dateFilter + ' AND property_id IS NOT NULL' : 'WHERE property_id IS NOT NULL'} 
+      GROUP BY property_id 
+      ORDER BY views DESC 
+      LIMIT 5
+    `);
+
+    res.json({
+      total: parseInt(totalRes.rows[0].total),
+      topProperties: topPropsRes.rows
+    });
+  } catch (err) {
+    console.error('[Analytics] Error fetching visits:', err);
+    res.status(500).json({ error: 'Error fetching visits stats' });
+  }
+});
 
 /**
  * GET /api/analytics/insights - Dashboard completo de inteligencia

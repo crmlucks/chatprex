@@ -91,64 +91,43 @@ export default function PropertyReviews({ propertyId, isDarkMode }: PropertyRevi
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className={`p-4 rounded-xl border border-edge mb-6 ${isDarkMode ? 'bg-surface-inset' : 'bg-slate-50'}`}>
-          <div className="flex justify-between items-center mb-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-content-muted">Tu Experiencia</h4>
-            <div className="flex gap-1">
+        <form onSubmit={handleSubmit} className={`p-3 rounded-xl border border-edge mb-6 ${isDarkMode ? 'bg-surface-inset' : 'bg-slate-50'}`}>
+          <div className="flex flex-col sm:flex-row items-center gap-2 mb-2">
+            <input 
+              type="text" 
+              placeholder="Tu Nombre" 
+              value={name} 
+              onChange={e => setName(e.target.value)}
+              className={`${inputClass} flex-1`}
+              required
+            />
+            <div className="flex gap-1 shrink-0 px-2">
               {[1, 2, 3, 4, 5].map(star => (
                 <button
                   key={star}
                   type="button"
                   onClick={() => setRating(star)}
-                  className="focus:outline-none transition-transform hover:scale-110"
+                  className="focus:outline-none hover:scale-110 transition-transform"
                 >
                   <Star size={20} fill={star <= rating ? 'currentColor' : 'none'} className={star <= rating ? 'text-amber-400' : 'text-content-muted/30'} />
                 </button>
               ))}
             </div>
-          </div>
-          
-          <div className="grid gap-3">
-            <div>
-              <input 
-                type="text" 
-                placeholder="Tu Nombre" 
-                value={name} 
-                onChange={e => setName(e.target.value)}
-                className={inputClass}
-                required
-              />
-            </div>
-            <div>
-              <textarea 
-                placeholder="Comparte detalles de tu visita o experiencia (Opcional)" 
-                value={comment}
-                onChange={e => setComment(e.target.value)}
-                className={`${inputClass} min-h-[80px] py-2 resize-none`}
-              />
-            </div>
-          </div>
-          
-          <div className="mt-4 flex gap-2">
             <button 
               type="submit" 
               disabled={submitting}
-              className="flex-1 bg-accent hover:bg-accent/90 text-white h-10 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              className="bg-accent hover:bg-accent/90 text-white h-10 px-4 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shrink-0 w-full sm:w-auto"
             >
-              <Send size={14} /> {submitting ? 'Enviando...' : 'Publicar Reseña'}
-            </button>
-            <button 
-              type="button" 
-              onClick={() => setShowForm(false)}
-              className="px-4 border border-edge rounded-lg text-xs font-bold hover:bg-surface-raised transition-colors"
-            >
-              Cancelar
+              <Send size={14} /> {submitting ? '...' : 'Enviar'}
             </button>
           </div>
-          <p className="text-[10px] text-content-muted mt-3 flex items-center gap-1.5 justify-center">
-            <ShieldCheck size={12} />
-            Tu reseña será revisada por nuestro equipo antes de publicarse.
-          </p>
+          
+          <textarea 
+            placeholder="Comparte detalles de tu experiencia (Opcional)" 
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            className={`${inputClass} min-h-[50px] py-2 resize-none w-full text-xs`}
+          />
         </form>
       )}
 
