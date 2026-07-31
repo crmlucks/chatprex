@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowUpRight, ArrowDownRight, DollarSign, Download, Filter, UserPlus, FileText, Plus, Search, Calendar as CalendarIcon, MapPin, Users, Calculator, Wallet, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, DollarSign, Download, Filter, UserPlus, FileText, Plus, Search, Calendar as CalendarIcon, MapPin, Users, Calculator, Wallet, TrendingUp, TrendingDown, Edit2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
@@ -15,6 +15,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
  const [properties, setProperties] = useState<any[]>([]);
  const [agents, setAgents] = useState<any[]>([]);
  const [editingClient, setEditingClient] = useState<any>(null);
+ const [editingTx, setEditingTx] = useState<any>(null);
  const { token } = useAuth();
  
  useEffect(() => {
@@ -48,16 +49,29 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
     e.preventDefault(); 
     if (!txForm.amount || !txForm.concept) return; 
     try {
-      const res = await fetch(`${API_URL}/api/data/finances/transactions`, {
-        method: 'POST',
+      const isEdit = !!editingTx;
+      const url = isEdit ? `${API_URL}/api/data/finances/transactions/${editingTx.id}` : `${API_URL}/api/data/finances/transactions`;
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ...txForm, amount: parseFloat(txForm.amount) })
       });
       if (res.ok) {
-        const newTx = await res.json();
-        setTransactions([newTx, ...transactions]);
+        const saved = await res.json();
+        if (isEdit) {
+          setTransactions(transactions.map(t => t.id === saved.id ? {
+            ...t, ...saved, date: saved.date?.split('T')[0] || t.date,
+            amount: Number(saved.amount), concept: saved.description || saved.concept || t.concept
+          } : t));
+        } else {
+          setTransactions([{
+            id: saved.id, date: saved.date?.split('T')[0] || '', client: saved.client_name || '', concept: saved.description || txForm.concept,
+            property: '', type: saved.type || txForm.type, amount: Number(saved.amount), currency: saved.currency || 'local'
+          }, ...transactions]);
+        }
         setShowTxForm(false);
-        setTxForm({ ...txForm, concept: '', amount: '' });
+        setEditingTx(null);
+        setTxForm({ date: new Date().toISOString().split('T')[0], client: '', concept: '', property: '', type: 'ingreso', amount: '', currency: 'local' });
       }
     } catch (err) { console.error(err); }
   };
@@ -149,21 +163,33 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
          <input type="number" step="0.01" value={exchangeRate} onChange={e => setExchangeRate(Number(e.target.value))} className="w-12 bg-transparent font-medium outline-none text-right text-xs" />
         </div>
        </div>
-       <button onClick={() => setShowTxForm(!showTxForm)} className="btn-primary">
-        <Plus size={16} /> {showTxForm ? 'Cancelar' : 'Nuevo movimiento'}
-       </button>
+        <button onClick={() => {
+          if (showTxForm && !editingTx) {
+            setShowTxForm(false);
+          } else {
+            setEditingTx(null);
+            setTxForm({ date: new Date().toISOString().split('T')[0], client: '', concept: '', property: '', type: 'ingreso', amount: '', currency: 'local' });
+            setShowTxForm(true);
+          }
+        }} className="btn-primary">
+         <Plus size={16} /> {showTxForm && !editingTx ? 'Cancelar' : 'Nuevo movimiento'}
+        </button>
       </div>
 
       {/* Tx Form */}
       {showTxForm && (
        <form onSubmit={handleAddTx} className="card p-4 border-accent/20">
+         <div className="flex justify-between items-center mb-4">
+           <h3 className="text-sm font-semibold">{editingTx ? 'Editar movimiento' : 'Nuevo movimiento'}</h3>
+           {editingTx && <button type="button" onClick={() => { setShowTxForm(false); setEditingTx(null); }} className="text-xs text-content-muted hover:text-content">Cancelar edición</button>}
+         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
          <div><label className="label-text mb-1 block">Fecha</label><input type="date" required value={txForm.date} onChange={e => setTxForm({...txForm, date: e.target.value})} className="input-field text-xs" /></div>
          <div><label className="label-text mb-1 block">Tipo</label><select value={txForm.type} onChange={e => setTxForm({...txForm, type: e.target.value})} className="input-field text-xs"><option value="ingreso">Ingreso</option><option value="egreso">Egreso</option></select></div>
          <div className="col-span-2"><label className="label-text mb-1 block">Concepto</label><input type="text" required placeholder="Descripción..." value={txForm.concept} onChange={e => setTxForm({...txForm, concept: e.target.value})} className="input-field text-xs" /></div>
          <div><label className="label-text mb-1 block">Moneda</label><select value={txForm.currency} onChange={e => setTxForm({...txForm, currency: e.target.value})} className="input-field text-xs"><option value="local">Local (S/.)</option><option value="usd">USD ($)</option></select></div>
-         <div><label className="label-text mb-1 block">Monto</label><input type="number" required placeholder="0.00" value={txForm.amount} onChange={e => setTxForm({...txForm, amount: e.target.value})} className="input-field text-xs" /></div>
-         <div className="flex items-end"><button type="submit" className="btn-secondary w-full py-2.5 text-xs">Guardar</button></div>
+         <div><label className="label-text mb-1 block">Monto</label><input type="number" step="0.01" required placeholder="0.00" value={txForm.amount} onChange={e => setTxForm({...txForm, amount: e.target.value})} className="input-field text-xs" /></div>
+         <div className="flex items-end"><button type="submit" className="btn-secondary w-full py-2.5 text-xs">{editingTx ? 'Actualizar' : 'Guardar'}</button></div>
         </div>
        </form>
       )}
@@ -185,7 +211,7 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
          <table className="w-full text-left">
            <thead>
             <tr className="text-xs font-medium text-content-muted border-b border-edge">
-              <th className="px-5 py-3">Fecha</th><th className="px-5 py-3">Concepto / Cliente</th><th className="px-5 py-3">Tipo</th><th className="px-5 py-3 text-right">Original</th><th className="px-5 py-3 text-right">Local (equiv)</th>
+              <th className="px-5 py-3">Fecha</th><th className="px-5 py-3">Concepto / Cliente</th><th className="px-5 py-3">Tipo</th><th className="px-5 py-3 text-right">Original</th><th className="px-5 py-3 text-right">Local (equiv)</th><th className="px-5 py-3 w-16"></th>
             </tr>
            </thead>
            <tbody className="divide-y divide-edge">
@@ -199,6 +225,23 @@ export default function Finances({ isDarkMode }: { isDarkMode?: boolean }) {
                 <td className="px-5 py-3"><span className={`text-xs font-medium px-2 py-0.5 rounded-md ${isInc ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>{t.type}</span></td>
                 <td className="px-5 py-3 text-right text-xs text-content-muted">{t.currency === 'usd' ? `$${t.amount}` : `S/ ${t.amount}`}</td>
                 <td className={`px-5 py-3 text-right text-sm font-semibold ${isInc ? 'text-emerald-500' : 'text-red-500'}`}>{isInc ? '+' : '-'}{formatMoney(eq)}</td>
+                <td className="px-5 py-3 text-right">
+                  <button onClick={() => {
+                    setEditingTx(t);
+                    setTxForm({
+                      date: t.date || new Date().toISOString().split('T')[0],
+                      client: t.client || '',
+                      concept: t.concept || '',
+                      property: t.property || '',
+                      type: t.type || 'ingreso',
+                      amount: t.amount?.toString() || '',
+                      currency: t.currency || 'local'
+                    });
+                    setShowTxForm(true);
+                  }} className="text-content-muted hover:text-accent p-1 transition-colors">
+                    <Edit2 size={16} />
+                  </button>
+                </td>
               </tr>
              );
             })}
