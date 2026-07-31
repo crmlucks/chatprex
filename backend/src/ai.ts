@@ -401,13 +401,28 @@ No intentes responder tú si otro bot está mejor capacitado. Al ejecutar la fun
         type: "function",
         function: {
           name: "transferir_conversacion",
-          description: "Transfiere la conversación del cliente actual a un bot especialista diferente.",
+          description: "Transfiere la conversación del cliente actual a un bot especialista diferente basado en el proyecto.",
           parameters: {
             type: "object",
             properties: {
               bot_id: { type: "integer", description: "El ID del bot al que se desea transferir al usuario." }
             },
             required: ["bot_id"]
+          }
+        }
+      });
+      
+      tools.push({
+        type: "function",
+        function: {
+          name: "transferir_asesor_humano",
+          description: "Transfiere la conversación a un asesor humano real (desactiva el bot). Úsalo solo si el cliente pide explícitamente hablar con un humano, está frustrado o si tiene preguntas de financiamiento complejas.",
+          parameters: {
+            type: "object",
+            properties: {
+              departamento: { type: "string", description: "El departamento al que se desea transferir, ej. 'Ventas' o 'Soporte'." }
+            },
+            required: []
           }
         }
       });
@@ -561,6 +576,23 @@ No intentes responder tú si otro bot está mejor capacitado. Al ejecutar la fun
               return await generateAIResponse(fromJid, textMessage);
             } else {
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "El bot especificado no existe." } as any);
+            }
+          }
+          else if (functionName === 'transferir_asesor_humano' && isOrchestrator) {
+            // Buscar un agente online aleatoriamente
+            const agentRes = await pool.query("SELECT id, name FROM users WHERE role = 'agente' ORDER BY RANDOM() LIMIT 1");
+            
+            if (agentRes.rowCount > 0) {
+              const agent = agentRes.rows[0];
+              await pool.query("UPDATE leads SET assigned_to = $1, bot_active = false WHERE id = $2", [agent.id, leadId]);
+              console.log(`[Orquestador] Lead transferido al asesor humano: ${agent.name} (ID: ${agent.id})`);
+              
+              // No retornamos una respuesta AI normal, sino un mensaje predeterminado
+              return `Te estoy transfiriendo con nuestro asesor ${agent.name}. En breve te atenderá personalmente. 🙋‍♂️`;
+            } else {
+              // Si no hay agentes o no se encontró a nadie, solo apagar el bot
+              await pool.query("UPDATE leads SET bot_active = false WHERE id = $1", [leadId]);
+              return `Te estoy derivando con un asesor humano. Por favor, aguarda unos instantes y alguien de nuestro equipo te atenderá. 🙋‍♂️`;
             }
           }
         } catch (e: any) {
