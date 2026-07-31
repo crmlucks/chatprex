@@ -407,19 +407,43 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   saveQuickReplies(quickReplies.filter(r => r.id !== id));
  };
 
- const handleReplyFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const handleReplyFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   if (e.target.files && e.target.files.length > 0) {
    const file = e.target.files[0];
-   const reader = new FileReader();
-   reader.onload = (event) => {
-    setReplyForm({
-     ...replyForm,
-     media: event.target?.result as string,
-     mimeType: file.type,
-     fileName: file.name
+   
+   setReplyForm(prev => ({
+    ...prev,
+    fileName: 'Subiendo archivo...',
+    mimeType: file.type
+   }));
+
+   try {
+    const formData = new FormData();
+    formData.append('image', file);
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const token = localStorage.getItem('casaya_token');
+    
+    const res = await fetch(`${API_URL}/api/upload`, {
+     method: 'POST',
+     headers: { Authorization: `Bearer ${token}` },
+     body: formData
     });
-   };
-   reader.readAsDataURL(file);
+    
+    if (res.ok) {
+     const data = await res.json();
+     setReplyForm(prev => ({
+      ...prev,
+      media: data.url, // URL absoluta generada por el backend
+      fileName: file.name,
+      mimeType: file.type
+     }));
+    } else {
+     setReplyForm(prev => ({ ...prev, fileName: 'Error al subir archivo' }));
+    }
+   } catch (err) {
+    console.error('Error subiendo media', err);
+    setReplyForm(prev => ({ ...prev, fileName: 'Error al subir archivo' }));
+   }
   }
  };
 

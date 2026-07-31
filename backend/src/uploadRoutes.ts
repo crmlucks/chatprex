@@ -24,12 +24,12 @@ const storage = multer.diskStorage({
   }
 });
 
-// Filtro de tipos de archivos (imágenes solamente)
+// Filtro de tipos de archivos
 const fileFilter = (req: any, file: any, cb: any) => {
-  if (file.mimetype.startsWith('image/')) {
+  if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype === 'application/pdf') {
     cb(null, true);
   } else {
-    cb(new Error('Solo se permiten imágenes.'), false);
+    cb(new Error('Solo se permiten imágenes, videos o PDFs.'), false);
   }
 };
 
@@ -45,11 +45,12 @@ const upload = multer({
 uploadRouter.post('/', authMiddleware, upload.single('image'), (req: any, res: any) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No se ha proporcionado ninguna imagen.' });
+      return res.status(400).json({ error: 'No se ha proporcionado ninguna imagen o archivo.' });
     }
     
-    // Generar la URL pública del archivo
-    const fileUrl = `/uploads/${req.file.filename}`;
+    // Generar la URL pública del archivo absoluta (importante para Evolution API)
+    const hostUrl = process.env.VITE_API_URL || `${req.protocol}://${req.get('host')}`;
+    const fileUrl = `${hostUrl}/uploads/${req.file.filename}`;
     res.status(200).json({ url: fileUrl });
   } catch (error: any) {
     console.error('[Upload] Error procesando archivo:', error);
