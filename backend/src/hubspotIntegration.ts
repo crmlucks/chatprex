@@ -25,8 +25,6 @@ export async function syncLeadToHubspot(leadData: any) {
 
     if (leadData.name) properties.firstname = leadData.name;
     if (leadData.email) properties.email = leadData.email;
-    if (leadData.interest) properties.message = leadData.interest;
-    if (leadData.notes) properties.hs_notes_last_updated = leadData.notes;
 
     // 3. Crear/Actualizar en HubSpot usando la API v3
     // Primero, buscar si existe el contacto por email (si hay email)
@@ -92,6 +90,6 @@ export async function syncLeadToHubspot(leadData: any) {
       }
     }
   } catch (error: any) {
-    console.error('[HubSpot Sync Error]', error.message);
+    console.error('[HubSpot Sync Error]', error);
   }
 }
