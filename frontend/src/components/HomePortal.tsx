@@ -1173,6 +1173,76 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
             </div>
           </section>
 
+          {/* Testimonios Destacados */}
+          {globalReviews.length > 0 && (
+            <section className="py-12 px-6 md:px-12 bg-surface border-t border-edge">
+              <div className="max-w-7xl mx-auto">
+                <div className="text-center mb-8">
+                  <h2 className="text-xl md:text-2xl font-black text-content tracking-tight mb-2">Lo que dicen nuestros clientes</h2>
+                  <div className="flex items-center justify-center gap-2 mt-2 text-accent">
+                    <span className="font-bold text-lg">{(globalReviews.reduce((sum, r) => sum + r.rating, 0) / globalReviews.length).toFixed(1)}</span>
+                    <div className="flex text-amber-400">
+                      <Star size={16} fill="currentColor" />
+                    </div>
+                    <span className="text-xs text-content-secondary">({globalReviews.length} reseñas)</span>
+                  </div>
+                </div>
+                
+                <div className="relative overflow-hidden w-full px-2">
+                  <div 
+                    className="flex lg:grid lg:grid-cols-4 gap-4 transition-transform duration-700 ease-in-out"
+                    style={{
+                      transform: `translateX(calc(-${currentReviewIndex * 100}% - ${currentReviewIndex * 16}px))`,
+                    }}
+                  >
+                    {/* 
+                      Use CSS to override transform on large screens so it becomes a static grid.
+                      Adding a small style tag to handle this elegantly.
+                    */}
+                    <style dangerouslySetInnerHTML={{__html: `
+                      @media (min-width: 1024px) {
+                        .flex.lg\\:grid {
+                          transform: none !important;
+                          display: grid !important;
+                        }
+                      }
+                    `}} />
+
+                    {globalReviews.slice(0, 8).map((r, idx) => (
+                      <div key={idx} className="w-full lg:w-auto shrink-0 p-5 rounded-xl border border-edge bg-surface-inset shadow-sm flex flex-col justify-between">
+                        <div>
+                          <div className="flex text-amber-400 mb-3 justify-center lg:justify-start">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} size={12} fill={i < r.rating ? 'currentColor' : 'none'} className={i < r.rating ? 'text-amber-400' : 'text-content-muted/30'} />
+                            ))}
+                          </div>
+                          <p className="text-xs text-content-secondary italic mb-4 text-center lg:text-left">"{r.comment}"</p>
+                        </div>
+                        <div className="flex items-center gap-3 justify-center lg:justify-start mt-auto">
+                          <div className="w-8 h-8 rounded-full bg-accent/10 text-accent flex items-center justify-center font-bold uppercase text-xs">
+                            {r.author_name.charAt(0)}
+                          </div>
+                          <div className="text-left">
+                            <p className="text-[11px] font-bold text-content">{r.author_name}</p>
+                            <p className="text-[9px] text-content-muted">Verificado</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mobile Dots */}
+                <div className="flex justify-center gap-1.5 mt-6 lg:hidden">
+                  {globalReviews.slice(0, 8).map((_, idx) => (
+                    <div key={idx} className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentReviewIndex ? 'w-4 bg-accent' : 'w-1.5 bg-edge'}`} />
+                  ))}
+                </div>
+
+              </div>
+            </section>
+          )}
+
           {/* 3.5. SECCIÓN DE CONTACTO Y FORMULARIO */}
           <section id="contacto" className="py-10 px-6 md:px-12 bg-surface border-t border-b border-edge">
             <div className="max-w-2xl mx-auto space-y-6 relative">
@@ -1480,75 +1550,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
         </>
       )}
 
-      {/* Testimonios Destacados */}
-      {globalReviews.length > 0 && (
-        <section className="py-12 px-6 md:px-12 bg-surface border-t border-edge">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-xl md:text-2xl font-black text-content tracking-tight mb-2">Lo que dicen nuestros clientes</h2>
-              <div className="flex items-center justify-center gap-2 mt-2 text-accent">
-                <span className="font-bold text-lg">{(globalReviews.reduce((sum, r) => sum + r.rating, 0) / globalReviews.length).toFixed(1)}</span>
-                <div className="flex text-amber-400">
-                  <Star size={16} fill="currentColor" />
-                </div>
-                <span className="text-xs text-content-secondary">({globalReviews.length} reseñas)</span>
-              </div>
-            </div>
-            
-            <div className="relative overflow-hidden w-full px-2">
-              <div 
-                className="flex lg:grid lg:grid-cols-4 gap-4 transition-transform duration-700 ease-in-out"
-                style={{
-                  transform: `translateX(calc(-${currentReviewIndex * 100}% - ${currentReviewIndex * 16}px))`,
-                }}
-              >
-                {/* 
-                  Use CSS to override transform on large screens so it becomes a static grid.
-                  Adding a small style tag to handle this elegantly.
-                */}
-                <style dangerouslySetInnerHTML={{__html: `
-                  @media (min-width: 1024px) {
-                    .flex.lg\\:grid {
-                      transform: none !important;
-                      display: grid !important;
-                    }
-                  }
-                `}} />
 
-                {globalReviews.slice(0, 8).map((r, idx) => (
-                  <div key={idx} className="w-full lg:w-auto shrink-0 p-5 rounded-xl border border-edge bg-surface-inset shadow-sm flex flex-col justify-between">
-                    <div>
-                      <div className="flex text-amber-400 mb-3 justify-center lg:justify-start">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={12} fill={i < r.rating ? 'currentColor' : 'none'} className={i < r.rating ? 'text-amber-400' : 'text-content-muted/30'} />
-                        ))}
-                      </div>
-                      <p className="text-xs text-content-secondary italic mb-4 text-center lg:text-left">"{r.comment}"</p>
-                    </div>
-                    <div className="flex items-center gap-3 justify-center lg:justify-start mt-auto">
-                      <div className="w-8 h-8 rounded-full bg-accent/10 text-accent flex items-center justify-center font-bold uppercase text-xs">
-                        {r.author_name.charAt(0)}
-                      </div>
-                      <div className="text-left">
-                        <p className="text-[11px] font-bold text-content">{r.author_name}</p>
-                        <p className="text-[9px] text-content-muted">Verificado</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Mobile Dots */}
-            <div className="flex justify-center gap-1.5 mt-6 lg:hidden">
-              {globalReviews.slice(0, 8).map((_, idx) => (
-                <div key={idx} className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentReviewIndex ? 'w-4 bg-accent' : 'w-1.5 bg-edge'}`} />
-              ))}
-            </div>
-
-          </div>
-        </section>
-      )}
 
       {/* 5. FOOTER */}
       <footer className="mt-auto border-t border-edge bg-surface/50 transition-all pt-16 pb-8 px-6 md:px-12 text-sm text-content-secondary">
