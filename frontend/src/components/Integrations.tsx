@@ -12,6 +12,7 @@ export default function Integrations({ isDarkMode }: IntegrationsProps) {
   const [hubspotEnabled, setHubspotEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
   const { showToast } = useToast();
   const { token } = useAuth();
 
@@ -137,7 +138,19 @@ export default function Integrations({ isDarkMode }: IntegrationsProps) {
                   <p className="text-xs text-content-muted ml-1 mt-2">Asegúrate de que tu Private App tenga los permisos <b>crm.objects.contacts.read</b> y <b>crm.objects.contacts.write</b>.</p>
                 </div>
 
-                <div className="flex justify-end pt-4 border-t border-edge">
+                <div className="flex justify-end gap-3 pt-4 border-t border-edge">
+                  <button
+                    onClick={testHubspot}
+                    disabled={isTesting || !hubspotKey}
+                    className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-semibold text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isTesting ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Workflow className="w-4 h-4" />
+                    )}
+                    Probar Conexión
+                  </button>
                   <button 
                     onClick={saveHubspot}
                     disabled={isSaving}

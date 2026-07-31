@@ -20,10 +20,8 @@ export async function syncLeadToHubspot(leadData: any) {
     // HubSpot asume que el email es el identificador principal
     // Si no tenemos email, no podemos sincronizar a menos que permitamos contactos sin email
     // Usualmente HubSpot rechaza si no hay email o firstname, pero depende de la configuración
-    const properties: any = {
-      phone: leadData.phone,
-      hs_lead_status: 'NEW'
-    };
+    const properties: any = {};
+    if (leadData.phone) properties.phone = leadData.phone;
 
     if (leadData.name) properties.firstname = leadData.name;
     if (leadData.email) properties.email = leadData.email;
