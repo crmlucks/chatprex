@@ -37,6 +37,8 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [apiKey, setApiKey] = useState('');
  const [hasApiKey, setHasApiKey] = useState(false);
  const [safeApiKey, setSafeApiKey] = useState('');
+ const [deepseekApiKey, setDeepseekApiKey] = useState('');
+ const [hasDeepseekKey, setHasDeepseekKey] = useState(false);
  const [knowledge, setKnowledge] = useState('');
 
  // Behavior toggles
@@ -70,6 +72,8 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    setModel(selected.model || 'gpt-4o-mini');
    setHasApiKey(selected.hasApiKey || false);
    setSafeApiKey(selected.safeApiKey || '');
+   setHasDeepseekKey(selected.hasDeepseekKey || false);
+   setDeepseekApiKey('');
    setKnowledge(selected.knowledge || '');
    setVoiceToText(selected.voiceToText !== false);
    setMessageGrouping(selected.messageGrouping !== false);
@@ -110,6 +114,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     model,
     prompt,
     api_key: apiKey || 'UNCHANGED',
+    deepseekApiKey: deepseekApiKey,
     knowledge,
     voiceToText,
     messageGrouping,
@@ -313,16 +318,28 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
 
        <div className="space-y-2">
         <label className={labelCls}>Clave de acceso (API Key)</label>
-        <div className="relative group">
-         <input
-          type="password"
-          value={apiKey}
-          onChange={e => setApiKey(e.target.value)}
-          placeholder={hasApiKey ? `Clave actual: ${safeApiKey}` : 'sk-pro-xxxxxxxx'}
-          className={`w-full pl-12 pr-4 py-4 rounded-2xl border text-sm font-mono outline-none transition-all focus:ring-4 focus:ring-accent/10 ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge text-content focus:border-accent shadow-sm'}`}
-         />
-         <Key size={20} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${dc ? 'text-content-secondary group-focus-within:text-accent' : 'text-content-muted group-focus-within:text-accent'}`} />
-        </div>
+        <div className="relative group mb-2">
+          <input
+           type="password"
+           value={apiKey}
+           onChange={e => setApiKey(e.target.value)}
+           placeholder={hasApiKey ? `Clave actual: ${safeApiKey}` : 'sk-pro-xxxxxxxx'}
+           className={`w-full pl-12 pr-4 py-4 rounded-2xl border text-sm font-mono outline-none transition-all focus:ring-4 focus:ring-accent/10 ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge text-content focus:border-accent shadow-sm'}`}
+          />
+          <Key size={20} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${dc ? 'text-content-secondary group-focus-within:text-accent' : 'text-content-muted group-focus-within:text-accent'}`} />
+         </div>
+         
+         <label className={labelCls}>Clave DeepSeek (Evaluador de Leads)</label>
+         <div className="relative group">
+          <input
+           type="password"
+           value={deepseekApiKey}
+           onChange={e => setDeepseekApiKey(e.target.value)}
+           placeholder={hasDeepseekKey ? 'Clave DeepSeek configurada' : 'sk-xxxxxxxx (Opcional)'}
+           className={`w-full pl-12 pr-4 py-4 rounded-2xl border text-sm font-mono outline-none transition-all focus:ring-4 focus:ring-accent/10 ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge text-content focus:border-accent shadow-sm'}`}
+          />
+          <Key size={20} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${dc ? 'text-content-secondary group-focus-within:text-accent' : 'text-content-muted group-focus-within:text-accent'}`} />
+         </div>
         <div className="flex justify-between items-center px-1">
           <p className={`text-xs font-bold ${hasApiKey ? 'text-emerald-500' : 'text-amber-500'}`}>
            {hasApiKey ? '✓ Conexión establecida y segura' : '⚠ Se requiere una clave para habilitar el bot real'}

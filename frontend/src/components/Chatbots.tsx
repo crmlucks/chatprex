@@ -13,77 +13,8 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [connectionMode, setConnectionMode] = useState<'qr' | 'meta'>('qr');
  const [qrCountdown, setQrCountdown] = useState(0);
  
- // Estados para Cerebro IA
- const [aiProvider, setAiProvider] = useState('OpenAI');
- const [aiModel, setAiModel] = useState('gpt-3.5-turbo');
- const [aiApiKey, setAiApiKey] = useState('');
- const [deepseekApiKey, setDeepseekApiKey] = useState('');
- const [aiPrompt, setAiPrompt] = useState('');
- const [isSavingAi, setIsSavingAi] = useState(false);
- const [aiSaveSuccess, setAiSaveSuccess] = useState(false);
-
- const socketRef = useRef<Socket | null>(null);
- const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
- const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
-
- /** Cargar configuración IA al inicio */
- useEffect(() => {
-  const fetchAiConfig = async () => {
-   try {
-    if (!token) return;
-    const res = await fetch(`${API_URL}/api/ai-config`, {
-     headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.ok) {
-     const data = await res.json();
-     if (data[0]) {
-      setAiProvider(data[0].provider || 'OpenAI');
-      setAiModel(data[0].model || 'gpt-3.5-turbo');
-      setAiPrompt(data[0].prompt || '');
-      if (data[0].hasApiKey) {
-       setAiApiKey('UNCHANGED'); // Valor mágico para no sobrescribir si el usuario no la cambia
-      }
-      if (data[0].hasDeepseekKey) {
-       setDeepseekApiKey('UNCHANGED');
-      }
-     }
-    }
-   } catch (e) {
-    console.error('Error cargando config IA:', e);
-   }
-  };
-  if (token) fetchAiConfig();
- }, [token]);
-
- const saveAiConfig = async () => {
-  setIsSavingAi(true);
-  setAiSaveSuccess(false);
-  try {
-   if (!token) return;
-   const res = await fetch(`${API_URL}/api/ai-config`, {
-    method: 'POST',
-    headers: { 
-     'Content-Type': 'application/json',
-     Authorization: `Bearer ${token}` 
-    },
-    body: JSON.stringify({
-     id: 1, // Por ahora el frontend maneja un solo bot (Bot Principal)
-     provider: aiProvider,
-     model: aiModel,
-     api_key: aiApiKey,
-     deepseekApiKey: deepseekApiKey,
-     prompt: aiPrompt
-    })
-   });
-   if (res.ok) {
-    setAiSaveSuccess(true);
-    setTimeout(() => setAiSaveSuccess(false), 3000);
-   }
-  } catch (e) {
-   console.error('Error guardando config IA:', e);
-  }
-  setIsSavingAi(false);
- };
+ 
+ 
 
  /** Normaliza el base64: agrega prefijo data:image si falta */
  const normalizeQR = (qr: string): string => {
@@ -317,88 +248,7 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       </div>
     </div>
 
-    {/* AI Configuration Section */}
-    <div className={`mt-8 p-6 md:p-8 rounded-xl border shadow-sm transition-colors ${isDarkMode ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
-      <div className="flex items-center gap-3 mb-6">
-       <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
-        <Bot size={20} />
-       </div>
-       <div>
-        <h2 className={`text-xl font-semibold tracking-tight ${isDarkMode ? 'text-content' : 'text-content'}`}>Cerebro IA</h2>
-        <p className="text-sm font-medium text-content-muted">Configura el comportamiento y las claves de tu asistente virtual.</p>
-       </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-       <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-normal text-content-muted ml-1">Proveedor IA</label>
-        <select 
-         value={aiProvider}
-         onChange={(e) => setAiProvider(e.target.value)}
-         className={`w-full p-4 rounded-xl border text-sm font-medium focus:ring-2 focus:ring-accent/20 outline-none transition-all ${isDarkMode ? 'bg-surface-raised border-edge text-content' : 'bg-surface-inset border-edge text-content'}`}
-        >
-         <option value="OpenAI">OpenAI</option>
-         <option value="Groq">Groq</option>
-         <option value="Anthropic">Anthropic (Claude)</option>
-        </select>
-       </div>
-       <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-normal text-content-muted ml-1">Modelo</label>
-        <input 
-         type="text" 
-         value={aiModel}
-         onChange={(e) => setAiModel(e.target.value)}
-         placeholder="Ej: gpt-4o-mini" 
-         className={`w-full p-4 rounded-xl border text-sm font-mono focus:ring-2 focus:ring-accent/20 outline-none transition-all ${isDarkMode ? 'bg-surface-raised border-edge text-content' : 'bg-surface-inset border-edge text-content'}`} 
-        />
-       </div>
-       <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-normal text-content-muted ml-1">Clave API ({aiProvider})</label>
-        <input 
-         type="password" 
-         value={aiApiKey}
-         onChange={(e) => setAiApiKey(e.target.value)}
-         placeholder={aiApiKey === 'UNCHANGED' ? '••••••••••••••••' : 'sk-...'} 
-         className={`w-full p-4 rounded-xl border text-sm font-mono focus:ring-2 focus:ring-accent/20 outline-none transition-all ${isDarkMode ? 'bg-surface-raised border-edge text-content' : 'bg-surface-inset border-edge text-content'}`} 
-        />
-       </div>
-       <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-normal text-content-muted ml-1 flex items-center gap-2">
-          Clave API DeepSeek 
-          <span className="bg-purple-500/20 text-purple-600 text-[10px] px-2 py-0.5 rounded-full font-bold">Evaluador de Leads</span>
-        </label>
-        <input 
-         type="password" 
-         value={deepseekApiKey}
-         onChange={(e) => setDeepseekApiKey(e.target.value)}
-         placeholder={deepseekApiKey === 'UNCHANGED' ? '••••••••••••••••' : 'sk-...'} 
-         className={`w-full p-4 rounded-xl border text-sm font-mono focus:ring-2 focus:ring-accent/20 outline-none transition-all ${isDarkMode ? 'bg-surface-raised border-edge text-content' : 'bg-surface-inset border-edge text-content'}`} 
-        />
-       </div>
-      </div>
-      
-      <div className="space-y-2 mb-6">
-       <label className="text-xs font-semibold uppercase tracking-normal text-content-muted ml-1">System Prompt (Instrucciones)</label>
-       <textarea 
-        rows={5} 
-        value={aiPrompt}
-        onChange={(e) => setAiPrompt(e.target.value)}
-        placeholder="Eres un asistente experto..." 
-        className={`w-full p-4 rounded-xl border text-sm font-medium focus:ring-2 focus:ring-accent/20 outline-none transition-all resize-y ${isDarkMode ? 'bg-surface-raised border-edge text-content' : 'bg-surface-inset border-edge text-content'}`} 
-       />
-      </div>
-
-      <div className="flex justify-end items-center gap-4">
-       {aiSaveSuccess && <span className="text-sm font-bold text-emerald-500 flex items-center gap-1"><CheckCircle2 size={16} /> Guardado</span>}
-       <button 
-        onClick={saveAiConfig}
-        disabled={isSavingAi}
-        className="px-6 py-3 bg-accent text-content rounded-xl font-semibold text-sm shadow-sm hover:bg-accent-dark transition-all disabled:opacity-50"
-       >
-        {isSavingAi ? 'Guardando...' : 'Guardar Configuración'}
-       </button>
-      </div>
-    </div>
+    {/* AI Configuration Moved to Builder */}
 
     {/* Footer Info Section */}
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
