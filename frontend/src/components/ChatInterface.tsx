@@ -546,9 +546,8 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     {activeChatData ? (
      <>
       {/* Header */}
-      <div className={`py-1.5 sm:h-16 flex-shrink-0 flex items-center justify-between px-3 sm:px-6 border-b z-30 transition-colors ${dc ? 'bg-surface/90 border-edge' : 'bg-surface border-edge'}`}>
-       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4 overflow-hidden min-w-0 w-full sm:w-auto">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+      <div className={`py-1.5 sm:h-16 flex-shrink-0 flex items-center justify-between px-2 sm:px-6 border-b z-30 transition-colors ${dc ? 'bg-surface/90 border-edge' : 'bg-surface border-edge'}`}>
+       <div className="flex items-center gap-1 sm:gap-4 overflow-hidden min-w-0 flex-1">
          <button onClick={() => setActiveChat(null)} className={`lg:hidden p-1.5 -ml-1 rounded-full transition-colors shrink-0 ${dc ? 'text-content-muted hover:bg-surface-raised' : 'text-content-secondary hover:bg-slate-100'}`}>
           <ArrowLeft size={18} />
          </button>
@@ -557,34 +556,48 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 border sm:border-2 border-white dark:border-[#1E1E1E] rounded-full"></div>
          </div>
          <div className="truncate min-w-0 flex-1">
-          <h3 className={`text-xs sm:text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>
-           {activeChatData.name}
-          </h3>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            <h3 className={`text-xs sm:text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>
+             {activeChatData.name}
+            </h3>
+            {/* Status badge hidden on mobile, shown on desktop */}
+            {activeChatData.leadId && (
+              <div
+               className="hidden sm:block px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider shadow-sm text-center"
+               style={pipelineHelpers.getStatusBadgeStyle(activeChatData.status || 'Nuevo')}
+              >
+               {activeChatData.status || 'Nuevo'}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 mt-0.5">
            <span className="text-content-muted text-[10px] sm:text-xs truncate">+{activeChatData.id.split('@')[0]}</span>
+           
+           {/* Bot Icon on mobile (next to phone) */}
+           {activeChatData.leadId && (
+            <button 
+             title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
+             onClick={() => toggleBot(activeChatData.leadId)} 
+             className={`sm:hidden p-0.5 rounded transition-all active:scale-90 flex items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}
+            >
+             <Bot size={10} className={activeChatData.botActive ? 'animate-pulse' : ''} />
+            </button>
+           )}
+           
+           {/* Status badge on mobile */}
+           {activeChatData.leadId && (
+              <div
+               className="sm:hidden px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shrink-0"
+               style={pipelineHelpers.getStatusBadgeStyle(activeChatData.status || 'Nuevo')}
+              >
+               {activeChatData.status || 'Nuevo'}
+              </div>
+            )}
           </div>
          </div>
-        </div>
-        {activeChatData.leadId && (
-         <div className="flex items-center gap-2 sm:ml-2 pl-9 sm:pl-0">
-          <div
-           className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-sm text-center"
-           style={pipelineHelpers.getStatusBadgeStyle(activeChatData.status || 'Nuevo')}
-          >
-           {activeChatData.status || 'Nuevo'}
-          </div>
-          <button 
-           title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
-           onClick={() => toggleBot(activeChatData.leadId)} 
-           className={`p-1 sm:p-1.5 rounded-lg sm:rounded-xl transition-all active:scale-90 flex items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
-          >
-           <Bot size={14} className={activeChatData.botActive ? 'animate-pulse' : ''} />
-          </button>
-         </div>
-        )}
        </div>
        
-       <div className="flex items-center gap-2">
+       <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
         <div className={`hidden sm:flex items-center p-1 rounded-xl transition-colors ${dc ? 'bg-surface-raised/50' : 'bg-slate-100'}`}>
           <button onClick={() => toggleN8nMode(false)} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${!useN8n ? 'bg-accent text-content shadow-lg' : 'text-content-muted hover:text-content-muted'}`}>Bot local</button>
           <button onClick={() => toggleN8nMode(true)} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${useN8n ? 'bg-accent text-content shadow-lg' : 'text-content-muted hover:text-content-muted'}`}>Bot n8n</button>
@@ -595,11 +608,23 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           <button onClick={() => toggleN8nMode(true)} className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${useN8n ? 'bg-accent text-content shadow-lg' : 'text-content-muted hover:text-content-muted'}`}>Bot n8n</button>
         </div>
         <div className="w-px h-6 mx-1 bg-slate-200 dark:bg-surface-raised hidden sm:block"></div>
-        <a href={`https://wa.me/${activeChatData.id.split('@')[0]}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className="p-2 rounded-xl text-accent transition-all active:scale-90 hover:bg-accent/10 flex items-center justify-center">
-         <Phone size={16} />
+        
+        {/* Desktop bot icon */}
+        {activeChatData.leadId && (
+          <button 
+           title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
+           onClick={() => toggleBot(activeChatData.leadId)} 
+           className={`hidden sm:flex p-1.5 rounded-xl transition-all active:scale-90 items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
+          >
+           <Bot size={14} className={activeChatData.botActive ? 'animate-pulse' : ''} />
+          </button>
+        )}
+
+        <a href={`https://wa.me/${activeChatData.id.split('@')[0]}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className="p-1.5 sm:p-2 rounded-xl text-accent transition-all active:scale-90 hover:bg-accent/10 flex items-center justify-center">
+         <Phone size={14} className="sm:w-4 sm:h-4" />
         </a>
         <div className="relative">
-         <button onClick={() => setShowMenu(!showMenu)} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised text-content-muted' : 'hover:bg-slate-100 text-content-muted'} ${showMenu ? 'bg-surface-raised' : ''}`}><MoreVertical size={16} /></button>
+         <button onClick={() => setShowMenu(!showMenu)} className={`p-1.5 sm:p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised text-content-muted' : 'hover:bg-slate-100 text-content-muted'} ${showMenu ? 'bg-surface-raised' : ''}`}><MoreVertical size={14} className="sm:w-4 sm:h-4" /></button>
          {showMenu && (
           <div className={`absolute right-0 top-full mt-2 w-48 rounded-xl shadow-lg border z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${dc ? 'bg-surface border-edge' : 'bg-white border-edge-light'}`}>
            <div className={`px-3 py-2 border-b text-[10px] font-bold uppercase tracking-wider ${dc ? 'border-edge text-content-muted' : 'border-edge-light text-content-muted'}`}>Cambiar estado</div>
