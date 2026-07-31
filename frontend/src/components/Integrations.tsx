@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Workflow, Save, CheckCircle2, AlertCircle } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useToast } from './Toast';
 
 interface IntegrationsProps {
   isDarkMode: boolean;
@@ -11,6 +11,7 @@ export default function Integrations({ isDarkMode }: IntegrationsProps) {
   const [hubspotEnabled, setHubspotEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetchIntegrations();
@@ -33,7 +34,7 @@ export default function Integrations({ isDarkMode }: IntegrationsProps) {
         }
       }
     } catch (err) {
-      toast.error('Error al cargar integraciones');
+      showToast('Error al cargar integraciones', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -59,12 +60,12 @@ export default function Integrations({ isDarkMode }: IntegrationsProps) {
       });
       
       if (res.ok) {
-        toast.success('Integración con HubSpot guardada');
+        showToast('Integración con HubSpot guardada', 'success');
       } else {
-        toast.error('Error al guardar integración');
+        showToast('Error al guardar integración', 'error');
       }
     } catch (err) {
-      toast.error('Error de red al guardar');
+      showToast('Error de red al guardar', 'error');
     } finally {
       setIsSaving(false);
     }
