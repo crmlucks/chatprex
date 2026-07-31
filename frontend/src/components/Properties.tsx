@@ -235,11 +235,11 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
       </div>
       
       <div className="flex items-center gap-1 md:gap-2 shrink-0">
-       <button onClick={handleDownloadTemplate} className={`p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Descargar plantilla CSV">
+       <button onClick={handleDownloadTemplate} className={`hidden p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Descargar plantilla CSV">
         <Download size={16} />
        </button>
        <input type="file" accept=".csv" ref={csvInputRef} onChange={handleCsvUpload} className="hidden" />
-       <button onClick={() => csvInputRef.current?.click()} className={`p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Importar Propiedades CSV">
+       <button onClick={() => csvInputRef.current?.click()} className={`hidden p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Importar Propiedades CSV">
         <Upload size={16} />
        </button>
        <div className={`flex p-1 rounded-xl shrink-0 ${isDarkMode ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
@@ -361,14 +361,14 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
        <table className="w-full text-left">
           <thead>
            <tr className={`text-[9px] md:text-[11px] font-bold text-content-muted uppercase tracking-wider border-b ${isDarkMode ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge'}`}>
-             <th className="px-3 py-2 md:px-5 md:py-4">Propiedad</th>
-             <th className="px-3 py-2 md:px-5 md:py-4">Proyecto</th>
-             <th className="px-3 py-2 md:px-5 md:py-4">Estado</th>
-             <th className="px-3 py-2 md:px-5 md:py-4 text-right">Precio</th>
-             <th className="px-3 py-2 md:px-5 md:py-4 text-right">Área</th>
-             <th className="px-3 py-2 md:px-5 md:py-4 hidden lg:table-cell">Ubicación</th>
-             <th className="px-3 py-2 md:px-5 md:py-4 hidden xl:table-cell">Detalles</th>
-             <th className="px-3 py-2 md:px-5 md:py-4 text-right">Acciones</th>
+             <th className="px-3 py-1.5 md:px-5 md:py-2">Propiedad</th>
+             <th className="px-3 py-1.5 md:px-5 md:py-2">Proyecto</th>
+             <th className="px-3 py-1.5 md:px-5 md:py-2">Estado</th>
+             <th className="px-3 py-1.5 md:px-5 md:py-2 text-right">Precio</th>
+             <th className="px-3 py-1.5 md:px-5 md:py-2 text-right">Área</th>
+             <th className="px-3 py-1.5 md:px-5 md:py-2 hidden lg:table-cell">Ubicación</th>
+             <th className="px-3 py-1.5 md:px-5 md:py-2 hidden xl:table-cell">Detalles</th>
+             <th className="px-3 py-1.5 md:px-5 md:py-2 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className={`divide-y ${isDarkMode ? 'divide-edge' : 'divide-slate-100'}`}>
@@ -376,55 +376,55 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
             const isBuilding = !['terreno','deposito'].includes(p.type?.toLowerCase() || '');
             return (
              <tr key={p.id} className="hover:bg-surface-inset transition-colors group">
-               <td className="px-3 py-2 md:px-5 md:py-3">
+               <td className="px-3 py-1 md:px-5 md:py-1.5">
                 <div className="flex items-center gap-2 md:gap-3">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg overflow-hidden border border-edge shrink-0 bg-surface-inset">
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg overflow-hidden border border-edge shrink-0 bg-surface-inset">
                    {p.avatar ? <img src={resolveUrl(p.avatar)} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-content-muted"><Home size={16} /></div>}
                   </div>
                   <div className="min-w-0">
-                   <div className="font-bold text-xs md:text-sm text-content truncate max-w-[120px] md:max-w-[180px]">{p.name}</div>
-                   <div className="text-[9px] md:text-[11px] font-medium text-content-muted mt-0.5 capitalize">{p.type}</div>
+                   <div className="font-bold text-xs md:text-[13px] text-content truncate max-w-[120px] md:max-w-[180px]">{p.name}</div>
+                   <div className="text-[9px] md:text-[10px] font-medium text-content-muted mt-0.5 capitalize">{p.type}</div>
                   </div>
                 </div>
                </td>
-               <td className="px-3 py-2 md:px-5 md:py-3">
+               <td className="px-3 py-1 md:px-5 md:py-1.5">
                 <span className="text-[10px] md:text-xs font-bold text-accent">{p.project || '—'}</span>
                </td>
-               <td className="px-3 py-2 md:px-5 md:py-3">
-                <span className={`text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg capitalize ${p.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-500' : p.status === 'reservado' ? 'bg-amber-500/10 text-amber-500' : 'bg-rose-500/10 text-rose-500'}`}>{p.status}</span>
+               <td className="px-3 py-1 md:px-5 md:py-1.5">
+                <span className={`text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-0.5 rounded-lg capitalize ${p.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-500' : p.status === 'reservado' ? 'bg-amber-500/10 text-amber-500' : 'bg-rose-500/10 text-rose-500'}`}>{p.status}</span>
                </td>
-               <td className="px-3 py-2 md:px-5 md:py-3 text-right">
+               <td className="px-3 py-1 md:px-5 md:py-1.5 text-right">
                 <div className="text-[10px] md:text-xs font-black text-content">{p.currency} {Number(p.price).toLocaleString()}</div>
                </td>
-               <td className="px-3 py-2 md:px-5 md:py-3 text-right">
+               <td className="px-3 py-1 md:px-5 md:py-1.5 text-right">
                 <span className="text-[10px] md:text-xs font-bold text-content-muted">{p.area ? `${p.area} m²` : '—'}</span>
                </td>
-               <td className="px-3 py-2 md:px-5 md:py-3 hidden lg:table-cell">
+               <td className="px-3 py-1 md:px-5 md:py-1.5 hidden lg:table-cell">
                 <div className="flex items-center gap-1.5 max-w-[200px]">
                  <MapPin size={12} className="shrink-0 text-accent/60" />
                  <span className="text-[10px] md:text-xs text-content-muted truncate">{p.location || '—'}</span>
                 </div>
                </td>
-               <td className="px-3 py-2 md:px-5 md:py-3 hidden xl:table-cell">
-                <div className="flex flex-col gap-1.5">
+               <td className="px-3 py-1 md:px-5 md:py-1.5 hidden xl:table-cell">
+                <div className="flex flex-col gap-1">
                  {isBuilding && (
-                  <div className="flex gap-1.5 flex-wrap">
-                   {p.rooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500">{p.rooms} hab</span>}
-                   {p.bathrooms && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-500">{p.bathrooms} baños</span>}
-                   {p.parking && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-500">{p.parking} est.</span>}
-                   {p.floor && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500">P{p.floor}</span>}
+                  <div className="flex gap-1 flex-wrap">
+                   {p.rooms && <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-blue-500/10 text-blue-500">{p.rooms} hab</span>}
+                   {p.bathrooms && <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-cyan-500/10 text-cyan-500">{p.bathrooms} ba</span>}
+                   {p.parking && <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-violet-500/10 text-violet-500">{p.parking} est</span>}
+                   {p.floor && <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-amber-500/10 text-amber-500">P{p.floor}</span>}
                   </div>
                  )}
                  {(p.details || p.notes) && (
-                   <p className="text-[10px] text-content-muted italic line-clamp-2 max-w-[200px]" title={p.details || p.notes}>"{p.details || p.notes}"</p>
+                   <p className="text-[9px] text-content-muted italic line-clamp-1 max-w-[200px]" title={p.details || p.notes}>"{p.details || p.notes}"</p>
                  )}
                 </div>
                </td>
-               <td className="px-3 py-2 md:px-5 md:py-3 text-right">
+               <td className="px-3 py-1 md:px-5 md:py-1.5 text-right">
                 <div className="flex justify-end gap-1">
-                  <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || [], featured: p.featured ?? false, visible: p.visible ?? true}); setShowModal(true); }} className={`p-1.5 md:p-2 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
+                  <button onClick={() => { setFormData({...p, bathrooms: p.bathrooms || '', parking: p.parking || '', floor: p.floor || '', notes: p.details || p.notes || '', avatar: p.avatar || '', images: p.images || [], featured: p.featured ?? false, visible: p.visible ?? true}); setShowModal(true); }} className={`p-1 md:p-1.5 rounded-lg transition-all ${isDarkMode ? 'text-content-muted hover:text-accent hover:bg-surface-raised' : 'text-content-muted hover:text-accent hover:bg-slate-100'}`}><Edit2 size={14} /></button>
                   {(user?.role === 'propietario' || user?.role === 'administrador') && (
-                    <button onClick={() => deleteProperty(p.id)} className="p-1.5 md:p-2 rounded-lg text-rose-400 hover:text-rose-50 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
+                    <button onClick={() => deleteProperty(p.id)} className="p-1 md:p-1.5 rounded-lg text-rose-400 hover:text-rose-50 hover:bg-rose-50 transition-all"><Trash2 size={14} /></button>
                   )}
                 </div>
                </td>

@@ -545,48 +545,48 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     {activeChatData ? (
      <>
       {/* Header */}
-      <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 sm:px-6 border-b z-30 transition-colors ${dc ? 'bg-surface/90 border-edge' : 'bg-surface border-edge'}`}>
-       <div className="flex items-center gap-3 sm:gap-4 overflow-hidden min-w-0">
-        <button onClick={() => setActiveChat(null)} className={`lg:hidden p-2 -ml-2 rounded-full transition-colors shrink-0 ${dc ? 'text-content-muted hover:bg-surface-raised' : 'text-content-secondary hover:bg-slate-100'}`}>
-         <ArrowLeft size={20} />
-        </button>
-        <div className="relative group cursor-pointer shrink-0">
-         <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-10 h-10 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-edge'}`} />
-         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-[#1E1E1E] rounded-full"></div>
-        </div>
-        <div className="flex items-center gap-2 overflow-hidden min-w-0">
-         <div className="truncate min-w-0">
-          <h3 className={`text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>
+      <div className={`py-1.5 sm:h-16 flex-shrink-0 flex items-center justify-between px-3 sm:px-6 border-b z-30 transition-colors ${dc ? 'bg-surface/90 border-edge' : 'bg-surface border-edge'}`}>
+       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4 overflow-hidden min-w-0 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+         <button onClick={() => setActiveChat(null)} className={`lg:hidden p-1.5 -ml-1 rounded-full transition-colors shrink-0 ${dc ? 'text-content-muted hover:bg-surface-raised' : 'text-content-secondary hover:bg-slate-100'}`}>
+          <ArrowLeft size={18} />
+         </button>
+         <div className="relative group cursor-pointer shrink-0">
+          <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-edge'}`} />
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 border sm:border-2 border-white dark:border-[#1E1E1E] rounded-full"></div>
+         </div>
+         <div className="truncate min-w-0 flex-1">
+          <h3 className={`text-xs sm:text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>
            {activeChatData.name}
           </h3>
-          <div className="flex items-center gap-2">
-           <span className="text-content-muted text-xs truncate">+{activeChatData.id.split('@')[0]}</span>
+          <div className="flex items-center gap-1">
+           <span className="text-content-muted text-[10px] sm:text-xs truncate">+{activeChatData.id.split('@')[0]}</span>
           </div>
          </div>
-         {activeChatData.leadId && (
-          <div className="flex items-center gap-2">
-           <select
-            value={activeChatData.status || 'Nuevo'}
-            onChange={(e) => handleChangeStatus(activeChatData.leadId!, e.target.value)}
-            className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm border-none outline-none cursor-pointer appearance-none text-center"
-            style={pipelineHelpers.getStatusBadgeStyle(activeChatData.status || 'Nuevo')}
-           >
-            {pipelineHelpers.stages.map(stage => (
-             <option key={stage.id} value={stage.name} className={`${dc ? 'bg-[#1E1E1E] text-white' : 'bg-white text-black'}`}>
-              {stage.name}
-             </option>
-            ))}
-           </select>
-           <button 
-            title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
-            onClick={() => toggleBot(activeChatData.leadId)} 
-            className={`p-1.5 rounded-xl transition-all active:scale-90 flex items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
-           >
-            <Bot size={16} className={activeChatData.botActive ? 'animate-pulse' : ''} />
-           </button>
-          </div>
-         )}
         </div>
+        {activeChatData.leadId && (
+         <div className="flex items-center gap-2 sm:ml-2 pl-9 sm:pl-0">
+          <select
+           value={activeChatData.status || 'Nuevo'}
+           onChange={(e) => handleChangeStatus(activeChatData.leadId!, e.target.value)}
+           className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-sm border-none outline-none cursor-pointer appearance-none text-center"
+           style={pipelineHelpers.getStatusBadgeStyle(activeChatData.status || 'Nuevo')}
+          >
+           {pipelineHelpers.stages.map(stage => (
+            <option key={stage.id} value={stage.name} className={`${dc ? 'bg-[#1E1E1E] text-white' : 'bg-white text-black'}`}>
+             {stage.name}
+            </option>
+           ))}
+          </select>
+          <button 
+           title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
+           onClick={() => toggleBot(activeChatData.leadId)} 
+           className={`p-1 sm:p-1.5 rounded-lg sm:rounded-xl transition-all active:scale-90 flex items-center justify-center ${activeChatData.botActive ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
+          >
+           <Bot size={14} className={activeChatData.botActive ? 'animate-pulse' : ''} />
+          </button>
+         </div>
+        )}
        </div>
        
        <div className="flex items-center gap-2">
@@ -595,16 +595,21 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           <button onClick={() => toggleN8nMode(true)} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${useN8n ? 'bg-accent text-content shadow-lg' : 'text-content-muted hover:text-content-muted'}`}>Bot n8n</button>
         </div>
         <div className="w-px h-6 mx-2 bg-slate-200 dark:bg-surface-raised hidden sm:block"></div>
-        <a href={`https://wa.me/${activeChatData.id.split('@')[0]}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className="p-2.5 rounded-xl text-accent transition-all active:scale-90 hover:bg-accent/10 flex items-center justify-center">
-         <Phone size={18} />
+        <div className={`hidden sm:flex items-center p-0.5 rounded-xl transition-colors ${dc ? 'bg-surface-raised/50' : 'bg-slate-100'}`}>
+          <button onClick={() => toggleN8nMode(false)} className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${!useN8n ? 'bg-accent text-content shadow-lg' : 'text-content-muted hover:text-content-muted'}`}>Bot local</button>
+          <button onClick={() => toggleN8nMode(true)} className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${useN8n ? 'bg-accent text-content shadow-lg' : 'text-content-muted hover:text-content-muted'}`}>Bot n8n</button>
+        </div>
+        <div className="w-px h-6 mx-1 bg-slate-200 dark:bg-surface-raised hidden sm:block"></div>
+        <a href={`https://wa.me/${activeChatData.id.split('@')[0]}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className="p-2 rounded-xl text-accent transition-all active:scale-90 hover:bg-accent/10 flex items-center justify-center">
+         <Phone size={16} />
         </a>
-        <button className={`p-2.5 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised text-content-muted' : 'hover:bg-slate-100 text-content-muted'}`}><MoreVertical size={18} /></button>
+        <button className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised text-content-muted' : 'hover:bg-slate-100 text-content-muted'}`}><MoreVertical size={16} /></button>
        </div>
       </div>
 
-      <div className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar transition-all ${dc ? 'bg-[#0f0f0f]' : 'bg-[#efeae2]'}`}
+      <div className={`flex-1 overflow-y-auto custom-scrollbar relative p-2 transition-all ${dc ? 'bg-[#0f0f0f]' : 'bg-[#efeae2]'}`}
          style={!dc ? { backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")', backgroundSize: '400px', opacity: 0.8 } : {}}>
-       <div className="p-4 md:p-6 flex flex-col gap-4 min-h-full">
+       <div className="p-2 md:p-4 flex flex-col gap-1.5 md:gap-3 min-h-full">
         <div className="flex justify-center mb-2">
          <span className={`px-4 py-1 rounded-full text-xs font-bold uppercase tracking-normal shadow-sm ${dc ? 'bg-surface-raised/80 text-content-muted' : 'bg-surface/80 text-content-muted'}`}>Hoy</span>
         </div>
@@ -658,7 +663,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           </div>
         </div>
       )}
-      <div className={`p-6 border-t z-30 relative transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge shadow-[0_-4px_12px_rgba(0,0,0,0.02)]'}`}>
+      <div className={`p-4 border-t z-30 relative transition-colors ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge shadow-[0_-4px_12px_rgba(0,0,0,0.02)]'}`}>
        {selectedFile && mediaBase64 && (
          <div className="mb-3 relative inline-block animate-in fade-in slide-in-from-bottom-2 duration-200">
            {selectedFile.type.startsWith('image/') ? (
@@ -677,10 +682,10 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
            </button>
          </div>
        )}
-       <div className={`flex items-center gap-1.5 md:gap-3 p-1.5 md:p-2 rounded-2xl border transition-all ${dc ? 'bg-surface-raised border-edge focus-within:border-accent/50' : 'bg-surface-inset border-edge focus-within:border-accent/50 focus-within:bg-surface focus-within:shadow-none'}`}>
+       <div className={`flex items-center gap-1.5 md:gap-3 p-1 rounded-2xl border transition-all ${dc ? 'bg-surface-raised border-edge focus-within:border-accent/50' : 'bg-surface-inset border-edge focus-within:border-accent/50 focus-within:bg-surface focus-within:shadow-none'}`}>
         <div className="flex items-center gap-1 pl-1">
          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-         <button onClick={() => fileInputRef.current?.click()} className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-accent hover:bg-accent/10' : 'text-content-muted hover:text-accent hover:bg-accent/10'}`}>
+         <button onClick={() => fileInputRef.current?.click()} className={`p-2 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-accent hover:bg-accent/10' : 'text-content-muted hover:text-accent hover:bg-accent/10'}`}>
           <Paperclip size={20} />
          </button>
         </div>
@@ -690,11 +695,11 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          onChange={(e) => setInputText(e.target.value)}
          onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
          placeholder="Escribe un mensaje..."
-         className={`flex-1 w-full min-w-0 bg-transparent py-2 md:py-3 px-1 md:px-2 text-sm font-medium focus:outline-none resize-none max-h-32 custom-scrollbar ${dc ? 'text-content placeholder-slate-600' : 'text-content placeholder-slate-400'}`}
+         className={`flex-1 w-full min-w-0 bg-transparent py-2 px-1 text-sm font-medium focus:outline-none resize-none max-h-32 custom-scrollbar ${dc ? 'text-content placeholder-slate-600' : 'text-content placeholder-slate-400'}`}
         />
-        <div className="flex items-center gap-1 md:gap-2 pr-1">
-          <button className={`p-2 md:p-3 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-emerald-500 hover:bg-emerald-500/10' : 'text-content-muted hover:text-emerald-500 hover:bg-emerald-500/10'}`}><Smile size={20} /></button>
-          <button onClick={handleSendMessage} className="bg-accent text-content p-3 md:p-4 rounded-2xl transition-all active:scale-90 hover:bg-accent-dark shadow-sm shadow-accent/30 flex items-center justify-center">
+        <div className="flex items-center gap-1 pr-1">
+          <button className={`p-2 rounded-xl transition-all active:scale-95 ${dc ? 'text-content-muted hover:text-emerald-500 hover:bg-emerald-500/10' : 'text-content-muted hover:text-emerald-500 hover:bg-emerald-500/10'}`}><Smile size={20} /></button>
+          <button onClick={handleSendMessage} className="bg-accent text-content p-3 rounded-xl transition-all active:scale-90 hover:bg-accent-dark shadow-sm shadow-accent/30 flex items-center justify-center">
            <Send size={18} />
           </button>
         </div>
@@ -801,8 +806,6 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       </div>
      )}
     </div>
-
-   {/* 3. Right Sidebar: Quick Replies */}
   </div>
  );
 };
@@ -811,11 +814,11 @@ const ChatItem = ({ name, message, time, unread, active, status, onClick, isDark
  const dc = isDarkMode;
 
  return (
-  <div onClick={onClick} className={`flex items-center gap-3 md:gap-4 p-3 md:p-4 cursor-pointer rounded-2xl transition-all active:scale-[0.98] relative group ${active ? (dc ? 'bg-accent/10 ' : 'bg-accent/5') : (dc ? 'hover:bg-surface-raised/50' : 'hover:bg-surface-inset')}`}>
-   {active && <div className="absolute left-0 top-3 bottom-3 md:top-4 md:bottom-4 w-1 bg-accent rounded-r-full"></div>}
+  <div onClick={onClick} className={`flex items-center gap-2.5 md:gap-4 p-2 md:p-3 cursor-pointer rounded-xl md:rounded-2xl transition-all active:scale-[0.98] relative group ${active ? (dc ? 'bg-accent/10 ' : 'bg-accent/5') : (dc ? 'hover:bg-surface-raised/50' : 'hover:bg-surface-inset')}`}>
+   {active && <div className="absolute left-0 top-2 bottom-2 md:top-3 md:bottom-3 w-1 bg-accent rounded-r-full"></div>}
    <div className="relative shrink-0">
-    <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-10 h-10 md:w-14 md:h-14 rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-white'}`} />
-    {unread > 0 && <div className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-rose-500 rounded-full border-2 text-content text-[10px] md:text-xs font-semibold flex items-center justify-center shadow-lg animate-bounce border-white dark:border-slate-900">{unread}</div>}
+    <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-white'}`} />
+    {unread > 0 && <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-500 rounded-full border-2 text-content text-[9px] md:text-xs font-semibold flex items-center justify-center shadow-lg animate-bounce border-white dark:border-slate-900">{unread}</div>}
    </div>
    <div className="flex-1 min-w-0">
     <div className="flex justify-between items-center mb-1">
@@ -838,18 +841,18 @@ const Message = ({ type, text, time, media, mimeType, isDarkMode }: any) => {
  const isOut = type === 'out';
  return (
   <div className={`flex flex-col ${isOut ? 'items-end' : 'items-start'} group animate-in slide-in-from-bottom-2 duration-300 w-full`}>
-   <div className={`relative max-w-[85%] sm:max-w-[75%] md:max-w-[65%] rounded-2xl p-4 shadow-sm transition-all hover:shadow-md ${isOut ? 'bg-accent text-white rounded-tr-sm' : (dc ? 'bg-surface text-content border border-edge rounded-tl-sm' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-sm')}`}>
+   <div className={`relative max-w-[85%] sm:max-w-[75%] md:max-w-[65%] rounded-xl md:rounded-2xl p-2 md:p-3 shadow-sm transition-all hover:shadow-md ${isOut ? 'bg-accent text-white rounded-tr-sm' : (dc ? 'bg-surface text-content border border-edge rounded-tl-sm' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-sm')}`}>
     {media && mimeType?.startsWith('image/') && (
-     <img src={media} className="max-w-full sm:max-w-xs rounded-2xl mb-3 cursor-pointer hover:opacity-95 transition-opacity border border-white/10 shadow-lg" alt="Media" />
+     <img src={media} className="max-w-full sm:max-w-xs rounded-xl md:rounded-2xl mb-1 md:mb-2 cursor-pointer hover:opacity-95 transition-opacity border border-white/10 shadow-sm" alt="Media" />
     )}
     {media && mimeType?.startsWith('video/') && (
-     <video src={media} controls className="max-w-full sm:max-w-xs rounded-2xl mb-3 shadow-lg" />
+     <video src={media} controls className="max-w-full sm:max-w-xs rounded-xl md:rounded-2xl mb-1 md:mb-2 shadow-sm" />
     )}
     {media && mimeType?.startsWith('audio/') && (
-     <audio src={media} controls className="max-w-full sm:max-w-xs mb-3 opacity-95 h-10" />
+     <audio src={media} controls className="max-w-full sm:max-w-xs mb-1 md:mb-2 h-8 md:h-10 opacity-95" />
     )}
     {media && !mimeType?.startsWith('image/') && !mimeType?.startsWith('video/') && !mimeType?.startsWith('audio/') && (
-      <a href={media} download className={`flex items-center gap-3 p-4 rounded-2xl mb-3 text-sm font-bold truncate transition-all ${dc ? 'bg-surface/5 hover:bg-surface/10' : 'bg-black/5 hover:bg-black/10'}`}>
+      <a href={media} download className={`flex items-center gap-3 p-3 rounded-xl mb-1 text-sm font-bold truncate transition-all ${dc ? 'bg-surface/5 hover:bg-surface/10' : 'bg-black/5 hover:bg-black/10'}`}>
        <Paperclip size={18} /> Archivo adjunto
       </a>
     )}
