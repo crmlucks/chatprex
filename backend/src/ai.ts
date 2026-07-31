@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import pool from './db';
+import { syncLeadToHubspot } from './hubspotIntegration';
 
 // Memoria a corto plazo para no perder el contexto de la conversación
 const conversationHistory: Record<string, { role: 'system' | 'user' | 'assistant', content: string }[]> = {};
@@ -425,10 +426,11 @@ ${advisorText}
             }
           }
           else if (functionName === 'actualizar_nombre') {
-            await pool.query(
-              "UPDATE leads SET name = $1 WHERE id = $2",
+            const updRes = await pool.query(
+              "UPDATE leads SET name = $1 WHERE id = $2 RETURNING *",
               [args.nuevo_nombre, leadId]
             );
+            if (updRes.rowCount > 0) syncLeadToHubspot(updRes.rows[0]);
             conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Nombre del lead actualizado exitosamente a ${args.nuevo_nombre} en la base de datos CRM.` } as any);
           }
           else if (functionName === 'registrar_perfil_lead') {
@@ -444,10 +446,11 @@ ${advisorText}
                 p_interest = p_interest ? p_interest + " | " + args.detalles_interes : args.detalles_interes;
               }
               
-              await pool.query(
-                "UPDATE leads SET project = $1, budget = $2, interest = $3 WHERE id = $4",
+              const updLeadRes = await pool.query(
+                "UPDATE leads SET project = $1, budget = $2, interest = $3 WHERE id = $4 RETURNING *",
                 [p_project, p_budget, p_interest, leadId]
               );
+              if (updLeadRes.rowCount > 0) syncLeadToHubspot(updLeadRes.rows[0]);
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Perfil del cliente (proyecto, presupuesto e intereses) actualizado exitosamente en el CRM." } as any);
             } else {
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Error: No se pudo actualizar el perfil porque el lead no existe." } as any);

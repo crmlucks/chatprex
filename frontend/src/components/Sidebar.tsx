@@ -103,11 +103,12 @@ const Sidebar = ({ activeTab, setActiveTab, isDarkMode, setIsDarkMode, userRole 
               label="Integraciones" 
               isOpen={openGroup === 'integraciones'} 
               onToggle={() => toggleGroup('integraciones')}
-              active={['Conexión WP', 'Constructor Bots', 'Automatización'].includes(activeTab)}
+              active={['Conexión WP', 'Constructor Bots', 'Automatización', 'HubSpot'].includes(activeTab)}
             >
               <SubNavItem onClick={() => { setActiveTab('Conexión WP'); setIsMobileOpen(false); }} label="Conexión Whatsapp" active={activeTab === 'Conexión WP'} />
               <SubNavItem onClick={() => { setActiveTab('Constructor Bots'); setIsMobileOpen(false); }} label="Entrenamiento IA" active={activeTab === 'Constructor Bots'} />
               <SubNavItem onClick={() => { setActiveTab('Automatización'); setIsMobileOpen(false); }} label="Automatización" active={activeTab === 'Automatización'} />
+              <SubNavItem onClick={() => { setActiveTab('HubSpot'); setIsMobileOpen(false); }} label="HubSpot CRM" active={activeTab === 'HubSpot'} />
             </NavGroup>
           )}
 

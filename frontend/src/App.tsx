@@ -21,6 +21,7 @@ import ChatbotBuilder from './components/ChatbotBuilder';
 import Campaigns from './components/Campaigns';
 import LeadIntelligence from './components/LeadIntelligence';
 import UserManagement from './components/UserManagement';
+import Integrations from './components/Integrations';
 import { ToastProvider } from './components/Toast';
 import AlarmSystem, { AlarmItem } from './components/AlarmSystem';
 import { Bot, Loader2, Home } from 'lucide-react';
@@ -240,6 +241,7 @@ function AuthenticatedApp() {
    case 'Constructor Bots': return <ChatbotBuilder isDarkMode={isDarkMode} />;
    case 'Configuración': return <Admin isDarkMode={isDarkMode} defaultTab="portal" />;
    case 'Automatización': return <Automation isDarkMode={isDarkMode} />;
+   case 'HubSpot': return <Integrations isDarkMode={isDarkMode} />;
    case 'Usuarios': return <UserManagement isDarkMode={isDarkMode} />;
    case 'Reseñas': return <ReviewsAdmin isDarkMode={isDarkMode} />;
    default: return (

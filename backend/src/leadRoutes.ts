@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from './db';
 import { authMiddleware, requireRole } from './authMiddleware';
+import { syncLeadToHubspot } from './hubspotIntegration';
 
 const leadRouter = express.Router();
 
@@ -52,6 +53,10 @@ leadRouter.post('/', authMiddleware, async (req, res) => {
         interest: newLead.interest || 'Comprar'
       });
     }
+    
+    // HubSpot Sync
+    syncLeadToHubspot(newLead);
+    
     res.status(201).json(newLead);
   } catch (error) {
     console.error('Error creating lead', error);

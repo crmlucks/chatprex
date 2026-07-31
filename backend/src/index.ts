@@ -24,6 +24,7 @@ import { portalSettingsRouter } from './portalSettingsRoutes';
 import { uploadRouter } from './uploadRoutes';
 import { dataDeletionRouter } from './metaDataDeletion';
 import reviewRouter from './reviewRoutes';
+import integrationRoutes from './integrationRoutes';
 
 const app = express();
 const server = http.createServer(app);
@@ -57,6 +58,7 @@ app.use('/api/analytics', analyticsRouter);
 app.use('/api/portal-settings', portalSettingsRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/reviews', reviewRouter);
+app.use('/api/integrations', integrationRoutes);
 
 // ─── Rutas de WhatsApp ───
 app.use('/api/webhook/meta', whatsappRouter);

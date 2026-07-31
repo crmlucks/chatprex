@@ -434,6 +434,18 @@ export async function initDatabase() {
       `);
     }
 
+    // Crear tabla integrations para configuraciones externas (HubSpot, etc.)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS integrations (
+        id            SERIAL PRIMARY KEY,
+        provider      VARCHAR(100) NOT NULL UNIQUE,
+        api_key       TEXT DEFAULT '',
+        enabled       BOOLEAN DEFAULT false,
+        config        JSONB DEFAULT '{}'::jsonb,
+        updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
     console.log('[DB] Base de datos sincronizada correctamente (incluye proyectos, pipeline, fuentes y portal_settings)');
 
     // Add new columns if they don't exist (for existing installs)
