@@ -215,7 +215,10 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
      const chatsList = await res.json();
      const chatsObj: Record<string, Chat> = {};
      chatsList.forEach((c: any) => {
-      chatsObj[c.id] = c;
+      chatsObj[c.id] = {
+        ...c,
+        time: c.timestamp ? new Date(c.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : c.time
+      };
      });
      
      setChats(prev => ({
@@ -260,7 +263,10 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
        ...prev,
        [activeChat]: {
         ...existingChat,
-        messages: messages,
+        messages: messages.map((m: any) => ({
+          ...m,
+          time: m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : m.time
+        })),
         lastMessage: messages.length > 0 ? messages[messages.length - 1].text : existingChat.lastMessage
        }
       };
