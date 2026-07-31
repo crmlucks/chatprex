@@ -74,6 +74,32 @@ export default function Integrations({ isDarkMode }: IntegrationsProps) {
     }
   };
 
+  const testHubspot = async () => {
+    setIsTesting(true);
+    try {
+      if (!token) return;
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const res = await fetch(`${API_URL}/api/integrations/test-hubspot`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ api_key: hubspotKey })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || 'Conexión a HubSpot exitosa.', 'success');
+      } else {
+        showToast(`Error de HubSpot: ${data.error}`, 'error');
+      }
+    } catch (err: any) {
+      showToast('Error al intentar probar la conexión: ' + err.message, 'error');
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Header */}
