@@ -46,6 +46,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [messageGrouping, setMessageGrouping] = useState(true);
  const [humanizedSplit, setHumanizedSplit] = useState(true);
  const [humanHandoff, setHumanHandoff] = useState(true);
+ const [isOrchestrator, setIsOrchestrator] = useState(false);
  const [activationKeywords, setActivationKeywords] = useState('info,precio,quiero,asesor,comprar');
 
  // Simulator
@@ -79,6 +80,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
    setMessageGrouping(selected.messageGrouping !== false);
    setHumanizedSplit(selected.humanizedSplit !== false);
    setHumanHandoff(selected.humanHandoff !== false);
+   setIsOrchestrator(selected.is_orchestrator === true);
    setActivationKeywords(selected.activationKeywords || 'info,precio,quiero,asesor,comprar');
    setApiKey('');
   }
@@ -120,6 +122,7 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     messageGrouping,
     humanizedSplit,
     humanHandoff,
+    is_orchestrator: isOrchestrator,
     activationKeywords,
    };
    const res = await fetch(`${API_URL}/api/ai-config`, {
@@ -404,7 +407,33 @@ const ChatbotBuilder = ({ isDarkMode }: { isDarkMode?: boolean }) => {
          </label>
         </div>
        ))}
-       <div className={`${cardCls} flex-col items-start gap-4`}>
+        <div className={cardCls}>
+         <div className="flex items-center gap-5 pr-4">
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${dc ? 'bg-emerald-500/10 text-emerald-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+            <Network size={18} />
+          </div>
+          <div>
+           <h4 className={`text-sm font-bold ${dc ? 'text-content' : 'text-content'}`}>Convertir en Orquestador</h4>
+           <p className="body-text text-xs mt-0.5">Delega conversaciones a otros Bots automáticamente según la intención del cliente.</p>
+          </div>
+         </div>
+         <label className="relative inline-flex items-center cursor-pointer shrink-0">
+          <input type="checkbox" className="sr-only peer" checked={isOrchestrator} onChange={() => setIsOrchestrator(!isOrchestrator)} />
+          <div className="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+         </label>
+        </div>
+
+        {isOrchestrator && (
+         <div className={`p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-sm`}>
+           <h5 className="font-bold text-emerald-500 mb-1 flex items-center gap-2"><Bot size={16} /> Modo Orquestador Activo</h5>
+           <p className="text-content-secondary leading-relaxed">
+             Este bot no responderá preguntas directas sobre el inventario. En cambio, usará IA para leer los mensajes, 
+             entender qué busca el cliente, y <b>transferirá silenciosamente la conversación</b> al Bot Especialista correspondiente (Ventas, Soporte, etc).
+           </p>
+         </div>
+        )}
+
+        <div className={`${cardCls} flex-col items-start gap-4`}>
          <div className="w-full">
           <h4 className={`text-sm font-bold ${dc ? 'text-content' : 'text-content'}`}>Palabras clave de activación</h4>
           <p className="body-text text-xs mb-4">El bot se activará al detectar estos términos en el chat.</p>

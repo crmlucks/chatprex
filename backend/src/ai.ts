@@ -22,7 +22,7 @@ async function getAIConfig(phone: string) {
     const leadRes = await pool.query('SELECT bot_id FROM leads WHERE phone = $1', [phone]);
     const botId = leadRes.rowCount > 0 && leadRes.rows[0].bot_id ? leadRes.rows[0].bot_id : 1;
     
-    const res = await pool.query('SELECT name, provider, model, api_key, deepseek_api_key, prompt, knowledge, human_handoff, activation_keywords FROM ai_config WHERE id = $1', [botId]);
+    const res = await pool.query('SELECT name, provider, model, api_key, deepseek_api_key, prompt, knowledge, human_handoff, activation_keywords, is_orchestrator FROM ai_config WHERE id = $1', [botId]);
     if (res.rowCount > 0) {
       return { ...res.rows[0], botId };
     }
@@ -129,6 +129,8 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
   const apiKey = config?.api_key || process.env.OPENAI_API_KEY || '';
   const knowledge = config?.knowledge || '';
   const humanHandoff = config?.human_handoff !== false;
+  const isOrchestrator = config?.is_orchestrator === true;
+  const currentBotId = config?.botId || 1;
 
   // Handoff: detectar si el usuario pide hablar con un humano
   if (humanHandoff) {
@@ -223,6 +225,27 @@ ${advisorText}
   // Agregar base de conocimiento al system prompt
   if (knowledge) {
     systemPrompt += `\n\n--- BASE DE CONOCIMIENTO MANUAL ---\n${knowledge}\n---`;
+  }
+
+  // Si es orquestador, inyectar lista de sub-bots y comportamiento de enrutamiento
+  if (isOrchestrator) {
+    try {
+      const botsRes = await pool.query('SELECT id, name, prompt, knowledge FROM ai_config WHERE id != $1 AND is_orchestrator = false', [currentBotId]);
+      if (botsRes.rowCount > 0) {
+        systemPrompt += `\n\n--- MODO ORQUESTADOR ACTIVO ---
+ATENCIÓN: Tu rol principal es ENRUTAR al cliente hacia el Asistente Especialista correcto. 
+Aquí tienes la lista de especialistas disponibles:
+`;
+        botsRes.rows.forEach(b => {
+          systemPrompt += `- BOT ID ${b.id}: Nombre "${b.name}". Conocimiento principal: ${b.knowledge ? b.knowledge.substring(0, 150) + '...' : (b.prompt ? b.prompt.substring(0, 150) + '...' : 'General')}\n`;
+        });
+        systemPrompt += `
+REGLA DE ENRUTAMIENTO: Si el cliente pregunta por un proyecto específico, un tema financiero o requiere soporte técnico que coincida con uno de los Bot Especialistas de la lista de arriba, DEBES OBLIGATORIAMENTE ejecutar la función "transferir_conversacion" con el BOT ID correspondiente.
+No intentes responder tú si otro bot está mejor capacitado. Al ejecutar la función, la conversación se transferirá automáticamente.`;
+      }
+    } catch (e) {
+      console.error("[AI] Error cargando sub-bots para orquestador:", e);
+    }
   }
 
   // Agregar inventario en tiempo real
@@ -373,6 +396,23 @@ ${advisorText}
       }
     ];
 
+    if (isOrchestrator) {
+      tools.push({
+        type: "function",
+        function: {
+          name: "transferir_conversacion",
+          description: "Transfiere la conversación del cliente actual a un bot especialista diferente.",
+          parameters: {
+            type: "object",
+            properties: {
+              bot_id: { type: "integer", description: "El ID del bot al que se desea transferir al usuario." }
+            },
+            required: ["bot_id"]
+          }
+        }
+      });
+    }
+
     let completion = await openai.chat.completions.create({
       model: model,
       messages: conversationHistory[fromJid] as any,
@@ -470,8 +510,6 @@ ${advisorText}
           }
           else if (functionName === 'solicitar_multimedia_proyecto') {
             let urls: string[] = [];
-            
-            // 1. Primero buscar imágenes registradas en el inventario de PROPIEDADES asociadas a este proyecto
             const propRes = await pool.query(
               "SELECT avatar, images FROM properties WHERE project ILIKE $1 OR name ILIKE $1 LIMIT 6", 
               [`%${args.proyecto}%`]
@@ -509,6 +547,20 @@ ${advisorText}
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: `Encontré ${urls.length} imágenes. DEBES incluir EXACTAMENTE esta etiqueta al final de tu respuesta al cliente: [MEDIA:${urls.join('|')}]` } as any);
             } else {
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "No hay fotos registradas para este proyecto en la base de datos." } as any);
+            }
+          }
+          else if (functionName === 'transferir_conversacion' && isOrchestrator) {
+            const targetBotId = args.bot_id;
+            const verifyBotRes = await pool.query("SELECT id FROM ai_config WHERE id = $1", [targetBotId]);
+            if (verifyBotRes.rowCount > 0) {
+              await pool.query("UPDATE leads SET bot_id = $1 WHERE id = $2", [targetBotId, leadId]);
+              console.log(`[Orquestador] Lead transferido al Bot ID ${targetBotId}`);
+              delete conversationHistory[fromJid]; // Limpiar historial para el nuevo bot
+              
+              // Inmediatamente derivar al nuevo bot especialista para mantener la fluidez
+              return await generateAIResponse(fromJid, textMessage);
+            } else {
+              conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "El bot especificado no existe." } as any);
             }
           }
         } catch (e: any) {

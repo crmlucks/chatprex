@@ -161,6 +161,7 @@ export async function initDatabase() {
         message_grouping BOOLEAN DEFAULT true,
         humanized_split BOOLEAN DEFAULT true,
         human_handoff BOOLEAN DEFAULT true,
+        is_orchestrator BOOLEAN DEFAULT false,
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
@@ -169,6 +170,7 @@ export async function initDatabase() {
       await client.query('ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS name VARCHAR(150);');
       await client.query('ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS activation_keywords TEXT;');
       await client.query('ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS deepseek_api_key VARCHAR(255) DEFAULT \'\';');
+      await client.query('ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS is_orchestrator BOOLEAN DEFAULT false;');
     } catch(e) {}
 
     // Crear tabla tasks (para Tareas, Citas, y Calendario)
