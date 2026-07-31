@@ -69,12 +69,16 @@ function AuthenticatedApp() {
       .filter((t: any) => t.status !== 'completada' && t.status !== 'cancelada')
       .map((t: any) => {
        const dateObj = t.due_date ? new Date(t.due_date) : new Date();
+       const yyyy = dateObj.getFullYear();
+       const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+       const dd = String(dateObj.getDate()).padStart(2, '0');
+       
        return {
         id: t.id.toString(),
         title: t.title || 'Recordatorio pendiente',
         type: (t.type?.toLowerCase() === 'cita' ? 'cita' : 'tarea') as 'cita' | 'tarea',
         subtype: t.type,
-        dueDate: dateObj.toISOString().split('T')[0],
+        dueDate: `${yyyy}-${mm}-${dd}`,
         dueTime: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
         leadName: t.lead_name || '',
         priority: t.description || 'media'
