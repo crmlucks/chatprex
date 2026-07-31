@@ -32,18 +32,27 @@ export async function syncLeadToHubspot(leadData: any) {
     // Primero, buscar si existe el contacto por email (si hay email)
     let contactId = null;
     
+    // Preparar filtros de búsqueda (OR: busca por email o por teléfono)
+    const filterGroups = [];
     if (leadData.email) {
+      filterGroups.push({
+        filters: [{ propertyName: 'email', operator: 'EQ', value: leadData.email }]
+      });
+    }
+    if (leadData.phone) {
+      filterGroups.push({
+        filters: [{ propertyName: 'phone', operator: 'EQ', value: leadData.phone }]
+      });
+    }
+
+    if (filterGroups.length > 0) {
       const searchRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts/search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${api_key}`
         },
-        body: JSON.stringify({
-          filterGroups: [{
-            filters: [{ propertyName: 'email', operator: 'EQ', value: leadData.email }]
-          }]
-        })
+        body: JSON.stringify({ filterGroups })
       });
       if (searchRes.ok) {
         const searchData: any = await searchRes.json();
