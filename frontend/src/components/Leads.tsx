@@ -1081,17 +1081,17 @@ const NewLeadModal = ({ editLead, isDarkMode, onClose, onSave, pipelineStages }:
  const labelCls = `text-[10px] font-bold text-content-muted mb-1 block ml-1 uppercase tracking-tight`;
 
  return (
-  <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-300">
-   <div className={`w-full max-w-2xl rounded-xl border shadow-sm overflow-hidden flex flex-col max-h-[90vh] ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
-    <div className={`px-8 py-5 border-b flex justify-between items-center shrink-0 ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
+  <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center sm:p-4 bg-black/60 animate-in fade-in duration-300">
+   <div className={`w-full max-w-2xl h-[92vh] sm:h-auto rounded-t-2xl sm:rounded-xl border shadow-sm overflow-hidden flex flex-col sm:max-h-[90vh] ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
+    <div className={`px-4 sm:px-8 py-3 sm:py-5 border-b flex justify-between items-center shrink-0 ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset border-edge-light'}`}>
      <div>
       <h2 className="h2">{editLead ? 'Editar lead' : 'Nuevo lead'}</h2>
       <p className="small-text mt-0.5">Registro completo del prospecto</p>
      </div>
-     <button onClick={onClose} className={`p-2 rounded-xl transition-all ${dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-surface border text-content-muted hover:text-content shadow-sm'}`}><X size={20} /></button>
+     <button onClick={onClose} className={`p-2 rounded-xl transition-all ${dc ? 'bg-surface-raised text-content-muted hover:text-content' : 'bg-surface border text-content-muted hover:text-content shadow-sm'}`}><X size={18} /></button>
     </div>
     
-    <div className="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
+    <div className="p-4 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
      {/* Datos Personales */}
      <div className="space-y-3">
       <p className="text-[9px] font-bold uppercase tracking-wider text-accent">Datos de contacto</p>

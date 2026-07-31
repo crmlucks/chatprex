@@ -166,34 +166,35 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
    <div className="max-w-7xl mx-auto space-y-6">
     
     {/* Header */}
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-     <div className="flex items-center gap-4">
-       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${dc ? 'bg-accent/20 text-accent' : 'bg-accent/10 text-accent border border-edge shadow-sm'}`}>
-        <Megaphone size={20} />
+    <div className="flex items-center justify-between gap-3">
+     <div className="flex items-center gap-3">
+       <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0 ${dc ? 'bg-accent/20 text-accent' : 'bg-accent/10 text-accent border border-edge shadow-sm'}`}>
+        <Megaphone size={18} />
        </div>
        <div>
-        <h1 className="text-xl font-bold tracking-tight text-content">Campañas y Automatización</h1>
-        <p className="text-[10px] font-bold text-content-muted uppercase tracking-wider">Envíos masivos y seguimientos</p>
+        <h1 className="h1">Campañas</h1>
+        <p className="body-text">Envíos masivos y seguimientos</p>
        </div>
      </div>
-     <button onClick={() => openModal()} className="btn-primary flex items-center gap-2 px-4 py-2 text-xs">
-       <Plus size={16} />
-       <span>Crear campaña</span>
+     <button onClick={() => openModal()} className="btn-primary flex items-center gap-2">
+       <Plus size={15} />
+       <span className="hidden sm:inline">Crear campaña</span>
+       <span className="sm:hidden">Nueva</span>
      </button>
     </div>
 
     {/* Toolbar */}
-    <div className="flex gap-3 items-center">
-      <div className="relative flex-1 max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
-        <input type="text" placeholder="Buscar campañas..." className={`${inputClass} pl-10`} />
+    <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+      <div className="relative w-full sm:max-w-xs">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
+        <input type="text" placeholder="Buscar campañas..." className={`${inputClass} pl-9 w-full`} />
       </div>
-       <div className={`flex p-1 rounded-xl ${dc ? 'bg-surface-raised border border-edge' : 'bg-white border border-edge shadow-sm'}`}>
+       <div className={`flex p-1 rounded-xl overflow-x-auto max-w-full ${dc ? 'bg-surface-raised border border-edge' : 'bg-white border border-edge shadow-sm'}`}>
          {['Todas', 'Activas', 'Seguimiento', 'Post Venta', 'Borradores'].map(t => (
            <button 
              key={t}
              onClick={() => setListTab(t)}
-             className={`px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${listTab === t ? 'bg-accent text-content shadow-sm' : 'text-content-muted hover:text-content'}`}
+             className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all shrink-0 ${listTab === t ? 'bg-accent text-content shadow-sm' : 'text-content-muted hover:text-content'}`}
            >
              {t}
            </button>
@@ -262,8 +263,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
     {/* Modal Windows */}
     {showModal && (
-     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className={`w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
+     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm">
+      <div className={`w-full max-w-4xl h-[95vh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl border shadow-2xl overflow-hidden ${dc ? 'bg-surface border-edge' : 'bg-surface border-edge'}`}>
        
        {/* Modal Header */}
        <div className={`px-6 py-4 border-b flex justify-between items-center ${dc ? 'bg-surface-raised/50 border-edge' : 'bg-surface-inset/50 border-slate-100'}`}>

@@ -211,47 +211,44 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
  return (
   <div className={`flex-1 flex flex-col h-[calc(100vh-4rem)] md:h-full pb-24 md:pb-0 ${isDarkMode ? 'bg-surface-base' : 'bg-surface-base'}`}>
-    
-    <div className={`py-4 md:py-0 md:h-24 px-6 md:px-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shrink-0 transition-all ${isDarkMode ? 'bg-surface border-b border-edge' : 'bg-surface border-b border-edge shadow-sm'}`}>
+    <div className={`py-3 md:py-0 md:h-20 px-4 md:px-10 flex flex-row items-center justify-between gap-3 shrink-0 transition-all ${isDarkMode ? 'bg-surface border-b border-edge' : 'bg-surface border-b border-edge shadow-sm'}`}>
      
-     {/* Left side: Title + View Toggle */}
-     <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-start">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent shrink-0">
-         <Home size={22} />
-        </div>
-        <div className="flex flex-col">
-         <h1 className="h1">Propiedades</h1>
-         <p className="body-text mt-0.5 hidden md:block">Gestión de inventario inmobiliario</p>
-        </div>
-      </div>
-      </div>
+     {/* Left side: Title */}
+     <div className="flex items-center gap-2.5">
+       <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center bg-accent/10 text-accent shrink-0">
+        <Home size={17} />
+       </div>
+       <div className="flex flex-col">
+        <h1 className="h1">Propiedades</h1>
+        <p className="body-text hidden md:block">Gestión de inventario inmobiliario</p>
+       </div>
+     </div>
 
      {/* Right side: Search, Filters, Add Button */}
-     <div className="flex items-center justify-between gap-1.5 md:gap-3 w-full md:w-auto">
-      <div className="relative flex-1 min-w-0 md:w-64">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={14} />
-        <input type="text" placeholder="Buscar propiedad..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-9 pr-4 py-2 md:py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-full ${isDarkMode ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
+     <div className="flex items-center justify-end gap-1.5 md:gap-2 flex-1 min-w-0 ml-3">
+      <div className="relative flex-1 min-w-0 max-w-xs hidden sm:block">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={13} />
+        <input type="text" placeholder="Buscar propiedad..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-8 pr-4 py-1.5 md:py-2 rounded-xl border text-xs font-medium outline-none transition-all w-full ${isDarkMode ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
       </div>
       
-      <div className="flex items-center gap-1 md:gap-2 shrink-0">
-       <button onClick={handleDownloadTemplate} className={`hidden p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Descargar plantilla CSV">
-        <Download size={16} />
+      <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
+       <button onClick={handleDownloadTemplate} className={`hidden md:block p-1.5 md:p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Descargar plantilla CSV">
+        <Download size={15} />
        </button>
        <input type="file" accept=".csv" ref={csvInputRef} onChange={handleCsvUpload} className="hidden" />
-       <button onClick={() => csvInputRef.current?.click()} className={`hidden p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Importar Propiedades CSV">
-        <Upload size={16} />
+       <button onClick={() => csvInputRef.current?.click()} className={`hidden md:block p-1.5 md:p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Importar Propiedades CSV">
+        <Upload size={15} />
        </button>
-       <div className={`flex p-1 rounded-xl shrink-0 ${isDarkMode ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
-        <button onClick={() => setViewMode('grid')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'grid' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutGrid size={14} className="md:w-4 md:h-4" /></button>
-        <button onClick={() => setViewMode('list')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={14} className="md:w-4 md:h-4" /></button>
+       <div className={`flex p-0.5 rounded-xl shrink-0 ${isDarkMode ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
+        <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutGrid size={13} /></button>
+        <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={13} /></button>
        </div>
-       <button onClick={() => setShowFilters(!showFilters)} className={`p-2 md:p-2.5 rounded-xl border transition-colors shrink-0 ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
-        <Filter size={16} />
+       <button onClick={() => setShowFilters(!showFilters)} className={`p-1.5 md:p-2 rounded-xl border transition-colors shrink-0 ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
+        <Filter size={15} />
        </button>
-       <button onClick={() => { resetForm(); setShowModal(true); }} className="btn-primary flex items-center justify-center shrink-0 w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2.5 gap-2">
-        <Plus size={16} />
-        <span className="hidden md:inline">Agregar propiedad</span>
+       <button onClick={() => { resetForm(); setShowModal(true); }} className="btn-primary flex items-center justify-center shrink-0 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-2 gap-1.5">
+        <Plus size={15} />
+        <span className="hidden md:inline text-xs">Agregar</span>
        </button>
       </div>
      </div>
@@ -442,11 +439,11 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
     {/* MODAL FORM */}
     {showModal && (
-     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50">
-       <div className="w-full max-w-2xl rounded-xl border border-edge bg-surface overflow-hidden flex flex-col shadow-lg">
+     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 bg-black/50">
+       <div className="w-full max-w-2xl h-[92vh] sm:h-auto sm:max-h-[85vh] rounded-t-2xl sm:rounded-xl border border-edge bg-surface overflow-hidden flex flex-col shadow-lg">
         
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-edge flex justify-between items-center bg-surface-inset">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-edge flex justify-between items-center bg-surface-inset">
           <div>
            <h2 className="h2">{formData.id ? 'Editar propiedad' : 'Nueva propiedad'}</h2>
            <p className="label-text mt-0.5">Complete los detalles de la unidad</p>
@@ -455,7 +452,7 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 max-h-[70vh]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
            {/* Form Grid */}
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">

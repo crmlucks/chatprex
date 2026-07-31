@@ -94,34 +94,34 @@ type DateFilter = 'hoy' | 'semana' | 'mes' | 'todas';
    <div className="max-w-7xl mx-auto space-y-8">
 
     {/* Header */}
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="flex flex-row justify-between items-center gap-3">
      <div className="flex items-center gap-3">
-       <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent">
-        <LayoutDashboard size={22} />
+       <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent shrink-0">
+        <LayoutDashboard size={18} />
        </div>
        <div>
-        <h1 className="h1">Hola, {user?.name || 'Usuario'}</h1>
-        <p className="body-text text-sm">Resumen operativo Casaya</p>
+        <h1 className="h1">Hola, {user?.name?.split(' ')[0] || 'Usuario'}</h1>
+        <p className="body-text hidden sm:block">Resumen operativo Casaya</p>
        </div>
      </div>
-     <div className="flex items-center gap-3 w-full md:w-auto">
-      <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-edge bg-surface text-content-secondary">
-       <CalendarIcon size={14} className="text-accent" />
-       <span className="text-xs font-medium">{new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+     <div className="flex items-center gap-2">
+      <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg border border-edge bg-surface text-content-secondary">
+       <CalendarIcon size={13} className="text-accent" />
+       <span className="text-xs font-medium">{new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
       </div>
-      <button onClick={fetchAll} className="btn-primary px-3 py-2">
-       <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+      <button onClick={fetchAll} className="btn-primary px-2.5 py-2">
+       <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
       </button>
      </div>
     </div>
 
     {/* KPIs */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-     <StatCard label="Leads totales" value={stats.leads} trend={stats.leadsNew > 0 ? `+${stats.leadsNew}` : ''} icon={<Users size={20} strokeWidth={2.5} />} iconColor="text-blue-500" bgSoft="bg-blue-500/5" glowColor="bg-blue-500" />
-     <StatCard label="Propiedades" value={stats.properties} trend="" icon={<Building2 size={20} strokeWidth={2.5} />} iconColor="text-indigo-500" bgSoft="bg-indigo-500/5" glowColor="bg-indigo-500" />
-     <StatCard label="Efectividad" value={stats.tasks > 0 ? `${Math.round((stats.tasksDone / stats.tasks) * 100)}%` : '0%'} trend={stats.tasksDone > 0 ? `${stats.tasksDone}/${stats.tasks}` : ''} icon={<ListTodo size={20} strokeWidth={2.5} />} iconColor="text-amber-500" bgSoft="bg-amber-500/5" glowColor="bg-amber-500" />
-     <StatCard label="Cierres exitosos" value={stats.leadsClosed} trend={stats.leads > 0 ? `${Math.round((stats.leadsClosed / stats.leads) * 100)}%` : ''} icon={<DollarSign size={20} strokeWidth={2.5} />} iconColor="text-emerald-500" bgSoft="bg-emerald-500/5" glowColor="bg-emerald-500" />
-    </div>
+     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+      <StatCard label="Leads" value={stats.leads} trend={stats.leadsNew > 0 ? `+${stats.leadsNew} nuevos` : ''} icon={<Users size={18} strokeWidth={2.5} />} iconColor="text-blue-500" bgSoft="bg-blue-500/5" glowColor="bg-blue-500" />
+      <StatCard label="Propiedades" value={stats.properties} trend="" icon={<Building2 size={18} strokeWidth={2.5} />} iconColor="text-indigo-500" bgSoft="bg-indigo-500/5" glowColor="bg-indigo-500" />
+      <StatCard label="Efectividad" value={stats.tasks > 0 ? `${Math.round((stats.tasksDone / stats.tasks) * 100)}%` : '0%'} trend={stats.tasksDone > 0 ? `${stats.tasksDone}/${stats.tasks}` : ''} icon={<ListTodo size={18} strokeWidth={2.5} />} iconColor="text-amber-500" bgSoft="bg-amber-500/5" glowColor="bg-amber-500" />
+      <StatCard label="Cierres" value={stats.leadsClosed} trend={stats.leads > 0 ? `${Math.round((stats.leadsClosed / stats.leads) * 100)}%` : ''} icon={<DollarSign size={18} strokeWidth={2.5} />} iconColor="text-emerald-500" bgSoft="bg-emerald-500/5" glowColor="bg-emerald-500" />
+     </div>
 
     {/* Main Content Grid */}
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -323,11 +323,11 @@ type DateFilter = 'hoy' | 'semana' | 'mes' | 'todas';
 
 const StatCard = ({ label, value, trend, icon, iconColor, bgSoft, glowColor }: any) => {
  const iconBg = bgSoft.replace('/5', '/10');
- const bgIcon = React.cloneElement(icon, { size: 110, strokeWidth: 1.5 });
+ const bgIcon = React.cloneElement(icon, { size: 80, strokeWidth: 1.5 });
  return (
-  <div className={`card p-4 sm:p-5 group transition-all duration-300 hover:-translate-y-1 ${bgSoft} border-transparent relative overflow-hidden`}>
+  <div className={`card p-3 sm:p-4 group transition-all duration-300 hover:-translate-y-0.5 ${bgSoft} border-transparent relative overflow-hidden`}>
    {/* Large background icon */}
-   <div className={`absolute -bottom-6 -right-6 opacity-[0.04] dark:opacity-[0.06] ${iconColor} pointer-events-none transform -rotate-12 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6`}>
+   <div className={`absolute -bottom-4 -right-4 opacity-[0.04] dark:opacity-[0.06] ${iconColor} pointer-events-none transform -rotate-12 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6`}>
      {bgIcon}
    </div>
 
@@ -335,18 +335,18 @@ const StatCard = ({ label, value, trend, icon, iconColor, bgSoft, glowColor }: a
    <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-3xl opacity-20 dark:opacity-30 ${glowColor} pointer-events-none`}></div>
    
     <div className="relative z-10">
-     <div className="flex justify-between items-start mb-3 sm:mb-4">
-      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center ${iconBg} ${iconColor} shadow-inner border border-white/5`}>
-       {React.cloneElement(icon, { size: 18 })}
+     <div className="flex justify-between items-start mb-2">
+      <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center ${iconBg} ${iconColor} shadow-inner border border-white/5`}>
+       {React.cloneElement(icon, { size: 15 })}
       </div>
       {trend && (
-       <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs font-bold border border-emerald-500/20">
-         <ArrowUpRight size={12} strokeWidth={2.5} /> {trend}
+       <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] sm:text-[10px] font-bold border border-emerald-500/20">
+         <ArrowUpRight size={10} strokeWidth={2.5} /> {trend}
        </div>
       )}
      </div>
-     <p className="text-[9px] sm:text-[11px] font-bold text-content-muted uppercase tracking-wider mb-0.5 truncate">{label}</p>
-     <h2 className="text-2xl sm:text-3xl font-black text-content tracking-tight">{value}</h2>
+     <p className="text-[9px] sm:text-[10px] font-semibold text-content-muted tracking-wide mb-0.5 truncate">{label}</p>
+     <h2 className="text-xl sm:text-2xl font-black text-content tracking-tight">{value}</h2>
     </div>
   </div>
  );
