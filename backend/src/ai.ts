@@ -21,7 +21,7 @@ async function getAIConfig(phone: string) {
     const leadRes = await pool.query('SELECT bot_id FROM leads WHERE phone = $1', [phone]);
     const botId = leadRes.rowCount > 0 && leadRes.rows[0].bot_id ? leadRes.rows[0].bot_id : 1;
     
-    const res = await pool.query('SELECT name, provider, model, api_key, prompt, knowledge, human_handoff, activation_keywords FROM ai_config WHERE id = $1', [botId]);
+    const res = await pool.query('SELECT name, provider, model, api_key, deepseek_api_key, prompt, knowledge, human_handoff, activation_keywords FROM ai_config WHERE id = $1', [botId]);
     if (res.rowCount > 0) {
       return { ...res.rows[0], botId };
     }
@@ -57,6 +57,65 @@ export const appendMessageToHistory = (fromJid: string, role: 'user' | 'assistan
 };
 
 /**
+ * Evalúa el interés del lead en segundo plano usando DeepSeek y actualiza la BD.
+ * Esta función no bloquea el flujo principal del bot.
+ */
+const evaluateLeadScoreAsync = async (phone: string, history: any[], configDeepseekKey?: string) => {
+  try {
+    const deepseekKey = configDeepseekKey || process.env.DEEPSEEK_API_KEY;
+    if (!deepseekKey) return; // Si no hay clave configurada, abortar silenciosamente
+
+    const deepseek = new OpenAI({
+      apiKey: deepseekKey,
+      baseURL: 'https://api.deepseek.com',
+    });
+
+    // Construir prompt de evaluación
+    const evaluationPrompt = `
+      Eres un supervisor experto en ventas analizando un chat.
+      Tu único objetivo es determinar el nivel de interés actual del cliente y responder ÚNICAMENTE con un número seguido del signo de porcentaje (ej. 20%, 50%, 90%).
+      
+      Reglas de calificación:
+      - 90% - 100% (Caliente): El cliente solicita agendar cita, pregunta precios específicos, solicita métodos de pago o expresa fuerte intención de compra inmediata.
+      - 70% - 80% (Tibio-Alto): El cliente da datos precisos como su presupuesto, nombre y solicita información técnica, catálogos o fotos.
+      - 40% - 60% (Tibio): El cliente hace preguntas generales o la conversación apenas inicia sin compromiso fuerte.
+      - 10% - 30% (Frío): El cliente indica que "solo está mirando", da respuestas muy cortantes o se muestra reacio.
+      
+      Analiza el siguiente historial de chat y responde SOLO con el porcentaje (ej. "80%"). No escribas ninguna otra palabra.
+    `;
+
+    // Pasamos solo los últimos 6 mensajes para no consumir muchos tokens
+    const recentHistory = history.slice(-6).map(m => ({ role: m.role === 'system' ? 'user' : m.role, content: m.content }));
+    
+    const messages = [
+      { role: 'system', content: evaluationPrompt },
+      ...recentHistory
+    ];
+
+    const completion = await deepseek.chat.completions.create({
+      model: 'deepseek-chat',
+      messages: messages as any,
+      temperature: 0.1,
+      max_tokens: 10,
+    });
+
+    let score = completion.choices[0].message?.content?.trim() || '';
+    
+    // Limpiar respuesta para asegurar que solo contenga "X%" o "XX%" o "XXX%"
+    const scoreMatch = score.match(/(\d+)%/);
+    if (scoreMatch) {
+      score = scoreMatch[0];
+      
+      // Actualizar base de datos silenciosamente
+      await pool.query('UPDATE leads SET score = $1 WHERE phone = $2', [score, phone]);
+      console.log(`[DeepSeek Scoring] Lead ${phone} actualizado a ${score}`);
+    }
+  } catch (e: any) {
+    console.error(`[DeepSeek Scoring] Error evaluando lead ${phone}:`, e.message);
+  }
+};
+
+/**
  * Genera respuesta usando el proveedor configurado
  */
 export const generateAIResponse = async (fromJid: string, textMessage: string): Promise<string> => {
@@ -66,7 +125,7 @@ export const generateAIResponse = async (fromJid: string, textMessage: string): 
   let systemPrompt = config?.prompt || 'Eres un asistente.';
   const provider = config?.provider || 'OpenAI';
   const model = config?.model || 'gpt-4o-mini';
-  const apiKey = config?.api_key || '';
+  const apiKey = config?.api_key || process.env.OPENAI_API_KEY || '';
   const knowledge = config?.knowledge || '';
   const humanHandoff = config?.human_handoff !== false;
 
@@ -454,6 +513,10 @@ ${advisorText}
 
     const aiText = responseMessage.content || 'Cita procesada con éxito.';
     conversationHistory[fromJid].push({ role: 'assistant', content: aiText });
+    
+    // Disparar la evaluación asíncrona (fire-and-forget) sin bloquear
+    evaluateLeadScoreAsync(phone, conversationHistory[fromJid], config?.deepseek_api_key);
+    
     return aiText;
 
   } catch (error: any) {

@@ -1,5 +1,7 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
@@ -161,6 +163,12 @@ export async function initDatabase() {
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    try {
+      await client.query('ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS name VARCHAR(150);');
+      await client.query('ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS activation_keywords TEXT;');
+      await client.query('ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS deepseek_api_key VARCHAR(255) DEFAULT \'\';');
+    } catch(e) {}
 
     // Crear tabla tasks (para Tareas, Citas, y Calendario)
     await client.query(`

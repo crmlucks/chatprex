@@ -7,16 +7,20 @@ const aiConfigRouter = express.Router();
 // Obtener todos los bots
 aiConfigRouter.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, name, provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords FROM ai_config ORDER BY id ASC');
+    const result = await pool.query('SELECT id, name, provider, model, api_key, deepseek_api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords FROM ai_config ORDER BY id ASC');
     if (result.rowCount === 0) {
       // Si no hay ninguno, devolver uno por defecto en el array
-      return res.json([{ id: 1, name: 'Bot Principal', provider: 'OpenAI', model: 'gpt-4o-mini', hasApiKey: false, safeApiKey: '', prompt: '', knowledge: '', activationKeywords: 'info,precio,quiero,asesor,comprar' }]);
+      return res.json([{ id: 1, name: 'Bot Principal', provider: 'OpenAI', model: 'gpt-4o-mini', hasApiKey: false, safeApiKey: '', hasDeepseekKey: false, safeDeepseekKey: '', prompt: '', knowledge: '', activationKeywords: 'info,precio,quiero,asesor,comprar' }]);
     }
     
     const bots = result.rows.map(config => {
       let safeApiKey = config.api_key;
       if (safeApiKey && safeApiKey.length > 10) {
         safeApiKey = safeApiKey.substring(0, 4) + '...' + safeApiKey.substring(safeApiKey.length - 4);
+      }
+      let safeDeepseekKey = config.deepseek_api_key;
+      if (safeDeepseekKey && safeDeepseekKey.length > 10) {
+        safeDeepseekKey = safeDeepseekKey.substring(0, 4) + '...' + safeDeepseekKey.substring(safeDeepseekKey.length - 4);
       }
       return {
         id: config.id,
@@ -27,6 +31,8 @@ aiConfigRouter.get('/', async (req, res) => {
         knowledge: config.knowledge || '',
         hasApiKey: !!config.api_key,
         safeApiKey,
+        hasDeepseekKey: !!config.deepseek_api_key,
+        safeDeepseekKey,
         voiceToText: config.voice_to_text !== false,
         messageGrouping: config.message_grouping !== false,
         humanizedSplit: config.humanized_split !== false,
@@ -44,29 +50,33 @@ aiConfigRouter.get('/', async (req, res) => {
 
 // Crear o Actualizar bot
 aiConfigRouter.post('/', async (req, res) => {
-  const { id, name, provider, model, api_key, prompt, knowledge, voiceToText, messageGrouping, humanizedSplit, humanHandoff, activationKeywords } = req.body;
+  const { id, name, provider, model, api_key, deepseekApiKey, prompt, knowledge, voiceToText, messageGrouping, humanizedSplit, humanHandoff, activationKeywords } = req.body;
   try {
     let apiKeyToSave = api_key;
-    if (id && api_key === 'UNCHANGED') {
-      const check = await pool.query('SELECT api_key FROM ai_config WHERE id = $1', [id]);
-      if (check.rowCount > 0) apiKeyToSave = check.rows[0].api_key;
+    let deepseekKeyToSave = deepseekApiKey;
+    if (id) {
+      const check = await pool.query('SELECT api_key, deepseek_api_key FROM ai_config WHERE id = $1', [id]);
+      if (check.rowCount > 0) {
+        if (api_key === 'UNCHANGED') apiKeyToSave = check.rows[0].api_key;
+        if (deepseekApiKey === 'UNCHANGED') deepseekKeyToSave = check.rows[0].deepseek_api_key;
+      }
     }
 
     if (!id) {
       // Create new
       const result = await pool.query(
-        `INSERT INTO ai_config (name, provider, model, api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
-        [name || 'Nuevo Bot', provider, model, apiKeyToSave || '', prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || '']
+        `INSERT INTO ai_config (name, provider, model, api_key, deepseek_api_key, prompt, knowledge, voice_to_text, message_grouping, humanized_split, human_handoff, activation_keywords)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
+        [name || 'Nuevo Bot', provider, model, apiKeyToSave || '', deepseekKeyToSave || '', prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || '']
       );
       return res.json({ success: true, id: result.rows[0].id });
     } else {
       // Update existing
       await pool.query(
-        `UPDATE ai_config SET name=$1, provider=$2, model=$3, api_key=$4, prompt=$5, knowledge=$6,
-         voice_to_text=$7, message_grouping=$8, humanized_split=$9, human_handoff=$10, activation_keywords=$11, updated_at=NOW()
-         WHERE id=$12`,
-        [name || 'Bot', provider, model, apiKeyToSave || '', prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || '', id]
+        `UPDATE ai_config SET name=$1, provider=$2, model=$3, api_key=$4, deepseek_api_key=$5, prompt=$6, knowledge=$7,
+         voice_to_text=$8, message_grouping=$9, humanized_split=$10, human_handoff=$11, activation_keywords=$12, updated_at=NOW()
+         WHERE id=$13`,
+        [name || 'Bot', provider, model, apiKeyToSave || '', deepseekKeyToSave || '', prompt, knowledge || '', voiceToText !== false, messageGrouping !== false, humanizedSplit !== false, humanHandoff !== false, activationKeywords || '', id]
       );
       return res.json({ success: true, id });
     }
