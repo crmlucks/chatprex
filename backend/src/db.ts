@@ -92,6 +92,7 @@ export async function initDatabase() {
     try {
       await client.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS birth_date VARCHAR(20) DEFAULT \'\';');
       await client.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS provider VARCHAR(50) DEFAULT \'evolution\';');
+      await client.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS bot_id INTEGER DEFAULT 1;');
     } catch(e) {}
 
 
