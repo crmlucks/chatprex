@@ -1552,35 +1552,21 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
 
 
-      {/* 5. FOOTER */}
-      <footer className="mt-auto border-t border-edge bg-surface/50 transition-all pt-16 pb-8 px-6 md:px-12 text-sm text-content-secondary">
+      <footer className="dark mt-auto border-t border-edge bg-[#0f0f11] transition-all pt-16 pb-8 px-6 md:px-12 text-sm text-content-secondary">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-10 mb-12">
 
           {/* Col 1: Marca */}
           <div className="space-y-4 col-span-1">
             <div className="flex items-center gap-3">
-              {isDarkMode ? (
-                portalSettings?.logo_night ? (
-                  <img src={resolveUrl(portalSettings.logo_night)} className="h-8 max-w-[160px] object-contain" alt="Casaya" />
-                ) : (
-                  <>
-                    <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
-                      <Home size={16} />
-                    </div>
-                    <span className="text-lg font-extrabold tracking-tight text-content">Casaya</span>
-                  </>
-                )
+              {portalSettings?.logo_night ? (
+                <img src={resolveUrl(portalSettings.logo_night)} className="h-8 max-w-[160px] object-contain" alt="Casaya" />
               ) : (
-                portalSettings?.logo_day ? (
-                  <img src={resolveUrl(portalSettings.logo_day)} className="h-8 max-w-[160px] object-contain" alt="Casaya" />
-                ) : (
-                  <>
-                    <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
-                      <Home size={16} />
-                    </div>
-                    <span className="text-lg font-extrabold tracking-tight text-content">Casaya</span>
-                  </>
-                )
+                <>
+                  <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
+                    <Home size={16} />
+                  </div>
+                  <span className="text-lg font-extrabold tracking-tight text-white">Casaya</span>
+                </>
               )}
             </div>
             <p className="text-xs leading-relaxed text-content-muted">
@@ -1597,7 +1583,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 <li>
                   <button
                     onClick={() => { setViewMode('portal'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="hover:text-accent transition-colors bg-transparent border-none p-0 cursor-pointer text-content-secondary text-xs font-semibold"
+                    className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-content-secondary text-xs font-semibold"
                   >
                     Inicio
                   </button>
@@ -1605,7 +1591,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 <li>
                   <button
                     onClick={() => { setViewMode('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="hover:text-accent transition-colors bg-transparent border-none p-0 cursor-pointer text-content-secondary text-xs font-semibold"
+                    className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-content-secondary text-xs font-semibold"
                   >
                     Catálogo Completo
                   </button>
@@ -1614,7 +1600,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   <a
                     href="#quienes-somos"
                     onClick={() => setViewMode('portal')}
-                    className="hover:text-accent transition-colors text-content-secondary font-semibold"
+                    className="hover:text-white transition-colors text-content-secondary font-semibold"
                   >
                     Quiénes Somos
                   </a>
@@ -1697,14 +1683,14 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
             <span className="text-[11px] font-medium text-content-muted">Garantía Inmobiliaria Certificada y Protegida</span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-[11px] text-content-muted">
-            <a href="/politicas-privacidad" className="hover:text-accent hover:underline transition-colors font-bold">
+            <a href="/politicas-privacidad" className="hover:text-white hover:underline transition-colors font-bold">
               Políticas de Privacidad
             </a>
-            <span className="hidden sm:inline text-content-muted/30">|</span>
-            <a href="/terminos-de-servicio" className="hover:text-accent hover:underline transition-colors font-bold">
+            <span className="hidden sm:inline text-edge">|</span>
+            <a href="/terminos-de-servicio" className="hover:text-white hover:underline transition-colors font-bold">
               Términos de Servicio
             </a>
-            <span className="hidden sm:inline text-content-muted/30">|</span>
+            <span className="hidden sm:inline text-edge">|</span>
             <span>
               © {new Date().getFullYear()} Casaya.app - Todos los derechos reservados.
             </span>
