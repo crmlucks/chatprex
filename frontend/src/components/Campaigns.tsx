@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Play, Pause, AlertCircle, Settings, Users, MessageSquare, Megaphone, Plus, Trash2, Send, Paperclip, X, Bot, Shield, CheckCircle2, Clock, Search, BarChart3, Upload, FileText, Image as ImageIcon } from 'lucide-react';
+import { Play, Pause, AlertCircle, Settings, Users, MessageSquare, Megaphone, Plus, Trash2, Send, Paperclip, X, Bot, Shield, CheckCircle2, Clock, Search, BarChart3, Upload, FileText, Image as ImageIcon, Star } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePipeline } from '../hooks/usePipeline';
 import { useToast } from './Toast';
