@@ -45,6 +45,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [chatSearch, setChatSearch] = useState('');
  const [showChatFilters, setShowChatFilters] = useState(false);
  const [chatFilterStatus, setChatFilterStatus] = useState('todos');
+ const [showMenu, setShowMenu] = useState(false);
  
  // Quick Replies
  const [showQuickReplies, setShowQuickReplies] = useState(false);
@@ -566,18 +567,12 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         </div>
         {activeChatData.leadId && (
          <div className="flex items-center gap-2 sm:ml-2 pl-9 sm:pl-0">
-          <select
-           value={activeChatData.status || 'Nuevo'}
-           onChange={(e) => handleChangeStatus(activeChatData.leadId!, e.target.value)}
-           className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-sm border-none outline-none cursor-pointer appearance-none text-center"
+          <div
+           className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-sm text-center"
            style={pipelineHelpers.getStatusBadgeStyle(activeChatData.status || 'Nuevo')}
           >
-           {pipelineHelpers.stages.map(stage => (
-            <option key={stage.id} value={stage.name} className={`${dc ? 'bg-[#1E1E1E] text-white' : 'bg-white text-black'}`}>
-             {stage.name}
-            </option>
-           ))}
-          </select>
+           {activeChatData.status || 'Nuevo'}
+          </div>
           <button 
            title={activeChatData.botActive ? "Desactivar Bot" : "Activar Bot IA"} 
            onClick={() => toggleBot(activeChatData.leadId)} 
@@ -603,7 +598,31 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         <a href={`https://wa.me/${activeChatData.id.split('@')[0]}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className="p-2 rounded-xl text-accent transition-all active:scale-90 hover:bg-accent/10 flex items-center justify-center">
          <Phone size={16} />
         </a>
-        <button className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised text-content-muted' : 'hover:bg-slate-100 text-content-muted'}`}><MoreVertical size={16} /></button>
+        <div className="relative">
+         <button onClick={() => setShowMenu(!showMenu)} className={`p-2 rounded-xl transition-all active:scale-90 ${dc ? 'hover:bg-surface-raised text-content-muted' : 'hover:bg-slate-100 text-content-muted'} ${showMenu ? 'bg-surface-raised' : ''}`}><MoreVertical size={16} /></button>
+         {showMenu && (
+          <div className={`absolute right-0 top-full mt-2 w-48 rounded-xl shadow-lg border z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${dc ? 'bg-surface border-edge' : 'bg-white border-edge-light'}`}>
+           <div className={`px-3 py-2 border-b text-[10px] font-bold uppercase tracking-wider ${dc ? 'border-edge text-content-muted' : 'border-edge-light text-content-muted'}`}>Cambiar estado</div>
+           <div className="p-1 max-h-64 overflow-y-auto custom-scrollbar">
+            {pipelineHelpers.stages.map(stage => (
+             <button
+              key={stage.id}
+              onClick={() => {
+               if (activeChatData.leadId) {
+                handleChangeStatus(activeChatData.leadId, stage.name);
+               }
+               setShowMenu(false);
+              }}
+              className={`w-full text-left px-3 py-2 text-xs font-semibold rounded-lg transition-colors flex items-center justify-between ${dc ? 'hover:bg-surface-raised text-content' : 'hover:bg-slate-100 text-content'}`}
+             >
+              {stage.name}
+              {activeChatData.status === stage.name && <CheckCircle2 size={14} className="text-accent" />}
+             </button>
+            ))}
+           </div>
+          </div>
+         )}
+        </div>
        </div>
       </div>
 

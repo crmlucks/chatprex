@@ -265,11 +265,11 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
        <input type="text" placeholder="Buscar lead..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-9 pr-4 py-2 md:py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-full ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
      </div>
      <div className="flex items-center gap-1 md:gap-2 shrink-0">
-       <button onClick={handleDownloadTemplate} className={`p-2 rounded-xl border transition-colors shrink-0 ${dc ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Descargar plantilla CSV">
+       <button onClick={handleDownloadTemplate} className={`hidden md:block p-2 rounded-xl border transition-colors shrink-0 ${dc ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Descargar plantilla CSV">
         <Download size={16} />
        </button>
        <input type="file" accept=".csv" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-       <button onClick={() => fileInputRef.current?.click()} className={`p-2 rounded-xl border transition-colors shrink-0 ${dc ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Importar Leads CSV">
+       <button onClick={() => fileInputRef.current?.click()} className={`hidden md:block p-2 rounded-xl border transition-colors shrink-0 ${dc ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Importar Leads CSV">
         <Upload size={16} />
        </button>
        <div className={`flex p-1 rounded-xl shrink-0 ${dc ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
