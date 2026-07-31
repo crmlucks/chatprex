@@ -12,9 +12,9 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  const [waStatus, setWaStatus] = useState<string>('disconnected');
  const [connectionMode, setConnectionMode] = useState<'qr' | 'meta'>('qr');
  const [qrCountdown, setQrCountdown] = useState(0);
- 
- 
- 
+ const socketRef = useRef<Socket | null>(null);
+ const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+ const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
  /** Normaliza el base64: agrega prefijo data:image si falta */
  const normalizeQR = (qr: string): string => {
