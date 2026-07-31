@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, Building2, Map, LayoutGrid, LayoutList, Search, Plus, Filter, MapPin, X, Edit2, Trash2, Upload, XCircle, Image as ImageIcon, DollarSign, Tag, Info } from 'lucide-react';
+import { Home, Building2, Map, LayoutGrid, LayoutList, Search, Plus, Filter, MapPin, X, Edit2, Trash2, Upload, XCircle, Image as ImageIcon, DollarSign, Tag, Info, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from './Toast';
 
@@ -27,7 +27,57 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
 
  const fileInputRef = useRef<HTMLInputElement>(null);
  const multipleFileInputRef = useRef<HTMLInputElement>(null);
+ const csvInputRef = useRef<HTMLInputElement>(null);
  const [uploadingImage, setUploadingImage] = useState(false);
+
+ const handleDownloadTemplate = () => {
+  const headers = ['name', 'type', 'price', 'currency', 'location', 'rooms', 'bathrooms', 'parking', 'area', 'status', 'developer'];
+  const csvContent = "data:text/csv;charset=utf-8," + headers.join(",");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "plantilla_propiedades.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+ };
+
+ const handleCsvUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  import('papaparse').then((Papa) => {
+   Papa.default.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: async (results) => {
+     try {
+      const res = await fetch(`${API_URL}/api/properties/bulk`, {
+       method: 'POST',
+       headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+       },
+       body: JSON.stringify({ properties: results.data })
+      });
+      if (res.ok) {
+       const data = await res.json();
+       showConfirm(`Importación exitosa. ${data.inserted} propiedades insertadas.`, () => {}, { confirmText: 'OK', cancelText: '' });
+       fetchProperties();
+      } else {
+       showConfirm('Error en la importación masiva', () => {}, { confirmText: 'OK', cancelText: '' });
+      }
+     } catch (err) {
+      console.error('Error importing properties', err);
+     }
+     if (csvInputRef.current) csvInputRef.current.value = '';
+    },
+    error: (error) => {
+     console.error('Error parsing CSV', error);
+    }
+   });
+  });
+ };
 
  const fetchProperties = async () => {
   try {
@@ -185,6 +235,13 @@ export default function Properties({ isDarkMode }: { isDarkMode?: boolean }) {
       </div>
       
       <div className="flex items-center gap-1 md:gap-2 shrink-0">
+       <button onClick={handleDownloadTemplate} className={`p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Descargar plantilla CSV">
+        <Download size={16} />
+       </button>
+       <input type="file" accept=".csv" ref={csvInputRef} onChange={handleCsvUpload} className="hidden" />
+       <button onClick={() => csvInputRef.current?.click()} className={`p-2 rounded-xl border transition-colors shrink-0 ${isDarkMode ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Importar Propiedades CSV">
+        <Upload size={16} />
+       </button>
        <div className={`flex p-1 rounded-xl shrink-0 ${isDarkMode ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
         <button onClick={() => setViewMode('grid')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'grid' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutGrid size={14} className="md:w-4 md:h-4" /></button>
         <button onClick={() => setViewMode('list')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'list' ? (isDarkMode ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={14} className="md:w-4 md:h-4" /></button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Plus, Filter, MessageSquare, Phone, LayoutList, KanbanSquare, Bot, Edit, Trash2, BrainCircuit, X, CheckCircle2, Circle, Calendar, Clock, FileText, ListTodo, Send, Tag, History, CalendarDays, Users } from 'lucide-react';
+import { Search, Plus, Filter, MessageSquare, Phone, LayoutList, KanbanSquare, Bot, Edit, Trash2, BrainCircuit, X, CheckCircle2, Circle, Calendar, Clock, FileText, ListTodo, Send, Tag, History, CalendarDays, Users, Download, Upload } from 'lucide-react';
 import { useToast } from './Toast';
 import AlarmSystem, { AlarmItem } from './AlarmSystem';
 import { useAuth } from '../context/AuthContext';
@@ -40,6 +40,59 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
  const { showToast, showConfirm } = useToast();
  const [alarmItems, setAlarmItems] = useState<AlarmItem[]>([]);
  const { token, user } = useAuth();
+ const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+ const handleDownloadTemplate = () => {
+  const headers = ['name', 'phone', 'email', 'project', 'status', 'budget', 'budget_amount', 'currency', 'source', 'notes'];
+  const csvContent = "data:text/csv;charset=utf-8," + headers.join(",");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "plantilla_leads.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+ };
+
+ const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  import('papaparse').then((Papa) => {
+   Papa.default.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: async (results) => {
+     try {
+      const res = await fetch(`${API_URL}/api/leads/bulk`, {
+       method: 'POST',
+       headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+       },
+       body: JSON.stringify({ leads: results.data })
+      });
+      if (res.ok) {
+       const data = await res.json();
+       showToast(`Importación exitosa. ${data.inserted} leads insertados, ${data.ignored} ignorados.`, 'success');
+       fetchLeads();
+      } else {
+       showToast('Error en la importación masiva', 'error');
+      }
+     } catch (err) {
+      console.error('Error importing leads', err);
+      showToast('Error al importar leads', 'error');
+     }
+     // Limpiar input
+     if (fileInputRef.current) fileInputRef.current.value = '';
+    },
+    error: (error) => {
+     console.error('Error parsing CSV', error);
+     showToast('Error al leer el archivo CSV', 'error');
+    }
+   });
+  });
+ };
 
  const fetchLeads = async () => {
   try {
@@ -212,17 +265,24 @@ const Leads = ({ isDarkMode, setActiveTab }: { isDarkMode?: boolean; setActiveTa
        <input type="text" placeholder="Buscar lead..." value={search} onChange={e => setSearch(e.target.value)} className={`pl-9 pr-4 py-2 md:py-2.5 rounded-xl border text-xs font-medium outline-none transition-all w-full ${dc ? 'bg-surface-raised border-edge text-content focus:border-accent' : 'bg-surface border-edge focus:border-accent shadow-sm'}`} />
      </div>
      <div className="flex items-center gap-1 md:gap-2 shrink-0">
-      <div className={`flex p-1 rounded-xl shrink-0 ${dc ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
-       <button onClick={() => setViewMode('kanban')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><KanbanSquare size={14} className="md:w-4 md:h-4" /></button>
-       <button onClick={() => setViewMode('list')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'list' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={14} className="md:w-4 md:h-4" /></button>
+       <button onClick={handleDownloadTemplate} className={`p-2 rounded-xl border transition-colors shrink-0 ${dc ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Descargar plantilla CSV">
+        <Download size={16} />
+       </button>
+       <input type="file" accept=".csv" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
+       <button onClick={() => fileInputRef.current?.click()} className={`p-2 rounded-xl border transition-colors shrink-0 ${dc ? 'bg-surface border-edge hover:border-accent hover:text-accent' : 'bg-surface border-edge text-content-muted hover:text-content shadow-sm'}`} title="Importar Leads CSV">
+        <Upload size={16} />
+       </button>
+       <div className={`flex p-1 rounded-xl shrink-0 ${dc ? 'bg-surface-raised' : 'bg-surface-inset border border-edge '}`}>
+        <button onClick={() => setViewMode('kanban')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'kanban' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><KanbanSquare size={14} className="md:w-4 md:h-4" /></button>
+        <button onClick={() => setViewMode('list')} className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'list' ? (dc ? 'bg-accent text-content shadow-lg' : 'bg-accent text-content shadow-md') : 'text-content-muted hover:text-content-secondary'}`}><LayoutList size={14} className="md:w-4 md:h-4" /></button>
+       </div>
+       <button onClick={() => setShowFilters(!showFilters)} className={`p-2 md:p-2.5 rounded-xl border transition-colors shrink-0 ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
+        <Filter size={16} />
+       </button>
+       <button onClick={() => setShowNewLead(true)} className="btn-primary flex items-center justify-center shrink-0 w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2.5 gap-2">
+        <Plus size={16} /> <span className="hidden md:inline">Nuevo lead</span>
+       </button>
       </div>
-      <button onClick={() => setShowFilters(!showFilters)} className={`p-2 md:p-2.5 rounded-xl border transition-colors shrink-0 ${showFilters ? 'bg-accent text-content border-accent shadow-sm' : 'bg-surface border-edge text-content-muted hover:text-content'}`}>
-       <Filter size={16} />
-      </button>
-      <button onClick={() => setShowNewLead(true)} className="btn-primary flex items-center justify-center shrink-0 w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2.5 gap-2">
-       <Plus size={16} /> <span className="hidden md:inline">Nuevo lead</span>
-      </button>
-     </div>
     </div>
    </div>
 

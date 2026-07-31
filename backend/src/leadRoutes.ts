@@ -59,6 +59,63 @@ leadRouter.post('/', authMiddleware, async (req, res) => {
   }
 });
 
+// POST bulk leads
+leadRouter.post('/bulk', authMiddleware, async (req, res) => {
+  const { leads } = req.body;
+  if (!Array.isArray(leads)) {
+    return res.status(400).json({ error: 'Expected an array of leads' });
+  }
+  
+  try {
+    const existing = await pool.query('SELECT phone, email FROM leads');
+    const existingPhones = new Set(existing.rows.map(r => r.phone).filter(Boolean));
+    const existingEmails = new Set(existing.rows.map(r => r.email).filter(Boolean));
+    
+    let insertedCount = 0;
+    let ignoredCount = 0;
+    
+    // We do one by one or batch insert. One by one is safe enough for small CSVs (<10k rows)
+    for (const lead of leads) {
+      if ((lead.phone && existingPhones.has(lead.phone)) || 
+          (lead.email && existingEmails.has(lead.email))) {
+        ignoredCount++;
+        continue;
+      }
+      
+      await pool.query(
+        `INSERT INTO leads (name, phone, score, budget, project, status, tags, bot_active, email, source, advisor_id, currency, budget_amount, notes, interest)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+        [
+          lead.name || 'Sin nombre',
+          lead.phone || '',
+          lead.score || '50%',
+          lead.budget || '',
+          lead.project || '',
+          lead.status || 'Nuevo',
+          JSON.stringify(lead.tags || []),
+          lead.botActive || false,
+          lead.email || '',
+          lead.source || 'Importación CSV',
+          lead.advisor_id || null,
+          lead.currency || 'USD',
+          parseFloat(lead.budget_amount) || 0,
+          lead.notes || '',
+          lead.interest || ''
+        ]
+      );
+      
+      insertedCount++;
+      if (lead.phone) existingPhones.add(lead.phone);
+      if (lead.email) existingEmails.add(lead.email);
+    }
+    
+    res.status(200).json({ success: true, inserted: insertedCount, ignored: ignoredCount });
+  } catch (error) {
+    console.error('Error in bulk lead upload', error);
+    res.status(500).json({ error: 'Bulk upload failed' });
+  }
+});
+
 // PUT update lead
 leadRouter.put('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;

@@ -52,6 +52,55 @@ propertyRouter.post('/', authMiddleware, async (req, res) => {
   }
 });
 
+// POST bulk properties
+propertyRouter.post('/bulk', authMiddleware, async (req, res) => {
+  const { properties } = req.body;
+  if (!Array.isArray(properties)) {
+    return res.status(400).json({ error: 'Expected an array of properties' });
+  }
+
+  try {
+    let insertedCount = 0;
+    for (const p of properties) {
+      if (!p.name || !p.price) continue; // Basic validation
+      
+      const propertyDetails = p.notes || p.details || '';
+      const imagesJson = Array.isArray(p.images) ? JSON.stringify(p.images) : '[]';
+      
+      await pool.query(
+        `INSERT INTO properties (type, name, project, developer, price, currency, location, area, rooms, bathrooms, parking, floor, details, status, image, avatar, images, featured, visible)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+        [
+          p.type || 'Departamento', 
+          p.name, 
+          p.project || '', 
+          p.developer || '', 
+          p.price, 
+          p.currency || 'USD', 
+          p.location || '', 
+          p.area || '', 
+          p.rooms || '', 
+          p.bathrooms || '', 
+          p.parking || '', 
+          p.floor || '', 
+          propertyDetails, 
+          p.status || 'Disponible', 
+          p.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80', 
+          p.avatar || '', 
+          imagesJson, 
+          p.featured ?? false, 
+          p.visible ?? true
+        ]
+      );
+      insertedCount++;
+    }
+    res.status(200).json({ success: true, inserted: insertedCount });
+  } catch (error) {
+    console.error('Error in bulk property upload', error);
+    res.status(500).json({ error: 'Bulk upload failed' });
+  }
+});
+
 // PUT update property
 propertyRouter.put('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
