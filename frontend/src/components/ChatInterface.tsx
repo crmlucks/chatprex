@@ -546,24 +546,24 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     {activeChatData ? (
      <>
       {/* Header */}
-      <div className={`py-1.5 sm:h-16 flex-shrink-0 flex items-center justify-between px-2 sm:px-6 border-b z-30 transition-colors ${dc ? 'bg-surface/90 border-edge' : 'bg-surface border-edge'}`}>
-       <div className="flex items-center gap-1 sm:gap-4 overflow-hidden min-w-0 flex-1">
+      <div className={`py-1.5 sm:h-12 flex-shrink-0 flex items-center justify-between px-2 sm:px-4 border-b z-30 transition-colors ${dc ? 'bg-surface/90 border-edge' : 'bg-surface border-edge'}`}>
+       <div className="flex items-center gap-1 sm:gap-3 overflow-hidden min-w-0 flex-1">
          <button onClick={() => setActiveChat(null)} className={`lg:hidden p-1.5 -ml-1 rounded-full transition-colors shrink-0 ${dc ? 'text-content-muted hover:bg-surface-raised' : 'text-content-secondary hover:bg-slate-100'}`}>
           <ArrowLeft size={18} />
          </button>
          <div className="relative group cursor-pointer shrink-0">
-          <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-edge'}`} />
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 border sm:border-2 border-white dark:border-[#1E1E1E] rounded-full"></div>
+          <img src={`https://ui-avatars.com/api/?name=${activeChatData.name}&background=random`} alt="Profile" className={`w-8 h-8 sm:w-8 sm:h-8 rounded-xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-edge'}`} />
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border border-white dark:border-[#1E1E1E] rounded-full"></div>
          </div>
          <div className="truncate min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className={`text-xs sm:text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>
+            <h3 className={`text-xs sm:text-xs font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>
              {activeChatData.name}
             </h3>
             {/* Status badge hidden on mobile, shown on desktop */}
             {activeChatData.leadId && (
               <div
-               className="hidden sm:block px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider shadow-sm text-center"
+               className="hidden sm:block px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shadow-sm text-center"
                style={pipelineHelpers.getStatusBadgeStyle(activeChatData.status || 'Nuevo')}
               >
                {activeChatData.status || 'Nuevo'}
@@ -571,7 +571,7 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
             )}
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
-           <span className="text-content-muted text-[10px] sm:text-xs truncate">+{activeChatData.id.split('@')[0]}</span>
+           <span className="text-content-muted text-[10px] sm:text-[10px] truncate">+{activeChatData.id.split('@')[0]}</span>
            
            {/* Bot Icon on mobile (next to phone) */}
            {activeChatData.leadId && (
@@ -858,20 +858,20 @@ const ChatItem = ({ name, message, time, unread, active, status, onClick, isDark
  const dc = isDarkMode;
 
  return (
-  <div onClick={onClick} className={`flex items-center gap-2.5 md:gap-4 p-2 md:p-3 cursor-pointer rounded-xl md:rounded-2xl transition-all active:scale-[0.98] relative group ${active ? (dc ? 'bg-accent/10 ' : 'bg-accent/5') : (dc ? 'hover:bg-surface-raised/50' : 'hover:bg-surface-inset')}`}>
-   {active && <div className="absolute left-0 top-2 bottom-2 md:top-3 md:bottom-3 w-1 bg-accent rounded-r-full"></div>}
+  <div onClick={onClick} className={`flex items-center gap-2.5 md:gap-2 p-2 md:p-2 cursor-pointer rounded-xl md:rounded-xl transition-all active:scale-[0.98] relative group ${active ? (dc ? 'bg-accent/10 ' : 'bg-accent/5') : (dc ? 'hover:bg-surface-raised/50' : 'hover:bg-surface-inset')}`}>
+   {active && <div className="absolute left-0 top-2 bottom-2 md:top-2 md:bottom-2 w-1 bg-accent rounded-r-full"></div>}
    <div className="relative shrink-0">
-    <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-white'}`} />
-    {unread > 0 && <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-500 rounded-full border-2 text-content text-[9px] md:text-xs font-semibold flex items-center justify-center shadow-lg animate-bounce border-white dark:border-slate-900">{unread}</div>}
+    <img src={`https://ui-avatars.com/api/?name=${name}&background=random`} alt={name} className={`w-9 h-9 md:w-9 md:h-9 rounded-xl md:rounded-xl object-cover shadow-sm border transition-transform group-hover:scale-105 ${dc ? 'border-edge' : 'border-white'}`} />
+    {unread > 0 && <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-500 rounded-full border-2 text-content text-[9px] md:text-[9px] font-semibold flex items-center justify-center shadow-lg animate-bounce border-white dark:border-slate-900">{unread}</div>}
    </div>
    <div className="flex-1 min-w-0">
-    <div className="flex justify-between items-center mb-1">
-     <h4 className={`text-xs md:text-sm font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>{name}</h4>
-     <span className={`text-[10px] md:text-xs whitespace-nowrap font-bold uppercase tracking-tight ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{time}</span>
+    <div className="flex justify-between items-center mb-0.5">
+     <h4 className={`text-xs md:text-xs font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>{name}</h4>
+     <span className={`text-[10px] md:text-[9px] whitespace-nowrap font-bold uppercase tracking-tight ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{time}</span>
     </div>
-    <p className={`text-[10px] md:text-xs truncate mb-1.5 md:mb-2 font-medium ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{message}</p>
+    <p className={`text-[10px] md:text-[10px] truncate mb-1 md:mb-1 font-medium ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{message}</p>
     <div className="flex items-center">
-     <span className={`text-[9px] md:text-xs font-bold px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg uppercase tracking-wider shadow-sm`} style={pipelineHelpers.getStatusBadgeStyle(status || 'Nuevo')}>
+     <span className={`text-[9px] md:text-[8px] font-bold px-2 py-0.5 md:px-1.5 md:py-0.5 rounded-md uppercase tracking-wider shadow-sm`} style={pipelineHelpers.getStatusBadgeStyle(status || 'Nuevo')}>
       {status || 'Sin estado'}
      </span>
     </div>
@@ -885,25 +885,25 @@ const Message = ({ type, text, time, media, mimeType, isDarkMode }: any) => {
  const isOut = type === 'out';
  return (
   <div className={`flex flex-col ${isOut ? 'items-end' : 'items-start'} group animate-in slide-in-from-bottom-2 duration-300 w-full`}>
-   <div className={`relative max-w-[85%] sm:max-w-[75%] md:max-w-[65%] rounded-xl md:rounded-2xl p-2 md:p-3 shadow-sm transition-all hover:shadow-md ${isOut ? 'bg-accent text-white rounded-tr-sm' : (dc ? 'bg-surface text-content border border-edge rounded-tl-sm' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-sm')}`}>
+   <div className={`relative max-w-[85%] sm:max-w-[75%] md:max-w-[65%] rounded-xl md:rounded-xl p-2 md:p-2 shadow-sm transition-all hover:shadow-md ${isOut ? 'bg-accent text-white rounded-tr-sm' : (dc ? 'bg-surface text-content border border-edge rounded-tl-sm' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-sm')}`}>
     {media && mimeType?.startsWith('image/') && (
-     <img src={media} className="max-w-full sm:max-w-xs rounded-xl md:rounded-2xl mb-1 md:mb-2 cursor-pointer hover:opacity-95 transition-opacity border border-white/10 shadow-sm" alt="Media" />
+     <img src={media} className="max-w-full sm:max-w-xs rounded-xl md:rounded-xl mb-1 md:mb-1 cursor-pointer hover:opacity-95 transition-opacity border border-white/10 shadow-sm" alt="Media" />
     )}
     {media && mimeType?.startsWith('video/') && (
-     <video src={media} controls className="max-w-full sm:max-w-xs rounded-xl md:rounded-2xl mb-1 md:mb-2 shadow-sm" />
+     <video src={media} controls className="max-w-full sm:max-w-xs rounded-xl md:rounded-xl mb-1 md:mb-1 shadow-sm" />
     )}
     {media && mimeType?.startsWith('audio/') && (
-     <audio src={media} controls className="max-w-full sm:max-w-xs mb-1 md:mb-2 h-8 md:h-10 opacity-95" />
+     <audio src={media} controls className="max-w-full sm:max-w-xs mb-1 md:mb-1 h-8 md:h-10 opacity-95" />
     )}
     {media && !mimeType?.startsWith('image/') && !mimeType?.startsWith('video/') && !mimeType?.startsWith('audio/') && (
-      <a href={media} download className={`flex items-center gap-3 p-3 rounded-xl mb-1 text-sm font-bold truncate transition-all ${dc ? 'bg-surface/5 hover:bg-surface/10' : 'bg-black/5 hover:bg-black/10'}`}>
-       <Paperclip size={18} /> Archivo adjunto
+      <a href={media} download className={`flex items-center gap-3 p-2 rounded-xl mb-1 text-xs font-bold truncate transition-all ${dc ? 'bg-surface/5 hover:bg-surface/10' : 'bg-black/5 hover:bg-black/10'}`}>
+       <Paperclip size={16} /> Archivo adjunto
       </a>
     )}
-    {text && <p className={`text-sm font-medium leading-relaxed whitespace-pre-wrap break-words ${isOut ? 'text-white' : (dc ? 'text-content' : 'text-slate-800')}`}>{text}</p>}
-    <div className={`flex items-center gap-1.5 mt-2 justify-end transition-opacity opacity-70 group-hover:opacity-100 ${isOut ? 'text-white/90' : (dc ? 'text-content-muted' : 'text-slate-500')}`}>
-     <span className="text-xs font-bold tracking-normal">{time}</span>
-     {isOut && <CheckCircle2 size={12} className="text-white/90" />}
+    {text && <p className={`text-[13px] font-medium leading-relaxed whitespace-pre-wrap break-words ${isOut ? 'text-white' : (dc ? 'text-content' : 'text-slate-800')}`}>{text}</p>}
+    <div className={`flex items-center gap-1 mt-1 justify-end transition-opacity opacity-70 group-hover:opacity-100 ${isOut ? 'text-white/90' : (dc ? 'text-content-muted' : 'text-slate-500')}`}>
+     <span className="text-[9px] md:text-[8px] font-bold tracking-normal">{time}</span>
+     {isOut && <CheckCircle2 size={10} className="text-white/90" />}
     </div>
    </div>
   </div>
