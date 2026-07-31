@@ -26,6 +26,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
  const projectImgRef = useRef<HTMLInputElement>(null);
 
   const [portalProperties, setPortalProperties] = useState<any[]>([]);
+  const [portalVisits, setPortalVisits] = useState(0);
 
  // Portal Settings state
  const [portalSettings, setPortalSettings] = useState<any>({
@@ -235,6 +236,16 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
         }
       } catch (err) {
         console.error("Error al cargar propiedades del portal:", err);
+      }
+
+      try {
+        const visitsRes = await fetch(`${API_URL}/api/analytics/visits?range=todas`, { headers });
+        if (visitsRes.ok) {
+          const vData = await visitsRes.json();
+          setPortalVisits(vData.total || 0);
+        }
+      } catch (err) {
+        console.error("Error al cargar visitas del portal:", err);
       }
     }
    } catch (err) {}
@@ -865,7 +876,7 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                                className="w-4 h-4 rounded border-edge text-accent focus:ring-0 cursor-pointer"
                              />
                            </td>
-                           <td className="px-4 py-3 text-center">
+<td className="px-4 py-3 text-center">
                              <input 
                                type="checkbox" 
                                checked={p.visible !== false} 
@@ -879,6 +890,38 @@ const Admin = ({ isDarkMode, defaultTab = 'proyectos' }: { isDarkMode?: boolean;
                    )}
                  </tbody>
                </table>
+             </div>
+           </div>
+
+           {/* SECCIÓN 6: ESTADÍSTICAS DEL PORTAL */}
+           <div className="card p-4 md:p-6 space-y-4">
+             <div className="border-b border-edge pb-2">
+               <h3 className="text-sm font-black uppercase text-content tracking-wider">Sección 6: Estadísticas del Portal</h3>
+               <p className="text-[10px] text-content-muted mt-1">
+                 Monitorea el tráfico de tu sitio web público.
+               </p>
+             </div>
+             
+             <div className="max-w-xs">
+               <div className="card p-4 sm:p-5 group transition-all duration-300 hover:-translate-y-1 bg-purple-500/5 border-transparent relative overflow-hidden">
+                 <div className="absolute -bottom-6 -right-6 opacity-[0.04] dark:opacity-[0.06] text-purple-500 pointer-events-none transform -rotate-12 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+                   <Target size={110} strokeWidth={1.5} />
+                 </div>
+                 <div className="absolute -right-10 -top-10 w-32 h-32 rounded-full blur-3xl opacity-20 dark:opacity-30 bg-purple-500 pointer-events-none"></div>
+                 
+                 <div className="relative z-10">
+                   <div className="flex justify-between items-start mb-3 sm:mb-4">
+                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center bg-purple-500/10 text-purple-500 shadow-inner border border-white/5">
+                       <Globe size={18} />
+                     </div>
+                     <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs font-bold border border-emerald-500/20">
+                       Vistas pág.
+                     </div>
+                   </div>
+                   <p className="text-[9px] sm:text-[11px] font-bold text-content-muted uppercase tracking-wider mb-0.5 truncate">Visitas Portal</p>
+                   <h2 className="text-2xl sm:text-3xl font-black text-content tracking-tight">{portalVisits}</h2>
+                 </div>
+               </div>
              </div>
            </div>
 

@@ -28,34 +28,27 @@ type DateFilter = 'hoy' | 'semana' | 'mes' | 'todas';
  const fetchAll = async () => {
   setLoading(true);
   try {
-   const [usersRes, leadsRes, propsRes, tasksRes, visitsRes] = await Promise.allSettled([
+   const [usersRes, leadsRes, propsRes, tasksRes] = await Promise.allSettled([
     fetch(`${API_URL}/api/users`, hdr),
     fetch(`${API_URL}/api/leads`, hdr),
     fetch(`${API_URL}/api/properties`, hdr),
-    fetch(`${API_URL}/api/data/tasks`, hdr),
-    fetch(`${API_URL}/api/analytics/visits?range=${dateFilter}`, hdr)
+    fetch(`${API_URL}/api/data/tasks`, hdr)
    ]);
 
-   let uCount = 0, lData: any[] = [], pCount = 0, tData: any[] = [], vCount = 0, vTop: any[] = [];
+   let uCount = 0, lData: any[] = [], pCount = 0, tData: any[] = [];
    if (usersRes.status === 'fulfilled' && usersRes.value.ok) { const d = await usersRes.value.json(); uCount = d.users?.length || 0; }
    if (leadsRes.status === 'fulfilled' && leadsRes.value.ok) { lData = await leadsRes.value.json(); }
    if (propsRes.status === 'fulfilled' && propsRes.value.ok) { const d = await propsRes.value.json(); pCount = Array.isArray(d) ? d.length : 0; }
    if (tasksRes.status === 'fulfilled' && tasksRes.value.ok) { tData = await tasksRes.value.json(); }
-   if (visitsRes.status === 'fulfilled' && visitsRes.value.ok) { 
-     const d = await visitsRes.value.json(); 
-     vCount = d.total || 0;
-     vTop = d.topProperties || [];
-   }
 
    const tasksDone = tData.filter((t: any) => t.status === 'completada').length;
    const leadsNew = lData.filter((l: any) => l.status === 'Nuevo').length;
    const leadsClosed = lData.filter((l: any) => l.status === 'Cerrado').length;
 
-   setStats({ leads: lData.length, conversations: 0, properties: pCount, users: uCount, tasks: tData.length, tasksDone, leadsNew, leadsClosed, visits: vCount });
+   setStats({ leads: lData.length, conversations: 0, properties: pCount, users: uCount, tasks: tData.length, tasksDone, leadsNew, leadsClosed, visits: 0 });
    setTasks(tData);
    setLeads(lData);
    setRecentLeads(lData.slice(-5).reverse());
-   setTopVisits(vTop);
   } catch {}
   setLoading(false);
  };
@@ -123,12 +116,11 @@ type DateFilter = 'hoy' | 'semana' | 'mes' | 'todas';
     </div>
 
     {/* KPIs */}
-    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
      <StatCard label="Leads totales" value={stats.leads} trend={stats.leadsNew > 0 ? `+${stats.leadsNew}` : ''} icon={<Users size={20} strokeWidth={2.5} />} iconColor="text-blue-500" bgSoft="bg-blue-500/5" glowColor="bg-blue-500" />
      <StatCard label="Propiedades" value={stats.properties} trend="" icon={<Building2 size={20} strokeWidth={2.5} />} iconColor="text-indigo-500" bgSoft="bg-indigo-500/5" glowColor="bg-indigo-500" />
      <StatCard label="Efectividad" value={stats.tasks > 0 ? `${Math.round((stats.tasksDone / stats.tasks) * 100)}%` : '0%'} trend={stats.tasksDone > 0 ? `${stats.tasksDone}/${stats.tasks}` : ''} icon={<ListTodo size={20} strokeWidth={2.5} />} iconColor="text-amber-500" bgSoft="bg-amber-500/5" glowColor="bg-amber-500" />
      <StatCard label="Cierres exitosos" value={stats.leadsClosed} trend={stats.leads > 0 ? `${Math.round((stats.leadsClosed / stats.leads) * 100)}%` : ''} icon={<DollarSign size={20} strokeWidth={2.5} />} iconColor="text-emerald-500" bgSoft="bg-emerald-500/5" glowColor="bg-emerald-500" />
-     <StatCard label="Visitas Portal" value={stats.visits} trend="Vistas pág." icon={<TrendingUp size={20} strokeWidth={2.5} />} iconColor="text-purple-500" bgSoft="bg-purple-500/5" glowColor="bg-purple-500" />
     </div>
 
     {/* Main Content Grid */}
