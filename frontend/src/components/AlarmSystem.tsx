@@ -304,7 +304,7 @@ export const AlarmSystem = ({
         const dueDate = new Date(`${item.dueDate}T${item.dueTime}:00`);
         if (isNaN(dueDate.getTime())) return;
         const timeDiff = dueDate.getTime() - now.getTime();
-        if (timeDiff > 0 && timeDiff <= 5 * 60 * 1000) newAlarms.push({ item, triggeredAt: new Date() });
+        if (timeDiff <= 5 * 60 * 1000 && timeDiff > -24 * 60 * 60 * 1000) newAlarms.push({ item, triggeredAt: new Date() });
       } catch {}
     });
     if (newAlarms.length > 0) { setActiveAlarms(prev => [...prev, ...newAlarms]); toneGenerator.start(30000); }
