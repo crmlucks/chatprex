@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Search, MapPin, Home, Building, Layers, Briefcase, Car, HelpCircle,
   Phone, Mail, Globe, Moon, Sun, ArrowRight, Eye, Send,
-  Facebook, Instagram, Linkedin, Youtube, ShieldCheck, Award, Heart, Users, ChevronDown, Check, LogIn, Menu, X, Lock, Star
+  Facebook, Instagram, Linkedin, Youtube, ShieldCheck, Award, Heart, Users, ChevronDown, Check, LogIn, Menu, X, Lock, Star, Cpu, Scale, History
 } from 'lucide-react';
 import PropertyReviews from './PropertyReviews';
 
@@ -82,6 +82,18 @@ export default function HomePortal({
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [currentHeroIndex, setCurrentHeroIndex] = useState<number>(0);
+
+  // Carrusel de reseñas (mobile)
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+
+  useEffect(() => {
+    if (globalReviews.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentReviewIndex((prev) => (prev + 1) % globalReviews.length);
+      }, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [globalReviews]);
 
   // Propiedad seleccionada para el Modal
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -1055,17 +1067,17 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
           {/* 4. QUIÉNES SOMOS */}
           <section id="quienes-somos" className="py-12 px-6 md:px-12 border-t border-edge bg-surface">
-            <div className={`max-w-7xl mx-auto ${portalSettings?.about_image ? 'grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center' : 'max-w-3xl text-center'}`}>
+            <div className={`max-w-7xl mx-auto ${portalSettings?.about_image ? 'flex flex-col lg:flex-row gap-8 lg:gap-16 items-center' : 'max-w-3xl text-center'}`}>
 
               {/* Columna Izquierda: Imagen */}
               {portalSettings?.about_image && (
-                <div className="relative max-w-sm mx-auto lg:mx-0 lg:ml-auto">
+                <div className="relative w-full lg:w-1/2">
                   <div className="absolute -top-4 -left-4 w-72 h-72 bg-accent/5 rounded-3xl blur-2xl pointer-events-none"></div>
                   <div className="rounded-3xl overflow-hidden shadow-2xl relative z-10 border border-edge">
                     <img
                       src={resolveUrl(portalSettings.about_image)}
                       alt="Quiénes Somos"
-                      className="w-full aspect-[4/5] object-cover"
+                      className="w-full aspect-video object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white space-y-1 text-left">
@@ -1075,15 +1087,15 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                   </div>
 
                   {/* Tarjeta flotante de experiencia */}
-                  <div className="absolute -bottom-6 -right-6 bg-accent text-white p-6 rounded-2xl shadow-xl z-20 flex flex-col items-center justify-center text-center w-36 h-36 border-4 border-surface">
-                    <span className="text-3xl font-black">100%</span>
-                    <span className="text-[10px] font-bold tracking-wider uppercase mt-1">Garantía Legal</span>
+                  <div className="absolute -bottom-6 -right-6 bg-accent text-white p-6 rounded-2xl shadow-xl z-20 flex flex-col items-center justify-center text-center w-32 h-32 border-4 border-surface hidden sm:flex">
+                    <span className="text-2xl font-black">100%</span>
+                    <span className="text-[9px] font-bold tracking-wider uppercase mt-1">Garantía Legal</span>
                   </div>
                 </div>
               )}
 
               {/* Columna Derecha: Texto */}
-              <div className={`space-y-8 ${portalSettings?.about_image ? 'text-left' : 'max-w-2xl mx-auto text-center'}`}>
+              <div className={`space-y-8 w-full lg:w-1/2 ${portalSettings?.about_image ? 'text-left' : 'max-w-2xl mx-auto text-center'}`}>
                 <div className="space-y-3">
                   <span className="text-xs font-bold text-accent tracking-widest uppercase block">La forma más segura de comprar y vender inmuebles.</span>
                   <h2 className="text-2xl md:text-3xl font-black text-content tracking-tight">
@@ -1104,7 +1116,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
                   <div className="flex gap-4 items-start text-left">
                     <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 dark:bg-amber-500/25 shrink-0 flex items-center justify-center">
-                      <Award size={18} />
+                      <Cpu size={18} />
                     </div>
                     <div>
                       <h4 className="font-extrabold text-sm text-content">Tecnología e IA Propia</h4>
@@ -1114,7 +1126,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
                   <div className="flex gap-4 items-start text-left">
                     <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 dark:bg-blue-500/25 shrink-0 flex items-center justify-center">
-                      <Users size={18} />
+                      <Scale size={18} />
                     </div>
                     <div>
                       <h4 className="font-extrabold text-sm text-content">Filtro de Legalidad</h4>
@@ -1124,7 +1136,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
                   <div className="flex gap-4 items-start text-left">
                     <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 dark:bg-rose-500/25 shrink-0 flex items-center justify-center">
-                      <Heart size={18} />
+                      <History size={18} />
                     </div>
                     <div>
                       <h4 className="font-extrabold text-sm text-content">+10 Años de Experiencia</h4>
@@ -1470,42 +1482,70 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
       {/* Testimonios Destacados */}
       {globalReviews.length > 0 && (
-        <section className="py-16 px-6 md:px-12 bg-surface">
+        <section className="py-12 px-6 md:px-12 bg-surface border-t border-edge">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-black text-content tracking-tight mb-3">Lo que dicen nuestros clientes</h2>
-              <p className="text-sm text-content-secondary max-w-2xl mx-auto">
-                Experiencias reales de personas que encontraron su hogar ideal o invirtieron con nosotros.
-              </p>
-              <div className="flex items-center justify-center gap-2 mt-4 text-accent">
-                <span className="font-bold text-xl">{(globalReviews.reduce((sum, r) => sum + r.rating, 0) / globalReviews.length).toFixed(1)}</span>
+            <div className="text-center mb-8">
+              <h2 className="text-xl md:text-2xl font-black text-content tracking-tight mb-2">Lo que dicen nuestros clientes</h2>
+              <div className="flex items-center justify-center gap-2 mt-2 text-accent">
+                <span className="font-bold text-lg">{(globalReviews.reduce((sum, r) => sum + r.rating, 0) / globalReviews.length).toFixed(1)}</span>
                 <div className="flex text-amber-400">
-                  <Star size={20} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
                 </div>
-                <span className="text-sm text-content-secondary">({globalReviews.length} reseñas verificadas)</span>
+                <span className="text-xs text-content-secondary">({globalReviews.length} reseñas)</span>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {globalReviews.slice(0, 3).map((r, idx) => (
-                <div key={idx} className="p-6 rounded-2xl border border-edge bg-surface-inset shadow-sm">
-                  <div className="flex text-amber-400 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={14} fill={i < r.rating ? 'currentColor' : 'none'} className={i < r.rating ? 'text-amber-400' : 'text-content-muted/30'} />
-                    ))}
-                  </div>
-                  <p className="text-sm text-content-secondary italic mb-6">"{r.comment}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-accent/10 text-accent flex items-center justify-center font-bold uppercase">
-                      {r.author_name.charAt(0)}
-                    </div>
+            
+            <div className="relative overflow-hidden w-full px-2">
+              <div 
+                className="flex lg:grid lg:grid-cols-4 gap-4 transition-transform duration-700 ease-in-out"
+                style={{
+                  transform: `translateX(calc(-${currentReviewIndex * 100}% - ${currentReviewIndex * 16}px))`,
+                }}
+              >
+                {/* 
+                  Use CSS to override transform on large screens so it becomes a static grid.
+                  Adding a small style tag to handle this elegantly.
+                */}
+                <style dangerouslySetInnerHTML={{__html: `
+                  @media (min-width: 1024px) {
+                    .flex.lg\\:grid {
+                      transform: none !important;
+                      display: grid !important;
+                    }
+                  }
+                `}} />
+
+                {globalReviews.slice(0, 8).map((r, idx) => (
+                  <div key={idx} className="w-full lg:w-auto shrink-0 p-5 rounded-xl border border-edge bg-surface-inset shadow-sm flex flex-col justify-between">
                     <div>
-                      <p className="text-xs font-bold text-content">{r.author_name}</p>
-                      <p className="text-[10px] text-content-muted">Comprador Verificado</p>
+                      <div className="flex text-amber-400 mb-3 justify-center lg:justify-start">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} size={12} fill={i < r.rating ? 'currentColor' : 'none'} className={i < r.rating ? 'text-amber-400' : 'text-content-muted/30'} />
+                        ))}
+                      </div>
+                      <p className="text-xs text-content-secondary italic mb-4 text-center lg:text-left">"{r.comment}"</p>
+                    </div>
+                    <div className="flex items-center gap-3 justify-center lg:justify-start mt-auto">
+                      <div className="w-8 h-8 rounded-full bg-accent/10 text-accent flex items-center justify-center font-bold uppercase text-xs">
+                        {r.author_name.charAt(0)}
+                      </div>
+                      <div className="text-left">
+                        <p className="text-[11px] font-bold text-content">{r.author_name}</p>
+                        <p className="text-[9px] text-content-muted">Verificado</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile Dots */}
+            <div className="flex justify-center gap-1.5 mt-6 lg:hidden">
+              {globalReviews.slice(0, 8).map((_, idx) => (
+                <div key={idx} className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentReviewIndex ? 'w-4 bg-accent' : 'w-1.5 bg-edge'}`} />
               ))}
             </div>
+
           </div>
         </section>
       )}
