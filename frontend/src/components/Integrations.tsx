@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Workflow, Save, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useToast } from './Toast';
+import { useAuth } from '../context/AuthContext';
 
 interface IntegrationsProps {
   isDarkMode: boolean;
@@ -12,15 +13,16 @@ export default function Integrations({ isDarkMode }: IntegrationsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { showToast } = useToast();
+  const { token } = useAuth();
 
   useEffect(() => {
-    fetchIntegrations();
-  }, []);
+    if (token) fetchIntegrations();
+  }, [token]);
 
   const fetchIntegrations = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('casaya_token');
+      if (!token) return;
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const res = await fetch(`${API_URL}/api/integrations`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -43,7 +45,7 @@ export default function Integrations({ isDarkMode }: IntegrationsProps) {
   const saveHubspot = async () => {
     setIsSaving(true);
     try {
-      const token = localStorage.getItem('casaya_token');
+      if (!token) return;
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const res = await fetch(`${API_URL}/api/integrations`, {
         method: 'POST',

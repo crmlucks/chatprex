@@ -35,6 +35,7 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
      headers: { Authorization: `Bearer ${token}` }
     });
     if (res.ok) {
+     const data = await res.json();
      if (data[0]) {
       setAiProvider(data[0].provider || 'OpenAI');
       setAiModel(data[0].model || 'gpt-3.5-turbo');
@@ -51,8 +52,8 @@ const Chatbots = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     console.error('Error cargando config IA:', e);
    }
   };
-  fetchAiConfig();
- }, []);
+  if (token) fetchAiConfig();
+ }, [token]);
 
  const saveAiConfig = async () => {
   setIsSavingAi(true);
