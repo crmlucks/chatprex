@@ -14,6 +14,8 @@ export async function syncLeadToHubspot(leadData: any) {
     const { api_key, enabled } = configRes.rows[0];
     if (!enabled || !api_key) return; // Si la integración está apagada o no hay token, no hacemos nada
 
+    const clean_api_key = api_key.trim();
+
     // 2. Mapear datos de Chatprex a HubSpot
     // HubSpot asume que el email es el identificador principal
     // Si no tenemos email, no podemos sincronizar a menos que permitamos contactos sin email
@@ -48,7 +50,7 @@ export async function syncLeadToHubspot(leadData: any) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${api_key}`
+          'Authorization': `Bearer ${clean_api_key}`
         },
         body: JSON.stringify({ filterGroups })
       });
@@ -57,6 +59,9 @@ export async function syncLeadToHubspot(leadData: any) {
         if (searchData.total > 0) {
           contactId = searchData.results[0].id;
         }
+      } else {
+        const err = await searchRes.json().catch(()=>({}));
+        console.error('[HubSpot] Error en búsqueda:', err);
       }
     }
 
@@ -66,7 +71,7 @@ export async function syncLeadToHubspot(leadData: any) {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${api_key}`
+          'Authorization': `Bearer ${clean_api_key}`
         },
         body: JSON.stringify({ properties })
       });
@@ -77,7 +82,7 @@ export async function syncLeadToHubspot(leadData: any) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${api_key}`
+          'Authorization': `Bearer ${clean_api_key}`
         },
         body: JSON.stringify({ properties })
       });
