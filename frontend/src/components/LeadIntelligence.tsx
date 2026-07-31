@@ -69,11 +69,10 @@ export default function LeadIntelligence({ isDarkMode }: { isDarkMode?: boolean 
 
    {/* KPI Strip */}
    {k && (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 px-6 md:px-10 py-3 shrink-0">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-6 md:px-10 py-3 shrink-0">
      <KPI icon={<Users size={16}/>} label="Total Leads" value={k.totalLeads} color="blue" dc={dc} />
      <KPI icon={<CheckCircle2 size={16}/>} label="Cerrados" value={k.closedLeads} color="emerald" dc={dc} />
      <KPI icon={<Target size={16}/>} label="Conversión" value={`${k.conversionRate}%`} color="violet" dc={dc} />
-     <KPI icon={<Zap size={16}/>} label="Nuevos (7d)" value={k.newThisWeek} color="amber" dc={dc} />
      <KPI icon={<Activity size={16}/>} label="Score Prom." value={k.avgScore} color="fuchsia" dc={dc} />
     </div>
    )}
