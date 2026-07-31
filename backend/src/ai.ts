@@ -450,7 +450,19 @@ ${advisorText}
                 "UPDATE leads SET project = $1, budget = $2, interest = $3 WHERE id = $4 RETURNING *",
                 [p_project, p_budget, p_interest, leadId]
               );
-              if (updLeadRes.rowCount > 0) syncLeadToHubspot(updLeadRes.rows[0]);
+              
+              if (updLeadRes.rowCount > 0) {
+                // Extraer el historial de chat actual para enviarlo como nota a HubSpot
+                let chatText = '';
+                if (conversationHistory[fromJid]) {
+                  chatText = conversationHistory[fromJid]
+                    .filter(m => m.role === 'user' || m.role === 'assistant')
+                    .map(m => `${m.role === 'user' ? 'Cliente' : 'Asesor AI'}: ${m.content}`)
+                    .join('\n\n');
+                }
+                syncLeadToHubspot(updLeadRes.rows[0], chatText);
+              }
+              
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Perfil del cliente (proyecto, presupuesto e intereses) actualizado exitosamente en el CRM." } as any);
             } else {
               conversationHistory[fromJid].push({ role: "tool", tool_call_id: toolCall.id, content: "Error: No se pudo actualizar el perfil porque el lead no existe." } as any);

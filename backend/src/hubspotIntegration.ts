@@ -5,7 +5,7 @@ import pool from './db';
  * Función para sincronizar un Lead a HubSpot.
  * Crea o actualiza un Contacto en HubSpot.
  */
-export async function syncLeadToHubspot(leadData: any) {
+export async function syncLeadToHubspot(leadData: any, chatHistory?: string) {
   try {
     // 1. Obtener el token de integración de la base de datos
     const configRes = await pool.query("SELECT api_key, enabled FROM integrations WHERE provider = 'hubspot' LIMIT 1");
@@ -25,6 +25,9 @@ export async function syncLeadToHubspot(leadData: any) {
 
     if (leadData.name) properties.firstname = leadData.name;
     if (leadData.email) properties.email = leadData.email;
+    // Si tienen una propiedad personalizada de "interest" o "interes" configurada en su HubSpot, intentará enviarlo.
+    // Si no, igualmente se exporta en la nota si enviamos el historial.
+    if (leadData.interest) properties.interes = leadData.interest;
 
     // 3. Crear/Actualizar en HubSpot usando la API v3
     // Primero, buscar si existe el contacto por email (si hay email)
@@ -89,7 +92,47 @@ export async function syncLeadToHubspot(leadData: any) {
         const err = await createRes.json();
         console.error('[HubSpot] Error creando contacto:', err);
       } else {
+        const createdData: any = await createRes.json();
+        contactId = createdData.id;
         console.log(`[HubSpot] Nuevo contacto creado: ${leadData.name || leadData.phone}`);
+      }
+    }
+
+    // 4. Si hay historial de chat, crear una Nota y asociarla al Contacto
+    if (contactId && chatHistory) {
+      let noteContent = `Historial de Conversación con el Bot de Casaya:\n\n${chatHistory}`;
+      if (leadData.interest) {
+        noteContent = `Interés detectado: ${leadData.interest}\n\n${noteContent}`;
+      }
+      
+      const noteRes = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${clean_api_key}`
+        },
+        body: JSON.stringify({
+          properties: {
+            hs_timestamp: Date.now().toString(),
+            hs_note_body: noteContent.replace(/\n/g, '<br>')
+          }
+        })
+      });
+      
+      if (noteRes.ok) {
+        const noteData: any = await noteRes.json();
+        const noteId = noteData.id;
+        // Asociar la nota al contacto
+        await fetch(`https://api.hubapi.com/crm/v3/objects/notes/${noteId}/associations/contacts/${contactId}/202`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${clean_api_key}`
+          }
+        });
+        console.log(`[HubSpot] Nota de historial exportada para contacto ${contactId}`);
+      } else {
+        console.error('[HubSpot] Error creando Nota:', await noteRes.json().catch(()=>({})));
       }
     }
   } catch (error: any) {
