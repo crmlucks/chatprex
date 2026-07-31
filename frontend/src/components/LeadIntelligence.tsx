@@ -79,7 +79,7 @@ export default function LeadIntelligence({ isDarkMode }: { isDarkMode?: boolean 
 
    {/* Tabs */}
    <div className={`flex gap-1 mx-6 md:mx-10 p-1 rounded-xl shrink-0 ${dc ? 'bg-surface-raised border border-edge' : 'bg-surface-inset border border-edge'}`}>
-    {([['seguimiento','Centro de Seguimiento'],['analytics','Analytics'],['scoring','Lead Scoring']] as const).map(([k,l]) => (
+    {([['seguimiento','Seguimiento'],['analytics','Analytics'],['scoring','Lead Scoring']] as const).map(([k,l]) => (
      <button key={k} onClick={() => setTab(k)} className={`flex-1 py-1.5 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${tab === k ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-content-muted hover:text-content'}`}>{l}</button>
     ))}
    </div>
@@ -164,26 +164,32 @@ const FollowUpItem = ({ item, color, dc }: any) => {
 
  return (
   <div className={`flex flex-col rounded-xl border transition-all ${showStrategy ? (dc ? 'bg-surface-raised border-accent/40 shadow-sm' : 'bg-white border-accent/40 shadow-md') : (dc ? 'bg-surface-raised border-edge hover:bg-surface-inset' : 'bg-white border-edge shadow-sm hover:shadow-md')} overflow-hidden`}>
-   <div className="flex items-center gap-4 p-3 cursor-pointer select-none" onClick={() => setShowStrategy(!showStrategy)}>
-    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border bg-${color}-500/5 border-${color}-500/20 text-${color}-500`}>
-     <span className="text-[11px] font-black">{scoreVal}%</span>
-    </div>
-    <div className="flex-1 min-w-0">
-     <p className="text-xs font-bold text-content truncate">{item.name}</p>
-     <p className="text-[10px] text-content-muted font-bold mt-0.5 uppercase tracking-tight truncate">{item.reason}</p>
-    </div>
-    <div className="flex items-center gap-3 text-[10px] text-content-muted shrink-0" onClick={e => e.stopPropagation()}>
-     <span className={`px-2 py-0.5 rounded-md font-bold uppercase tracking-tighter ${dc ? 'bg-surface border border-edge' : 'bg-surface-inset border border-edge'}`}>{item.status}</span>
-     {item.advisor_name && <span className="hidden lg:inline font-bold uppercase text-[9px] tracking-tight">{item.advisor_name}</span>}
-     <div className="flex gap-1 items-center ml-2">
-      <button onClick={() => setShowStrategy(!showStrategy)} title="Ver Estrategia IA" className={`p-2 rounded-lg transition-all active:scale-90 ${showStrategy ? 'bg-accent/20 text-accent' : 'hover:bg-accent/10 text-accent/70'}`}>
-       <BrainCircuit size={14} className={showStrategy ? 'animate-pulse' : ''} />
-      </button>
-      <a href={`https://wa.me/${item.phone}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-90"><Phone size={14}/></a>
-      <button title="Conversación" className="p-2 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-all active:scale-90"><MessageSquare size={14}/></button>
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 cursor-pointer select-none" onClick={() => setShowStrategy(!showStrategy)}>
+     
+     <div className="flex items-center gap-3 w-full sm:w-auto">
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border bg-${color}-500/5 border-${color}-500/20 text-${color}-500`}>
+       <span className="text-[11px] font-black">{scoreVal}%</span>
+      </div>
+      <div className="flex-1 min-w-0">
+       <p className="text-xs font-bold text-content truncate">{item.name}</p>
+       <p className="text-[10px] text-content-muted font-bold mt-0.5 uppercase tracking-tight truncate">{item.reason}</p>
+      </div>
+     </div>
+
+     <div className="flex items-center justify-between w-full sm:w-auto gap-3 text-[10px] text-content-muted shrink-0" onClick={e => e.stopPropagation()}>
+      <div className="flex items-center gap-2">
+       <span className={`px-2 py-0.5 rounded-md font-bold uppercase tracking-tighter ${dc ? 'bg-surface border border-edge' : 'bg-surface-inset border border-edge'}`}>{item.status}</span>
+       {item.advisor_name && <span className="hidden sm:inline font-bold uppercase text-[9px] tracking-tight">{item.advisor_name}</span>}
+      </div>
+      <div className="flex gap-1 items-center">
+       <button onClick={() => setShowStrategy(!showStrategy)} title="Ver Estrategia IA" className={`p-2 rounded-lg transition-all active:scale-90 ${showStrategy ? 'bg-accent/20 text-accent' : 'hover:bg-accent/10 text-accent/70'}`}>
+        <BrainCircuit size={14} className={showStrategy ? 'animate-pulse' : ''} />
+       </button>
+       <a href={`https://wa.me/${item.phone}`} target="_blank" rel="noopener noreferrer" title="Llamar / Abrir en WhatsApp" className={`p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-90 ${dc ? 'bg-surface border border-edge' : 'bg-surface-inset border border-edge'}`}><Phone size={14}/></a>
+       <button title="Conversación" className={`p-2 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-all active:scale-90 ${dc ? 'bg-surface border border-edge' : 'bg-surface-inset border border-edge'}`}><MessageSquare size={14}/></button>
+      </div>
      </div>
     </div>
-   </div>
    
    {showStrategy && (
     <div className={`p-4 pt-0 border-t ${dc ? 'border-edge/50' : 'border-edge/50'} animate-in slide-in-from-top-2 duration-200`}>
