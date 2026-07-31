@@ -14,8 +14,8 @@ export default function ChatprexLanding() {
   }, []);
 
   const handleDemoClick = () => {
-    const message = "Hola! Quiero agendar una demo del ecosistema Chatprex para mi desarrollo inmobiliario.";
-    window.open(`https://wa.me/51900000000?text=${encodeURIComponent(message)}`, '_blank');
+    const message = "Hola equipo Chatprex, me gustaría obtener más información sobre el CRM para Inmobiliarias y probar el demo.";
+    window.open(`https://wa.me/51958716850?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (

@@ -143,7 +143,7 @@ export default function HomePortal({
     } catch (err) { }
 
     // Generar mensaje estructurado para WhatsApp
-    const targetPhone = portalSettings?.phone ? portalSettings.phone.replace(/\D/g, '') : "51900000000";
+    const targetPhone = portalSettings?.phone ? portalSettings.phone.replace(/\D/g, '') : "51958716850";
     const summaryMessage =
       `📌 *NUEVA CONSULTA DE CONTACTO*
 ----------------------------------
@@ -384,7 +384,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
 
   // Función para generar el enlace de WhatsApp
   const handleWhatsAppContact = (property: Property) => {
-    const defaultPhone = "51900000000"; // Reemplazar con el número oficial de ventas
+    const defaultPhone = "51958716850"; // Reemplazar con el número oficial de ventas
     const message = `👋 Hola. Te interesa ${property.name}. ¿En qué puedo ayudarte?`;
     const encodedMessage = encodeURIComponent(message);
     const url = `https://wa.me/${defaultPhone}?text=${encodedMessage}`;
@@ -1665,7 +1665,7 @@ Hola, les comparto mis datos registrados desde el portal web. Quedo a la espera 
                 <Youtube size={16} />
               </a>
               <a
-                href={portalSettings?.phone ? `https://wa.me/${portalSettings.phone.replace(/[^0-9]/g, '')}` : "https://wa.me/51900000000"}
+                href={portalSettings?.phone ? `https://wa.me/${portalSettings.phone.replace(/[^0-9]/g, '')}` : "https://wa.me/51958716850"}
                 target="_blank"
                 rel="noreferrer"
                 className="w-9 h-9 rounded-xl border border-accent text-accent hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:scale-105 flex items-center justify-center transition-all"
