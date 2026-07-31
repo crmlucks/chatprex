@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import express from 'express';
 import { handleVoiceMessage } from './voiceBot';
 import { generateAIResponse, appendMessageToHistory } from './ai';
+import { syncLeadToHubspot } from './hubspotIntegration';
 import { sendToN8N } from './n8nIntegration';
 import pool from './db';
 
@@ -182,10 +183,11 @@ whatsappRouter.post('/', async (req, res) => {
                     }
                   } catch (err) {}
                   
-                  await pool.query(
-                    `INSERT INTO leads (name, phone, score, status, bot_active, bot_id, advisor_id, provider) VALUES ($1, $2, '50%', 'Nuevo', $3, $4, $5, 'meta')`,
+                  const newLeadRes = await pool.query(
+                    `INSERT INTO leads (name, phone, score, status, bot_active, bot_id, advisor_id, provider) VALUES ($1, $2, '50%', 'Nuevo', $3, $4, $5, 'meta') RETURNING *`,
                     [pushName, phone, isBotActive, matchedBotId, assignedAdvisorId]
                   );
+                  if (newLeadRes.rowCount > 0) syncLeadToHubspot(newLeadRes.rows[0]);
                   console.log(`[Meta] ✅ Lead registrado: ${pushName} (${phone}) - Bot: ${isBotActive ? 'ACTIVO (keyword match)' : 'INACTIVO (sin keyword)'} - Bot ID: ${matchedBotId}`);
                   ioInstance.emit('new-lead', { name: pushName, phone, source: 'WhatsApp (Meta)', interest: 'Consulta WhatsApp' });
                 } else {

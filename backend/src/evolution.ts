@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import express from 'express';
 import { generateAIResponse, appendMessageToHistory } from './ai';
+import { syncLeadToHubspot } from './hubspotIntegration';
 import { transcribeAudio } from './voiceBot';
 import pool from './db';
 
@@ -857,10 +858,11 @@ const handleWebhookEvent = async (req: any, res: any) => {
               console.error('[Evolution] Error en auto asignación:', err);
             }
 
-            await pool.query(
-              `INSERT INTO leads (name, phone, score, status, bot_active, bot_id, advisor_id) VALUES ($1, $2, '50%', 'Nuevo', $3, $4, $5)`,
+            const newLeadRes = await pool.query(
+              `INSERT INTO leads (name, phone, score, status, bot_active, bot_id, advisor_id) VALUES ($1, $2, '50%', 'Nuevo', $3, $4, $5) RETURNING *`,
               [pushName, phone, isBotActive, matchedBotId, assignedAdvisorId]
             );
+            if (newLeadRes.rowCount > 0) syncLeadToHubspot(newLeadRes.rows[0]);
             console.log(`[Evolution] ✅ Lead registrado: ${pushName} (${phone}) - Bot: ${isBotActive ? 'ACTIVO (keyword match)' : 'INACTIVO (sin keyword)'} - Bot ID: ${matchedBotId}`);
             ioInstance.emit('new-lead', { name: pushName, phone, source: 'WhatsApp', interest: 'Consulta WhatsApp' });
           } else {
