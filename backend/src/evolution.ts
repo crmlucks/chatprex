@@ -691,10 +691,12 @@ const handleWebhookEvent = async (req: any, res: any) => {
       let aiConfig: any = { activation_keywords: 'info,precio,quiero,asesor,comprar', voice_to_text: true, id: 1 };
       let allBots: any[] = [];
       try {
-        const configRes = await pool.query('SELECT id, api_key, voice_to_text, activation_keywords, humanized_split, message_grouping FROM ai_config ORDER BY id ASC');
+        const configRes = await pool.query('SELECT id, api_key, voice_to_text, activation_keywords, humanized_split, message_grouping FROM ai_config ORDER BY is_orchestrator ASC, id ASC');
         if (configRes.rowCount > 0) {
           allBots = configRes.rows;
-          aiConfig = { ...aiConfig, ...configRes.rows[0] }; // Por defecto el primer bot
+          // Buscar el orquestador o el primer bot para asignar por defecto
+          const defaultBot = configRes.rows.find(b => b.is_orchestrator) || configRes.rows[0];
+          aiConfig = { ...aiConfig, ...defaultBot };
         }
       } catch (err) {
         console.error('[Evolution] Error obteniendo config de IA:', err);
@@ -1105,6 +1107,7 @@ evolutionRouter.get('/chats', async (req, res) => {
         COALESCE(l.name, SPLIT_PART(m.chat_id, '@', 1)) as name,
         COALESCE(l.bot_active, false) as bot_active,
         l.id as lead_id,
+        COALESCE(l.status, 'Nuevo') as status,
         m.text as last_message,
         m.timestamp as time
       FROM (
@@ -1126,7 +1129,7 @@ evolutionRouter.get('/chats', async (req, res) => {
       time: new Date(row.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       timestamp: row.time,
       unread: 0,
-      status: 'Leído',
+      status: row.status,
       messages: []
     }));
 

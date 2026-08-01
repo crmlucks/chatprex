@@ -140,10 +140,11 @@ whatsappRouter.post('/', async (req, res) => {
               let allBots: any[] = [];
               let defaultKeywords = 'info,precio,quiero,asesor,comprar';
               try {
-                const configRes = await pool.query('SELECT id, activation_keywords FROM ai_config ORDER BY id ASC');
+                const configRes = await pool.query('SELECT id, activation_keywords FROM ai_config ORDER BY is_orchestrator ASC, id ASC');
                 if (configRes.rowCount > 0) {
                   allBots = configRes.rows;
-                  defaultKeywords = configRes.rows[0].activation_keywords || defaultKeywords;
+                  const defaultBot = configRes.rows.find(b => b.is_orchestrator) || configRes.rows[0];
+                  defaultKeywords = defaultBot.activation_keywords || defaultKeywords;
                 }
               } catch (err) {
                 console.error('[Meta] Error obteniendo config de IA:', err);

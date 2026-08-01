@@ -455,14 +455,18 @@ const ChatInterface = ({ isDarkMode }: { isDarkMode?: boolean }) => {
  };
 
  const activeChatData = activeChat ? chats[activeChat] : null;
- const chatList = Object.values(chats)
-  .filter(c => {
-   const matchSearch = c.name.toLowerCase().includes(chatSearch.toLowerCase()) || (c.lastMessage && c.lastMessage.toLowerCase().includes(chatSearch.toLowerCase()));
-   const matchStatus = chatFilterStatus === 'todos' || c.status === chatFilterStatus;
-   return matchSearch && matchStatus;
-  })
-  .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
- const dc = isDarkMode;
+  const chatList = Object.values(chats)
+   .filter(c => {
+    const matchSearch = c.name.toLowerCase().includes(chatSearch.toLowerCase()) || (c.lastMessage && c.lastMessage.toLowerCase().includes(chatSearch.toLowerCase()));
+    const matchStatus = chatFilterStatus === 'todos' || c.status === chatFilterStatus;
+    return matchSearch && matchStatus;
+   })
+   .sort((a, b) => {
+    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : new Date(a.time).getTime();
+    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : new Date(b.time).getTime();
+    return timeB - timeA;
+   });
+  const dc = isDarkMode;
 
  return (
   <div className={`flex flex-1 w-full min-w-0 h-[calc(100vh-4rem)] md:h-full overflow-hidden transition-colors ${dc ? 'bg-surface-base' : 'bg-surface-base'}`}>
@@ -866,10 +870,10 @@ const ChatItem = ({ name, message, time, unread, active, status, onClick, isDark
    </div>
    <div className="flex-1 min-w-0">
     <div className="flex justify-between items-center mb-0.5">
-     <h4 className={`text-xs md:text-xs font-bold truncate tracking-tight ${dc ? 'text-content' : 'text-content'}`}>{name}</h4>
-     <span className={`text-[10px] md:text-[9px] whitespace-nowrap font-bold uppercase tracking-tight ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{time}</span>
+     <h4 className={`text-xs md:text-xs font-bold truncate tracking-tight ${unread > 0 ? (dc ? 'text-white' : 'text-slate-900') : (dc ? 'text-content' : 'text-content')}`}>{name}</h4>
+     <span className={`text-[10px] md:text-[9px] whitespace-nowrap font-bold uppercase tracking-tight ${unread > 0 ? (dc ? 'text-emerald-400' : 'text-emerald-600') : (dc ? 'text-content-muted' : 'text-content-muted')}`}>{time}</span>
     </div>
-    <p className={`text-[10px] md:text-[10px] truncate mb-1 md:mb-1 font-medium ${dc ? 'text-content-muted' : 'text-content-muted'}`}>{message}</p>
+    <p className={`text-[10px] md:text-[10px] truncate mb-1 md:mb-1 ${unread > 0 ? 'font-bold' : 'font-medium'} ${unread > 0 ? (dc ? 'text-content' : 'text-slate-800') : (dc ? 'text-content-muted' : 'text-content-muted')}`}>{message}</p>
     <div className="flex items-center">
      <span className={`text-[9px] md:text-[8px] font-bold px-2 py-0.5 md:px-1.5 md:py-0.5 rounded-md uppercase tracking-wider shadow-sm`} style={pipelineHelpers.getStatusBadgeStyle(status || 'Nuevo')}>
       {status || 'Sin estado'}
